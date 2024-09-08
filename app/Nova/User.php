@@ -48,7 +48,7 @@ class User extends Resource
         return [
             ID::make()->sortable(),
 
-            Avatar::make('Avatar', 'avatar')->disk('s3')->path('admin/users'),
+            Avatar::make('Avatar', 'avatar')->disk(env('FILESYSTEM_DISK'))->path('admin/users'),
 
             Text::make('Name', function () {
                 return sprintf('%s %s', $this->first_name, $this->last_name);
