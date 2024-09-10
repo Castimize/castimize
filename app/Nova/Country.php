@@ -2,24 +2,19 @@
 
 namespace App\Nova;
 
-use Illuminate\Validation\Rules;
-use Laravel\Nova\Fields\Avatar;
+use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\MorphToMany;
-use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Sereny\NovaPermissions\Nova\Permission;
-use Sereny\NovaPermissions\Nova\Role;
 
-class User extends Resource
+class Country extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\User>
+     * @var class-string<\App\Models\Country>
      */
-    public static $model = \App\Models\User::class;
+    public static $model = \App\Models\Country::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -34,7 +29,9 @@ class User extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'name', 'email',
+        'id',
+        'name',
+        'alpha2',
     ];
 
     /**
@@ -43,7 +40,7 @@ class User extends Resource
      * @var array
      */
     public static $sort = [
-        'id' => 'desc',
+        'id' => 'asc',
     ];
 
     /**
@@ -57,35 +54,18 @@ class User extends Resource
         return [
             ID::make()->sortable(),
 
-            Avatar::make('Avatar', 'avatar')->disk(env('FILESYSTEM_DISK'))->path('admin/users'),
+            Text::make('Name', 'name')
+                ->sortable()
+                ->rules('required', 'max:255'),
 
-            Text::make('Name', function () {
-                return sprintf('%s %s', $this->first_name, $this->last_name);
-            })->onlyOnIndex(),
+            Text::make('Iso 2', 'alpha2')
+                ->sortable()
+                ->rules('required', 'max:255'),
 
-            Text::make('First name', 'first_name')
+            Text::make('Iso 3', 'alpha3')
                 ->sortable()
                 ->rules('required', 'max:255')
-                ->showOnIndex(false),
-
-            Text::make('Last name', 'last_name')
-                ->sortable()
-                ->rules('required', 'max:255')
-                ->showOnIndex(false),
-
-            Text::make('Email')
-                ->sortable()
-                ->rules('required', 'email', 'max:254')
-                ->creationRules('unique:users,email')
-                ->updateRules('unique:users,email,{{resourceId}}'),
-
-            Password::make('Password')
-                ->onlyOnForms()
-                ->creationRules('required', Rules\Password::defaults())
-                ->updateRules('nullable', Rules\Password::defaults()),
-
-            MorphToMany::make('Roles', 'roles', Role::class),
-            MorphToMany::make('Permissions', 'permissions', Permission::class),
+                ->hideFromIndex(),
         ];
     }
 

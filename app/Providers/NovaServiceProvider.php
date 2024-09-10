@@ -2,9 +2,20 @@
 
 namespace App\Providers;
 
+use App\Nova\Country;
+use App\Nova\Currency;
+use App\Nova\Dashboards\Main;
+use App\Nova\Language;
+use App\Nova\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Menu\MenuItem;
+use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
+use Sereny\NovaPermissions\Nova\Permission;
+use Sereny\NovaPermissions\Nova\Role;
 use Sereny\NovaPermissions\NovaPermissions;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
@@ -17,6 +28,33 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function boot()
     {
         parent::boot();
+
+        Nova::mainMenu(function (Request $request) {
+            return [
+                MenuSection::dashboard(Main::class)
+                    ->icon('chart-bar'),
+
+                MenuSection::make(__('Users'), [
+                    MenuItem::resource(User::class),
+                    MenuItem::resource(Role::class)
+                        ->canSee(function (NovaRequest $request) {
+                        return $request->user()->isSuperAdmin();
+                    }),
+                    MenuItem::resource(Permission::class)
+                        ->canSee(function (NovaRequest $request) {
+                        return $request->user()->isSuperAdmin();
+                    }),
+                ])->icon('user')
+                    ->collapsable(),
+
+                MenuSection::make(__('Internationalization'), [
+                    MenuItem::resource(Currency::class),
+                    MenuItem::resource(Language::class),
+                    MenuItem::resource(Country::class),
+                ])->icon('document-text')
+                    ->collapsable(),
+            ];
+        });
     }
 
     /**
@@ -60,7 +98,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     protected function dashboards()
     {
         return [
-            new \App\Nova\Dashboards\Main,
+            new Main,
         ];
     }
 

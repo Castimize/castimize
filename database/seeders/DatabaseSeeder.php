@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Currency;
+use App\Models\Language;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,6 +23,14 @@ class DatabaseSeeder extends Seeder
         $role = Role::where('name', 'super-admin')->first();
         if ($role === null) {
             $this->call(RolesAndPermissionsSeeder::class);
+        }
+        $currency = Currency::where('code', 'EUR')->first();
+        if ($currency === null) {
+            $this->call(CurrencyTableSeeder::class);
+        }
+        $language = Language::where('iso', 'en')->first();
+        if ($language === null) {
+            $this->call(LanguagesTableSeeder::class);
         }
     }
 }
