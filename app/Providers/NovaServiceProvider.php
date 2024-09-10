@@ -7,6 +7,7 @@ use App\Nova\Currency;
 use App\Nova\Dashboards\Main;
 use App\Nova\Language;
 use App\Nova\User;
+use CodencoDev\NovaGridSystem\NovaGridSystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -113,6 +114,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             (new NovaPermissions())->canSee(function ($request) {
                 return $request->user()->isSuperAdmin();
             }),
+            new NovaGridSystem(),
         ];
     }
 

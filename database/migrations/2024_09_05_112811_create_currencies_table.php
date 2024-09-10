@@ -23,6 +23,11 @@ class CreateCurrenciesTable extends Migration
 
             $table->index('code');
         });
+
+        Schema::table('currencies', function (Blueprint $table) {
+            $table->unsignedInteger('created_by')->nullable()->default(null)->after('created_at');
+            $table->unsignedInteger('updated_by')->nullable()->default(null)->after('updated_at');
+        });
     }
 
     /**

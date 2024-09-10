@@ -24,6 +24,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::table('users', function (Blueprint $table) {
+            $table->unsignedInteger('created_by')->nullable()->default(null)->after('created_at');
+            $table->unsignedInteger('updated_by')->nullable()->default(null)->after('updated_at');
+        });
+
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');

@@ -19,6 +19,11 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+
+        Schema::table('countries', function (Blueprint $table) {
+            $table->unsignedInteger('created_by')->nullable()->default(null)->after('created_at');
+            $table->unsignedInteger('updated_by')->nullable()->default(null)->after('updated_at');
+        });
     }
 
     /**

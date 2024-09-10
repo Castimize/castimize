@@ -3,16 +3,25 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Observers\UserObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Auth\Impersonatable;
 use Spatie\Permission\Traits\HasRoles;
+use Venturecraft\Revisionable\RevisionableTrait;
+use Wildside\Userstamps\Userstamps;
 
+#[ObservedBy([UserObserver::class])]
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable, Impersonatable;
+    use HasFactory, HasRoles, Notifiable, Impersonatable, RevisionableTrait, Userstamps;
+
+    protected $revisionForceDeleteEnabled = true;
+    protected $revisionCreationsEnabled = true;
+
+    protected $dontKeepRevisionOf = ['password', 'remember_token'];
 
     /**
      * The attributes that are mass assignable.
@@ -48,6 +57,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function identifiableName()
+    {
+        return sprintf('%s %s', $this->first_name, $this->last_name);
     }
 
     /**

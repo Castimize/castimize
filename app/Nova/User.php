@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Validation\Rules;
 use Laravel\Nova\Fields\Avatar;
 use Laravel\Nova\Fields\ID;
@@ -9,11 +10,14 @@ use Laravel\Nova\Fields\MorphToMany;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Panel;
 use Sereny\NovaPermissions\Nova\Permission;
 use Sereny\NovaPermissions\Nova\Role;
 
 class User extends Resource
 {
+    use CommonMetaDataTrait;
+
     /**
      * The model the resource corresponds to.
      *
@@ -86,6 +90,8 @@ class User extends Resource
 
             MorphToMany::make('Roles', 'roles', Role::class),
             MorphToMany::make('Permissions', 'permissions', Permission::class),
+
+            new Panel('History', $this->commonMetaData()),
         ];
     }
 
