@@ -7,9 +7,12 @@
     "require": {
         "php": "^8.2",
         "codenco-dev/nova-grid-system": "^2.0",
+        "darkaonline/l5-swagger": "^8.6",
         "guzzlehttp/guzzle": "^7.9",
+        "jeffbeltran/sanctum-tokens": "^2.1",
         "laravel/framework": "^11.9",
         "laravel/nova": "^4.0",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.0",
         "picqer/exact-php-client": "^4.4",

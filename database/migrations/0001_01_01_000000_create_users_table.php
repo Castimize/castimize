@@ -21,12 +21,14 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 
         Schema::table('users', function (Blueprint $table) {
             $table->unsignedInteger('created_by')->nullable()->default(null)->after('created_at');
             $table->unsignedInteger('updated_by')->nullable()->default(null)->after('updated_at');
+            $table->unsignedInteger('deleted_by')->nullable()->default(null)->after('deleted_at');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

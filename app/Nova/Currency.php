@@ -2,13 +2,17 @@
 
 namespace App\Nova;
 
+use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Panel;
 
 class Currency extends Resource
 {
+    use CommonMetaDataTrait;
+
     /**
      * The model the resource corresponds to.
      *
@@ -67,6 +71,8 @@ class Currency extends Resource
             Text::make('Symbol', 'symbol')
                 ->rules('required', 'max:3')
                 ->hideFromIndex(),
+
+            new Panel('History', $this->commonMetaData()),
         ];
     }
 

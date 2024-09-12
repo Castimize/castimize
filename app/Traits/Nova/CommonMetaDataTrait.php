@@ -16,6 +16,7 @@ trait CommonMetaDataTrait
     {
         return [
             DateTime::make('Created', 'created_at')
+                ->displayUsing(fn ($value) => $value ? $value->format('D d/m/Y, g:ia') : '')
                 ->sizeOnDetail('w-1/2')
                 ->stackedOnDetail(false)
                 ->onlyOnDetail(),
@@ -26,6 +27,7 @@ trait CommonMetaDataTrait
                 ->onlyOnDetail(),
 
             DateTime::make('Updated', 'updated_at')
+                ->displayUsing(fn ($value) => $value ? $value->format('D d/m/Y, g:ia') : '')
                 ->sizeOnDetail('w-1/2')
                 ->stackedOnDetail(false)
                 ->sortable()
@@ -38,6 +40,7 @@ trait CommonMetaDataTrait
                 ->exceptOnForms(),
 
             DateTime::make('Deleted', 'deleted_at')
+                ->displayUsing(fn ($value) => $value ? $value->format('D d/m/Y, g:ia') : '')
                 ->sizeOnDetail('w-1/2')
                 ->stackedOnDetail(false)
                 ->onlyOnDetail(),

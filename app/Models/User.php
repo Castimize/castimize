@@ -6,9 +6,11 @@ namespace App\Models;
 use App\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Nova\Auth\Impersonatable;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
@@ -16,7 +18,7 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([UserObserver::class])]
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable, Impersonatable, RevisionableTrait, Userstamps;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, Impersonatable, RevisionableTrait, Userstamps, SoftDeletes;
 
     protected $revisionForceDeleteEnabled = true;
     protected $revisionCreationsEnabled = true;

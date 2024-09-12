@@ -24,6 +24,7 @@ return new class extends Migration
         Schema::table('languages', function (Blueprint $table) {
             $table->unsignedInteger('created_by')->nullable()->default(null)->after('created_at');
             $table->unsignedInteger('updated_by')->nullable()->default(null)->after('updated_at');
+            $table->unsignedInteger('deleted_by')->nullable()->default(null)->after('deleted_at');
         });
     }
 

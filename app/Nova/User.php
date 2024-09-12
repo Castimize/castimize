@@ -2,8 +2,10 @@
 
 namespace App\Nova;
 
+use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Validation\Rules;
+use Jeffbeltran\SanctumTokens\SanctumTokens;
 use Laravel\Nova\Fields\Avatar;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphToMany;
@@ -61,7 +63,10 @@ class User extends Resource
         return [
             ID::make()->sortable(),
 
-            Avatar::make('Avatar', 'avatar')->disk(env('FILESYSTEM_DISK'))->path('admin/users'),
+            Avatar::make('Avatar', 'avatar')
+                ->maxWidth(50)
+                ->disk(env('FILESYSTEM_DISK'))
+                ->path('admin/users'),
 
             Text::make('Name', function () {
                 return sprintf('%s %s', $this->first_name, $this->last_name);
@@ -87,6 +92,8 @@ class User extends Resource
                 ->onlyOnForms()
                 ->creationRules('required', Rules\Password::defaults())
                 ->updateRules('nullable', Rules\Password::defaults()),
+
+            SanctumTokens::make(),
 
             MorphToMany::make('Roles', 'roles', Role::class),
             MorphToMany::make('Permissions', 'permissions', Permission::class),
@@ -114,7 +121,9 @@ class User extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            new ShowDeleted(),
+        ];
     }
 
     /**
