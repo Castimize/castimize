@@ -11,12 +11,12 @@ class PricesApiController extends ApiController
 {
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return mixed[]
      */
     public function calculatePrice(Request $request)
     {
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return response()->json(10.00);
+        return (new CalculatedPriceResource(null))->toArray($request);
     }
 }
