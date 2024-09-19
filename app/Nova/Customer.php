@@ -5,6 +5,7 @@ namespace App\Nova;
 use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Devloops\PhoneNumber\PhoneNumber;
+use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\DateTime;
@@ -143,11 +144,21 @@ class Customer extends Resource
         ];
     }
 
-    // Overwrite the indexQuery to include relationship count
+    /**
+     * @param NovaRequest $request
+     * @param $query
+     * @return Builder
+     */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        // Give relationship name as alias else Laravel will name it as comments_count
-        return $query->withCount('orders as orders');
+        $query->withCount('orders as orders');
+        if (empty($request->get('orderBy'))) {
+            $query->getQuery()->orders = [];
+
+            return $query->orderBy(key(static::$sort), reset(static::$sort));
+        }
+
+        return $query;
     }
 
     /**

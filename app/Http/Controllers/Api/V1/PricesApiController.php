@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Resources\CalculatedPriceResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -11,13 +12,12 @@ use Symfony\Component\HttpFoundation\Response;
 class PricesApiController extends ApiController
 {
     /**
-     * @return
+     * @param Request $request
      */
     public function calculatePrice(Request $request)
     {
-        Log::info(print_r($request->toArray(), true));
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return new UserResource(auth()->user());
+        return (new CalculatedPriceResource(null))->setRequestData($request);
     }
 }

@@ -65,7 +65,9 @@ class RolesAndPermissionsSeeder extends Seeder
         $roleApi = Role::create(['name' => 'api']);
         $roleApi->givePermissionTo(Permission::whereIn('group', ['Api'])->get());
 
-        // Give User Super-Admin Role
+        // Give Users Super-Admin Role (System user and dev)
+         $user = User::where('email', 'matthijs.bon1@gmail.com')->first();
+         $user->assignRole('super-admin');
          $user = User::where('email', 'matthbon@hotmail.com')->first();
          $user->assignRole('super-admin');
 

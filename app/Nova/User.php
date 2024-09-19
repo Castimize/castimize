@@ -4,6 +4,7 @@ namespace App\Nova;
 
 use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules;
 use Jeffbeltran\SanctumTokens\SanctumTokens;
 use Laravel\Nova\Fields\Avatar;
@@ -110,6 +111,29 @@ class User extends Resource
 
             new Panel(__('History'), $this->commonMetaData()),
         ];
+    }
+
+    /**
+     * @param NovaRequest $request
+     * @param $query
+     * @return Builder
+     */
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        /**
+         * @var $user \App\Models\User
+         */
+        $user = auth()->user();
+        if (!$user->isSuperAdmin()) {
+            $query->where('id', '>', 1);
+        }
+        if (empty($request->get('orderBy'))) {
+            $query->getQuery()->orders = [];
+
+            return $query->orderBy(key(static::$sort), reset(static::$sort));
+        }
+
+        return $query;
     }
 
     /**
