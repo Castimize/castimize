@@ -7,8 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CalculatedPriceResource extends JsonResource
 {
-    private $requestData;
-
     /**
      * Transform the resource into an array.
      *
@@ -21,11 +19,5 @@ class CalculatedPriceResource extends JsonResource
         $data['argument_6']['p3d_estimated_price'] = 10.00;
 
         return $data;
-    }
-
-    public function setRequestData(Request $request): static
-    {
-        $this->requestData = $request;
-        return $this;
     }
 }
