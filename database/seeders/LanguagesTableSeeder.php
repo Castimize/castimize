@@ -6,9 +6,12 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use JsonException;
+use Ranium\SeedOnce\Traits\SeedOnce;
 
 class LanguagesTableSeeder extends Seeder
 {
+    use SeedOnce;
+
     /**
      * Run the database seeds.
      *

@@ -2,8 +2,8 @@
 
 namespace App\Nova;
 
+use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
-use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -59,19 +59,21 @@ class Language extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make('Iso', 'iso')
+            Text::make(__('Iso'), 'iso')
                 ->sortable()
-                ->rules('required', 'max:3'),
+                ->required()
+                ->rules('max:3'),
 
-            Text::make('Name', 'en_name')
+            Text::make(__('Name'), 'en_name')
                 ->sortable()
-                ->rules('required', 'max:255'),
+                ->required()
+                ->rules('max:255'),
 
-            Text::make('Local name', 'local_name')
+            Text::make(__('Local name'), 'local_name')
                 ->sortable()
                 ->rules('max:255'),
 
-            new Panel('History', $this->commonMetaData()),
+            new Panel(__('History'), $this->commonMetaData()),
         ];
     }
 
@@ -94,7 +96,9 @@ class Language extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            new ShowDeleted(),
+        ];
     }
 
     /**

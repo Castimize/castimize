@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('countries', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('logistics_zone_id')->index()->nullable();
             $table->string('name');
             $table->string('alpha2');
             $table->string('alpha3');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreign('logistics_zone_id')->references('id')->on('logistics_zones')->onDelete('set null');
         });
 
         Schema::table('countries', function (Blueprint $table) {

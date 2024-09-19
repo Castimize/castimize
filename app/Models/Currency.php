@@ -11,4 +11,32 @@ use Wildside\Userstamps\Userstamps;
 class Currency extends Model
 {
     use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
+
+    protected $revisionForceDeleteEnabled = true;
+    protected $revisionCreationsEnabled = true;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'code',
+        'symbol',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime',
+        ];
+    }
 }

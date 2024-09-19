@@ -4,12 +4,15 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Ranium\SeedOnce\Traits\SeedOnce;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
+    use SeedOnce;
+
     /**
      * Run the database seeds.
      *
@@ -21,10 +24,16 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $collection = collect([
-            'Invoice',
-            'Client',
+            'Customer',
+            'Manufacturer',
             'Contact',
+            'Model',
+            'Pricing',
             'Payment',
+            'Order',
+            'Invoice',
+            'Complaint',
+            'Api',
             'Team',
             'User',
             'Role',
@@ -45,19 +54,27 @@ class RolesAndPermissionsSeeder extends Seeder
         // Create a Super-Admin Role and assign all Permissions
         $role = Role::create(['name' => 'super-admin']);
         $role->givePermissionTo(Permission::all());
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'supplier']);
+        $roleAdmin = Role::create(['name' => 'admin']);
+        $roleAdmin->givePermissionTo(Permission::whereNotIn('group', ['Role', 'Permission'])->get());
+        $roleCustomerSupport = Role::create(['name' => 'customer-support']);
+        $roleCustomerSupport->givePermissionTo(Permission::whereIn('group', ['Customer', 'Manufacturer', 'Order', 'Complaint', 'Team'])->get());
+        $roleManufacturer = Role::create(['name' => 'manufacturer']);
+        $roleManufacturer->givePermissionTo(Permission::whereIn('group', ['Manufacturer', 'Order', 'Invoice', 'Payment', 'Complaint'])->get());
+        $roleCustomer = Role::create(['name' => 'customer']);
+        $roleCustomer->givePermissionTo(Permission::whereIn('group', ['Customer', 'Order', 'Invoice', 'Payment', 'Complaint'])->get());
+        $roleApi = Role::create(['name' => 'api']);
+        $roleApi->givePermissionTo(Permission::whereIn('group', ['Api'])->get());
 
         // Give User Super-Admin Role
-         $user = User::where('email', 'matthbon@hotmail.com')->first(); // Change this to your email.
+         $user = User::where('email', 'matthbon@hotmail.com')->first();
          $user->assignRole('super-admin');
 
          // Give Users Admin Role
-        $user = User::where('email', 'oscar@castimize.com')->first(); // Change this to your email.
+        $user = User::where('email', 'oscar@castimize.com')->first();
         $user->assignRole('admin');
-        $user = User::where('email', 'robin@castimize.com')->first(); // Change this to your email.
+        $user = User::where('email', 'robin@castimize.com')->first();
         $user->assignRole('admin');
-        $user = User::where('email', 'koen@castimize.com')->first(); // Change this to your email.
+        $user = User::where('email', 'koen@castimize.com')->first();
         $user->assignRole('admin');
     }
 }

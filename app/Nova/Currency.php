@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
@@ -44,7 +45,7 @@ class Currency extends Resource
      * @var array
      */
     public static $sort = [
-        'name' => 'asc',
+        'id' => 'asc',
     ];
 
     /**
@@ -58,21 +59,24 @@ class Currency extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make('Name', 'name')
+            Text::make(__('Name'), 'name')
                 ->sortable()
-                ->rules('required', 'max:255'),
+                ->required()
+                ->rules('max:255'),
 
-            Text::make('Code', 'code')
+            Text::make(__('Code'), 'code')
                 ->sortable()
-                ->rules('required', 'max:255')
+                ->required()
+                ->rules('max:255')
                 ->creationRules('unique:currencies,code')
                 ->updateRules('unique:currencies,code,{{resourceId}}'),
 
-            Text::make('Symbol', 'symbol')
-                ->rules('required', 'max:3')
+            Text::make(__('Symbol'), 'symbol')
+                ->required()
+                ->rules('max:3')
                 ->hideFromIndex(),
 
-            new Panel('History', $this->commonMetaData()),
+            new Panel(__('History'), $this->commonMetaData()),
         ];
     }
 
@@ -95,7 +99,9 @@ class Currency extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            new ShowDeleted(),
+        ];
     }
 
     /**

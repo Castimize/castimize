@@ -58,6 +58,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime',
         ];
     }
 
@@ -66,13 +69,38 @@ class User extends Authenticatable
         return sprintf('%s %s', $this->first_name, $this->last_name);
     }
 
+    public function isBackendUser()
+    {
+        return $this->isSuperAdmin() ||
+            $this->isAdmin() ||
+            $this->isCustomerSupport();
+    }
+
     /**
      * Determines if the User is a Super admin
-     * @return null
+     * @return bool
      */
-    public function isSuperAdmin()
+    public function isSuperAdmin(): bool
     {
         return $this->hasRole('super-admin');
+    }
+
+    /**
+     * Determines if the User is a admin
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    /**
+     * Determines if the User is Customer support
+     * @return bool
+     */
+    public function isCustomerSupport(): bool
+    {
+        return $this->hasRole('customer-support');
     }
 
     /**
@@ -82,6 +110,6 @@ class User extends Authenticatable
      */
     public function canImpersonate()
     {
-        return $this->isSuperAdmin();
+        return $this->isSuperAdmin() || $this->isAdmin();
     }
 }

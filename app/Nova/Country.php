@@ -2,8 +2,9 @@
 
 namespace App\Nova;
 
+use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
-use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -58,20 +59,26 @@ class Country extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make('Name', 'name')
+            Text::make(__('Name'), 'name')
                 ->sortable()
-                ->rules('required', 'max:255'),
+                ->required()
+                ->rules('max:255'),
 
-            Text::make('Iso 2', 'alpha2')
+            Text::make(__('Iso 2'), 'alpha2')
                 ->sortable()
-                ->rules('required', 'max:255'),
+                ->required()
+                ->rules('max:255'),
 
-            Text::make('Iso 3', 'alpha3')
+            Text::make(__('Iso 3'), 'alpha3')
                 ->sortable()
-                ->rules('required', 'max:255')
+                ->required()
+                ->rules('max:255')
                 ->hideFromIndex(),
 
-            new Panel('History', $this->commonMetaData()),
+            BelongsTo::make(__('Logistics zone'), 'logisticsZone')
+                ->sortable(),
+
+            new Panel(__('History'), $this->commonMetaData()),
         ];
     }
 
@@ -94,7 +101,9 @@ class Country extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            new ShowDeleted(),
+        ];
     }
 
     /**

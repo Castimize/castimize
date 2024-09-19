@@ -30,9 +30,12 @@ class User extends Resource
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
-     * @var string
+     * @return mixed
      */
-    public static $title = 'name';
+    public function title()
+    {
+        return sprintf('%s (%s %s)', $this->username, $this->first_name, $this->last_name);
+    }
 
     /**
      * The columns that should be searched.
@@ -40,7 +43,10 @@ class User extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'name', 'email',
+        'id',
+        'name',
+        'email',
+        'username',
     ];
 
     /**
@@ -63,42 +69,46 @@ class User extends Resource
         return [
             ID::make()->sortable(),
 
-            Avatar::make('Avatar', 'avatar')
+            Avatar::make(__('Avatar'), 'avatar')
                 ->maxWidth(50)
                 ->disk(env('FILESYSTEM_DISK'))
                 ->path('admin/users'),
 
-            Text::make('Name', function () {
+            Text::make(__('Name'), function () {
                 return sprintf('%s %s', $this->first_name, $this->last_name);
             })->onlyOnIndex(),
 
-            Text::make('First name', 'first_name')
+            Text::make(__('First name'), 'first_name')
                 ->sortable()
-                ->rules('required', 'max:255')
+                ->required()
+                ->rules('max:255')
                 ->showOnIndex(false),
 
-            Text::make('Last name', 'last_name')
+            Text::make(__('Last name'), 'last_name')
                 ->sortable()
-                ->rules('required', 'max:255')
+                ->required()
+                ->rules('max:255')
                 ->showOnIndex(false),
 
-            Text::make('Email')
+            Text::make(__('Email'))
                 ->sortable()
-                ->rules('required', 'email', 'max:254')
+                ->required()
+                ->rules('email', 'max:254')
                 ->creationRules('unique:users,email')
                 ->updateRules('unique:users,email,{{resourceId}}'),
 
-            Password::make('Password')
+            Password::make(__('Password'))
                 ->onlyOnForms()
-                ->creationRules('required', Rules\Password::defaults())
+                ->required()
+                ->creationRules(Rules\Password::defaults())
                 ->updateRules('nullable', Rules\Password::defaults()),
 
             SanctumTokens::make(),
 
-            MorphToMany::make('Roles', 'roles', Role::class),
-            MorphToMany::make('Permissions', 'permissions', Permission::class),
+            MorphToMany::make(__('Roles'), 'roles', Role::class),
+            MorphToMany::make(__('Permissions'), 'permissions', Permission::class),
 
-            new Panel('History', $this->commonMetaData()),
+            new Panel(__('History'), $this->commonMetaData()),
         ];
     }
 
