@@ -17,7 +17,6 @@ class PricesApiController extends ApiController
     {
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $calculatedPriceResource = new CalculatedPriceResource();
-        return $calculatedPriceResource->setRequestData($request)->toArray();
+        return (new CalculatedPriceResource(null))->toArray($request);
     }
 }

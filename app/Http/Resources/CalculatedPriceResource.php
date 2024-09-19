@@ -16,7 +16,7 @@ class CalculatedPriceResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $data = $this->requestData->toArray();
+        $data = $request->toArray();
         $data['argument_1'] = 10.00;
         $data['argument_6']['p3d_estimated_price'] = 10.00;
 
