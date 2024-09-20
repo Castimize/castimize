@@ -64,6 +64,9 @@ class Material extends Resource
         return [
             ID::make()->sortable(),
 
+            Number::make(__('Wordpress ID'), 'wp_id')
+                ->hideFromIndex(),
+
             Text::make(__('Name'), 'name')
                 ->sortable(),
 

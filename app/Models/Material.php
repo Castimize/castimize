@@ -29,6 +29,7 @@ class Material extends Model
     protected $fillable = [
         'material_group_id',
         'currency_id',
+        'wp_id',
         'name',
         'discount',
         'bulk_discount_10',

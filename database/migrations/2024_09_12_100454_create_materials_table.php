@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('material_group_id')->nullable()->index();
             $table->unsignedBigInteger('currency_id')->nullable()->index();
-            $table->integer('wp_id');
+            $table->integer('wp_id')->nullable();
             $table->string('name');
             $table->float('discount')->nullable();
             $table->float('bulk_discount_10')->nullable();
