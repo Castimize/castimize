@@ -13,6 +13,7 @@ use Laravel\Nova\Fields\Email;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphToMany;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -70,6 +71,9 @@ class Customer extends Resource
     {
         return [
             ID::make()->sortable(),
+
+            Number::make(__('Wordpress ID'), 'wp_id')
+                ->hideFromIndex(),
 
             BelongsTo::make(__('Country'), 'country')
                 ->sortable(),

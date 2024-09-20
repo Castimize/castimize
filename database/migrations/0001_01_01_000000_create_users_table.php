@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->integer('wp_id')->nullable()->index();
             $table->string('username')->unique();
             $table->string('name')->nullable();
             $table->string('avatar')->nullable();

@@ -26,6 +26,7 @@ class Order extends Model
         'country_id',
         'customer_shipment_id',
         'currency_id',
+        'wp_id',
         'order_number',
         'first_name',
         'last_name',

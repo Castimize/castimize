@@ -10,6 +10,7 @@ use Jeffbeltran\SanctumTokens\SanctumTokens;
 use Laravel\Nova\Fields\Avatar;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphToMany;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -69,6 +70,9 @@ class User extends Resource
     {
         return [
             ID::make()->sortable(),
+
+            Number::make(__('Wordpress ID'), 'wp_id')
+                ->hideFromIndex(),
 
             Avatar::make(__('Avatar'), 'avatar')
                 ->maxWidth(50)

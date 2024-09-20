@@ -5,6 +5,7 @@ namespace App\Nova;
 use App\Nova\Filters\ShowDeleted;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Order extends Resource
@@ -51,6 +52,9 @@ class Order extends Resource
     {
         return [
             ID::make()->sortable(),
+
+            Number::make(__('Wordpress ID'), 'wp_id')
+                ->hideFromIndex(),
         ];
     }
 

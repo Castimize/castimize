@@ -31,6 +31,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'wp_id',
         'name',
         'first_name',
         'last_name',

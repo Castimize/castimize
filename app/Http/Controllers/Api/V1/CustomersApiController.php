@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Requests\DeleteCustomerRequest;
 use App\Http\Requests\ShowCustomerWpRequest;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Services\Admin\CustomersService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -44,12 +44,27 @@ class CustomersApiController extends ApiController
      * @param StoreCustomerRequest $request
      * @return JsonResponse
      */
-    public function store(StoreCustomerRequest $request): JsonResponse
+    public function storeCustomerWp(StoreCustomerRequest $request): JsonResponse
     {
         $customer = (new CustomersService())->storeCustomerFromApi($request);
 
         return (new CustomerResource($customer))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    /**
+     * @param DeleteCustomerRequest $request
+     * @return Response
+     */
+    public function deleteCustomerWp(DeleteCustomerRequest $request): Response
+    {
+        $customer = Customer::where('wp_id', $request->wp_id)->first();
+        if ($customer === null) {
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+        $customer->delete();
+
+        return response(null, Response::HTTP_NO_CONTENT);
     }
 }
