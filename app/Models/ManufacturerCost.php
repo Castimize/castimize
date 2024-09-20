@@ -27,12 +27,11 @@ class ManufacturerCost extends Model
         'currency_id',
         'production_lead_time',
         'shipment_lead_time',
-        'minimum_cc',
-        'start_up_per_stl_volume_only',
-        'costs_per_cc_volume_only',
+        'setup_fee',
+        'setup_fee_amount',
+        'costs_volume_cc',
         'costs_minimum_per_stl',
-        'costs_per_cc_surface',
-        'costs_surface_area',
+        'costs_surface_cm2',
     ];
 
     /**

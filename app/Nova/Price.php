@@ -110,7 +110,7 @@ class Price extends Resource
                 })
                 ->sortable(),
 
-            \Laravel\Nova\Fields\Currency::make(__('Price model volume cc'), 'price_model_volume_cc')
+            \Laravel\Nova\Fields\Currency::make(__('Price minimum per stl'), 'price_minimum_per_stl')
                 ->min(0)
                 ->step(0.01)
                 ->hideFromIndex()
@@ -124,7 +124,7 @@ class Price extends Resource
                     return sprintf('%s %s', $this->currency_code, number_format($value, 2, '.', ','));
                 }),
 
-            \Laravel\Nova\Fields\Currency::make(__('Price model volume and surface cc'), 'price_model_volume_and_surface_cc')
+            \Laravel\Nova\Fields\Currency::make(__('Price volume cc'), 'price_volume_cc')
                 ->min(0)
                 ->step(0.01)
                 ->hideFromIndex()

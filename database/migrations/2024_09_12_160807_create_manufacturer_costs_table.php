@@ -18,13 +18,11 @@ return new class extends Migration
             $table->unsignedBigInteger('currency_id')->nullable()->index();
             $table->integer('production_lead_time')->nullable();
             $table->integer('shipment_lead_time')->nullable();
-            $table->float('minimum_cc')->nullable();
-            $table->float('start_up_per_stl_volume_only')->nullable();
-            $table->float('costs_per_cc_volume_only')->nullable();
+            $table->float('setup_fee')->nullable();
+            $table->float('setup_fee_amount')->nullable();
+            $table->float('costs_volume_cc')->nullable();
             $table->float('costs_minimum_per_stl')->nullable();
-            $table->float('costs_per_cc_surface')->nullable();
-            $table->float('costs_surface_area')->nullable();
-//            $table->boolean('bulk_discount')->nullable();
+            $table->float('costs_surface_cm2')->nullable();
             $table->string('currency_code')->default('EUR');
             $table->timestamps();
             $table->softDeletes();

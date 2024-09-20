@@ -19,8 +19,8 @@ return new class extends Migration
             $table->float('setup_fee')->nullable();
             $table->float('setup_fee_amount')->nullable();
             $table->float('minimum_per_stl')->nullable();
-            $table->float('price_model_volume_cc')->nullable();
-            $table->float('price_model_volume_and_surface_cc')->nullable();
+            $table->float('price_minimum_per_stl')->nullable();
+            $table->float('price_volume_cc')->nullable();
             $table->float('price_surface_cm2')->nullable();
             $table->float('fixed_fee_per_part')->nullable();
             $table->float('material_discount')->nullable();
