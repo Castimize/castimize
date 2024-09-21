@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('currency_id')->nullable()->index();
             $table->integer('production_lead_time')->nullable();
             $table->integer('shipment_lead_time')->nullable();
-            $table->float('setup_fee')->nullable();
+            $table->boolean('setup_fee')->default(false);
             $table->float('setup_fee_amount')->nullable();
             $table->float('costs_volume_cc')->nullable();
             $table->float('costs_minimum_per_stl')->nullable();

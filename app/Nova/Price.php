@@ -5,8 +5,10 @@ namespace App\Nova;
 use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
@@ -58,7 +60,8 @@ class Price extends Resource
         return [
             ID::make()->sortable(),
 
-            BelongsTo::make(__('Material'), 'material', Material::class),
+            BelongsTo::make(__('Material'), 'material', Material::class)
+                ->sortable(),
 
             BelongsTo::make(__('Country'), 'country', Country::class),
 
@@ -68,18 +71,7 @@ class Price extends Resource
                 ->hideFromIndex()
                 ->help(__('This currency will be used for all below prices')),
 
-            \Laravel\Nova\Fields\Currency::make(__('Setup fee'), 'setup_fee')
-                ->min(0)
-                ->step(0.01)
-                ->dependsOn(
-                    ['currency_code'],
-                    function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
-                        $field->currency($formData->currency_code);
-                    }
-                )
-                ->displayUsing(function ($value) {
-                    return sprintf('%s %s', $this->currency_code, number_format($value, 2, '.', ','));
-                })
+            Boolean::make(__('Setup fee'), 'setup_fee')
                 ->sortable(),
 
             \Laravel\Nova\Fields\Currency::make(__('Setup fee amount'), 'setup_fee_amount')
@@ -96,18 +88,9 @@ class Price extends Resource
                     return sprintf('%s %s', $this->currency_code, number_format($value, 2, '.', ','));
                 }),
 
-            \Laravel\Nova\Fields\Currency::make(__('Minimum per stl'), 'minimum_per_stl')
+            Number::make(__('Minimum per stl'), 'minimum_per_stl')
                 ->min(0)
                 ->step(0.01)
-                ->dependsOn(
-                    ['currency_code'],
-                    function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
-                        $field->currency($formData->currency_code);
-                    }
-                )
-                ->displayUsing(function ($value) {
-                    return sprintf('%s %s', $this->currency_code, number_format($value, 2, '.', ','));
-                })
                 ->sortable(),
 
             \Laravel\Nova\Fields\Currency::make(__('Price minimum per stl'), 'price_minimum_per_stl')

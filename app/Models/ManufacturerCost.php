@@ -45,6 +45,7 @@ class ManufacturerCost extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'setup_fee' => 'boolean',
         ];
     }
 

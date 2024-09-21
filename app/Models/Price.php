@@ -52,35 +52,14 @@ class Price extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'setup_fee' => 'boolean',
         ];
-    }
-
-    /**
-     * Interact with  setup fee
-     */
-    protected function setupFee(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => $value * 100,
-        );
     }
 
     /**
      * Interact with  setup fee amount
      */
     protected function setupFeeAmount(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => $value * 100,
-        );
-    }
-
-    /**
-     * Interact with minimum per stl
-     */
-    protected function minimumPerStl(): Attribute
     {
         return Attribute::make(
             get: fn ($value) => $value / 100,

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('material_id')->nullable()->index();
             $table->unsignedBigInteger('country_id')->nullable()->index();
             $table->unsignedBigInteger('currency_id')->nullable()->index();
-            $table->float('setup_fee')->nullable();
+            $table->boolean('setup_fee')->default(false);
             $table->float('setup_fee_amount')->nullable();
             $table->float('minimum_per_stl')->nullable();
             $table->float('price_minimum_per_stl')->nullable();
