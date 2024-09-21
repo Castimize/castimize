@@ -53,6 +53,7 @@ class Price extends Model
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
             'setup_fee' => 'boolean',
+            'calculated_total' => 'float',
         ];
     }
 

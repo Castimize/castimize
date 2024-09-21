@@ -21,8 +21,11 @@ Route::group([
     Route::get('customers/wp', 'CustomersApiController@showCustomerWp')->name('api.customers.show-customer-wp');
     Route::get('customers/{customer}', 'CustomersApiController@show')->name('api.customers.show');
     Route::post('customers/wp', 'CustomersApiController@storeCustomerWp')->name('api.customers.store-customer-wp');
-    Route::delete('customers/wp', 'CustomersApiController@deleteCustomerWp')->name('api.customers.delete-custoer.wp');
+    Route::delete('customers/wp', 'CustomersApiController@deleteCustomerWp')->name('api.customers.delete-customer.wp');
 
     // Prices
     Route::post('prices/calculate', 'PricesApiController@calculatePrice')->name('api.prices.calculate');
+
+    // Models
+    Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
 });
