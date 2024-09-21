@@ -16,7 +16,7 @@ class PricesApiController extends ApiController
      */
     public function calculatePrice(Request $request)
     {
-        Log::info(print_r($request->toArray(), true));
+        Log::info(print_r($request->all(), true));
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return (new CalculatedPriceResource(null))->toArray($request);
