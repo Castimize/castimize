@@ -24,6 +24,7 @@ return new class extends Migration
             $table->float('costs_minimum_per_stl')->nullable();
             $table->float('costs_surface_cm2')->nullable();
             $table->string('currency_code')->default('EUR');
+            $table->boolean('active')->default(true);
             $table->timestamps();
             $table->softDeletes();
 

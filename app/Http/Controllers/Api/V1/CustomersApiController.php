@@ -31,8 +31,6 @@ class CustomersApiController extends ApiController
      */
     public function showCustomerWp(ShowCustomerWpRequest $request): CustomerResource
     {
-        abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
         $customer = Customer::where('wp_id', $request->wp_id)->first();
         if ($customer === null) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');

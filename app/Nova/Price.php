@@ -77,7 +77,6 @@ class Price extends Resource
             \Laravel\Nova\Fields\Currency::make(__('Setup fee amount'), 'setup_fee_amount')
                 ->min(0)
                 ->step(0.01)
-                ->hideFromIndex()
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
@@ -96,7 +95,6 @@ class Price extends Resource
             \Laravel\Nova\Fields\Currency::make(__('Price minimum per stl'), 'price_minimum_per_stl')
                 ->min(0)
                 ->step(0.01)
-                ->hideFromIndex()
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {

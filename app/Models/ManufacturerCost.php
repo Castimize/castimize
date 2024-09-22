@@ -32,6 +32,8 @@ class ManufacturerCost extends Model
         'costs_volume_cc',
         'costs_minimum_per_stl',
         'costs_surface_cm2',
+        'currency_code',
+        'active',
     ];
 
     /**
@@ -46,6 +48,7 @@ class ManufacturerCost extends Model
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
             'setup_fee' => 'boolean',
+            'active' => 'boolean',
         ];
     }
 
