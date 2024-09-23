@@ -98,7 +98,10 @@ class Material extends Resource
                     }
                 )
                 ->displayUsing(function ($value) {
-                    return sprintf('%s %s', $this->currency_code, number_format($value, 2, '.', ','));
+                    if ($value !== null) {
+                        return currencyFormatter($value, $this->currency_code);
+                    }
+                    return $value;
                 })
                 ->sortable(),
 

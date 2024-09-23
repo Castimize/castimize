@@ -17,11 +17,11 @@ return new class extends Migration
             $table->unsignedBigInteger('currency_id')->nullable()->index();
             $table->dateTime('sent_at')->nullable();
             $table->dateTime('arrived_at')->nullable();
-            $table->integer('time_in_transit')->nullable();
             $table->dateTime('expected_delivery_date')->nullable();
             $table->string('ups_tracking', 500)->nullable();
             $table->tinyText('ups_tracking_manual')->nullable();
-            $table->float('amount')->nullable();
+            $table->integer('total_parts')->nullable();
+            $table->float('total_costs')->nullable();
             $table->string('currency_code')->default('EUR');
             $table->integer('type')->nullable();
             $table->timestamps();

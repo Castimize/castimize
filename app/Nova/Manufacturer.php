@@ -3,12 +3,24 @@
 namespace App\Nova;
 
 use App\Nova\Filters\ShowDeleted;
+use App\Traits\Nova\CommonMetaDataTrait;
+use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Illuminate\Http\Request;
+use Laravel\Nova\Actions\ExportAsCsv;
+use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Email;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Panel;
+use Wame\TelInput\TelInput;
 
 class Manufacturer extends Resource
 {
+    use ColumnTogglerTrait, CommonMetaDataTrait;
+
     /**
      * The model the resource corresponds to.
      *
@@ -52,6 +64,83 @@ class Manufacturer extends Resource
     {
         return [
             ID::make()->sortable(),
+
+            Text::make(__('Name'), 'name')
+                ->required(),
+
+            BelongsTo::make(__('User'), 'user'),
+
+            Text::make(__('COC number'), 'coc_number'),
+
+            Text::make(__('Vat number'), 'vat_number'),
+
+            Text::make(__('IBAN'), 'iban'),
+
+            Text::make(__('Contact name'), 'contact_name_1'),
+
+            Text::make(__('Contact name 2'), 'contact_name_2'),
+
+            TelInput::make(__('Phone'), 'phone_1')
+                ->sortable(),
+
+            Email::make(__('Email'), 'email')
+                ->sortable(),
+
+            Email::make(__('Billing email'), 'billing_email')
+                ->sortable(),
+
+            Textarea::make(__('Comments'), 'comments'),
+
+            BelongsTo::make(__('Country'), 'country')
+                ->sortable(),
+
+            BelongsTo::make(__('Language'), 'language')
+                ->hideFromIndex()
+                ->sortable(),
+
+            BelongsTo::make(__('Currency'), 'currency')
+                ->hideFromIndex()
+                ->sortable(),
+
+            new Panel(__('Address'), $this->addressFields()),
+
+//            HasMany::make(__('Uploads'), 'uploads'),
+
+            HasMany::make(__('Shipments'), 'shipments', ManufacturerShipment::class),
+
+
+            HasMany::make(__('Costs'), 'costs', ManufacturerCost::class),
+
+            new Panel(__('History'), $this->commonMetaData(false, false, false, false)),
+        ];
+    }
+
+    /**
+     * Get the fields displayed by the resource on index page.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function fieldsForIndex(NovaRequest $request)
+    {
+        return [
+            ID::make()->sortable(),
+
+            Text::make(__('Name'), 'name')
+                ->sortable(),
+
+            BelongsTo::make(__('City'), 'city')
+                ->onlyOnIndex()
+                ->sortable(),
+
+            BelongsTo::make(__('Country'), 'country')
+                ->sortable(),
+
+            TelInput::make(__('Phone'), 'phone_1')
+                ->sortable(),
+
+            Email::make(__('Email'), 'email')
+                ->sortable(),
         ];
     }
 
@@ -98,6 +187,47 @@ class Manufacturer extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            ExportAsCsv::make()
+                ->nameable()
+                ->icon('<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+</svg>'),
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    protected function addressFields(): array
+    {
+        return [
+            Text::make(__('Street / House number'), function () {
+                return sprintf('%s %s', $this->address_line1, $this->house_number);
+            })->exceptOnForms(),
+
+            Text::make(__('Street'), 'address_line1')
+                ->onlyOnForms()
+                ->required()
+                ->sortable(),
+
+            Text::make(__('House number'), 'house_number')
+                ->onlyOnForms()
+                ->required()
+                ->sortable(),
+
+            Text::make(__('Postal code'), 'postal_code')
+                ->required()
+                ->sortable(),
+
+            BelongsTo::make(__('City'))
+                ->showCreateRelationButton()
+                ->sortable(),
+
+            BelongsTo::make(__('State'))
+                ->showCreateRelationButton()
+                ->hideFromIndex()
+                ->sortable(),
+        ];
     }
 }

@@ -108,6 +108,14 @@ class Manufacturer extends Model
     /**
      * @return HasMany
      */
+    public function uploads(): HasMany
+    {
+        return $this->hasMany(Upload::class);
+    }
+
+    /**
+     * @return HasMany
+     */
     public function costs(): HasMany
     {
         return $this->hasMany(ManufacturerCost::class);

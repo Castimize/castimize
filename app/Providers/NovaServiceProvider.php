@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Nova\City;
+use App\Nova\Complaint;
+use App\Nova\ComplaintReason;
 use App\Nova\Country;
 use App\Nova\Currency;
 use App\Nova\Customer;
@@ -24,6 +26,7 @@ use Illuminate\Support\Facades\Gate;
 use Kaiserkiwi\NovaQueueManagement\Resources\FailedJob;
 use Kaiserkiwi\NovaQueueManagement\Resources\Job;
 use Kaiserkiwi\NovaQueueManagement\Tool;
+use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
@@ -44,7 +47,15 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         parent::boot();
 
+        Nova::withBreadcrumbs();
+
         Nova::mainMenu(function (Request $request) {
+            if ($request->user()->hasRole('manufacturer')) {
+                return [
+                    MenuSection::dashboard(Main::class)
+                        ->icon('chart-bar'),
+                ];
+            }
             return [
                 MenuSection::dashboard(Main::class)
                     ->icon('chart-bar'),
@@ -91,7 +102,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     }),
 
                 MenuSection::make(__('Complaints'), [
-//                    MenuItem::resource(Complaint::class),
+                    MenuItem::resource(Complaint::class),
+                    MenuItem::resource(ComplaintReason::class),
                 ])->icon('exclamation-circle')
                     ->collapsable()
                     ->canSee(function (NovaRequest $request) {

@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
+use App\Observers\OrderObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+#[ObservedBy([OrderObserver::class])]
 class Order extends Model
 {
     use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
@@ -61,6 +66,7 @@ class Order extends Model
         'total_tax',
         'production_cost',
         'production_cost_tax',
+        'currency_code',
         'order_parts',
         'payment_method',
         'payment_issuer',
@@ -92,6 +98,116 @@ class Order extends Model
             'paid_at' => 'datetime',
             'arrived_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Interact with  service_fee
+     */
+    protected function serviceFee(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  service_fee_tax
+     */
+    protected function serviceFeeTax(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  shipping_fee
+     */
+    protected function shippingFee(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  shipping_fee_tax
+     */
+    protected function shippingFeeTax(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  discount_fee
+     */
+    protected function discountFee(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  discount_fee_tax
+     */
+    protected function discountFeeTax(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  total
+     */
+    protected function total(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  total_tax
+     */
+    protected function totalTax(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  production_cost
+     */
+    protected function productionCost(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  production_cost_tax
+     */
+    protected function productionCostTax(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
     }
 
     /**
@@ -132,5 +248,13 @@ class Order extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function uploads(): HasMany
+    {
+        return $this->hasMany(Upload::class);
     }
 }

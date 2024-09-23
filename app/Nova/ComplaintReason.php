@@ -3,30 +3,29 @@
 namespace App\Nova;
 
 use App\Nova\Filters\ShowDeleted;
-use Illuminate\Http\Request;
-use Laravel\Nova\Fields\BelongsTo;
+use App\Traits\Nova\CommonMetaDataTrait;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class Address extends Resource
+class ComplaintReason extends Resource
 {
+    use CommonMetaDataTrait;
+
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Address>
+     * @var class-string<\App\Models\ComplaintReason>
      */
-    public static $model = \App\Models\Address::class;
+    public static $model = \App\Models\ComplaintReason::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
-     * @return mixed
+     * @var string
      */
-    public function title()
-    {
-        return sprintf('%s %s, %s %s', $this->address_line1, $this->house_number, $this->postal_code, $this->city?->name);
-    }
+    public static $title = 'name';
 
     /**
      * The columns that should be searched.
@@ -35,8 +34,7 @@ class Address extends Resource
      */
     public static $search = [
         'id',
-        'address_line1',
-        'postal_code',
+        'name',
     ];
 
     /**
@@ -45,7 +43,7 @@ class Address extends Resource
      * @var array
      */
     public static $sort = [
-        'address_line1' => 'asc',
+        'id' => 'desc',
     ];
 
     /**
@@ -59,34 +57,7 @@ class Address extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make(__('Street / House number'), function () {
-                return sprintf('%s %s', $this->address_line1, $this->house_number);
-            })->onlyOnIndex(),
-
-            Text::make(__('Street'), 'address_line1')
-                ->hideFromIndex()
-                ->required()
-                ->sortable(),
-
-            Text::make(__('House number'), 'house_number')
-                ->hideFromIndex()
-                ->required()
-                ->sortable(),
-
-            Text::make(__('Postal code'), 'postal_code')
-                ->required()
-                ->sortable(),
-
-            BelongsTo::make(__('City'))
-                ->showCreateRelationButton()
-                ->sortable(),
-
-            BelongsTo::make(__('State'))
-                ->showCreateRelationButton()
-                ->hideFromIndex()
-                ->sortable(),
-
-            BelongsTo::make(__('Country'))
+            Text::make(__('Reason'), 'name')
                 ->sortable(),
         ];
     }

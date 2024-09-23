@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Observers\ManufacturerShipmentObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+#[ObservedBy([ManufacturerShipmentObserver::class])]
 class ManufacturerShipment extends Model
 {
     use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
@@ -26,11 +30,11 @@ class ManufacturerShipment extends Model
         'currency_id',
         'sent_at',
         'arrived_at',
-        'time_in_transit', //date difference created_at en arrived_at. indien geen arrived_at dan date difference created_at en today()
         'expected_delivery_date',
         'ups_tracking',
         'ups_tracking_manual',
-        'amount',
+        'total_parts',
+        'total_costs',
         'currency_code',
         'type',
     ];
@@ -48,8 +52,20 @@ class ManufacturerShipment extends Model
             'deleted_at' => 'datetime',
             'sent_at' => 'datetime',
             'arrived_at' => 'datetime',
+            'time_in_transit' => 'integer',
             'expected_delivery_date' => 'datetime',
         ];
+    }
+
+    /**
+     * Time in transit
+     * date difference created_at en arrived_at. indien geen arrived_at dan date difference created_at en today()
+     */
+    protected function timeInTransit(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->arrived_at !== null ? $this->arrived_at->diffInDays($this->created_at) : now()->diffInDays($this->created_at),
+        );
     }
 
     /**

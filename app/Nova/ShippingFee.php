@@ -3,6 +3,8 @@
 namespace App\Nova;
 
 use App\Nova\Filters\ShowDeleted;
+use App\Traits\Nova\CommonMetaDataTrait;
+use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\FormData;
@@ -11,10 +13,12 @@ use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Nsavinov\NovaPercentField\Percent;
+use Laravel\Nova\Panel;
 
 class ShippingFee extends Resource
 {
+    use ColumnTogglerTrait, CommonMetaDataTrait;
+
     /**
      * The model the resource corresponds to.
      *
@@ -75,46 +79,52 @@ class ShippingFee extends Resource
             \Laravel\Nova\Fields\Currency::make(__('Default rate'), 'default_rate')
                 ->min(0)
                 ->step(0.01)
+                ->locale(config('app.format_locale'))
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
                 )
-                ->displayUsing(function ($value) {
-                    return sprintf('%s %s', $this->currency_code, number_format($value, 2, '.', ','));
-                })
                 ->sortable(),
 
             Number::make(__('Default lead time'), 'default_lead_time')
                 ->step(1),
 
             Number::make(__('Cc threshold 1'), 'cc_threshold_1')
-                ->sizeOnDetail('w-1/2')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
-            Percent::make(__('Rate increase 1'), 'rate_increase_1')
-                ->sizeOnDetail('w-1/2')
-                ->hideFromIndex(),
+            Number::make(__('Rate increase 1'), 'rate_increase_1')
+                ->hideByDefault()
+                ->step(0.01)
+                ->displayUsing(function ($value) {
+                    return $value . '%';
+                }),
 
             Number::make(__('Cc threshold 2'), 'cc_threshold_2')
-                ->sizeOnDetail('w-1/2')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
-            Percent::make(__('Rate increase 2'), 'rate_increase_2')
-                ->sizeOnDetail('w-1/2')
-                ->hideFromIndex(),
+            Number::make(__('Rate increase 2'), 'rate_increase_2')
+                ->hideByDefault()
+                ->step(0.01)
+                ->displayUsing(function ($value) {
+                    return $value . '%';
+                }),
 
             Number::make(__('Cc threshold 3'), 'cc_threshold_3')
-                ->sizeOnDetail('w-1/2')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
-            Percent::make(__('Rate increase 3'), 'rate_increase_3')
-                ->sizeOnDetail('w-1/2')
-                ->hideFromIndex(),
+            Number::make(__('Rate increase 3'), 'rate_increase_3')
+                ->hideByDefault()
+                ->step(0.01)
+                ->displayUsing(function ($value) {
+                    return $value . '%';
+                }),
+
+            new Panel(__('History'), $this->commonMetaData(false, false, false, false)),
         ];
     }
 

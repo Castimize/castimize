@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Observers\ManufacturerCostObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+#[ObservedBy([ManufacturerCostObserver::class])]
 class ManufacturerCost extends Model
 {
     use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
@@ -50,6 +54,50 @@ class ManufacturerCost extends Model
             'setup_fee' => 'boolean',
             'active' => 'boolean',
         ];
+    }
+
+    /**
+     * Interact with costs_volume_cc
+     */
+    protected function costsVolumeCc(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with costs_minimum_per_stl
+     */
+    protected function costsMinimumPerStl(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with costs_surface_cm2
+     */
+    protected function costsSurfaceCm2(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with setup fee amount
+     */
+    protected function setupFeeAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
     }
 
     /**

@@ -12,6 +12,7 @@ use App\Http\Resources\OrderResource;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Services\Admin\CustomersService;
+use App\Services\Admin\OrdersService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,7 +49,7 @@ class OrdersApiController extends ApiController
      */
     public function storeOrderWp(StoreOrderRequest $request): JsonResponse
     {
-        $order = (new CustomersService())->storeCustomerFromApi($request);
+        $order = (new OrdersService())->storeOrderFromApi($request);
 
         return (new OrderResource($order))
             ->response()

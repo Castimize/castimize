@@ -81,19 +81,19 @@ class User extends Resource
 
             Text::make(__('Name'), function () {
                 return sprintf('%s %s', $this->first_name, $this->last_name);
-            })->onlyOnIndex(),
+            })->exceptOnForms(),
 
             Text::make(__('First name'), 'first_name')
                 ->sortable()
                 ->required()
                 ->rules('max:255')
-                ->showOnIndex(false),
+                ->onlyOnForms(),
 
             Text::make(__('Last name'), 'last_name')
                 ->sortable()
                 ->required()
                 ->rules('max:255')
-                ->showOnIndex(false),
+                ->onlyOnForms(),
 
             Text::make(__('Email'))
                 ->sortable()

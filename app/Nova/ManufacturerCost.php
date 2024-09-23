@@ -4,7 +4,6 @@ namespace App\Nova;
 
 use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\FormData;
@@ -15,16 +14,16 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Vyuldashev\NovaMoneyField\Money;
 
-class Price extends Resource
+class ManufacturerCost extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Price>
+     * @var class-string<\App\Models\ManufacturerCost>
      */
-    public static $model = \App\Models\Price::class;
+    public static $model = \App\Models\ManufacturerCost::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -48,7 +47,7 @@ class Price extends Resource
      * @var array
      */
     public static $sort = [
-        'id' => 'asc',
+        'id' => 'desc',
     ];
 
     /**
@@ -65,18 +64,20 @@ class Price extends Resource
             BelongsTo::make(__('Material'), 'material', Material::class)
                 ->sortable(),
 
-            BelongsTo::make(__('Country'), 'country', Country::class),
-
             Select::make(__('Currency'), 'currency_code')->options(function () {
                 return array_filter(\App\Models\Currency::pluck('name', 'code')->all());
             })
                 ->hideFromIndex()
                 ->help(__('This currency will be used for all below prices')),
 
+            Boolean::make(__('Active'), 'active')
+                ->sortable(),
+
             Boolean::make(__('Setup fee'), 'setup_fee')
                 ->sortable(),
 
             \Laravel\Nova\Fields\Currency::make(__('Setup fee amount'), 'setup_fee_amount')
+                ->onlyOnForms()
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
@@ -87,15 +88,19 @@ class Price extends Resource
                     }
                 ),
 
-//            Money::make(__('Setup fee amount'), 'EUR', 'setup_fee_amount')
-//                ->onlyOnDetail(),
 
-            Number::make(__('Minimum per stl'), 'minimum_per_stl')
+            Number::make(__('Production lead time'), 'production_lead_time')
                 ->min(0)
-                ->step(0.01)
+                ->step(1)
                 ->sortable(),
 
-            \Laravel\Nova\Fields\Currency::make(__('Price minimum per stl'), 'price_minimum_per_stl')
+            Number::make(__('Shipment lead time'), 'shipment_lead_time')
+                ->min(0)
+                ->step(1)
+                ->sortable(),
+
+            \Laravel\Nova\Fields\Currency::make(__('Costs minimum per stl'), 'costs_minimum_per_stl')
+                ->onlyOnForms()
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
@@ -106,11 +111,11 @@ class Price extends Resource
                     }
                 ),
 
-            \Laravel\Nova\Fields\Currency::make(__('Price volume cc'), 'price_volume_cc')
+            \Laravel\Nova\Fields\Currency::make(__('Costs volume cc'), 'costs_volume_cc')
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
-                ->hideByDefault()
+                ->hideFromIndex()
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
@@ -118,23 +123,11 @@ class Price extends Resource
                     }
                 ),
 
-            \Laravel\Nova\Fields\Currency::make(__('Price surface cm2'), 'price_surface_cm2')
+            \Laravel\Nova\Fields\Currency::make(__('Costs surface cm2'), 'costs_surface_cm2')
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
-                ->hideByDefault()
-                ->dependsOn(
-                    ['currency_code'],
-                    function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
-                        $field->currency($formData->currency_code);
-                    }
-                ),
-
-            \Laravel\Nova\Fields\Currency::make(__('Fixed fee per part'), 'fixed_fee_per_part')
-                ->min(0)
-                ->step(0.01)
-                ->locale(config('app.format_locale'))
-                ->hideByDefault()
+                ->hideFromIndex()
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {

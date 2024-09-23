@@ -89,8 +89,24 @@ class Customer extends Model
     /**
      * @return HasMany
      */
+    public function models(): HasMany
+    {
+        return $this->hasMany(\App\Models\Model::class);
+    }
+
+    /**
+     * @return HasMany
+     */
     public function shipments(): HasMany
     {
         return $this->hasMany(CustomerShipment::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function complaints(): HasMany
+    {
+        return $this->hasMany(Complaint::class);
     }
 }

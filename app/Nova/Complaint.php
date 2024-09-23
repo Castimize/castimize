@@ -4,24 +4,25 @@ namespace App\Nova;
 
 use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
+use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
-use Laravel\Nova\Fields\File;
+use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Image;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Panel;
 
-class Model extends Resource
+class Complaint extends Resource
 {
     use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Model>
+     * @var class-string<\App\Models\Complaint>
      */
-    public static $model = \App\Models\Model::class;
+    public static $model = \App\Models\Complaint::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -38,7 +39,6 @@ class Model extends Resource
     public static $search = [
         'id',
         'name',
-        'file_name',
     ];
 
     /**
@@ -47,7 +47,7 @@ class Model extends Resource
      * @var array
      */
     public static $sort = [
-        'name' => 'asc',
+        'id' => 'desc',
     ];
 
     /**
@@ -61,54 +61,38 @@ class Model extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make(__('Name'), 'name')
-                ->sortable(),
-
-            File::make(__('Stl file'))
-                ->disk(env('FILESYSTEM_DISK'))
-                ->path('website/wp-content/uploads/p3d/')
-                ->acceptedTypes('.stl,.obj,.3ds'),
-
             BelongsTo::make(__('Customer'), 'customer')
-                ->hideFromIndex(function () use ($request) {
-                    return ($request->viaResource === 'customer');
-                })
                 ->sortable(),
 
-            BelongsTo::make(__('Material'), 'material')
+            BelongsTo::make(__('Complaint reason'), 'complaintReason')
+                ->hideFromIndex()
                 ->sortable(),
 
-            Number::make(__('Model volume cc'), 'model_volume_cc')
+//            BelongsTo::make(__('Upload'), 'upload')
+//                ->sortable(),
+
+            BelongsTo::make(__('Order'), 'order')
                 ->hideFromIndex()
-                ->step(0.01),
+                ->sortable(),
 
-            Number::make(__('Model x length'), 'model_x_length')
-                ->hideFromIndex()
-                ->step(0.01),
+            DateTime::make(__('Denied at'), 'deny_at')
+                ->sortable(),
 
-            Number::make(__('Model y length'), 'model_y_length')
-                ->hideFromIndex()
-                ->step(0.01),
+            DateTime::make(__('Reprint at'), 'reprint_at')
+                ->sortable(),
 
-            Number::make(__('Model z length'), 'model_z_length')
-                ->hideFromIndex()
-                ->step(0.01),
+            DateTime::make(__('Refund at'), 'refund_at')
+                ->sortable(),
 
-            Number::make(__('Model surface area cm2'), 'model_surface_area_cm2')
-                ->hideFromIndex()
-                ->step(0.01),
+            Text::make(__('Reason'), 'reason')
+                ->sortable(),
 
-            Number::make(__('Model parts'), 'model_parts')
-                ->hideFromIndex(function () use ($request) {
-                    return ($request->viaResource === 'customer');
-                })
-                ->step(1),
+            Textarea::make(__('Description'), 'description')
+                ->hideFromIndex(),
 
-            Number::make(__('Model box volume'), 'model_box_volume')
-                ->hideFromIndex()
-                ->step(0.01),
-
-            new Panel(__('History'), $this->commonMetaData(true, true, false, false)),
+            Image::make(__('Image'), 'image')
+                ->disk('r2_private')
+                ->path('admin/complaints'),
         ];
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
@@ -21,7 +22,6 @@ class Complaint extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
         'customer_id',
         'complaint_reason_id',
         'upload_id',
@@ -49,5 +49,37 @@ class Complaint extends Model
             'reprint_at' => 'datetime',
             'refund_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function complaintReason(): BelongsTo
+    {
+        return $this->belongsTo(ComplaintReason::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function upload(): BelongsTo
+    {
+        return $this->belongsTo(Upload::class);
     }
 }

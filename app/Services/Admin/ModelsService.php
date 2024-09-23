@@ -20,7 +20,7 @@ class ModelsService
         $model = Model::create([
             'material_id' => $material->id,
             'name' => $request->original_file_name,
-            'file_name' => 'admin/models/' . $request->file_name,
+            'file_name' => 'website/wp-content/uploads/p3d/' . $request->file_name,
             'model_volume_cc' => $request->material_volume,
             'model_x_length' => $request->x_dim,
             'model_y_length' => $request->y_dim,
