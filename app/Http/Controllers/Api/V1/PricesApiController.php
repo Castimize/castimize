@@ -25,7 +25,7 @@ class PricesApiController extends ApiController
         $price = (new CalculatePricesService())->calculatePrice($request);
 
         if ($request->has('file_name', 'original_file_name', 'thumb')) {
-            (new ModelsService())->storeModelFromApi($request);
+            //(new ModelsService())->storeModelFromApi($request);
         }
 
         return new CalculatedPriceResource($price);
