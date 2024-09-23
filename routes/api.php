@@ -27,7 +27,7 @@ Route::group([
     Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');
     Route::get('orders/{order}', 'OrdersApiController@show')->name('api.orders.show');
     Route::post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
-    Route::post('orders/wp/stripe-callback', 'OrdersApiCOntroller@orderPaidCallback')->name('api.orders.wp.stripe-callback');
+    Route::post('orders/wp/stripe-callback', 'OrdersApiController@orderPaidCallback')->name('api.orders.wp.stripe-callback');
 
     // Prices
     Route::post('prices/calculate', 'PricesApiController@calculatePrice')->name('api.prices.calculate');
