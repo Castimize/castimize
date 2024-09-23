@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\Admin\UsersService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,7 +30,11 @@ class UsersApiController extends ApiController
      */
     public function storeUserWp(StoreUserRequest $request): JsonResponse
     {
-        $user = (new UsersService())->storeUserFromApi($request);
+        try {
+            $user = (new UsersService())->storeUserFromApi($request);
+        } catch (Exception $e) {
+            abort(Response::HTTP_UNPROCESSABLE_ENTITY, '422 Unable t0 add user');
+        }
 
         return (new UserResource($user))
             ->response()
