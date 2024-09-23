@@ -20,7 +20,7 @@ class ModelsService
         $model = Model::create([
             'material_id' => $material->id,
             'name' => $request->original_file_name,
-            'file_name' => 'website/wp-content/uploads/p3d/' . $request->file_name,
+            'file_name' => 'wp-content/uploads/p3d/' . $request->file_name,
             'model_volume_cc' => $request->material_volume,
             'model_x_length' => $request->x_dim,
             'model_y_length' => $request->y_dim,
@@ -29,10 +29,6 @@ class ModelsService
             'model_parts' => $request->model_parts ?? 1,
             'model_box_volume' => $request->box_volume,
         ]);
-
-        if ($model) {
-            Storage::disk('r2')->put($model->file_name, $request->thumb);
-        }
 
         return $model;
     }
