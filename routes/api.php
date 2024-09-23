@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AuthGates;
+use App\Http\Middleware\ValidateWcWebhookSignature;
 use Illuminate\Support\Facades\Route;
 
 //Route::get('/user', [UsersApiController::class, 'show'])->can('viewUser')->middleware('auth:sanctum');
@@ -26,7 +27,7 @@ Route::group([
     //Orders
     Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');
     Route::get('orders/{order}', 'OrdersApiController@show')->name('api.orders.show');
-    Route::post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
+    Route::middleware(ValidateWcWebhookSignature::class)->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
     Route::post('orders/wp/stripe-callback', 'OrdersApiController@orderPaidCallback')->name('api.orders.wp.stripe-callback');
 
     // Prices

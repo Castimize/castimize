@@ -33,7 +33,7 @@ class UsersApiController extends ApiController
         try {
             $user = (new UsersService())->storeUserFromApi($request);
         } catch (Exception $e) {
-            abort(Response::HTTP_UNPROCESSABLE_ENTITY, '422 Unable t0 add user');
+            abort(Response::HTTP_UNPROCESSABLE_ENTITY, '422 Unable to add user');
         }
 
         return (new UserResource($user))
