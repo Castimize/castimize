@@ -14,7 +14,9 @@ use App\Models\Order;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\OrdersService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class OrdersApiController extends ApiController
@@ -54,5 +56,10 @@ class OrdersApiController extends ApiController
         return (new OrderResource($order))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    public function orderPaidCallback(Request $request)
+    {
+        Log::info(print_r($request->all(), true));
     }
 }
