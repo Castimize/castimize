@@ -54,17 +54,15 @@ class OrdersApiController extends ApiController
     }
 
     /**
-     * @param StoreOrderRequest $request
+     * @param Request $request
      */
-    public function storeOrderWp(StoreOrderRequest $request)
+    public function storeOrderWp(Request $request)
     {
-        Log::info(print_r($request->all(), true));
-        return response()->json([ 'data' => $request->all(), 'status' => Response::HTTP_OK]);
-//        $order = (new OrdersService())->storeOrderFromApi($request);
-//
-//        return (new OrderResource($order))
-//            ->response()
-//            ->setStatusCode(Response::HTTP_CREATED);
+        $order = (new OrdersService())->storeOrderWpFromApi($request);
+
+        return (new OrderResource($order))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     public function orderPaidCallback(Request $request)

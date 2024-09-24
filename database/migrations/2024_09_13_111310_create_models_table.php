@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_id')->nullable()->index();
             $table->unsignedBigInteger('material_id')->nullable()->index();
             $table->string('name');
-            $table->string('file_name');
+            $table->string('file_name')->index();
             $table->float('model_volume_cc');
             $table->float('model_x_length');
             $table->float('model_y_length');
