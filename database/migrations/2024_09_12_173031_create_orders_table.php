@@ -60,6 +60,7 @@ return new class extends Migration
             $table->string('payment_intent_id')->nullable();
             $table->string('customer_ip_address')->nullable();
             $table->string('customer_user_agent')->nullable();
+            $table->json('meta_data')->nullable();
             $table->text('comments')->nullable();
             $table->string('promo_code')->nullable();
             $table->dateTime('fast_delivery_lead_time')->nullable();

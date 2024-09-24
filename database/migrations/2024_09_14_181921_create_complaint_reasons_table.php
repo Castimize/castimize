@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('complaint_reasons', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('reason');
             $table->timestamps();
             $table->softDeletes();
         });

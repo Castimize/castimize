@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Observers\OrderObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -73,6 +74,7 @@ class Order extends Model
         'payment_intent_id',
         'customer_ip_address',
         'customer_user_agent',
+        'meta_data',
         'comments',
         'promo_code',
         'fast_delivery_lead_time',
@@ -97,6 +99,7 @@ class Order extends Model
             'is_paid' => 'boolean',
             'paid_at' => 'datetime',
             'arrived_at' => 'datetime',
+            'meta_data' => AsArrayObject::class,
         ];
     }
 
