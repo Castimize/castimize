@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class ValidateWcWebhookSignature
@@ -15,6 +16,7 @@ class ValidateWcWebhookSignature
      */
     public function handle(Request $request, Closure $next): Response
     {
+        Log::info(print_r($request->all(), true));
         $signature = $request->header('X-WP-Webhook-Signature');
         if (empty($signature)) {
             return response(['Invalid key'], 401);
