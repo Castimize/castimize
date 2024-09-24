@@ -42,7 +42,6 @@ Route::group([
 
 Route::group([
     'prefix' => 'v1',
-    'as' => 'api.',
     'namespace' => 'App\Http\Controllers\Api\V1',
 ], function () {
     Route::middleware(ValidateWcWebhookSignature::class)
