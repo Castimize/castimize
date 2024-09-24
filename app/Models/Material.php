@@ -53,8 +53,8 @@ class Material extends Model
         'maximum_z_length',
         'minimum_volume',
         'maximum_volume',
-        'material_min_bounding_box',
-        'material_max_bounding_box',
+        'minimum_box_volume',
+        'maximum_box_volume',
     ];
 
     /**

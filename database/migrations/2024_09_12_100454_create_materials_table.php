@@ -39,8 +39,8 @@ return new class extends Migration
             $table->float('maximum_z_length')->nullable();
             $table->float('minimum_volume')->nullable();
             $table->float('maximum_volume')->nullable();
-            $table->float('material_min_bounding_box')->nullable();
-            $table->float('material_max_bounding_box')->nullable();
+            $table->float('minimum_box_volume')->nullable();
+            $table->float('maximum_box_volume')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

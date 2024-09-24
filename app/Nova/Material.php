@@ -138,11 +138,11 @@ class Material extends Resource
                 ->hideByDefault()
                 ->step(0.01),
 
-            Number::make(__('Material min bounding box'), 'material_min_bounding_box')
+            Number::make(__('Minimum box volume'), 'minimum_box_volume')
                 ->hideByDefault()
                 ->step(0.01),
 
-            Number::make(__('Material max bounding box'), 'material_max_bounding_box')
+            Number::make(__('Maximum box volume'), 'maximum_box_volume')
                 ->hideByDefault()
                 ->step(0.01),
 
