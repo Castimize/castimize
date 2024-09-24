@@ -74,6 +74,7 @@ class OrdersService
             'updated_at' => Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_modified_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE')),
         ]);
 
+        $biggestCustomerLeadTime = null;
         foreach ($request->line_items as $lineItem) {
             $name = null;
             $fileName = null;
@@ -84,7 +85,7 @@ class OrdersService
             $modelYLength = null;
             $modelZLength = null;
             $surfaceArea = null;
-            $customerLeadTime = 1;
+            $customerLeadTime = null;
             foreach ($lineItem['meta_data'] as $metaData) {
                 if ($metaData['key'] === 'pa_p3d_filename') {
                     $name = $metaData['value'];
@@ -95,6 +96,10 @@ class OrdersService
                 if ($metaData['key'] === 'pa_p3d_material') {
                     [$materialId, $materialName] = explode('. ', $metaData['value']);
                     $material = Material::where('wp_id', $materialId)->first();
+                    $customerLeadTime = $material->customer_lead_time;
+                    if ($biggestCustomerLeadTime === null || $material->customer_lead_time > $biggestCustomerLeadTime) {
+                        $biggestCustomerLeadTime = $material->customer_lead_time;
+                    }
                 }
                 if ($metaData['key'] === '_p3d_stats_material_volume') {
                     $modelVolumeCc = $metaData['value'];
@@ -145,9 +150,11 @@ class OrdersService
                 'total' => $lineItem['total'],
                 'total_tax' => $lineItem['total_tax'],
                 'currency_code' => $request->currency ?? 'EUR',
-                'customer_lead_time' => $material->customer_lead_time,
+                'customer_lead_time' => $customerLeadTime,
             ]);
         }
+        $order->order_customer_lead_time = $biggestCustomerLeadTime;
+        $order->save();
 
         return $order;
     }
