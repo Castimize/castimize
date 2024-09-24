@@ -71,6 +71,7 @@ class OrderResource extends JsonResource
             'paid_at' => $this->paid_at,
             'order_customer_lead_time' => $this->order_customer_lead_time,
             'arrived_at' => $this->arrived_at,
+            'meta_data' => $this->meta_data,
             'line_items' => [],
         ];
     }

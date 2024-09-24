@@ -58,6 +58,7 @@ class OrdersApiController extends ApiController
      */
     public function storeOrderWp(Request $request)
     {
+        Log::info(print_r($request->all(), true));
         $order = (new OrdersService())->storeOrderWpFromApi($request);
 
         return (new OrderResource($order))
