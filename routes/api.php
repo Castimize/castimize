@@ -40,6 +40,9 @@ Route::group([
 
     // Models
     Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
+
+    Route::middleware([ValidateWcWebhookSignature::class])
+        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
 });
 
 Route::group([
@@ -50,6 +53,6 @@ Route::group([
     Route::get('orders/{order}', 'OrdersApiController@show')->name('api.orders.show');
     Route::middleware([ValidateWcWebhookSignature::class])
         ->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
-    Route::middleware([ValidateWcWebhookSignature::class])
-        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
+//    Route::middleware([ValidateWcWebhookSignature::class])
+//        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
 });
