@@ -4,6 +4,7 @@ namespace App\Nova;
 
 use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
+use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\HasMany;
@@ -14,11 +15,10 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
-use Nsavinov\NovaPercentField\Percent;
 
 class Material extends Resource
 {
-    use CommonMetaDataTrait;
+    use ColumnTogglerTrait, CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -91,81 +91,92 @@ class Material extends Resource
             \Laravel\Nova\Fields\Currency::make(__('Fast delivery fee'), 'fast_delivery_fee')
                 ->min(0)
                 ->step(0.01)
+                ->locale(config('app.format_locale'))
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
                 )
-                ->displayUsing(function ($value) {
-                    if ($value !== null) {
-                        return currencyFormatter($value, $this->currency_code);
-                    }
-                    return $value;
-                })
                 ->sortable(),
 
             Text::make(__('HS code'), 'hs_code')
                 ->sortable(),
 
             Textarea::make(__('HS code description'), 'hs_code_description')
-                ->hideFromIndex(),
+                ->hideByDefault(),
 
             Number::make(__('Minimum x length'), 'minimum_x_length')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Maximum x length'), 'maximum_x_length')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Minimum y length'), 'minimum_y_length')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Maximum y length'), 'maximum_y_length')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Minimum z length'), 'minimum_z_length')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Maximum z length'), 'maximum_z_length')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Minimum volume'), 'minimum_volume')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Maximum volume'), 'maximum_volume')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Material min bounding box'), 'material_min_bounding_box')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Material max bounding box'), 'material_max_bounding_box')
-                ->hideFromIndex()
+                ->hideByDefault()
                 ->step(0.01),
 
-            Percent::make(__('Discount'), 'discount')
+            Number::make(__('Discount'), 'discount')
                 ->sizeOnDetail('w-1/4')
-                ->hideFromIndex(),
+                ->hideByDefault()
+                ->step(0.01)
+                ->displayUsing(function ($value) {
+                    return $value . '%';
+                }),
 
-            Percent::make(__('Bulk discount 10'), 'bulk_discount_10')
+            Number::make(__('Bulk discount 10'), 'bulk_discount_10')
                 ->sizeOnDetail('w-1/4')
-                ->hideFromIndex(),
+                ->hideByDefault()
+                ->step(0.01)
+                ->displayUsing(function ($value) {
+                    return $value . '%';
+                }),
 
-            Percent::make(__('Bulk discount 25'), 'bulk_discount_25')
+            Number::make(__('Bulk discount 25'), 'bulk_discount_25')
                 ->sizeOnDetail('w-1/4')
-                ->hideFromIndex(),
+                ->hideByDefault()
+                ->step(0.01)
+                ->displayUsing(function ($value) {
+                    return $value . '%';
+                }),
 
-            Percent::make(__('Bulk discount 50'), 'bulk_discount_50')
+            Number::make(__('Bulk discount 50'), 'bulk_discount_50')
                 ->sizeOnDetail('w-1/4')
-                ->hideFromIndex(),
+                ->hideByDefault()
+                ->step(0.01)
+                ->displayUsing(function ($value) {
+                    return $value . '%';
+                }),
 
             HasMany::make(__('Prices'), 'prices'),
 

@@ -21,7 +21,7 @@ class ComplaintReason extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'reason',
     ];
 
     /**

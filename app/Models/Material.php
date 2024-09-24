@@ -83,6 +83,50 @@ class Material extends Model
     }
 
     /**
+     * Interact with discount
+     */
+    protected function discount(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value * 100,
+            set: fn ($value) => $value / 100,
+        );
+    }
+
+    /**
+     * Interact with bulk_discount_10
+     */
+    protected function bulkDiscount10(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value * 100,
+            set: fn ($value) => $value / 100,
+        );
+    }
+
+    /**
+     * Interact with bulk_discount_25
+     */
+    protected function bulkDiscount25(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value * 100,
+            set: fn ($value) => $value / 100,
+        );
+    }
+
+    /**
+     * Interact with bulk_discount_50
+     */
+    protected function bulkDiscount50(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value * 100,
+            set: fn ($value) => $value / 100,
+        );
+    }
+
+    /**
      * @return BelongsTo
      */
     public function materialGroup(): BelongsTo

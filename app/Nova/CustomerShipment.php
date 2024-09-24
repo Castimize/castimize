@@ -3,7 +3,6 @@
 namespace App\Nova;
 
 use App\Traits\Nova\CommonMetaDataTrait;
-use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
 

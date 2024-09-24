@@ -4,7 +4,6 @@ namespace App\Nova;
 
 use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
-use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -25,7 +24,7 @@ class ComplaintReason extends Resource
      *
      * @var string
      */
-    public static $title = 'name';
+    public static $title = 'reason';
 
     /**
      * The columns that should be searched.
@@ -34,7 +33,7 @@ class ComplaintReason extends Resource
      */
     public static $search = [
         'id',
-        'name',
+        'reason',
     ];
 
     /**
@@ -57,7 +56,7 @@ class ComplaintReason extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make(__('Reason'), 'name')
+            Text::make(__('Reason'), 'reason')
                 ->sortable(),
         ];
     }
