@@ -131,20 +131,16 @@ class Material extends Resource
                 ->step(0.01),
 
             Number::make(__('Minimum volume'), 'minimum_volume')
-                ->hideByDefault()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Maximum volume'), 'maximum_volume')
-                ->hideByDefault()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Minimum box volume'), 'minimum_box_volume')
-                ->hideByDefault()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Maximum box volume'), 'maximum_box_volume')
-                ->hideByDefault()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Discount'), 'discount')
                 ->sizeOnDetail('w-1/4')
