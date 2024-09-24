@@ -16,8 +16,7 @@ class ValidateWcWebhookSignature
      */
     public function handle(Request $request, Closure $next): Response
     {
-        Log::info(print_r($request->all(), true));
-        $signature = $request->header('X-WP-Webhook-Signature');
+        $signature = $request->header('x-wp-webhook-signature');
         if (empty($signature)) {
             return response(['Invalid key'], 401);
         }
