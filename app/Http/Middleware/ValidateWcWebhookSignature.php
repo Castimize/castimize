@@ -16,8 +16,8 @@ class ValidateWcWebhookSignature
      */
     public function handle(Request $request, Closure $next): Response
     {
-//        Log::info($request->header());
-//        Log::info(print_r($request->all(), true));
+        Log::info($request->header());
+        Log::info(print_r($request->all(), true));
 //        $signature = $request->header('x-wc-webhook-signature');
 //        if (empty($signature)) {
 //            return response(['Invalid key'], 401);
