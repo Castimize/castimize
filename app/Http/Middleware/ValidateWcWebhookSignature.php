@@ -15,7 +15,7 @@ class ValidateWcWebhookSignature
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $signature = $request->header('X-WC-Webhook-Signature');
+        $signature = $request->header('X-WP-Webhook-Signature');
         if (empty($signature)) {
             return response(['Invalid key'], 401);
         }
@@ -26,6 +26,8 @@ class ValidateWcWebhookSignature
         if ($signature != $calculated_hmac) {
             return response(['Invalid key'], 401);
         }
+
+
 
         return $next($request);
     }
