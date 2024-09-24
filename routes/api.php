@@ -28,11 +28,9 @@ Route::group([
     Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');
     Route::get('orders/{order}', 'OrdersApiController@show')->name('api.orders.show');
     Route::middleware(ValidateWcWebhookSignature::class)
-        ->withoutMiddleware(['auth:sanctum', AuthGates::class])
         ->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
-    Route::middleware(ValidateWcWebhookSignature::class)
-        ->withoutMiddleware(['auth:sanctum', AuthGates::class])
-        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
+//    Route::middleware(ValidateWcWebhookSignature::class)
+//        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
     Route::post('orders/wp/stripe-callback', 'OrdersApiController@orderPaidCallback')->name('api.orders.wp.stripe-callback');
 
     // Prices
@@ -40,19 +38,4 @@ Route::group([
 
     // Models
     Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
-
-    Route::middleware([ValidateWcWebhookSignature::class])
-        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
-});
-
-Route::group([
-    'prefix' => 'v1',
-    'as' => 'api.',
-    'namespace' => 'App\Http\Controllers\Api\V1',
-], function () {
-    Route::get('orders/{order}', 'OrdersApiController@show')->name('api.orders.show');
-    Route::middleware([ValidateWcWebhookSignature::class])
-        ->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
-//    Route::middleware([ValidateWcWebhookSignature::class])
-//        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
 });
