@@ -41,3 +41,15 @@ Route::group([
     // Models
     Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
 });
+
+Route::group([
+    'prefix' => 'v1',
+    'as' => 'api.',
+    'namespace' => 'App\Http\Controllers\Api\V1',
+], function () {
+    Route::get('orders/{order}', 'OrdersApiController@show')->name('api.orders.show');
+    Route::middleware([ValidateWcWebhookSignature::class])
+        ->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
+    Route::middleware([ValidateWcWebhookSignature::class])
+        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
+});
