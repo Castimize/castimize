@@ -45,12 +45,20 @@ class OrdersApiController extends ApiController
         return new OrderResource($order);
     }
 
+    public function testIncomingOrder()
+    {
+        $payload = @file_get_contents('php://input');
+        $payload = json_decode( $payload, true);
+        Log::info(json_encode( $payload));
+        return response()->json([ 'data' => $payload, 'status' => Response::HTTP_OK]);
+    }
+
     /**
      * @param StoreOrderRequest $request
      */
     public function storeOrderWp(StoreOrderRequest $request)
     {
-        Log::info(print_r($request->all(), true));
+        Log::info($request->all());
 //        $order = (new OrdersService())->storeOrderFromApi($request);
 //
 //        return (new OrderResource($order))
@@ -60,6 +68,6 @@ class OrdersApiController extends ApiController
 
     public function orderPaidCallback(Request $request)
     {
-        Log::info(print_r($request->all(), true));
+        Log::info($request->all());
     }
 }
