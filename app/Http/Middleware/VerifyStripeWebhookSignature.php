@@ -4,12 +4,13 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\WebhookSignature;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-class VerifyWebhookSignature
+class VerifyStripeWebhookSignature
 {
     /**
      * Handle an incoming request.
@@ -18,6 +19,8 @@ class VerifyWebhookSignature
      */
     public function handle(Request $request, Closure $next): Response
     {
+        Log::info($request->header());
+        Log::info($request->getContent());
         try {
             WebhookSignature::verifyHeader(
                 $request->getContent(),

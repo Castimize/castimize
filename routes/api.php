@@ -44,5 +44,5 @@ Route::group([
         ->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
     //    Route::middleware([ValidateWcWebhookSignature::class])
 //        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
-    Route::post('orders/wp/stripe-callback', 'OrdersApiController@orderPaidCallback')->name('api.orders.wp.stripe-callback');
+//    Route::post('orders/wp/stripe-callback', 'OrdersApiController@orderPaidCallback')->name('api.orders.wp.stripe-callback');
 });

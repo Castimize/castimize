@@ -1,12 +1,15 @@
 <?php
 
-use App\Http\Middleware\VerifyWebhookSignature;
+use App\Http\Middleware\VerifyStripeWebhookSignature;
 use Illuminate\Support\Facades\Route;
 
 //Route::get('/', function () {
     //return view('welcome');
 //});
 
-
-Route::post('/payment/providers/stripe/callback', 'App\Http\Controllers\Webhooks\StripeWebhookController@handleWebhook')
-    ->withoutMiddleware(VerifyWebhookSignature::class);
+Route::group([
+    'namespace' => 'App\Http\Controllers',
+], function () {
+    Route::post('/payment/providers/stripe/callback', 'Webhooks\StripeWebhookController@handleWebhook')
+        ->middleware(VerifyStripeWebhookSignature::class);
+});
