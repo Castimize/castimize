@@ -25,10 +25,10 @@ class CalculatePricesService
 
         if (
             $request->x_dim < $material->minimum_x_length ||
-            $request->y_dim < $material->minimum_y_length ||
-            $request->z_dim < $material->minimum_z_length ||
             $request->x_dim > $material->maximum_x_length ||
+            $request->y_dim < $material->minimum_y_length ||
             $request->y_dim > $material->maximum_y_length ||
+            $request->z_dim < $material->minimum_z_length ||
             $request->z_dim > $material->maximum_z_length ||
             $request->material_volume < $material->minimum_volume ||
             $request->material_volume > $material->maximum_volume ||

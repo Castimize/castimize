@@ -55,7 +55,6 @@ class Order extends Model
         'shipping_postal_code',
         'shipping_city',
         'shipping_country',
-        'order_product_value',
         'service_id',
         'service_fee',
         'service_fee_tax',
