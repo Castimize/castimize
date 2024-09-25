@@ -72,7 +72,7 @@ class Material extends Resource
 
             BelongsTo::make(__('Material group'), 'materialGroup', MaterialGroup::class),
 
-            Number::make(__('Customer lead time'), 'customer_lead_time')
+            Number::make(__('Dc lead time'), 'dc_lead_time')
                 ->min(0)
                 ->step(1)
                 ->sortable(),

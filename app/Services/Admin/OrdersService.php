@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Material;
@@ -19,6 +20,10 @@ class OrdersService
      */
     public function storeOrderWpFromApi($request): Order
     {
+        $country = Country::where('alpha2', strtolower($request->billing['country']))->first();
+        if ($country === null) {
+            $country = Country::where('alpha2', 'nl')->first();
+        }
         $customer = Customer::where('wp_id', $request->customer_id)->first();
         $currency = Currency::where('code', $request->currency)->first();
 
@@ -96,9 +101,9 @@ class OrdersService
                 if ($metaData['key'] === 'pa_p3d_material') {
                     [$materialId, $materialName] = explode('. ', $metaData['value']);
                     $material = Material::where('wp_id', $materialId)->first();
-                    $customerLeadTime = $material->customer_lead_time;
-                    if ($biggestCustomerLeadTime === null || $material->customer_lead_time > $biggestCustomerLeadTime) {
-                        $biggestCustomerLeadTime = $material->customer_lead_time;
+                    $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
+                    if ($biggestCustomerLeadTime === null || $customerLeadTime > $biggestCustomerLeadTime) {
+                        $biggestCustomerLeadTime = $customerLeadTime;
                     }
                 }
                 if ($metaData['key'] === '_p3d_stats_material_volume') {

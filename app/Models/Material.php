@@ -35,7 +35,7 @@ class Material extends Model
         'bulk_discount_10',
         'bulk_discount_25',
         'bulk_discount_50',
-        'customer_lead_time',
+        'dc_lead_time',
         'fast_delivery_lead_time',
         'fast_delivery_fee',
         'currency_code',

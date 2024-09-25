@@ -21,7 +21,7 @@ return new class extends Migration
             $table->float('bulk_discount_10')->nullable();
             $table->float('bulk_discount_25')->nullable();
             $table->float('bulk_discount_50')->nullable();
-            $table->integer('customer_lead_time')->nullable();
+            $table->integer('dc_lead_time')->nullable();
             $table->integer('fast_delivery_lead_time')->nullable();
             $table->float('fast_delivery_fee')->nullable();
             $table->string('currency_code')->nullable();
