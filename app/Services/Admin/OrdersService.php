@@ -173,8 +173,8 @@ class OrdersService
                 'currency_code' => $request->currency ?? 'EUR',
                 'customer_lead_time' => $customerLeadTime,
                 'meta_data' => $lineItem['meta_data'],
-                'created_by' => $customer?->user_id ?? $systemUser->id,
-                'updated_by' => $customer?->user_id ?? $systemUser->id,
+                'created_by' => $systemUser->id,
+                'updated_by' => $systemUser->id,
             ]);
         }
         $order->order_customer_lead_time = $biggestCustomerLeadTime;
