@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -44,6 +45,7 @@ class Upload extends Model
         'total_tax',
         'currency_code',
         'customer_lead_time',
+        'meta_data',
     ];
 
     /**
@@ -57,6 +59,7 @@ class Upload extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'meta_data' => AsArrayObject::class,
         ];
     }
 

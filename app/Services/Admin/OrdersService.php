@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Model;
 use App\Models\Order;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,6 +21,7 @@ class OrdersService
      */
     public function storeOrderWpFromApi($request): Order
     {
+        $systemUser = User::find(1);
         $country = Country::where('alpha2', strtolower($request->billing['country']))->first();
         if ($country === null) {
             $country = Country::where('alpha2', 'nl')->first();
@@ -34,6 +36,7 @@ class OrdersService
             'wp_id' => $request->wid,
             'customer_id' => $customer?->id,
             'currency_id' => $currency?->id,
+            'country_id' => $country->id,
             'order_number' => $request->number,
             'first_name' => $request->billing['first_name'],
             'last_name' => $request->billing['last_name'],
@@ -75,7 +78,9 @@ class OrdersService
             'meta_data' => $request->meta_data,
             'comments' => $request->customer_note,
             'promo_code' => null,
+            'created_by' => $customer?->user_id ?? $systemUser->id,
             'created_at' => Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_created_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE')),
+            'updated_by' => $customer?->user_id ?? $systemUser->id,
             'updated_at' => Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_modified_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE')),
         ]);
 
@@ -86,9 +91,9 @@ class OrdersService
             $material = null;
             $modelVolumeCc = null;
             $modelBoxVolume = null;
-            $modelXLength = null;
-            $modelYLength = null;
-            $modelZLength = null;
+            $modelXLength = 0.01;
+            $modelYLength = 0.01;
+            $modelZLength = 0.01;
             $surfaceArea = null;
             $customerLeadTime = null;
             foreach ($lineItem['meta_data'] as $metaData) {
@@ -131,8 +136,12 @@ class OrdersService
                 $modelYLength = $model->model_y_length;
                 $modelZLength = $model->model_z_length;
 
-                $model->customer_id = $customer?->id;
-                $model->save();
+                if ($customer) {
+                    $model->customer_id = $customer?->id;
+                    $model->save();
+                } else {
+                    $model->delete();
+                }
             }
 
             $order->uploads()->create([
@@ -156,6 +165,9 @@ class OrdersService
                 'total_tax' => $lineItem['total_tax'],
                 'currency_code' => $request->currency ?? 'EUR',
                 'customer_lead_time' => $customerLeadTime,
+                'meta_data' => $lineItem['meta_data'],
+                'created_by' => $customer?->user_id ?? $systemUser->id,
+                'updated_by' => $customer?->user_id ?? $systemUser->id,
             ]);
         }
         $order->order_customer_lead_time = $biggestCustomerLeadTime;

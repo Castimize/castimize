@@ -9,7 +9,9 @@ use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Services\Admin\CustomersService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class CustomersApiController extends ApiController
@@ -39,25 +41,27 @@ class CustomersApiController extends ApiController
     }
 
     /**
-     * @param StoreCustomerRequest $request
+     * @param Request $request
      * @return JsonResponse
      */
-    public function storeCustomerWp(StoreCustomerRequest $request): JsonResponse
+    public function storeCustomerWp(Request $request): JsonResponse
     {
-        $customer = (new CustomersService())->storeCustomerFromApi($request);
-
-        return (new CustomerResource($customer))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
+        Log::info(print_r($request->all(), true));
+        return response()->json($request->all());
+//        $customer = (new CustomersService())->storeCustomerFromApi($request);
+//
+//        return (new CustomerResource($customer))
+//            ->response()
+//            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**
-     * @param DeleteCustomerRequest $request
+     * @param Request $request
      * @return Response
      */
-    public function deleteCustomerWp(DeleteCustomerRequest $request): Response
+    public function deleteCustomerWp(Request $request): Response
     {
-        $customer = Customer::where('wp_id', $request->wp_id)->first();
+        $customer = Customer::where('wp_id', $request->id)->first();
         if ($customer === null) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
