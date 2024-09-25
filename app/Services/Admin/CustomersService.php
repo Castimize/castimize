@@ -51,7 +51,7 @@ class CustomersService
 
         $billingAddress = $this->createAddress($request->billing);
 
-        if ($request->shipping['address_1'] !== $billingAddress->address_line1) {
+        if ($request->shipping['address_1'] !== $request->billing['address_1']) {
             $shippingAddress = $this->createAddress($request->shipping);
 
             $pivotData = [
