@@ -35,8 +35,7 @@ Route::group([
         Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
     });
 
-    Route::middleware(ValidateWcWebhookSignature::class)
-        ->post('customers/wp', 'CustomersApiController@storeCustomerWp')->name('api.customers.store-customer-wp');
+    Route::post('customers/wp', 'CustomersApiController@storeCustomerWp')->name('api.customers.store-customer-wp');
     Route::middleware(ValidateWcWebhookSignature::class)
         ->post('customers/wp/update', 'CustomersApiController@updateCustomerWp')->name('api.customers.update-customer-wp');
     Route::middleware(ValidateWcWebhookSignature::class)
