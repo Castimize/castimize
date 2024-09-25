@@ -43,7 +43,7 @@ class CustomersService
 
         $customer = Customer::create([
             'country_id' => $country->id,
-            'wp_id' => $request->id,
+            'wp_id' => $request->customer_id,
             'first_name' => $request->first_name ?? $request->billing['first_name'],
             'last_name' => $request->last_name ?? $request->billing['last_name'],
             'email' => $request->email ?? $request->billing['email'],
