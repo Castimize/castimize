@@ -18,15 +18,16 @@ class ValidateWcWebhookSignature
     {
         Log::info($request->header());
         Log::info(print_r($request->all(), true));
-        $signature = $request->header('x-wc-webhook-signature');
-        if (empty($signature)) {
+        $signatureWc = $request->header('x-wc-webhook-signature');
+        $signatureWp = $request->header('x-wp-webhook-signature');
+        if (empty($signatureWc) && empty($signatureWp)) {
             return response(['Invalid key'], 401);
         }
 
         $payload = $request->getContent();
         $calculated_hmac = base64_encode(hash_hmac('sha256', $payload, env('WOOCOMMERCE_KEY'), true));
 
-        if ($signature != $calculated_hmac) {
+        if ($signatureWc != $calculated_hmac && $signatureWp != $calculated_hmac) {
             Log::info('Invalid payload');
             return response(['Invalid payload'], 401);
         }
