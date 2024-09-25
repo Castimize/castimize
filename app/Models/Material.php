@@ -68,6 +68,16 @@ class Material extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'minimum_x_length' => 'float',
+            'maximum_x_length' => 'float',
+            'minimum_y_length' => 'float',
+            'maximum_y_length' => 'float',
+            'minimum_z_length' => 'float',
+            'maximum_z_length' => 'float',
+            'minimum_volume' => 'float',
+            'maximum_volume' => 'float',
+            'minimum_box_volume' => 'float',
+            'maximum_box_volume' => 'float',
         ];
     }
 
