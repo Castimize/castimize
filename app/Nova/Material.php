@@ -107,28 +107,22 @@ class Material extends Resource
                 ->hideByDefault(),
 
             Number::make(__('Minimum x length'), 'minimum_x_length')
-                ->hideByDefault()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Maximum x length'), 'maximum_x_length')
-                ->hideByDefault()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Minimum y length'), 'minimum_y_length')
-                ->hideByDefault()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Maximum y length'), 'maximum_y_length')
-                ->hideByDefault()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Minimum z length'), 'minimum_z_length')
-                ->hideByDefault()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Maximum z length'), 'maximum_z_length')
-                ->hideByDefault()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Minimum volume'), 'minimum_volume')
                 ->hideByDefault(),
