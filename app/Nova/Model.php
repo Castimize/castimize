@@ -79,22 +79,22 @@ class Model extends Resource
             BelongsTo::make(__('Material'), 'material')
                 ->sortable(),
 
-            Number::make(__('Model volume cc'), 'model_volume_cc')
+            Text::make(__('Model volume cc'), 'model_volume_cc')
                 ->hideByDefault(),
 
-            Number::make(__('Model x length'), 'model_x_length')
+            Text::make(__('Model x length'), 'model_x_length')
                 ->hideByDefault(),
 
-            Number::make(__('Model y length'), 'model_y_length')
+            Text::make(__('Model y length'), 'model_y_length')
                 ->hideByDefault(),
 
-            Number::make(__('Model z length'), 'model_z_length')
+            Text::make(__('Model z length'), 'model_z_length')
                 ->hideByDefault(),
 
-            Number::make(__('Model surface area cm2'), 'model_surface_area_cm2')
+            Text::make(__('Model surface area cm2'), 'model_surface_area_cm2')
                 ->hideByDefault(),
 
-            Number::make(__('Model box volume'), 'model_box_volume')
+            Text::make(__('Model box volume'), 'model_box_volume')
                 ->hideByDefault(),
 
             Number::make(__('Model parts'), 'model_parts')

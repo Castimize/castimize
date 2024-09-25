@@ -33,7 +33,7 @@ class PricesApiController extends ApiController
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        if ($request->has('file_name', 'original_file_name', 'thumb')) {
+        if ($request->has('file_name', 'original_file_name') && $request->get('file_name') !== null && $request->get('original_file_name') !== null) {
             (new ModelsService())->storeModelFromApi($request);
         }
 
