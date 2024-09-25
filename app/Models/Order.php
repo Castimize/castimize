@@ -34,6 +34,7 @@ class Order extends Model
         'currency_id',
         'wp_id',
         'order_number',
+        'order_key',
         'first_name',
         'last_name',
         'email',

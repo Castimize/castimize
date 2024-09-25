@@ -39,12 +39,20 @@ class OrdersService
         preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->billing['address_1'], $matchBilling);
         preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->shipping['address_1'], $matchShipping);
 
+        $stripePaymentId = null;
+        foreach ($request->meta_data as $orderMetaData) {
+            if ($orderMetaData['key'] === '_stripe_intent_id') {
+                $stripePaymentId = $orderMetaData['value'];
+            }
+        }
+
         $order = Order::create([
             'wp_id' => $request->wid,
             'customer_id' => $customer?->id,
             'currency_id' => $currency?->id,
             'country_id' => $country->id,
             'order_number' => $request->number,
+            'order_key' => $request->order_key,
             'first_name' => $request->billing['first_name'],
             'last_name' => $request->billing['last_name'],
             'email' => $request->billing['email'],
@@ -80,6 +88,7 @@ class OrdersService
             'currency_code' => $request->currency ?? 'EUR',
             'payment_method' => $request->payment_method_title,
             'payment_issuer' => $request->payment_method,
+            'payment_intent_id' => $stripePaymentId,
             'customer_ip_address' => $request->customer_ip_address,
             'customer_user_agent' => $request->customer_user_agent,
             'meta_data' => $request->meta_data,

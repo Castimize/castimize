@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Webhooks;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use JsonException;
+use Stripe\Event;
+use Stripe\PaymentIntent;
 use Symfony\Component\HttpFoundation\Response;
+use UnexpectedValueException;
 
 class StripeWebhookController extends Controller
 {
@@ -22,47 +27,51 @@ class StripeWebhookController extends Controller
      *
      * @param Request $request
      * @return Response
-     * @throws InvalidChannelException
+     * @throws JsonException
      */
     public function handleWebhook(Request $request): Response
     {
-        $payload = json_decode($request->getContent());
+        try {
+            $event = Event::constructFrom(
+                json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)
+            );
+        } catch(UnexpectedValueException $e) {
+            // Invalid payload
+            return $this->invalidMethod();
+        }
 
-//        $handledEvent = $this->getHandledEvent($payload->id);
-//        if ($handledEvent !== null && $handledEvent->state === HandledEvent::STATE_SUCCEEDED) {
-//            return $this->successMethod();
-//        }
-//
-//        $method = 'handle' . Str::studly(str_replace('.', '_', $payload->type));
-//
-//        if (method_exists($this, $method)) {
-//            if ($handledEvent !== null) {
-//                $handledEvent->state = HandledEvent::STATE_SUCCEEDED;
-//                $this->saveHandledEvent($handledEvent);
-//            } else {
-//                $this->storeHandledEvent(
-//                    $payload->id,
-//                    $payload->type,
-//                    Carbon::createFromTimestamp($payload->created),
-//                    HandledEvent::STATE_SUCCEEDED
-//                );
-//            }
-//            return $this->{$method}($payload);
-//        }
+// Handle the event
+        switch ($event->type) {
+            case 'payment_intent.succeeded':
+                /**
+                 * @var $paymentIntent PaymentIntent
+                 */
+                $paymentIntent = $event->data->object; // contains a \Stripe\PaymentIntent
+                // Then define and call a method to handle the successful payment intent.
+                $this->handlePaymentIntentSucceeded($paymentIntent);
+                break;
+            default:
+                echo 'Received unknown event type ' . $event->type;
+        }
 
         return $this->missingMethod();
     }
 
     /**
-     * @param $payload
+     * @param PaymentIntent $paymentIntent
      * @return Response
      */
-    protected function handlePaymentIntentSucceeded($payload): Response
+    protected function handlePaymentIntentSucceeded(PaymentIntent $paymentIntent): Response
     {
-        $intent = $payload->data->object;
-        $orderId = $intent->charges->data[0]->metadata->order_id;
-        $identifier = $intent->charges->data[0]->metadata->identifier ?? '';
-        //event(new OrderPaymentSucceeded($orderId, $identifier, $payload));
+        $order = Order::where('order_number', $paymentIntent->metadata->order_id)->first();
+        if ($order !== null) {
+            $order->is_paid = true;
+            $order->paid_at = Carbon::createFromTimestamp($paymentIntent->created);
+            $order->save();
+            return $this->successMethod();
+        }
+
+        Log::info('Order not found, payment intent' . print_r($paymentIntent->toArray(), true));
         return $this->successMethod();
     }
 
@@ -75,46 +84,6 @@ class StripeWebhookController extends Controller
         $intent = $payload->data->object;
         $orderId = $intent->charges->data[0]->metadata->order_id;
         //event(new OrderPaymentCanceled($orderId, $payload));
-        return $this->successMethod();
-    }
-
-    /**
-     * @param $payload
-     * @return Response
-     * @throws InvalidChannelException
-     */
-    protected function handlePaymentIntentPaymentFailed($payload): Response
-    {
-        $intent = $payload->data->object;
-        $errorMessage = $intent->last_payment_error->message ?? '';
-        //Notifier::notify($errorMessage, Notifier::JOBS_CHANNEL);
-//        event(new StripeOrderPaymentCanceled($orderId));
-        return $this->successMethod();
-    }
-
-    /**
-     * @param $payload
-     * @return Response
-     */
-    protected function handleBalanceAvailable($payload): Response
-    {
-        $balance = $payload->data->object;
-        //CreateStripeTransferFromSupplierTransaction::dispatch($balance, $payload)->onQueue('jobs');
-        return $this->successMethod();
-    }
-
-    ////////// Handle Connect webhook endpoints /////////////
-
-    /**
-     * @param $payload
-     * @return Response
-     */
-    protected function handleConnectBalanceAvailable($payload): Response
-    {
-//        $balance = $payload->data->object;
-//        $account = $payload->account;
-//        CreateStripePayoutFromSupplierTransaction::dispatch($balance, $account)->onQueue('jobs');
-
         return $this->successMethod();
     }
 
@@ -138,5 +107,16 @@ class StripeWebhookController extends Controller
     protected function missingMethod(array $parameters = []): Response
     {
         return new Response;
+    }
+
+    /**
+     * Handle calls to invalid payload on the controller.
+     *
+     * @param array $parameters
+     * @return Response
+     */
+    protected function invalidMethod(): Response
+    {
+        return new Response('', Response::HTTP_BAD_REQUEST);
     }
 }
