@@ -4,6 +4,7 @@ namespace App\Nova;
 
 use App\Nova\Filters\ShowDeleted;
 use App\Traits\Nova\CommonMetaDataTrait;
+use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\File;
 use Laravel\Nova\Fields\ID;
@@ -14,7 +15,7 @@ use Laravel\Nova\Panel;
 
 class Model extends Resource
 {
-    use CommonMetaDataTrait;
+    use ColumnTogglerTrait, CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -79,34 +80,28 @@ class Model extends Resource
                 ->sortable(),
 
             Number::make(__('Model volume cc'), 'model_volume_cc')
-                ->hideFromIndex()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Model x length'), 'model_x_length')
-                ->hideFromIndex()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Model y length'), 'model_y_length')
-                ->hideFromIndex()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Model z length'), 'model_z_length')
-                ->hideFromIndex()
-                ->step(0.01),
+                ->hideByDefault(),
 
             Number::make(__('Model surface area cm2'), 'model_surface_area_cm2')
-                ->hideFromIndex()
-                ->step(0.01),
+                ->hideByDefault(),
+
+            Number::make(__('Model box volume'), 'model_box_volume')
+                ->hideByDefault(),
 
             Number::make(__('Model parts'), 'model_parts')
-                ->hideFromIndex(function () use ($request) {
+                ->hideByDefault(function () use ($request) {
                     return ($request->viaResource === 'customer');
                 })
                 ->step(1),
-
-            Number::make(__('Model box volume'), 'model_box_volume')
-                ->hideFromIndex()
-                ->step(0.01),
 
             new Panel(__('History'), $this->commonMetaData(true, true, false, false)),
         ];
