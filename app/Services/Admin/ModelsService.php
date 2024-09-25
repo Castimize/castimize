@@ -15,7 +15,6 @@ class ModelsService
      */
     public function storeModelFromApi($request): Model|null
     {
-        $model = null;
         $material = Material::where('wp_id', $request->wp_id)->first();
         $fileName = env('APP_SITE_STL_UPLOAD_DIR') . $request->file_name;
 

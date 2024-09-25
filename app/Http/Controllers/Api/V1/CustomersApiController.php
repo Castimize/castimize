@@ -47,6 +47,21 @@ class CustomersApiController extends ApiController
     public function storeCustomerWp(Request $request): JsonResponse
     {
         Log::info(print_r($request->all(), true));
+//        return response()->json($request->all());
+        $customer = (new CustomersService())->storeCustomerFromApi($request);
+
+        return (new CustomerResource($customer))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function updateCustomerWp(Request $request): JsonResponse
+    {
+        Log::info(print_r($request->all(), true));
         return response()->json($request->all());
 //        $customer = (new CustomersService())->storeCustomerFromApi($request);
 //

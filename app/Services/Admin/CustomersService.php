@@ -19,17 +19,19 @@ class CustomersService
      */
     public function storeCustomerFromApi($request): Customer
     {
-        $user = User::where('username', $request->username)->first();
-        $user->first_name = $request->first_name;
-        $user->last__name = $request->last_name;
-        $user->save();
-        $country = Country::where('alpha2', $request->billing['country'])->first();
-        $countryShipping = Country::where('alpha2', $request->shipping['country'])->first();
+//        $user = User::where('username', $request->username)->first();
+//        $user->first_name = $request->first_name;
+//        $user->last__name = $request->last_name;
+//        $user->save();
+        $country = Country::where('alpha2', strtolower($request->billing['country']))->first();
+        $countryShipping = Country::where('alpha2', strtolower($request->shipping['country']))->first();
+        if ($country === null) {
+            $country = Country::where('alpha2', 'nl')->first();
+        }
 
         $customer = Customer::create([
-            'user_id' => $user?->id,
-            'country_id' => $country?->id,
-            'wp_id' => $request->wp_id,
+            'country_id' => $country->id,
+            'wp_id' => $request->id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
