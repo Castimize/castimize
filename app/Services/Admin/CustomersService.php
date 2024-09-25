@@ -152,6 +152,8 @@ class CustomersService
             );
         }
 
+        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $input['address_1'], $match);
+
         $address = Address::where('postal_code', $input['postcode'])->where('house_number', $match[2] ?? '-')->first();
         if ($address === null) {
             $address = Address::create([
