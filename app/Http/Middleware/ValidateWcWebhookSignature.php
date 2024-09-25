@@ -27,6 +27,7 @@ class ValidateWcWebhookSignature
         $calculated_hmac = base64_encode(hash_hmac('sha256', $payload, env('WOOCOMMERCE_KEY'), true));
 
         if ($signature != $calculated_hmac) {
+            Log::info('Invalid payload');
             return response(['Invalid payload'], 401);
         }
 
