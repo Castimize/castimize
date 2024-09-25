@@ -26,7 +26,14 @@ class OrdersService
         if ($country === null) {
             $country = Country::where('alpha2', 'nl')->first();
         }
-        $customer = Customer::where('wp_id', $request->customer_id)->first();
+        $customer = null;
+        if (!empty($request->customer_id)) {
+            $customer = Customer::where('wp_id', $request->customer_id)->first();
+            if ($customer === null) {
+                $customer = (new CustomersService())->storeCustomerFromWpApi($request);
+            }
+        }
+
         $currency = Currency::where('code', $request->currency)->first();
 
         preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->billing['address_1'], $matchBilling);
