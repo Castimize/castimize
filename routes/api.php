@@ -25,6 +25,8 @@ Route::group([
     Route::delete('customers/wp', 'CustomersApiController@deleteCustomerWp')->name('api.customers.delete-customer.wp');
 
     //Orders
+    Route::middleware(ValidateWcWebhookSignature::class)
+        ->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
     Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');
     Route::get('orders/{order}', 'OrdersApiController@show')->name('api.orders.show');
 
@@ -45,8 +47,7 @@ Route::group([
     'as' => 'api.',
     'namespace' => 'App\Http\Controllers\Api\V1',
 ], function () {
-    Route::middleware(ValidateWcWebhookSignature::class)
-        ->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
+
 //    Route::middleware([ValidateWcWebhookSignature::class])
 //        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
 });
