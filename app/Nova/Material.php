@@ -106,44 +106,34 @@ class Material extends Resource
             Textarea::make(__('HS code description'), 'hs_code_description')
                 ->hideByDefault(),
 
-            Number::make(__('Minimum x length'), 'minimum_x_length')
-                ->min(0.00000000000000001)
+            Text::make(__('Minimum x length'), 'minimum_x_length')
                 ->hideByDefault(),
 
-            Number::make(__('Maximum x length'), 'maximum_x_length')
-                ->min(0.00000000000000001)
+            Text::make(__('Maximum x length'), 'maximum_x_length')
                 ->hideByDefault(),
 
-            Number::make(__('Minimum y length'), 'minimum_y_length')
-                ->min(0.00000000000000001)
+            Text::make(__('Minimum y length'), 'minimum_y_length')
                 ->hideByDefault(),
 
-            Number::make(__('Maximum y length'), 'maximum_y_length')
-                ->min(0.00000000000000001)
+            Text::make(__('Maximum y length'), 'maximum_y_length')
                 ->hideByDefault(),
 
-            Number::make(__('Minimum z length'), 'minimum_z_length')
-                ->min(0.00000000000000001)
+            Text::make(__('Minimum z length'), 'minimum_z_length')
                 ->hideByDefault(),
 
-            Number::make(__('Maximum z length'), 'maximum_z_length')
-                ->min(0.00000000000000001)
+            Text::make(__('Maximum z length'), 'maximum_z_length')
                 ->hideByDefault(),
 
-            Number::make(__('Minimum volume'), 'minimum_volume')
-                ->min(0.00000000000000001)
+            Text::make(__('Minimum volume'), 'minimum_volume')
                 ->hideByDefault(),
 
-            Number::make(__('Maximum volume'), 'maximum_volume')
-                ->min(0.00000000000000001)
+            Text::make(__('Maximum volume'), 'maximum_volume')
                 ->hideByDefault(),
 
-            Number::make(__('Minimum box volume'), 'minimum_box_volume')
-                ->min(0.00000000000000001)
+            Text::make(__('Minimum box volume'), 'minimum_box_volume')
                 ->hideByDefault(),
 
-            Number::make(__('Maximum box volume'), 'maximum_box_volume')
-                ->min(0.00000000000000001)
+            Text::make(__('Maximum box volume'), 'maximum_box_volume')
                 ->hideByDefault(),
 
             Number::make(__('Discount'), 'discount')
