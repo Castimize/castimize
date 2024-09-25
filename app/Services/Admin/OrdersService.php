@@ -22,8 +22,8 @@ class OrdersService
         $customer = Customer::where('wp_id', $request->customer_id)->first();
         $currency = Currency::where('code', $request->currency)->first();
 
-        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->billing['address1'], $matchBilling);
-        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->billing['shipping1'], $matchShipping);
+        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->billing['address_1'], $matchBilling);
+        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->shipping['address_1'], $matchShipping);
 
         $order = Order::create([
             'wp_id' => $request->wid,
@@ -36,8 +36,8 @@ class OrdersService
             'billing_first_name' => $request->billing['first_name'],
             'billing_last_name' => $request->billing['last_name'],
             'billing_phone_number' => $request->billing['phone_number'],
-            'billing_address_line1' => $matchBilling[1] ?? $request->billing['address1'],
-            'billing_address_line2' => $request->billing['address2'],
+            'billing_address_line1' => $matchBilling[1] ?? $request->billing['address_1'],
+            'billing_address_line2' => $request->billing['address_2'],
             'billing_house_number' => $matchBilling[2] ?? null,
             'billing_postal_code' => $request->billing['postcode'],
             'billing_city' => $request->billing['city'],
@@ -45,8 +45,8 @@ class OrdersService
             'shipping_first_name' => $request->shipping['first_name'],
             'shipping_last_name' => $request->shipping['last_name'],
             'shipping_phone_number' => $request->shipping['phone_number'],
-            'shipping_address_line1' => $matchShipping[1] ?? $request->shipping['address1'],
-            'shipping_address_line2' => $request->shipping['address2'],
+            'shipping_address_line1' => $matchShipping[1] ?? $request->shipping['address_1'],
+            'shipping_address_line2' => $request->shipping['address_2'],
             'shipping_house_number' => $matchShipping[2] ?? null,
             'shipping_postal_code' => $request->shipping['postcode'],
             'shipping_city' => $request->shipping['city'],
