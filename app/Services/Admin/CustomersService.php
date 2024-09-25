@@ -159,7 +159,7 @@ class CustomersService
             $address = Address::create([
                 'address_line1' => $match[1] ?? null,
                 'address_line2' => $input['address_2'],
-                'house_number' => $matchB[2] ?? null,
+                'house_number' => $match[2] ?? null,
                 'postal_code' => $input['postcode'],
                 'city_id' => $city?->id,
                 'state_id' => $state?->id,
