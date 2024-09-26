@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
-use WesselPerik\StatusField\StatusField;
 use Wildside\Userstamps\Userstamps;
 
 #[ObservedBy([OrderObserver::class])]
@@ -104,6 +103,8 @@ class Order extends Model
             'due_date' => 'datetime',
             'arrived_at' => 'datetime',
             'meta_data' => AsArrayObject::class,
+            'billing_name' => 'string',
+            'shipping_name' => 'string',
         ];
     }
 
@@ -232,6 +233,26 @@ class Order extends Model
     {
         return Attribute::make(
             get: fn ($value) => Carbon::parse($this->created_at)->addDays($this->order_customer_lead_time),
+        );
+    }
+
+    /**
+     * Interact with billing_name
+     */
+    protected function billingName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => sprintf('%s %s', $this->billing_first_name, $this->billing_last_name),
+        );
+    }
+
+    /**
+     * Interact with shipping_name
+     */
+    protected function shippingName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => sprintf('%s %s', $this->shipping_first_name, $this->shipping_last_name),
         );
     }
 

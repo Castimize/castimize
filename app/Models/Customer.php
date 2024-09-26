@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Observers\CustomerObserver;
 use App\Traits\Models\ModelHasAddresses;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -53,7 +54,18 @@ class Customer extends Model
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
             'last_active' => 'datetime',
+            'name' => 'string',
         ];
+    }
+
+    /**
+     * Interact with name
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => sprintf('%s %s', $this->first_name, $this->last_name),
+        );
     }
 
     /**

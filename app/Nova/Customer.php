@@ -44,7 +44,7 @@ class Customer extends Resource
      */
     public function title()
     {
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->name;
     }
 
     /**
@@ -84,7 +84,7 @@ class Customer extends Resource
                 ->sortable(),
 
             Text::make(__('Name'), function () {
-                return sprintf('%s %s', $this->first_name, $this->last_name);
+                return $this->name;
             })->exceptOnForms(),
 
             BelongsTo::make(__('User'), 'user')

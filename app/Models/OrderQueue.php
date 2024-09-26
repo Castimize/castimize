@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
@@ -35,6 +36,7 @@ class OrderQueue extends Model
         'upload_id',
         'order_id',
         'manufacturer_shipment_id',
+        'manufacturer_cost_id',
         'customer_shipment_id',
         'contract_date',
         'manufacturer_costs',
@@ -53,6 +55,7 @@ class OrderQueue extends Model
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
             'contract_date' => 'datetime',
+            'status' => 'string',
         ];
     }
 
@@ -64,6 +67,16 @@ class OrderQueue extends Model
         return Attribute::make(
             get: fn ($value) => $value / 100,
             set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  status
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->statuses?->last()->status,
         );
     }
 
@@ -102,6 +115,14 @@ class OrderQueue extends Model
     /**
      * @return BelongsTo
      */
+    public function manufacturerCost(): BelongsTo
+    {
+        return $this->belongsTo(ManufacturerCost::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
     public function customerShipment(): BelongsTo
     {
         return $this->belongsTo(CustomerShipment::class);
@@ -113,5 +134,13 @@ class OrderQueue extends Model
     public function statuses(): HasMany
     {
         return $this->hasMany(OrderQueueStatus::class);
+    }
+
+    /**
+     * @return HasOne
+     */
+    public function rejection(): HasOne
+    {
+        return $this->hasOne(Rejection::class);
     }
 }

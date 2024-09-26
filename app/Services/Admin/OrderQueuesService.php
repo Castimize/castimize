@@ -31,7 +31,9 @@ class OrderQueuesService
             $manufacturerCost = $manufacturer->costs->where('material_id', $upload->material_id)->first();
             if ($manufacturerCost) {
                 $orderQueues[] = $upload->orderQueue()->create([
+                    'order_id' => $upload->order_id,
                     'manufacturer_id' => $manufacturer->id,
+                    'manufacturer_cost_id' => $manufacturerCost->id,
                     'manufacturer_costs' => (new CalculatePricesService())->calculateCostsOfModel(
                         $manufacturerCost,
                         $upload->model_volume_cc,

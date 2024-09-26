@@ -118,7 +118,7 @@ class Upload extends Model
     protected function status(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->orderQueue?->statuses?->last()->status,
+            get: fn () => $this->orderQueue?->status,
         );
     }
 

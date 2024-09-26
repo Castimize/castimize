@@ -68,6 +68,9 @@ class Order extends Resource
         'order_number' => 'desc',
     ];
 
+    /**
+     * @var string[]
+     */
     public static $with = [
         'customer',
         'country',
@@ -322,8 +325,8 @@ class Order extends Resource
         return StatusField::make(__('Status'))
             ->icons([
                 'dots-circle-horizontal' => $this->status === 'processing',
-                'clock' => $this->status == 'overdue',
-                'exclamation' => $this->status == 'almost-overdue',
+                'clock' => $this->status === 'overdue',
+                'exclamation' => $this->status === 'almost-overdue',
                 'check-circle' => $this->status === 'completed',
                 'x-circle' => $this->status === 'canceled',
             ])
@@ -358,7 +361,7 @@ class Order extends Resource
         return [
             // Detail fields
             Text::make(__('Billing Name'), function () {
-                return sprintf('%s %s', $this->billing_first_name, $this->billing_last_name);
+                return $this->billing_name;
             })->exceptOnForms(),
 
             Text::make(__('Billing Street / House number'), function () {
@@ -408,7 +411,7 @@ class Order extends Resource
         return [
             // Detail fields
             Text::make(__('Shipping name'), function () {
-                return sprintf('%s %s', $this->shipping_first_name, $this->shipping_last_name);
+                return $this->shipping_name;
             })->exceptOnForms(),
 
             Text::make(__('Shipping Street / House number'), function () {
