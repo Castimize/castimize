@@ -94,9 +94,9 @@ class OrdersService
             'meta_data' => $request->meta_data,
             'comments' => $request->customer_note,
             'promo_code' => null,
-            'created_by' => $customer?->user_id ?? $systemUser->id,
+            'created_by' => $systemUser->id,
             'created_at' => Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_created_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE')),
-            'updated_by' => $customer?->user_id ?? $systemUser->id,
+            'updated_by' => $systemUser->id,
             'updated_at' => Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_modified_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE')),
         ]);
 

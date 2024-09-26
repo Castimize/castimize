@@ -29,6 +29,7 @@ class Customer extends Model
     protected $fillable = [
         'user_id',
         'country_id',
+        'wp_id',
         'first_name',
         'last_name',
         'email',
@@ -51,6 +52,7 @@ class Customer extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'last_active' => 'datetime',
         ];
     }
 

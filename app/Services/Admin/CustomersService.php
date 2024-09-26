@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Models\Address;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\State;
 use App\Models\User;
@@ -40,13 +41,18 @@ class CustomersService
         if ($country === null) {
             $country = Country::where('alpha2', 'nl')->first();
         }
+        $currency = Currency::where('code', $request->currency)->first();
 
         $customer = Customer::create([
             'country_id' => $country->id,
+            'currency_id' => $currency?->id,
             'wp_id' => $request->customer_id,
             'first_name' => $request->first_name ?? $request->billing['first_name'],
             'last_name' => $request->last_name ?? $request->billing['last_name'],
             'email' => $request->email ?? $request->billing['email'],
+            'phone' => $request->phone ?? $request->billing['phone'],
+            'created_by' => 1,
+            'updated_by' => 1,
         ]);
 
         $billingAddress = $this->createAddress($request->billing);
@@ -58,6 +64,7 @@ class CustomersService
                 'default_billing' => 1,
                 'default_shipping' => 0,
                 'contact_name' => sprintf('%s %s', $request->billing['first_name'], $request->billing['last_name']),
+                'phone' => $request->billing['phone'],
             ];
             $customer->addresses()->attach($billingAddress, $pivotData);
 
@@ -65,6 +72,7 @@ class CustomersService
                 'default_billing' => 0,
                 'default_shipping' => 1,
                 'contact_name' => sprintf('%s %s', $request->shipping['first_name'], $request->shipping['last_name']),
+                'phone' => $request->shiping['phone'],
             ];
             $customer->addresses()->attach($shippingAddress, $pivotData);
         } else {
@@ -72,6 +80,7 @@ class CustomersService
                 'default_billing' => 1,
                 'default_shipping' => 1,
                 'contact_name' => sprintf('%s %s', $request->billing['first_name'], $request->billing['last_name']),
+                'phone' => $request->billing['phone'],
             ];
             $customer->addresses()->attach($billingAddress, $pivotData);
         }
@@ -107,6 +116,7 @@ class CustomersService
                 'default_billing' => 1,
                 'default_shipping' => 0,
                 'contact_name' => sprintf('%s %s', $request->billing['first_name'], $request->billing['last_name']),
+                'phone' => $request->billing['phone'],
             ];
             $customer->addresses()->attach($billingAddress, $pivotData);
 
@@ -114,6 +124,7 @@ class CustomersService
                 'default_billing' => 0,
                 'default_shipping' => 1,
                 'contact_name' => sprintf('%s %s', $request->shipping['first_name'], $request->shipping['last_name']),
+                'phone' => $request->shipping['phone'],
             ];
             $customer->addresses()->attach($shippingAddress, $pivotData);
         } else {
@@ -121,6 +132,7 @@ class CustomersService
                 'default_billing' => 1,
                 'default_shipping' => 1,
                 'contact_name' => sprintf('%s %s', $request->billing['first_name'], $request->billing['last_name']),
+                'phone' => $request->billing['phone'],
             ];
             $customer->addresses()->attach($billingAddress, $pivotData);
         }
@@ -164,6 +176,8 @@ class CustomersService
                 'city_id' => $city?->id,
                 'state_id' => $state?->id,
                 'country_id' => $country->id,
+                'created_by' => 1,
+                'updated_by' => 1,
             ]);
         }
 
