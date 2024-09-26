@@ -40,7 +40,7 @@ class StripeWebhookController extends Controller
             return $this->invalidMethod();
         }
 
-// Handle the event
+        // Handle the event
         switch ($event->type) {
             case 'payment_intent.succeeded':
                 /**
@@ -66,7 +66,7 @@ class StripeWebhookController extends Controller
         $order = Order::where('order_number', $paymentIntent->metadata->order_id)->first();
         if ($order !== null) {
             $order->is_paid = true;
-            $order->paid_at = Carbon::createFromTimestamp($paymentIntent->created);
+            $order->paid_at = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'));
             $order->save();
             return $this->successMethod();
         }
