@@ -33,6 +33,7 @@ class OrderQueue extends Model
     protected $fillable = [
         'manufacturer_id',
         'upload_id',
+        'order_id',
         'manufacturer_shipment_id',
         'customer_shipment_id',
         'contract_date',
@@ -80,6 +81,14 @@ class OrderQueue extends Model
     public function upload(): BelongsTo
     {
         return $this->belongsTo(Upload::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     /**

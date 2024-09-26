@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('manufacturer_id')->nullable()->index();
             $table->unsignedBigInteger('upload_id')->index();
+            $table->unsignedBigInteger('order_id')->nullable()->index();
             $table->unsignedBigInteger('manufacturer_shipment_id')->nullable()->index();
             $table->unsignedBigInteger('customer_shipment_id')->nullable()->index();
             $table->dateTime('contract_date')->nullable();
@@ -24,6 +25,7 @@ return new class extends Migration
 
             $table->foreign('manufacturer_id')->references('id')->on('manufacturers')->onDelete('set null');
             $table->foreign('upload_id')->references('id')->on('uploads')->onDelete('cascade');
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->foreign('manufacturer_shipment_id')->references('id')->on('manufacturer_shipments')->onDelete('set null');
             $table->foreign('customer_shipment_id')->references('id')->on('customer_shipments')->onDelete('set null');
         });
