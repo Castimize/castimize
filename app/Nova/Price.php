@@ -2,7 +2,7 @@
 
 namespace App\Nova;
 
-use App\Nova\Filters\ShowDeleted;
+
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
@@ -11,6 +11,7 @@ use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Vyuldashev\NovaMoneyField\Money;
@@ -85,10 +86,14 @@ class Price extends Resource
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
-                ),
+                )
+                ->onlyOnForms(),
 
-//            Money::make(__('Setup fee amount'), 'EUR', 'setup_fee_amount')
-//                ->onlyOnDetail(),
+            Text::make(__('Setup fee amount'), function () {
+                return $this->setup_fee_amount ? currencyFormatter((float)$this->setup_fee_amount, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
+                ->sortable(),
 
             Number::make(__('Minimum per stl'), 'minimum_per_stl')
                 ->min(0)
@@ -104,43 +109,68 @@ class Price extends Resource
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
-                ),
+                )
+                ->onlyOnForms(),
+
+            Text::make(__('Price minimum per stl'), function () {
+                return $this->price_minimum_per_stl ? currencyFormatter((float)$this->price_minimum_per_stl, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
+                ->sortable(),
 
             \Laravel\Nova\Fields\Currency::make(__('Price volume cc'), 'price_volume_cc')
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
-                ->hideByDefault()
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
-                ),
+                )
+                ->onlyOnForms(),
+
+            Text::make(__('Price volume cc'), function () {
+                return $this->price_volume_cc ? currencyFormatter((float)$this->price_volume_cc, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
+                ->sortable(),
 
             \Laravel\Nova\Fields\Currency::make(__('Price surface cm2'), 'price_surface_cm2')
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
-                ->hideByDefault()
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
-                ),
+                )
+                ->onlyOnForms(),
+
+            Text::make(__('Price surface cm2'), function () {
+                return $this->price_surface_cm2 ? currencyFormatter((float)$this->price_surface_cm2, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
+                ->sortable(),
 
             \Laravel\Nova\Fields\Currency::make(__('Fixed fee per part'), 'fixed_fee_per_part')
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
-                ->hideByDefault()
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
-                ),
+                )
+                ->onlyOnForms(),
+
+            Text::make(__('Fixed fee per part'), function () {
+                return $this->fixed_fee_per_part ? currencyFormatter((float)$this->fixed_fee_per_part, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
+                ->sortable(),
 
             new Panel(__('History'), $this->commonMetaData(true, false, false, false)),
         ];
@@ -166,7 +196,7 @@ class Price extends Resource
     public function filters(NovaRequest $request)
     {
         return [
-            new ShowDeleted(),
+
         ];
     }
 

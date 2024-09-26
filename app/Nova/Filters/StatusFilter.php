@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Filters\Filter;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class ShowDeleted extends Filter
+class StatusFilter extends Filter
 {
     /**
      * The filter's component.
@@ -25,10 +25,7 @@ class ShowDeleted extends Filter
      */
     public function apply(NovaRequest $request, $query, $value)
     {
-        if ($value === 'show-deleted') {
-            return $query->whereNotNull('deleted_at');
-        }
-        return $query;
+        return $query->where('status', $value);
     }
 
     /**
@@ -40,7 +37,11 @@ class ShowDeleted extends Filter
     public function options(NovaRequest $request)
     {
         return [
-            'Show deleted' => 'show-deleted',
+            'processing' => __('In process'),
+            'overdue' => __('Overdue'),
+            'almost-overdue' => __('Almost overdue'),
+            'completed' => __('Completed'),
+            'canceled' => __('Canceled'),
         ];
     }
 }

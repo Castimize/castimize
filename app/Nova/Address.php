@@ -2,7 +2,6 @@
 
 namespace App\Nova;
 
-use App\Nova\Filters\ShowDeleted;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
@@ -110,9 +109,7 @@ class Address extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [
-            new ShowDeleted(),
-        ];
+        return [];
     }
 
     /**

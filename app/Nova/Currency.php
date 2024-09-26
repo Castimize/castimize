@@ -2,7 +2,7 @@
 
 namespace App\Nova;
 
-use App\Nova\Filters\ShowDeleted;
+
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
@@ -100,7 +100,7 @@ class Currency extends Resource
     public function filters(NovaRequest $request)
     {
         return [
-            new ShowDeleted(),
+
         ];
     }
 

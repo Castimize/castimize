@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Observers\OrderObserver;
+use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
+use WesselPerik\StatusField\StatusField;
 use Wildside\Userstamps\Userstamps;
 
 #[ObservedBy([OrderObserver::class])]
@@ -98,9 +101,18 @@ class Order extends Model
             'fast_delivery_lead_time' => 'datetime',
             'is_paid' => 'boolean',
             'paid_at' => 'datetime',
+            'due_date' => 'datetime',
             'arrived_at' => 'datetime',
             'meta_data' => AsArrayObject::class,
         ];
+    }
+
+    /**
+     * Prepare a date for array / JSON serialization.
+     */
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format('d-m-Y H:i:s');
     }
 
     /**
@@ -214,6 +226,16 @@ class Order extends Model
     }
 
     /**
+     * Interact with  due_date
+     */
+    protected function dueDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => Carbon::parse($this->created_at)->addDays($this->order_customer_lead_time),
+        );
+    }
+
+    /**
      * @return BelongsTo
      */
     public function customer(): BelongsTo
@@ -259,5 +281,41 @@ class Order extends Model
     public function uploads(): HasMany
     {
         return $this->hasMany(Upload::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function rejections(): HasMany
+    {
+        return $this->hasMany(Rejection::class);
+    }
+
+    /**
+     * @return string
+     */
+    public function getCustomerCountry(): string
+    {
+        return $this->customer?->country?->name ?? '';
+    }
+
+    /**
+     * Get the days overdue
+     * @return float|null
+     */
+    public function daysOverdue(): float|null
+    {
+        if ($this->status === 'overdue') {
+            return now()->diffInDays($this->due_date);
+        }
+        return null;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function totalOrderParts()
+    {
+        return $this->uploads()->sum('model_parts');
     }
 }

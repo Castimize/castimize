@@ -17,6 +17,7 @@
         "digital-creative/icon-action-toolbar": "^0.1.2",
         "digital-creative/nova-dashboard": "^1.1",
         "digital-creative/resource-navigation-tab": "^2.1",
+        "ferdiunal/nova-editable-field": "^1.0",
         "guzzlehttp/guzzle": "^7.9",
         "jeffbeltran/sanctum-tokens": "^2.1",
         "kaiserkiwi/nova-queue-management": "^1.2",
@@ -25,6 +26,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.0",
+        "pavloniym/nova-action-buttons": "^1.1",
         "picqer/exact-php-client": "^4.4",
         "predis/predis": "^2.2",
         "ranium/laravel-seedonce": "^1.6",
@@ -38,6 +40,7 @@
         "tomodo531/filterable-filters": "^2.0",
         "venturecraft/revisionable": "^1.41",
         "wamesk/laravel-nova-tel-input": "^1.0",
+        "wesselperik/nova-status-field": "^2.1",
         "wildside/userstamps": "^2.4"
     },
     "require-dev": {

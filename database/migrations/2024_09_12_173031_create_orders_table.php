@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('wp_id')->nullable()->index();
             $table->string('order_number')->index();
             $table->string('order_key')->nullable();
+            $table->string('status')->default('processing');
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('email')->nullable();

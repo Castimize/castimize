@@ -2,7 +2,7 @@
 
 namespace App\Nova;
 
-use App\Nova\Filters\ShowDeleted;
+
 use App\Traits\Nova\CommonMetaDataTrait;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
@@ -81,7 +81,7 @@ class ComplaintReason extends Resource
     public function filters(NovaRequest $request)
     {
         return [
-            new ShowDeleted(),
+
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Jobs\UploadToOrderQueue;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Customer;
@@ -164,7 +165,7 @@ class OrdersService
                 }
             }
 
-            $order->uploads()->create([
+            $upload = $order->uploads()->create([
                 'material_id' => $material->id,
                 'customer_id' => $customer?->id,
                 'currency_id' => $currency?->id,
@@ -189,6 +190,9 @@ class OrdersService
                 'created_by' => $systemUser->id,
                 'updated_by' => $systemUser->id,
             ]);
+
+            // Set upload to order queue
+            UploadToOrderQueue::dispatch($upload);
         }
         $order->order_customer_lead_time = $biggestCustomerLeadTime;
         $order->save();

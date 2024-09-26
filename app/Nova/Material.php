@@ -2,7 +2,7 @@
 
 namespace App\Nova;
 
-use App\Nova\Filters\ShowDeleted;
+
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
@@ -98,6 +98,13 @@ class Material extends Resource
                         $field->currency($formData->currency_code);
                     }
                 )
+                ->onlyOnForms()
+                ->sortable(),
+
+            Text::make(__('Fast delivery fee'), function () {
+                return $this->fast_delivery_fee ? currencyFormatter((float)$this->fast_delivery_fee, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
                 ->sortable(),
 
             Text::make(__('HS code'), 'hs_code')
@@ -107,21 +114,27 @@ class Material extends Resource
                 ->hideByDefault(),
 
             Text::make(__('Minimum x length'), 'minimum_x_length')
+                ->help(__('Unit in cm'))
                 ->hideByDefault(),
 
             Text::make(__('Maximum x length'), 'maximum_x_length')
+                ->help(__('Unit in cm'))
                 ->hideByDefault(),
 
             Text::make(__('Minimum y length'), 'minimum_y_length')
+                ->help(__('Unit in cm'))
                 ->hideByDefault(),
 
             Text::make(__('Maximum y length'), 'maximum_y_length')
+                ->help(__('Unit in cm'))
                 ->hideByDefault(),
 
             Text::make(__('Minimum z length'), 'minimum_z_length')
+                ->help(__('Unit in cm'))
                 ->hideByDefault(),
 
             Text::make(__('Maximum z length'), 'maximum_z_length')
+                ->help(__('Unit in cm'))
                 ->hideByDefault(),
 
             Text::make(__('Minimum volume'), 'minimum_volume')
@@ -137,36 +150,56 @@ class Material extends Resource
                 ->hideByDefault(),
 
             Number::make(__('Discount'), 'discount')
+                ->help(__('In percentage'))
                 ->sizeOnDetail('w-1/4')
-                ->hideByDefault()
                 ->step(0.01)
-                ->displayUsing(function ($value) {
-                    return $value . '%';
-                }),
+                ->onlyOnForms(),
 
             Number::make(__('Bulk discount 10'), 'bulk_discount_10')
+                ->help(__('In percentage, for :amount pieces', ['amount' => 10]))
                 ->sizeOnDetail('w-1/4')
-                ->hideByDefault()
                 ->step(0.01)
-                ->displayUsing(function ($value) {
-                    return $value . '%';
-                }),
+                ->onlyOnForms(),
 
             Number::make(__('Bulk discount 25'), 'bulk_discount_25')
+                ->help(__('In percentage, for :amount pieces', ['amount' => 25]))
                 ->sizeOnDetail('w-1/4')
-                ->hideByDefault()
                 ->step(0.01)
-                ->displayUsing(function ($value) {
-                    return $value . '%';
-                }),
+                ->onlyOnForms(),
 
             Number::make(__('Bulk discount 50'), 'bulk_discount_50')
+                ->help(__('In percentage, for :amount pieces', ['amount' => 50]))
+                ->sizeOnDetail('w-1/4')
+                ->step(0.01)
+                ->onlyOnForms(),
+
+            Text::make(__('Discount'), function () {
+                return $this->discount ? $this->discount . '%' : '';
+            })
                 ->sizeOnDetail('w-1/4')
                 ->hideByDefault()
-                ->step(0.01)
-                ->displayUsing(function ($value) {
-                    return $value . '%';
-                }),
+                ->exceptOnForms(),
+
+            Text::make(__('Bulk discount 10'), function () {
+                return $this->bulk_discount_10 ? $this->bulk_discount_10 . '%' : '';
+            })
+                ->sizeOnDetail('w-1/4')
+                ->hideByDefault()
+                ->exceptOnForms(),
+
+            Text::make(__('Bulk discount 25'), function () {
+                return $this->bulk_discount_25 ? $this->bulk_discount_25 . '%' : '';
+            })
+                ->sizeOnDetail('w-1/4')
+                ->hideByDefault()
+                ->exceptOnForms(),
+
+            Text::make(__('Bulk discount 50'), function () {
+                return $this->bulk_discount_50 ? $this->bulk_discount_50 . '%' : '';
+            })
+                ->sizeOnDetail('w-1/4')
+                ->hideByDefault()
+                ->exceptOnForms(),
 
             HasMany::make(__('Prices'), 'prices'),
 
@@ -194,7 +227,7 @@ class Material extends Resource
     public function filters(NovaRequest $request)
     {
         return [
-            new ShowDeleted(),
+
         ];
     }
 

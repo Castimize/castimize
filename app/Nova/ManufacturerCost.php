@@ -2,7 +2,7 @@
 
 namespace App\Nova;
 
-use App\Nova\Filters\ShowDeleted;
+
 use App\Traits\Nova\CommonMetaDataTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
@@ -10,6 +10,7 @@ use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Vyuldashev\NovaMoneyField\Money;
@@ -77,7 +78,6 @@ class ManufacturerCost extends Resource
                 ->sortable(),
 
             \Laravel\Nova\Fields\Currency::make(__('Setup fee amount'), 'setup_fee_amount')
-                ->onlyOnForms()
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
@@ -86,7 +86,14 @@ class ManufacturerCost extends Resource
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
-                ),
+                )
+                ->onlyOnForms(),
+
+            Text::make(__('Setup fee amount'), function () {
+                return $this->setup_fee_amount ? currencyFormatter((float)$this->setup_fee_amount, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
+                ->sortable(),
 
 
             Number::make(__('Production lead time'), 'production_lead_time')
@@ -100,7 +107,6 @@ class ManufacturerCost extends Resource
                 ->sortable(),
 
             \Laravel\Nova\Fields\Currency::make(__('Costs minimum per stl'), 'costs_minimum_per_stl')
-                ->onlyOnForms()
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
@@ -109,31 +115,50 @@ class ManufacturerCost extends Resource
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
-                ),
+                )
+                ->onlyOnForms(),
+
+            Text::make(__('Costs minimum per stl'), function () {
+                return $this->costs_minimum_per_stl ? currencyFormatter((float)$this->costs_minimum_per_stl, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
+                ->sortable(),
 
             \Laravel\Nova\Fields\Currency::make(__('Costs volume cc'), 'costs_volume_cc')
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
-                ->hideFromIndex()
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
-                ),
+                )
+                ->onlyOnForms(),
+
+            Text::make(__('Costs volume cc'), function () {
+                return $this->costs_volume_cc ? currencyFormatter((float)$this->costs_volume_cc, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
+                ->sortable(),
 
             \Laravel\Nova\Fields\Currency::make(__('Costs surface cm2'), 'costs_surface_cm2')
                 ->min(0)
                 ->step(0.01)
                 ->locale(config('app.format_locale'))
-                ->hideFromIndex()
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
-                ),
+                )
+                ->onlyOnForms(),
+
+            Text::make(__('Costs surface cm2'), function () {
+                return $this->costs_surface_cm2 ? currencyFormatter((float)$this->costs_surface_cm2, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
+                ->sortable(),
 
             new Panel(__('History'), $this->commonMetaData(true, false, false, false)),
         ];
@@ -159,7 +184,7 @@ class ManufacturerCost extends Resource
     public function filters(NovaRequest $request)
     {
         return [
-            new ShowDeleted(),
+
         ];
     }
 

@@ -17,8 +17,11 @@ use App\Nova\MaterialGroup;
 use App\Nova\Model;
 use App\Nova\Order;
 use App\Nova\Price;
+use App\Nova\Rejection;
+use App\Nova\RejectionReason;
 use App\Nova\ShippingFee;
 use App\Nova\State;
+use App\Nova\Upload;
 use App\Nova\User;
 use CodencoDev\NovaGridSystem\NovaGridSystem;
 use Illuminate\Http\Request;
@@ -62,9 +65,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make(__('Customers'), [
                     MenuItem::resource(Order::class),
-//                    MenuItem::resource(Upload::class),
+                    MenuItem::resource(Upload::class),
                     MenuItem::resource(Customer::class),
-//                    MenuItem::resource(Rejection::class),
+                    MenuItem::resource(Rejection::class),
+                    MenuItem::resource(RejectionReason::class),
                 ])->icon('clipboard-list')
                     ->collapsable()
                     ->canSee(function (NovaRequest $request) {

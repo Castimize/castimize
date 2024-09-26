@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "50c7ecb7cf7822fbf6cf11e16b034956",
+    "content-hash": "c45c754139ff4daa066bdcb7f489d98a",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1434,6 +1434,76 @@
                 }
             ],
             "time": "2023-10-06T06:47:41+00:00"
+        },
+        {
+            "name": "ferdiunal/nova-editable-field",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ferdiunal/nova-editable-field.git",
+                "reference": "25ef9e8591b357a632e17f197bc50035b255e776"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ferdiunal/nova-editable-field/zipball/25ef9e8591b357a632e17f197bc50035b255e776",
+                "reference": "25ef9e8591b357a632e17f197bc50035b255e776",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "^10.0|^11.0",
+                "laravel/nova": "^4.0",
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Ferdiunal\\NovaEditableField\\FieldServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ferdiunal\\NovaEditableField\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ferdi Ünal",
+                    "email": "ferdiunal@outlook.com",
+                    "homepage": "https://gitub.com/ferdiunal",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Laravel Nova package to make fields editable.",
+            "keywords": [
+                "editable",
+                "field",
+                "laravel",
+                "nova",
+                "nova-editable",
+                "nova-editable-field",
+                "nova-field"
+            ],
+            "support": {
+                "issues": "https://github.com/ferdiunal/nova-editable-field/issues",
+                "source": "https://github.com/ferdiunal/nova-editable-field/tree/v1.0.1"
+            },
+            "funding": [
+                {
+                    "url": "https://buymeacoffee.com/ferdiunal",
+                    "type": "buymeacoffee"
+                },
+                {
+                    "url": "https://github.com/sponsors/ferdiunal",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-09-16T18:12:15+00:00"
         },
         {
             "name": "fruitcake/php-cors",
@@ -4038,6 +4108,53 @@
                 }
             ],
             "time": "2024-07-26T05:48:04+00:00"
+        },
+        {
+            "name": "pavloniym/nova-action-buttons",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pavloniym/nova-action-buttons.git",
+                "reference": "387e5228a4146ef7c78a70aaced494e207a25cba"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pavloniym/nova-action-buttons/zipball/387e5228a4146ef7c78a70aaced494e207a25cba",
+                "reference": "387e5228a4146ef7c78a70aaced494e207a25cba",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Pavloniym\\ActionButtons\\FieldServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Pavloniym\\ActionButtons\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A Laravel Nova field.",
+            "keywords": [
+                "actions",
+                "buttons",
+                "laravel",
+                "nova"
+            ],
+            "support": {
+                "issues": "https://github.com/pavloniym/nova-action-buttons/issues",
+                "source": "https://github.com/pavloniym/nova-action-buttons/tree/v1.1.1"
+            },
+            "time": "2023-03-24T17:59:15+00:00"
         },
         {
             "name": "phpoption/phpoption",
@@ -8665,6 +8782,53 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.11.0"
             },
             "time": "2022-06-03T18:03:27+00:00"
+        },
+        {
+            "name": "wesselperik/nova-status-field",
+            "version": "2.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wesselperik/nova-status-field.git",
+                "reference": "1b59ca03b658a2ed73b086df7d41394326fe80ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wesselperik/nova-status-field/zipball/1b59ca03b658a2ed73b086df7d41394326fe80ef",
+                "reference": "1b59ca03b658a2ed73b086df7d41394326fe80ef",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/nova": "^4.0",
+                "php": "^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "WesselPerik\\StatusField\\FieldServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "WesselPerik\\StatusField\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A Laravel Nova field for displaying statuses.",
+            "keywords": [
+                "laravel",
+                "nova",
+                "status"
+            ],
+            "support": {
+                "issues": "https://github.com/wesselperik/nova-status-field/issues",
+                "source": "https://github.com/wesselperik/nova-status-field/tree/2.1.2"
+            },
+            "time": "2022-09-14T19:06:22+00:00"
         },
         {
             "name": "wildside/userstamps",

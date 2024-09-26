@@ -2,7 +2,7 @@
 
 namespace App\Nova;
 
-use App\Nova\Filters\ShowDeleted;
+
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
@@ -65,9 +65,9 @@ class Model extends Resource
             Text::make(__('Name'), 'name')
                 ->sortable(),
 
-            File::make(__('Stl file'))
-                ->disk(env('FILESYSTEM_DISK'))
-                ->path('website/wp-content/uploads/p3d/')
+            File::make(__('Stl file'), 'file_name')
+                ->disk('r2')
+                ->path('wp-content/uploads/p3d/')
                 ->acceptedTypes('.stl,.obj,.3ds'),
 
             BelongsTo::make(__('Customer'), 'customer')
@@ -127,7 +127,7 @@ class Model extends Resource
     public function filters(NovaRequest $request)
     {
         return [
-            new ShowDeleted(),
+
         ];
     }
 

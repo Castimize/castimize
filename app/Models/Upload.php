@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
@@ -59,7 +61,10 @@ class Upload extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'due_date' => 'datetime',
+            'completed_at' => 'datetime',
             'meta_data' => AsArrayObject::class,
+            'status' => 'string',
         ];
     }
 
@@ -108,6 +113,36 @@ class Upload extends Model
     }
 
     /**
+     * Interact with  status
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->orderQueue?->statuses?->last()->status,
+        );
+    }
+
+    /**
+     * Interact with  due_date
+     */
+    protected function dueDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => Carbon::parse($this->created_at)->addDays($this->customer_lead_time),
+        );
+    }
+
+    /**
+     * Interact with  completed_at
+     */
+    protected function completedAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $this->orderQueue?->statuses?->last()->orderStatus?->slug === 'completed' ? $this->orderQueue?->statuses?->last()->orderStatus?->created_at : null,
+        );
+    }
+
+    /**
      * @return BelongsTo
      */
     public function order(): BelongsTo
@@ -137,5 +172,13 @@ class Upload extends Model
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
+    }
+
+    /**
+     * @return HasOne
+     */
+    public function  orderQueue(): HasOne
+    {
+        return $this->hasOne(OrderQueue::class);
     }
 }

@@ -9,7 +9,7 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Rpj\Daterangepicker\DateHelper as Helper;
 use Rpj\Daterangepicker\Daterangepicker;
 
-class CreatedAtDaterangepicker extends Daterangepicker
+class CreatedAtDaterangepickerFilter extends Daterangepicker
 {
     private Carbon|null $minDate = null;
     private Carbon|null $maxDate = null;

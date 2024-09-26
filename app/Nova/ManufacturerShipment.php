@@ -2,7 +2,7 @@
 
 namespace App\Nova;
 
-use App\Nova\Filters\ShowDeleted;
+
 use App\Traits\Nova\CommonMetaDataTrait;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\FormData;
@@ -92,18 +92,20 @@ class ManufacturerShipment extends Resource
             \Laravel\Nova\Fields\Currency::make(__('Total costs'), 'total_costs')
                 ->min(0)
                 ->step(0.01)
+                ->locale(config('app.format_locale'))
                 ->dependsOn(
                     ['currency_code'],
                     function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
                         $field->currency($formData->currency_code);
                     }
                 )
-                ->displayUsing(function ($value) {
-                    if ($value !== null) {
-                        return currencyFormatter($value, $this->currency_code);
-                    }
-                    return $value;
-                }),
+                ->onlyOnForms(),
+
+            Text::make(__('Total costs'), function () {
+                return $this->total_costs ? currencyFormatter((float)$this->total_costs, $this->currency_code) : '';
+            })
+                ->exceptOnForms()
+                ->sortable(),
 
             new Panel(__('History'), $this->commonMetaData(false, false, false, false)),
         ];
@@ -129,7 +131,7 @@ class ManufacturerShipment extends Resource
     public function filters(NovaRequest $request)
     {
         return [
-            new ShowDeleted(),
+
         ];
     }
 

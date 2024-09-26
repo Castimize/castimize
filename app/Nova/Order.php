@@ -2,17 +2,24 @@
 
 namespace App\Nova;
 
-use App\Nova\Filters\CreatedAtDaterangepicker;
-use App\Nova\Filters\ShowDeleted;
+use App\Nova\Filters\CreatedAtDaterangepickerFilter;
+
+use App\Nova\Filters\StatusFilter;
+use App\Traits\Nova\CommonMetaDataTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\Email;
 use Laravel\Nova\Fields\FormData;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Image;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Rpj\Daterangepicker\DateHelper;
@@ -20,9 +27,12 @@ use Rpj\Daterangepicker\Daterangepicker;
 use Saumini\Count\RelationshipCount;
 use Tomodo531\FilterableFilters\FilterableFilters;
 use Wame\TelInput\TelInput;
+use WesselPerik\StatusField\StatusField;
 
 class Order extends Resource
 {
+    use CommonMetaDataTrait;
+
     /**
      * The model the resource corresponds to.
      *
@@ -35,7 +45,7 @@ class Order extends Resource
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'order_number';
 
     /**
      * The columns that should be searched.
@@ -58,6 +68,13 @@ class Order extends Resource
         'order_number' => 'desc',
     ];
 
+    public static $with = [
+        'customer',
+        'country',
+        'currency',
+        'uploads',
+    ];
+
     /**
      * Get the fields displayed by the resource.
      *
@@ -66,89 +83,160 @@ class Order extends Resource
      */
     public function fields(NovaRequest $request)
     {
+        return [];
+    }
+
+    /**
+     * Get the fields displayed by the resource on index page.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function fieldsForIndex(NovaRequest $request)
+    {
         return [
             ID::make()->sortable(),
-
-            Number::make(__('Wordpress ID'), 'wp_id')
-                ->hideFromIndex(),
-
-            BelongsTo::make(__('Customer'), 'customer_id')
-                ->hideFromIndex(),
-
-            BelongsTo::make(__('Country'), 'country_id')
-                ->hideFromIndex(),
-
-            BelongsTo::make(__('Customer shipment'), 'customer_shipment_id')
-                ->hideFromIndex(),
-
-            Select::make(__('Currency'), 'currency_code')->options(function () {
-                return array_filter(\App\Models\Currency::pluck('name', 'code')->all());
-            })
-                ->hideFromIndex()
-                ->help(__('This currency will be used for all below prices')),
 
             Text::make(__('Order number'), 'order_number')
                 ->sortable(),
 
-            RelationshipCount::make(__('# Uploads'), 'uploads')
-                ->onlyOnIndex()
+            BelongsTo::make(__('Customer'), 'customer')
                 ->sortable(),
 
-            Text::make(__('Order product value'), 'order_product_value',)
+            Text::make(__('Country'), function () {
+                    return $this->getCustomerCountry();
+                })
                 ->sortable(),
 
-            \Laravel\Nova\Fields\Currency::make(__('Total'), 'total')
-                ->min(0)
-                ->step(0.01)
-                ->locale(config('app.format_locale'))
-                ->dependsOn(
-                    ['currency_code'],
-                    function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
-                        $field->currency($formData->currency_code);
+            $this->getStatusField(),
+
+            Text::make(__('Order parts'), function () {
+                    return $this->totalOrderParts();
+                })
+                ->sortable(),
+
+            Text::make(__('Total'), function () {
+                    return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
+                })
+                ->sortable(),
+
+            Text::make(__('Created at'), function () {
+                    return Carbon::parse($this->created_at)->format('d-m-Y H:i:s');
+                })
+                ->sortable(),
+
+            Text::make(__('Due date'), function () {
+                    return $this->due_date->format('d-m-Y H:i:s');
+                })
+                ->sortable(),
+
+            Text::make(__('Arrived at'), function () {
+                    if ($this->arrived_at === null) {
+                        return '-';
                     }
-                ),
+                    return Carbon::parse($this->arrived_at)->format('d-m-Y H:i:s');
+                })
+                ->sortable(),
+        ];
+    }
 
-            Text::make(__('Name'), function () {
-                return sprintf('%s %s', $this->first_name, $this->last_name);
-            })->exceptOnForms(),
+    /**
+     * Get the fields displayed by the resource on detail page.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function fieldsForDetail(NovaRequest $request)
+    {
+        return [
+            ID::make(),
 
-            Text::make(__('First name'), 'first_name')
-                ->onlyOnForms(),
+            Text::make(__('Order number'), 'order_number'),
 
-            Text::make(__('Last name'), 'last_name')
-                ->onlyOnForms(),
+            $this->getStatusField(),
 
-            Text::make(__('Email'), 'email')
-                ->hideFromIndex(),
+            Text::make(__('Created at'), function () {
+                return Carbon::parse($this->created_at)->format('d-m-Y H:i:s');
+            })
+                ->sortable(),
+
+            Text::make(__('Due date'), function () {
+                return $this->due_date->format('d-m-Y H:i:s');
+            }),
+
+            Text::make(__('Arrived at'), function () {
+                if ($this->arrived_at === null) {
+                    return '-';
+                }
+                return Carbon::parse($this->arrived_at)->format('d-m-Y H:i:s');
+            }),
+
+            Text::make(__('Order parts'), function () {
+                return $this->totalOrderParts();
+            }),
+
+            Text::make(__('Total'), function () {
+                return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
+            }),
+
+            BelongsTo::make(__('Customer'), 'customer'),
+
+            Text::make(__('Country'), function () {
+                    return $this->getCustomerCountry();
+                })
+                ->sortable(),
+
+            Text::make(__('Phone'), 'billing_phone_number'),
+
+            Text::make(__('Email'), 'email'),
+
+            Textarea::make(__('Customer note'), 'comments'),
 
             Panel::make('Billing address', $this->billingAddressFields()),
 
             Panel::make('Shipping address', $this->shippingAddressFields()),
 
-            'service_id',
-            'service_fee',
-            'service_fee_tax',
-            'shipping_fee',
-            'shipping_fee_tax',
-            'discount_fee',
-            'discount_fee_tax',
-            'total',
-            'total_tax',
-            'production_cost',
-            'production_cost_tax',
-            'order_parts',
-            'payment_method',
-            'payment_issuer',
-            'payment_intent_id',
-            'customer_ip_address',
-            'customer_user_agent',
-            'comments',
-            'promo_code',
-            'fast_delivery_lead_time',
-            'is_paid',
-            'paid_at',
-            'order_customer_lead_time',
-            'arrived_at',
+            HasMany::make(__('Uploads'), 'uploads'),
+
+            HasMany::make(__('Rejections'), 'rejections'),
+
+            new Panel(__('History'), $this->commonMetaData(false, false, false, false)),
+        ];
+    }
+
+    /**
+     * Get the fields displayed by the resource on detail page.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function fieldsForCreate(NovaRequest $request)
+    {
+
+    }
+
+    /**
+     * Get the fields displayed by the resource on detail page.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function fieldsForUpdate(NovaRequest $request)
+    {
+        return [
+            Text::make(__('First name'), 'first_name'),
+
+            Text::make(__('Last name'), 'last_name'),
+
+            Text::make(__('Phone'), 'billing_phone_number'),
+
+            Text::make(__('Email'), 'email'),
+
+            Textarea::make(__('Customer note'), 'comments'),
+
+            Panel::make('Billing address', $this->billingAddressFields()),
+
+            Panel::make('Shipping address', $this->shippingAddressFields()),
         ];
     }
 
@@ -197,9 +285,10 @@ class Order extends Resource
                         'foreignkey' => 'country_id',
                     ],
                 ]),
-            (new CreatedAtDaterangepicker( DateHelper::ALL))
+            (new CreatedAtDaterangepickerFilter( DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
-            new ShowDeleted(),
+            new StatusFilter(),
+
         ];
     }
 
@@ -226,36 +315,88 @@ class Order extends Resource
     }
 
     /**
+     * @return StatusField
+     */
+    protected function getStatusField(): StatusField
+    {
+        return StatusField::make(__('Status'))
+            ->icons([
+                'dots-circle-horizontal' => $this->status === 'processing',
+                'clock' => $this->status == 'overdue',
+                'exclamation' => $this->status == 'almost-overdue',
+                'check-circle' => $this->status === 'completed',
+                'x-circle' => $this->status === 'canceled',
+            ])
+            ->tooltip([
+                'dots-circle-horizontal' => __('In process since :date', ['date' => Carbon::parse($this->created_at)->format('d-m-Y H:i:s')]),
+                'clock' => __('Overdue since :days', ['days' => $this->daysOverdue()]),
+                'exclamation' => __('Almost overdue'),
+                'check-circle' => __('Completed'),
+                'x-circle' => __('Cancelled'),
+            ])
+            ->info([
+                'dots-circle-horizontal' => __('In process'),
+                'clock' => __('Overdue since :days', ['days' => $this->daysOverdue()]),
+                'exclamation' => __('Almost overdue'),
+                'check-circle' => __('Completed'),
+                'x-circle' => __('Cancelled'),
+            ])
+            ->color([
+                'dots-circle-horizontal' => 'grey-500',
+                'clock' => 'orange-500',
+                'exclamation' => 'yellow-500',
+                'check-circle' => 'green-500',
+                'x-circle' => 'red-500',
+            ]);
+    }
+
+    /**
      * @return array
      */
     protected function billingAddressFields(): array
     {
         return [
-            Text::make(__('Billing name'), function () {
+            // Detail fields
+            Text::make(__('Billing Name'), function () {
                 return sprintf('%s %s', $this->billing_first_name, $this->billing_last_name);
             })->exceptOnForms(),
 
-            Text::make(__('Billing first name'), 'billing_first_name')
+            Text::make(__('Billing Street / House number'), function () {
+                return sprintf('%s %s', $this->billing_address_line1, $this->billing_house_number);
+            })->onlyOnDetail(),
+
+            Text::make(__('Billing Postal code, City'), function () {
+                return sprintf('%s, %s', $this->billing_postal_code, $this->billing_city);
+            })->onlyOnDetail(),
+
+            // Form fields
+            Text::make(__('Billing First name'), 'billing_first_name')
+                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
-            Text::make(__('Billing last name'), 'billing_last_name')
+            Text::make(__('Billing Last name'), 'billing_last_name')
+                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
-            Text::make(__('Billing address line 1'), 'billing_address_line1'),
+            Text::make(__('Billing Street'), 'billing_address_line2')
+                ->sizeOnForms('w-1/2')
+                ->onlyOnForms(),
 
-            Text::make(__('Billing address line 2'), 'billing_address_line2')
-                ->hideFromIndex(),
+            Text::make(__('Billing House number'), 'billing_house_number')
+                ->sizeOnForms('w-1/2')
+                ->onlyOnForms(),
 
-            Text::make(__('Billing house number'), 'billing_house_number'),
+            Text::make(__('Billing Postal code'), 'billing_postal_code')
+                ->sizeOnForms('w-1/2')
+                ->onlyOnForms(),
 
-            Text::make(__('Billing postal code'), 'billing_postal_code'),
+            Text::make(__('Billing City'), 'billing_city')
+                ->sizeOnForms('w-1/2')
+                ->onlyOnForms(),
 
-            Text::make(__('Billing city'), 'billing_city'),
+            Text::make(__('Billing Country'), 'billing_country'),
 
-            Text::make(__('Billing country'), 'billing_country'),
-
-            TelInput::make(__('Billing phone'), 'billing_phone_number')
-                ->hideFromIndex(),
+            Text::make(__('Billing Phone'), 'billing_phone_number'),
         ];
     }
 
@@ -265,30 +406,47 @@ class Order extends Resource
     protected function shippingAddressFields(): array
     {
         return [
+            // Detail fields
             Text::make(__('Shipping name'), function () {
                 return sprintf('%s %s', $this->shipping_first_name, $this->shipping_last_name);
             })->exceptOnForms(),
 
-            Text::make(__('Shipping first name'), 'shipping_first_name')
+            Text::make(__('Shipping Street / House number'), function () {
+                return sprintf('%s %s', $this->shipping_address_line1, $this->shipping_house_number);
+            })->onlyOnDetail(),
+
+            Text::make(__('Shipping Postal code, City'), function () {
+                return sprintf('%s, %s', $this->shipping_postal_code, $this->shipping_city);
+            })->onlyOnDetail(),
+
+            // Form fields
+            Text::make(__('Shipping First name'), 'shipping_first_name')
+                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
-            Text::make(__('Shipping last name'), 'shipping_last_name')
+            Text::make(__('Shipping Last name'), 'shipping_last_name')
+                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
-            Text::make(__('Shipping address line 1'), 'shipping_address_line1'),
+            Text::make(__('Shipping Street'), 'shipping_address_line2')
+                ->sizeOnForms('w-1/2')
+                ->onlyOnForms(),
 
-            Text::make(__('Shipping address line 2'), 'shipping_address_line2')
-                ->hideFromIndex(),
+            Text::make(__('Shipping House number'), 'shipping_house_number')
+                ->sizeOnForms('w-1/2')
+                ->onlyOnForms(),
 
-            Text::make(__('Shipping house number'), 'shipping_house_number'),
+            Text::make(__('Shipping Postal code'), 'shipping_postal_code')
+                ->sizeOnForms('w-1/2')
+                ->onlyOnForms(),
 
-            Text::make(__('Shipping postal code'), 'shipping_postal_code'),
+            Text::make(__('Shipping City'), 'shipping_city')
+                ->sizeOnForms('w-1/2')
+                ->onlyOnForms(),
 
-            Text::make(__('Shipping city'), 'shipping_city'),
+            Text::make(__('Shipping Country'), 'shipping_country'),
 
-            Text::make(__('Shipping country'), 'shipping_country'),
-
-            TelInput::make(__('Shipping phone'), 'shipping_phone_number')
+            Text::make(__('Shipping Phone'), 'shipping_phone_number')
                 ->hideFromIndex(),
         ];
     }

@@ -2,7 +2,7 @@
 
 namespace App\Nova;
 
-use App\Nova\Filters\ShowDeleted;
+
 use App\Traits\Nova\CommonMetaDataTrait;
 use Carbon\Carbon;
 use Exception;
@@ -147,43 +147,6 @@ class Customer extends Resource
                 ->showCreateRelationButton(),
 
             HasMany::make(__('Orders'), 'orders')
-//                ->fields(function ($request, $relatedModel) {
-//                    return [
-//                        ID::make()->sortable(),
-//
-//                        Select::make(__('Currency'), 'currency_code')->options(function () {
-//                            return array_filter(\App\Models\Currency::pluck('name', 'code')->all());
-//                        })
-//                            ->hideFromIndex()
-//                            ->help(__('This currency will be used for all below prices')),
-//
-//                        Text::make(__('Order number'), 'order_number')
-//                            ->sortable(),
-//
-//                        RelationshipCount::make(__('# Uploads'), 'uploads')
-//                            ->onlyOnIndex()
-//                            ->sortable(),
-//
-//                        Text::make(__('Order product value'), 'order_product_value',)
-//                            ->sortable(),
-//
-//                        \Laravel\Nova\Fields\Currency::make(__('Total'), 'total')
-//                            ->min(0)
-//                            ->step(0.01)
-//                            ->dependsOn(
-//                                ['currency_code'],
-//                                function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
-//                                    $field->currency($formData->currency_code);
-//                                }
-//                            )
-//                            ->displayUsing(function ($value) {
-//                                if ($value !== null) {
-//                        return currencyFormatter($value, $this->currency_code);
-//                    }
-//                    return $value;
-//                            }),
-//                    ];
-//                })
                 ->hideFromIndex(),
 
             HasMany::make(__('Models'), 'models')
@@ -245,7 +208,7 @@ class Customer extends Resource
                         'foreignkey' => 'country_id',
                     ],
                 ]),
-            new ShowDeleted(),
+
         ];
     }
 
