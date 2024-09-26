@@ -60,10 +60,11 @@ class CalculatePricesService
     {
         if ($price->setup_fee) {
             $total = $price->setup_fee_amount + ($materialVolume * $price->price_volume_cc);
-        } else if ($materialVolume <= $price->minimum_per_stl) {
-            $total = $price->price_minimum_per_stl;
         } else {
             $total = ($materialVolume * $price->price_volume_cc) + ($surfaceArea * $price->price_surface_cm2);
+            if ($total < $price->price_minimum_per_stl) {
+                $total = $price->price_minimum_per_stl;
+            }
         }
 
         return (float)$total;
