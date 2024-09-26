@@ -49,7 +49,7 @@ class OrdersService
         $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_created_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE'));
 
         $order = Order::create([
-            'wp_id' => $request->wid,
+            'wp_id' => $request->id,
             'customer_id' => $customer?->id,
             'currency_id' => $currency?->id,
             'country_id' => $country->id,
