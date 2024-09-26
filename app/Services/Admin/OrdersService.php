@@ -46,6 +46,8 @@ class OrdersService
             }
         }
 
+        $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_created_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE'));
+
         $order = Order::create([
             'wp_id' => $request->wid,
             'customer_id' => $customer?->id,
@@ -94,8 +96,10 @@ class OrdersService
             'meta_data' => $request->meta_data,
             'comments' => $request->customer_note,
             'promo_code' => null,
+            'is_paid' => true,
+            'paid_at' => $createdAt,
             'created_by' => $systemUser->id,
-            'created_at' => Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_created_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE')),
+            'created_at' => $createdAt,
             'updated_by' => $systemUser->id,
             'updated_at' => Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_modified_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE')),
         ]);

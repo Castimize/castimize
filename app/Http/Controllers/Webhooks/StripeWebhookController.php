@@ -63,13 +63,14 @@ class StripeWebhookController extends Controller
      */
     protected function handlePaymentIntentSucceeded(PaymentIntent $paymentIntent): Response
     {
-        $order = Order::where('order_number', $paymentIntent->metadata->order_id)->first();
-        if ($order !== null) {
-            $order->is_paid = true;
-            $order->paid_at = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'));
-            $order->save();
-            return $this->successMethod();
-        }
+        // For now already handled by woocommerce and order is already paid
+//        $order = Order::where('order_number', $paymentIntent->metadata->order_id)->first();
+//        if ($order !== null) {
+//            $order->is_paid = true;
+//            $order->paid_at = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'));
+//            $order->save();
+//            return $this->successMethod();
+//        }
 
         Log::info('Order not found, payment intent' . print_r($paymentIntent->toArray(), true));
         return $this->successMethod();
