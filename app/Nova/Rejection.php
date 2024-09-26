@@ -71,7 +71,7 @@ class Rejection extends Resource
         return [
             ID::make()->sortable(),
 
-            BelongsTo::make(__('Order #'), 'order'),
+            BelongsTo::make(__('Order'), 'order'),
 
             DateTime::make(__('Order date'), function () {
                 return $this->getOrderDate();
@@ -111,7 +111,7 @@ class Rejection extends Resource
         return [
             ID::make()->sortable(),
 
-            BelongsTo::make(__('Order #'), 'order')
+            BelongsTo::make(__('Order'), 'order')
                 ->sortable(),
 
             DateTime::make(__('Order date'), function () {
