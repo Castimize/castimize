@@ -11,6 +11,7 @@ use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 use Laravel\Nova\Panel;
 
 class Model extends Resource
@@ -71,8 +72,8 @@ class Model extends Resource
                 ->acceptedTypes('.stl,.obj,.3ds'),
 
             BelongsTo::make(__('Customer'), 'customer')
-                ->hideFromIndex(function () use ($request) {
-                    return ($request->viaResource === 'customer');
+                ->hideFromIndex(function (ResourceIndexRequest $request) {
+                    return $request->viaRelationship();
                 })
                 ->sortable(),
 
@@ -98,8 +99,8 @@ class Model extends Resource
                 ->hideByDefault(),
 
             Number::make(__('Model parts'), 'model_parts')
-                ->hideByDefault(function () use ($request) {
-                    return ($request->viaResource === 'customer');
+                ->hideFromIndex(function (ResourceIndexRequest $request) {
+                    return $request->viaRelationship();
                 })
                 ->step(1),
 

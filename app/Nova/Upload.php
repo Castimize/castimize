@@ -6,11 +6,13 @@ use App\Traits\Nova\CommonMetaDataTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\File;
 use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 use Laravel\Nova\Panel;
 use WesselPerik\StatusField\StatusField;
 
@@ -61,8 +63,15 @@ class Upload extends Resource
         return [
             ID::make()->sortable(),
 
+            BelongsTo::make(__('Order'), 'order'),
+
             Text::make(__('Name'), 'name')
                 ->sortable(),
+
+            File::make(__('Stl file'), 'file_name')
+                ->disk('r2')
+                ->path('wp-content/uploads/p3d/')
+                ->acceptedTypes('.stl,.obj,.3ds'),
 
             BelongsTo::make(__('Material'), 'material')
                 ->sortable(),
@@ -78,7 +87,12 @@ class Upload extends Resource
                     }
                 ),
 
-            BelongsTo::make(__('Manufacturer'), 'manufacturer')
+            Text::make(__('Manufacturer'), function () {
+                return $this->orderQueue?->manufacturer
+                    ? '<span><a class="link-default" href="/admin/resources/maufacturers/' . $this->orderQueue->manufacturer->id . '">' . $this->orderQueue->manufacturer->name . '</a></span>'
+                    : '';
+                })
+                ->asHtml()
                 ->sortable(),
 //                        status
 //                        In queue 🚦
@@ -112,6 +126,12 @@ class Upload extends Resource
         return [
             ID::make()->sortable(),
 
+            BelongsTo::make(__('Order'), 'order')
+                ->hideFromIndex(function (ResourceIndexRequest $request) {
+                    return $request->viaRelationship();
+                })
+                ->sortable(),
+
             Text::make(__('Name'), 'name')
                 ->sortable(),
 
@@ -128,7 +148,12 @@ class Upload extends Resource
                 ->exceptOnForms()
                 ->sortable(),
 
-            BelongsTo::make(__('Manufacturer'), 'manufacturer')
+            Text::make(__('Manufacturer'), function () {
+                return $this->orderQueue?->manufacturer
+                    ? '<span><a class="link-default" href="/admin/resources/maufacturers/' . $this->orderQueue->manufacturer->id . '">' . $this->orderQueue->manufacturer->name . '</a></span>'
+                    : '';
+            })
+                ->asHtml()
                 ->sortable(),
 
             $this->getStatusField(),
