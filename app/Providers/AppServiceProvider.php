@@ -39,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
         // Macro to add or sub business days
         Carbon::macro('businessDays', function ($value = 1, string $type = 'add') {
             while ($value > 0) {
-                $method = sprintf('%sDay', $type);
+                $method = sprintf('%sDays', $type);
                 $this->$method();
                 if (!$this->isWeekend()) {
                     $type === 'add' ? ++$value : --$value;
