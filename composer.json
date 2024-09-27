@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "cmixin/business-day": "^1.18",
         "codenco-dev/nova-grid-system": "^2.0",
         "darkaonline/l5-swagger": "^8.6",
         "devloops/phone-number": "^1.0",
