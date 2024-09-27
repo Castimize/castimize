@@ -50,7 +50,7 @@ trait OrderQueueStatusFieldTrait
             ->color([
                 'dots-circle-horizontal' => 'grey-500',
                 'x-circle' => 'orange-500',
-                'x' => 'redd-500',
+                'x' => 'red-500',
                 'cog' => 'yellow-500',
                 'clipboard-check' => 'yellow-500',
                 'truck' => 'yellow-500',
@@ -58,6 +58,43 @@ trait OrderQueueStatusFieldTrait
                 'badge-check' => 'yellow-500',
                 'check' => 'green-500',
                 'printer' => 'purple-500',
+            ]);
+    }
+
+    protected function getStatusCheckField()
+    {
+        //Final arrival date = Date ordered + customer_lead_time
+        //In queue
+        //Target date: date orderded + 1 business day
+        //Rejection request
+        //Target date: rejections.created_at + 1 business day
+        //in production
+        //Target date: contract-date
+        //available for shipping
+        //Dichstbijzijnde datum van:
+        //OF: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day - manufacturing_costs.shipment_lead_time
+        //OF: available for shipping + 2 business days
+        //in_transit_to_dc
+        //Dichtstbijzijnde datum van:
+        //OF: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day
+        //OF: manufacturing.shipments.sent_at + manufacturing_costs.shipment_lead_time
+        //at_dc
+        //Target date: Final arrival date - shipping_fees.default_lead_time
+        //In transit to customer
+        //Target date: Final arrival date
+
+        return StatusField::make(__('Status'))
+            ->icons([
+                'check' => $this->onSchedule,
+                'clock' => !$this->onSchedule,
+            ])
+            ->tooltip([
+                'check' => __('On schedule'),
+                'clock' => __('Behind schedule'),
+            ])
+            ->color([
+                'check' => 'green-500',
+                'clock' => 'red-500',
             ]);
     }
 }

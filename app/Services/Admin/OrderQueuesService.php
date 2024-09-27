@@ -29,9 +29,11 @@ class OrderQueuesService
         $orderQueues = [];
         foreach ($manufacturers as $manufacturer) {
             $manufacturerCost = $manufacturer->costs->where('material_id', $upload->material_id)->first();
+            $shippingFee = $upload->order->country->logisticsZone->shippingFee;
             if ($manufacturerCost) {
                 $orderQueues[] = $upload->orderQueue()->create([
                     'order_id' => $upload->order_id,
+                    'shipping_fee_id' => $shippingFee?->id,
                     'manufacturer_id' => $manufacturer->id,
                     'manufacturer_cost_id' => $manufacturerCost->id,
                     'manufacturer_costs' => (new CalculatePricesService())->calculateCostsOfModel(
