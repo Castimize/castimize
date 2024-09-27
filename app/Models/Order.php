@@ -232,7 +232,7 @@ class Order extends Model
     protected function dueDate(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => Carbon::parse($this->created_at)->addDays($this->order_customer_lead_time),
+            get: fn ($value) => Carbon::parse($this->created_at)->businessDays($this->order_customer_lead_time, 'add'),
         );
     }
 

@@ -25,6 +25,7 @@ Route::group([
         Route::get('customers/{customer}', 'CustomersApiController@show')->name('api.customers.show');
 
         //Orders
+        Route::post('orders/calculate-expected-delivery-date', 'OrdersApiController@calculateExpectedDeliveryDate')->name('api.orders.calculate-expected-delivery-date');
         Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');
         Route::get('orders/{order}', 'OrdersApiController@show')->name('api.orders.show');
 
@@ -35,6 +36,7 @@ Route::group([
         Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
     });
 
+    // Woocommerce endpoints
     Route::post('customers/wp', 'CustomersApiController@storeCustomerWp')->name('api.customers.store-customer-wp');
     Route::post('customers/wp/update', 'CustomersApiController@updateCustomerWp')->name('api.customers.update-customer-wp');
     Route::middleware(ValidateWcWebhookSignature::class)
@@ -42,7 +44,4 @@ Route::group([
 
     Route::middleware(ValidateWcWebhookSignature::class)
         ->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
-    //    Route::middleware([ValidateWcWebhookSignature::class])
-//        ->post('orders/wp/test', 'OrdersApiController@testIncomingOrder')->name('api.orders.test-incoming-order');
-//    Route::post('orders/wp/stripe-callback', 'OrdersApiController@orderPaidCallback')->name('api.orders.wp.stripe-callback');
 });

@@ -103,7 +103,7 @@ class OrderQueue extends Model
     protected function finalArrivalDate(): Attribute
     {
         return Attribute::make(
-            get: fn () => CarbonImmutable::parse($this->created_at)->addDays($this->upload->customer_lead_time),
+            get: fn () => CarbonImmutable::parse($this->created_at)->businessDays($this->upload->customer_lead_time, 'add'),
         );
     }
 

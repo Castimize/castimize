@@ -45,18 +45,22 @@ class OrdersApiController extends ApiController
         return new OrderResource($order);
     }
 
-    public function testIncomingOrder()
+    public function calculateExpectedDeliveryDate(Request $request): JsonResponse
     {
-        $payload = @file_get_contents('php://input');
-        $payload = json_decode( $payload, true);
-        Log::info(json_encode( $payload));
-        return response()->json([ 'data' => $payload, 'status' => Response::HTTP_OK]);
+        Log::info(print_r($request->all(), true));
+        $expectedDeliveryDate = '';
+        $uploads = $request->uploads;
+
+
+
+        return response()->json(['success' => true, 'expected_delivery_date' => $expectedDeliveryDate]);
     }
 
     /**
      * @param Request $request
+     * @return JsonResponse
      */
-    public function storeOrderWp(Request $request)
+    public function storeOrderWp(Request $request): JsonResponse
     {
         Log::info(print_r($request->all(), true));
         $order = (new OrdersService())->storeOrderWpFromApi($request);
@@ -64,10 +68,5 @@ class OrdersApiController extends ApiController
         return (new OrderResource($order))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
-    }
-
-    public function orderPaidCallback(Request $request)
-    {
-        Log::info(print_r($request->all(), true));
     }
 }
