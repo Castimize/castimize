@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\UploadToOrderQueueAction;
 use App\Traits\Nova\CommonMetaDataTrait;
 use App\Traits\Nova\OrderQueueStatusFieldTrait;
 use Laravel\Nova\Fields\BelongsTo;
@@ -13,6 +14,8 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 use Laravel\Nova\Panel;
+use Pavloniym\ActionButtons\ActionButton;
+use Pavloniym\ActionButtons\ActionButtons;
 
 class Upload extends Resource
 {
@@ -94,20 +97,6 @@ class Upload extends Resource
                 })
                 ->asHtml()
                 ->sortable(),
-//                        status
-//                        In queue 🚦
-//                        Rejection request ❎
-//                        Cancelled ❌
-//                        In production 🛠️
-//                        Available for shipping ⚓️
-//                                      In transit to DC 🚢
-//                        At DC 🏭
-//                        In transit to customer 📦
-//                        Completed ✔
-//                        Reprinted 🔙
-//                        Duedate
-//                        Date received
-//                        T&T link (als line-item in shipment zit, is dit handig?)
 
             new Panel(__('History'), $this->commonMetaData(false, false, false, false)),
         ];
@@ -176,6 +165,22 @@ class Upload extends Resource
 
                 return '-';
             }),
+
+            ActionButtons::make(__('Order queue'))->collection([
+                ActionButton::make(__('Add'))
+                    ->icon('Add')
+                    ->action(new UploadToOrderQueueAction(), $this->resource->id),
+//                    ->canSee(function () {
+//                        return !$this->resource->orderQueue;
+//                    }),
+            ])->canSee(function () {
+                return !$this->orderQueue;
+            }),
+
+            BelongsTo::make(__('Order queue'), 'orderQueue')
+                ->canSee(function () {
+                    return $this->orderQueue;
+                }),
         ];
     }
 
@@ -220,6 +225,8 @@ class Upload extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            (new UploadToOrderQueueAction()),
+        ];
     }
 }

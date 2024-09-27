@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Manufacturer;
 use App\Models\Upload;
 use App\Services\Admin\OrderQueuesService;
+use App\Services\Admin\UploadsService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
@@ -28,13 +29,6 @@ class UploadToOrderQueue implements ShouldQueue
      */
     public function handle(): void
     {
-        $orderQueuesService = new OrderQueuesService();
-        $manufacturer = Manufacturer::with(['costs'])->orderBy('id')->first();
-        $orderQueues = $orderQueuesService->storeFromUpload($this->upload, [$manufacturer]);
-
-        // Create a order queue status in-queue for all order queues
-        foreach ($orderQueues as $orderQueue) {
-            $orderQueuesService->setStatus($orderQueue);
-        }
+        (new UploadsService())->setUploadToOrderQueue($this->upload);
     }
 }
