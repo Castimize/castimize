@@ -53,7 +53,7 @@ class OrdersApiController extends ApiController
      */
     public function calculateExpectedDeliveryDate(Request $request): JsonResponse
     {
-        Log::info(print_r($request->uploads, true));
+        Log::info(print_r($request->all(), true));
         $expectedDeliveryDate = '';
         $uploads = $request->uploads;
 
