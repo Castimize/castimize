@@ -61,7 +61,10 @@ trait OrderQueueStatusFieldTrait
             ]);
     }
 
-    protected function getStatusCheckField()
+    /**
+     * @return StatusField
+     */
+    protected function getStatusCheckField(): StatusField
     {
         //Final arrival date = Date ordered + customer_lead_time
         //In queue

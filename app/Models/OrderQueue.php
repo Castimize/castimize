@@ -60,6 +60,8 @@ class OrderQueue extends Model
             'contract_date' => 'datetime',
             'status' => 'string',
             'status_slug' => 'string',
+            'final_arrival_date' => 'datetime',
+            'target_date' => 'datetime',
             'on_schedule' => 'boolean',
         ];
     }
@@ -96,12 +98,32 @@ class OrderQueue extends Model
     }
 
     /**
+     * Interact with  fina_arrival_date
+     */
+    protected function finalArrivalDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => CarbonImmutable::parse($this->created_at)->addDays($this->upload->customer_lead_time),
+        );
+    }
+
+    /**
+     * Interact with  target_date
+     */
+    protected function targetDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->calculatedTargetDate(),
+        );
+    }
+
+    /**
      * Interact with  on_schedule
      */
     protected function onSchedule(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->isOnSchedule(),
+            get: fn () => !now()->gte($this->target_date),
         );
     }
 
@@ -180,54 +202,56 @@ class OrderQueue extends Model
     /**
      * @return bool
      */
-    public function isOnSchedule(): bool
+    public function calculatedTargetDate(): bool
     {
         $statusSlug = $this->statusSlug;
-        $finalArrivalDate = CarbonImmutable::parse($this->created_at)->addDays($this->upload->customer_lead_time);
+        $finalArrivalDate = $this->final_arrival_date;
 
-        $targetDate = match ($statusSlug) {
+        return match ($statusSlug) {
             'in-queue' => Carbon::parse($this->created_at)->businessDays(1, 'add'),
             'rejection-request' => Carbon::parse($this->rejection->created_at)->businessDays(1, 'add'),
             'in-production' => $this->contract_date,
             'available-for-shipping' => $this->getAvailableForShippingDate($finalArrivalDate),
+            'in-transit-to-dc' => $this->getInTransitToDcDate($finalArrivalDate),
+            'at-dc' => $finalArrivalDate->subDays($this->shippingFee->default_lead_time),
+            'in-transit-to-customer' => $finalArrivalDate,
+            default => $finalArrivalDate,
         };
-
-        //Final arrival date = Date ordered + customer_lead_time
-        //In queue
-        //Target date: date orderded + 1 business day
-        //Rejection request
-        //Target date: rejections.created_at + 1 business day
-        //in production
-        //Target date: contract-date
-        //available for shipping
-        //Dichstbijzijnde datum van:
-        //OF: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day - manufacturing_costs.shipment_lead_time
-        //OF: available for shipping + 2 business days
-        //in_transit_to_dc
-        //Dichtstbijzijnde datum van:
-        //OF: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day
-        //OF: manufacturing.shipments.sent_at + manufacturing_costs.shipment_lead_time
-        //at_dc
-        //Target date: Final arrival date - shipping_fees.default_lead_time
-        //In transit to customer
-        //Target date: Final arrival date
-
-        return true;
     }
 
-    private function getAvailableForShippingDate(CarbonImmutable $finalArrivalDate)
+    /**
+     * @param CarbonImmutable $finalArrivalDate
+     * @return Carbon
+     */
+    private function getAvailableForShippingDate(CarbonImmutable $finalArrivalDate): Carbon
     {
+        // Closest date of:
+        // OR: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day - manufacturing_costs.shipment_lead_time
+        // OR: available for shipping + 2 business days
         $lastStatus = $this->statuses?->last();
-        // shipping_fees.default_lead_time - 1 business day - manufacturing_costs.shipment_lead_time
-        $subDays = $this->order->country->logisticsZone->shippingFee->default_lead_time;
-        $targetDate = $finalArrivalDate;
+        $targetDate = $finalArrivalDate->subDays($this->shippingFee->default_lead_time - $this->manufacturerCost->shipment_lead_time)->bussinessDays(1, 'sub');
         if ($lastStatus->slug !== 'available-for-shipping') {
-
+            return $targetDate;
         }
-        $availableForShippingStatusDateCheck = $lastStatus->created_at;
-        //order.country.logisticsZone.shippingFee
-        //Dichstbijzijnde datum van:
-        //OF: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day - manufacturing_costs.shipment_lead_time
-        //OF: available for shipping + 2 business days
+        $availableForShippingStatusDateCheck = Carbon::parse($lastStatus->created_at)->businessDays(2, 'add');
+        return $targetDate->lt($availableForShippingStatusDateCheck) ? $targetDate : $availableForShippingStatusDateCheck;
+    }
+
+    /**
+     * @param CarbonImmutable $finalArrivalDate
+     * @return Carbon
+     */
+    private function getInTransitToDcDate(CarbonImmutable $finalArrivalDate): Carbon
+    {
+        // Closest date of:
+        // OR: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day
+        // OR: manufacturing.shipments.sent_at + manufacturing_costs.shipment_lead_time
+        $lastStatus = $this->statuses?->last();
+        $targetDate = $finalArrivalDate->subDays($this->shippingFee->default_lead_time)->bussinessDays(1, 'sub');
+        if ($lastStatus->slug !== 'in-transit-to-dc') {
+            return $targetDate;
+        }
+        $inTransitToDcStatusDateCheck = Carbon::parse($this->manufacturerShipment->sent_at)->addDays($this->manufacturerCost->shipment_lead_time);
+        return $targetDate->lt($inTransitToDcStatusDateCheck) ? $targetDate : $inTransitToDcStatusDateCheck;
     }
 }

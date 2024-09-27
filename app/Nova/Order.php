@@ -159,20 +159,19 @@ class Order extends Resource
             $this->getStatusField(),
 
             Text::make(__('Created at'), function () {
-                return Carbon::parse($this->created_at)->format('d-m-Y H:i:s');
-            })
+                    return Carbon::parse($this->created_at)->format('d-m-Y H:i:s');
+                })
                 ->sortable(),
 
             Text::make(__('Due date'), function () {
-                return $this->due_date->format('d-m-Y H:i:s');
-            }),
+                    return $this->due_date->format('d-m-Y H:i:s');
+                })
+                ->sortable(),
 
             Text::make(__('Arrived at'), function () {
-                if ($this->arrived_at === null) {
-                    return '-';
-                }
-                return Carbon::parse($this->arrived_at)->format('d-m-Y H:i:s');
-            }),
+                    return $this->arrived_at !== null ? Carbon::parse($this->arrived_at)->format('d-m-Y H:i:s') : '-';
+                })
+                ->sortable(),
 
             Text::make(__('Order parts'), function () {
                 return $this->totalOrderParts();

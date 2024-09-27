@@ -39,6 +39,8 @@ class Upload extends Resource
      */
     public static $search = [
         'id',
+        'name',
+        'file_name',
     ];
 
     /**
@@ -143,7 +145,6 @@ class Upload extends Resource
             Text::make(__('Price'), function () {
                 return $this->price ? currencyFormatter((float)$this->price, $this->currency_code) : '';
             })
-                ->exceptOnForms()
                 ->sortable(),
 
             Text::make(__('Manufacturer'), function () {
