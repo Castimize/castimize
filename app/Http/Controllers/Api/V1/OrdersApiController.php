@@ -17,6 +17,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use JsonException;
 use Symfony\Component\HttpFoundation\Response;
 
 class OrdersApiController extends ApiController
@@ -45,13 +46,16 @@ class OrdersApiController extends ApiController
         return new OrderResource($order);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws JsonException
+     */
     public function calculateExpectedDeliveryDate(Request $request): JsonResponse
     {
-        Log::info(print_r($request->all(), true));
+        Log::info(print_r(json_decode($request->uploads, false, 512, JSON_THROW_ON_ERROR), true));
         $expectedDeliveryDate = '';
         $uploads = $request->uploads;
-
-
 
         return response()->json(['success' => true, 'expected_delivery_date' => $expectedDeliveryDate]);
     }
