@@ -9,7 +9,9 @@ use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Resources\CustomerResource;
 use App\Http\Resources\OrderResource;
+use App\Models\Country;
 use App\Models\Customer;
+use App\Models\Material;
 use App\Models\Order;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\OrdersService;
@@ -54,8 +56,17 @@ class OrdersApiController extends ApiController
     public function calculateExpectedDeliveryDate(Request $request): JsonResponse
     {
         Log::info(print_r($request->all(), true));
-        $expectedDeliveryDate = '';
+        $country = Country::with('logisticsZone.shippingFee')->where('alpha2', $request->country)->first();
         $uploads = $request->uploads;
+        $biggestCustomerLeadTime = null;
+        foreach ($uploads as $upload) {
+            $material = Material::where('wp_id', $upload['material_id'])->first();
+            $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
+            if ($biggestCustomerLeadTime === null || $customerLeadTime > $biggestCustomerLeadTime) {
+                $biggestCustomerLeadTime = $customerLeadTime;
+            }
+        }
+        $expectedDeliveryDate = now()->businessDays($biggestCustomerLeadTime, 'add')->format('Y-m-d H:i:s');
 
         return response()->json(['success' => true, 'expected_delivery_date' => $expectedDeliveryDate]);
     }
