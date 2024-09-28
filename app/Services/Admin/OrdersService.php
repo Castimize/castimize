@@ -151,22 +151,30 @@ class OrdersService
             $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
             $fileHeaders = get_headers($fileUrl);
 
+            $withoutResizedFileName = str_replace('_resized', '', $fileName);
+
             // Check files exists on local storage of site and not on R2
             if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileName)) {
                 Storage::disk('r2')->put($fileName, file_get_contents($fileUrl));
+            }
+            // Check files exists on local storage of site and not on R2 (without resized
+            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($withoutResizedFileName)) {
+                Storage::disk('r2')->put($withoutResizedFileName, file_get_contents($fileUrl));
             }
             // Check file thumb exists on local storage of site and not on R2
             if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileNameThumb)) {
                 Storage::disk('r2')->put($fileNameThumb, file_get_contents($fileThumb));
             }
 
-            $model = Model::where('file_name', $fileName)->first();
+            $model = Model::where('file_name', $withoutResizedFileName)->first();
             if ($model) {
                 $modelXLength = $model->model_x_length;
                 $modelYLength = $model->model_y_length;
                 $modelZLength = $model->model_z_length;
 
                 $model->customer_id = $customer->id;
+                $model->file_name = $fileName;
+                $model->meta_data = $lineItem['meta_data'];
                 $model->save();
             }
 
