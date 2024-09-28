@@ -145,13 +145,13 @@ class OrdersService
                     $surfaceArea = $metaData['value'];
                 }
             }
-            $fileName = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $fileName);
             $fileNameThumb = sprintf('%s%s.thumb.png', env('APP_SITE_STL_UPLOAD_DIR'), $fileName);
+            $withoutResizedFileName = str_replace('_resized', '', $fileName);
+            $fileName = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $fileName);
             $fileUrl = sprintf('%s/%s', env('APP_SITE_URL'), $fileName);
             $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
             $fileHeaders = get_headers($fileUrl);
 
-            $withoutResizedFileName = str_replace('_resized', '', $fileName);
 
             // Check files exists on local storage of site and not on R2
             if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileName)) {
