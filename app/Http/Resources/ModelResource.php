@@ -17,6 +17,7 @@ class ModelResource extends JsonResource
     {
         $thumb = sprintf('%s.thumb.png', $this->file_name);
         return [
+            'id' => $this->id,
             'customer_id' => $this->customer_id,
             'material_name' => $this->material->name,
             'material_id' => $this->material->id,
