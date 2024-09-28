@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,6 +34,7 @@ class Model extends EloquentModel
         'model_surface_area_cm2',
         'model_parts',
         'model_box_volume',
+        'meta_data',
     ];
 
     /**
@@ -46,6 +48,7 @@ class Model extends EloquentModel
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'meta_data' => AsArrayObject::class,
         ];
     }
 
