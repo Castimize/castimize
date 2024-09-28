@@ -33,6 +33,7 @@ Route::group([
         Route::post('prices/calculate', 'PricesApiController@calculatePrice')->name('api.prices.calculate');
 
         // Models
+        Route::get('models/{model}', 'ModelsApiController@show')->name('api.models.show');
         Route::get('models/wp/{customerId}', 'ModelsApiController@showModelsWpCustomer')->name('api.models.show-customer-wp-models');
         Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
     });

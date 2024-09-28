@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Resources\ModelResource;
 use App\Models\Customer;
+use App\Models\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -13,6 +14,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ModelsApiController extends ApiController
 {
+    /**
+     * @param Model $model
+     * @return ModelResource
+     */
+    public function show(Model $model): ModelResource
+    {
+        abort_if(Gate::denies('viewModel'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        return new ModelResource($model);
+    }
+
     /**
      * @param int $customerId
      * @return AnonymousResourceCollection
