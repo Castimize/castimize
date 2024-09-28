@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
+use function Aws\map;
 
 class ModelResource extends JsonResource
 {
@@ -16,6 +17,15 @@ class ModelResource extends JsonResource
     public function toArray(Request $request): array
     {
         $thumb = sprintf('%s.thumb.png', $this->file_name);
+        $metaData = $this->meta_data;
+        if ($metaData) {
+            for ($i = 0, $iMax = count($metaData); $i < $iMax; $i++) {
+                if ($metaData[$i]['key'] === 'pa_p3d_scale') {
+                    [$value, $n] = explode(' (', str_replace('&times;', '', $metaData[$i]['value']));
+                    $metaData[$i]['value'] = $value;
+                }
+            }
+        }
         return [
             'id' => $this->id,
             'customer_id' => $this->customer_id,
@@ -34,7 +44,7 @@ class ModelResource extends JsonResource
             'model_surface_area_cm2' => $this->model_surface_area_cm2,
             'model_parts' => $this->model_parts,
             'model_box_volume' => $this->model_box_volume,
-            'meta_data' => $this->meta_data,
+            'meta_data' => $metaData,
         ];
     }
 }
