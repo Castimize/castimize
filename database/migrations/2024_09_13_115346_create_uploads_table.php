@@ -41,7 +41,7 @@ return new class extends Migration
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('set null');
             $table->foreign('material_id')->references('id')->on('materials')->onDelete('set null');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('set null');
-            $table->foreign('currency_id')->references('id')->on('orders')->onDelete('set null');
+            $table->foreign('currency_id')->references('id')->on('currencies')->onDelete('set null');
         });
 
         Schema::table('uploads', function (Blueprint $table) {
