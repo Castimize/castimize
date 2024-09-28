@@ -25,7 +25,7 @@ return new class extends Migration
             $table->float('total_costs')->nullable();
             $table->dateTime('service_lead_time')->nullable();
             $table->float('service_costs')->nullable();
-            $table->string('currency_code')->default('EUR');
+            $table->string('currency_code')->default('USD');
             $table->integer('type')->nullable();
 
             $table->timestamps();

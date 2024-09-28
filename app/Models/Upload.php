@@ -128,7 +128,7 @@ class Upload extends Model
     protected function dueDate(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => Carbon::parse($this->created_at)->businessDays($this->customer_lead_time, 'add'),
+            get: fn ($value) => Carbon::parse($this->created_at)->addBusinessDays($this->customer_lead_time),
         );
     }
 

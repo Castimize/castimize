@@ -103,7 +103,7 @@ class OrderQueue extends Model
     protected function finalArrivalDate(): Attribute
     {
         return Attribute::make(
-            get: fn () => CarbonImmutable::parse($this->created_at)->businessDays($this->upload->customer_lead_time, 'add'),
+            get: fn () => CarbonImmutable::parse($this->created_at)->addBusinessDays($this->upload->customer_lead_time),
         );
     }
 
@@ -208,8 +208,8 @@ class OrderQueue extends Model
         $finalArrivalDate = $this->final_arrival_date;
 
         return match ($statusSlug) {
-            'in-queue' => Carbon::parse($this->created_at)->businessDays(1, 'add'),
-            'rejection-request' => Carbon::parse($this->rejection->created_at)->businessDays(1, 'add'),
+            'in-queue' => Carbon::parse($this->created_at)->addBusinessDays(1),
+            'rejection-request' => Carbon::parse($this->rejection->created_at)->addBusinessDays(1),
             'in-production' => $this->contract_date,
             'available-for-shipping' => $this->getAvailableForShippingDate($finalArrivalDate),
             'in-transit-to-dc' => $this->getInTransitToDcDate($finalArrivalDate),
@@ -233,7 +233,7 @@ class OrderQueue extends Model
         if ($lastStatus->slug !== 'available-for-shipping') {
             return $targetDate;
         }
-        $availableForShippingStatusDateCheck = Carbon::parse($lastStatus->created_at)->businessDays(2, 'add');
+        $availableForShippingStatusDateCheck = Carbon::parse($lastStatus->created_at)->addBusinessDays(2);
         return $targetDate->lt($availableForShippingStatusDateCheck) ? $targetDate : $availableForShippingStatusDateCheck;
     }
 

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->tinyText('ups_tracking_manual')->nullable();
             $table->integer('total_parts')->nullable();
             $table->float('total_costs')->nullable();
-            $table->string('currency_code')->default('EUR');
+            $table->string('currency_code')->default('USD');
             $table->integer('type')->nullable();
             $table->timestamps();
             $table->softDeletes();

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('description', 500);
             $table->integer('quantity')->default(1);
             $table->float('amount');
-            $table->string('currency_code')->default('EUR');
+            $table->string('currency_code')->default('USD');
             $table->timestamps();
             $table->softDeletes();
 

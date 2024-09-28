@@ -23,7 +23,7 @@ return new class extends Migration
             $table->float('costs_volume_cc')->nullable();
             $table->float('costs_minimum_per_stl')->nullable();
             $table->float('costs_surface_cm2')->nullable();
-            $table->string('currency_code')->default('EUR');
+            $table->string('currency_code')->default('USD');
             $table->boolean('active')->default(true);
             $table->timestamps();
             $table->softDeletes();

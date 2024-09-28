@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('currency_id')->index()->nullable();
             $table->string('name');
             $table->float('default_rate');
-            $table->string('currency_code')->default('EUR');
+            $table->string('currency_code')->default('USD');
             $table->integer('default_lead_time');
             $table->float('cc_threshold_1')->nullable();
             $table->float('rate_increase_1')->nullable();

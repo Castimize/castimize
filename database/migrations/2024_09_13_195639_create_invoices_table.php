@@ -19,7 +19,7 @@ return new class extends Migration
             $table->dateTime('invoice_date');
             $table->boolean('debit')->default(true);
             $table->float('total_amount');
-            $table->string('currency_code')->default('EUR');
+            $table->string('currency_code')->default('USD');
             $table->text('description');
             $table->string('email');
             $table->string('email_cc')->nullable();

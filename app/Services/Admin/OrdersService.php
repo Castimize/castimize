@@ -36,6 +36,9 @@ class OrdersService
         }
 
         $currency = Currency::where('code', $request->currency)->first();
+        if ($currency === null) {
+            $currency = Currency::where('code', 'USD')->first();
+        }
 
         preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->billing['address_1'], $matchBilling);
         preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->shipping['address_1'], $matchShipping);
@@ -51,8 +54,8 @@ class OrdersService
 
         $order = Order::create([
             'wp_id' => $request->id,
-            'customer_id' => $customer?->id,
-            'currency_id' => $currency?->id,
+            'customer_id' => $customer->id,
+            'currency_id' => $currency->id,
             'country_id' => $country->id,
             'order_number' => $request->number,
             'order_key' => $request->order_key,
@@ -88,7 +91,7 @@ class OrdersService
             'production_cost' => null,
             'production_cost_tax' => null,
             'prices_include_tax' => $request->prices_include_tax ?? true,
-            'currency_code' => $request->currency ?? 'EUR',
+            'currency_code' => $request->currency ?? 'USD',
             'payment_method' => $request->payment_method_title,
             'payment_issuer' => $request->payment_method,
             'payment_intent_id' => $stripePaymentId,
@@ -143,12 +146,18 @@ class OrdersService
                 }
             }
             $fileName = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $fileName);
+            $fileNameThumb = sprintf('%s%s.thumb.png', env('APP_SITE_STL_UPLOAD_DIR'), $fileName);
             $fileUrl = sprintf('%s/%s', env('APP_SITE_URL'), $fileName);
+            $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
             $fileHeaders = get_headers($fileUrl);
 
             // Check files exists on local storage of site and not on R2
             if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileName)) {
                 Storage::disk('r2')->put($fileName, file_get_contents($fileUrl));
+            }
+            // Check file thumb exists on local storage of site and not on R2
+            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileNameThumb)) {
+                Storage::disk('r2')->put($fileNameThumb, file_get_contents($fileThumb));
             }
 
             $model = Model::where('file_name', $fileName)->first();
@@ -157,18 +166,14 @@ class OrdersService
                 $modelYLength = $model->model_y_length;
                 $modelZLength = $model->model_z_length;
 
-                if ($customer) {
-                    $model->customer_id = $customer?->id;
-                    $model->save();
-                } else {
-                    $model->delete();
-                }
+                $model->customer_id = $customer->id;
+                $model->save();
             }
 
             $upload = $order->uploads()->create([
                 'material_id' => $material->id,
-                'customer_id' => $customer?->id,
-                'currency_id' => $currency?->id,
+                'customer_id' => $customer->id,
+                'currency_id' => $currency->id,
                 'name' => $name,
                 'file_name' => $fileName,
                 'material_name' => $material->name,
@@ -184,7 +189,7 @@ class OrdersService
                 'subtotal_tax' => $lineItem['subtotal_tax'],
                 'total' => $lineItem['total'],
                 'total_tax' => $lineItem['total_tax'],
-                'currency_code' => $request->currency ?? 'EUR',
+                'currency_code' => $request->currency ?? 'USD',
                 'customer_lead_time' => $customerLeadTime,
                 'meta_data' => $lineItem['meta_data'],
                 'created_by' => $systemUser->id,

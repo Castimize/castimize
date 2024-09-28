@@ -55,7 +55,7 @@ return new class extends Migration
             $table->float('production_cost')->nullable();
             $table->float('production_cost_tax')->nullable();
 //            $table->float('logistic_cost')->nullable();
-            $table->string('currency_code')->default('EUR');
+            $table->string('currency_code')->default('USD');
             $table->integer('order_parts')->default(1);
             $table->string('payment_method')->nullable();
             $table->string('payment_issuer')->nullable();

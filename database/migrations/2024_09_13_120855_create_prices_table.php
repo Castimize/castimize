@@ -25,7 +25,7 @@ return new class extends Migration
             $table->float('fixed_fee_per_part')->nullable();
             $table->float('material_discount')->nullable();
             $table->float('bulk_discount')->nullable();
-            $table->string('currency_code')->default('EUR');
+            $table->string('currency_code')->default('USD');
             $table->timestamps();
             $table->softDeletes();
 

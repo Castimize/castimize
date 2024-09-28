@@ -32,7 +32,7 @@ return new class extends Migration
             $table->float('subtotal_tax')->nullable();
             $table->float('total')->nullable();
             $table->float('total_tax')->nullable();
-            $table->string('currency_code')->default('EUR');
+            $table->string('currency_code')->default('USD');
             $table->integer('customer_lead_time')->nullable();
             $table->json('meta_data')->nullable();
             $table->timestamps();
