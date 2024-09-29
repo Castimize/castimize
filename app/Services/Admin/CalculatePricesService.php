@@ -125,15 +125,7 @@ class CalculatePricesService
     {
         $totalVolume = 0.00;
         foreach ($uploads as $upload) {
-            $quantity = $upload['quantity'];
-            $volume = 0;
-            foreach ($upload['3dp_options']['meta_data'] as $metaData) {
-                if ($metaData['key'] === '_p3d_stats_box_volume') {
-                    $volume = $metaData['value'];
-                }
-            }
-            $volume *= $quantity;
-            $totalVolume += $volume;
+            $totalVolume += $upload['3dp_options']['model_stats_raw']['model']['box_volume'] * $upload['quantity'];
         }
         return $totalVolume;
     }

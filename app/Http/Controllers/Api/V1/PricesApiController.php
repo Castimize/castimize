@@ -46,7 +46,7 @@ class PricesApiController extends ApiController
      */
     public function calculateShipping(Request $request): JsonResponse|CalculatedShippingFeeResource
     {
-        Log::info(print_r($request->all(), true));
+//        Log::info(print_r($request->all(), true));
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         try {
