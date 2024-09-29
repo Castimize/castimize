@@ -127,7 +127,7 @@ class CalculatePricesService
         foreach ($uploads as $upload) {
             $quantity = $upload['quantity'];
             $volume = 0;
-            foreach ($upload['meta_data'] as $metaData) {
+            foreach ($upload['3dp_options']['meta_data'] as $metaData) {
                 if ($metaData['key'] === '_p3d_stats_box_volume') {
                     $volume = $metaData['value'];
                 }
