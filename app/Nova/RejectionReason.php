@@ -7,6 +7,7 @@ use App\Traits\Nova\CommonMetaDataTrait;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Panel;
 
 class RejectionReason extends Resource
 {
@@ -58,6 +59,8 @@ class RejectionReason extends Resource
 
             Text::make(__('Reason'), 'reason')
                 ->sortable(),
+
+            new Panel(__('History'), $this->commonMetaData(true, true, false, false)),
         ];
     }
 
