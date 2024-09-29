@@ -98,7 +98,7 @@ class CalculatePricesService
     public function calculateShippingFee(Request $request): ShippingFee
     {
         $country = Country::with(['logisticsZone.shippingFee'])->where('alpha2', $request->country)->first();
-        if ($country === null || $country->logisticsZone === null || $country->logisticsZone->shippingFee) {
+        if ($country === null || $country->logisticsZone === null) {
             throw new NotFoundHttpException(__('404 not found'));
         }
         $shippingFee = $country->logisticsZone->shippingFee;
