@@ -89,7 +89,7 @@ class ShippingFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Default rate'), function () {
-                return $this->default_rate ? currencyFormatter((float)$this->default_rate, $this->default_rate) : '';
+                return $this->default_rate ? currencyFormatter((float)$this->default_rate, $this->currency_code) : '';
             })
                 ->exceptOnForms()
                 ->sortable(),
