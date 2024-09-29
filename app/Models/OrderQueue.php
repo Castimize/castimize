@@ -117,12 +117,12 @@ class OrderQueue extends Model
     /**
      * Interact with  target_date
      */
-    protected function targetDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->calculatedTargetDate(),
-        );
-    }
+//    protected function targetDate(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn () => $this->calculatedTargetDate(),
+//        );
+//    }
 
     /**
      * Interact with  on_schedule
@@ -215,19 +215,16 @@ class OrderQueue extends Model
     /**
      * @return Carbon|CarbonImmutable|\Carbon\CarbonInterface|mixed
      */
-    public function calculatedTargetDate(): mixed
+    public function calculateTargetDate($statusSlug): mixed
     {
-        $statusSlug = $this->status_slug;
-        $finalArrivalDate = CarbonImmutable::parse($this->created_at)->addBusinessDays($this->upload->customer_lead_time);
-
         return match ($statusSlug) {
             'in-queue' => Carbon::parse($this->created_at)->addBusinessDays(1),
             'rejection-request' => Carbon::parse($this->rejection->created_at)->addBusinessDays(1),
             'in-production' => $this->contract_date,
-            'available-for-shipping' => $this->getAvailableForShippingDate($finalArrivalDate),
-            'in-transit-to-dc' => $this->getInTransitToDcDate($finalArrivalDate),
-            'at-dc' => $finalArrivalDate->subBusinessDays($this->shippingFee->default_lead_time),
-            default => $finalArrivalDate,
+            'available-for-shipping' => $this->getAvailableForShippingDate($this->final_arrival_date),
+            'in-transit-to-dc' => $this->getInTransitToDcDate($this->final_arrival_date),
+            'at-dc' => $this->final_arrival_date->subBusinessDays($this->shippingFee->default_lead_time),
+            default => $this->final_arrival_date,
         };
     }
 

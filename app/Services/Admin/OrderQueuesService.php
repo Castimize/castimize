@@ -62,7 +62,7 @@ class OrderQueuesService
             'order_status_id' => $orderStatus->id,
             'status' => $orderStatus->status,
             'slug' => $orderStatus->slug,
-            'target_date' => now()->addBusinessDays(1),
+            'target_date' => $orderQueue->calculateTargetDate($orderStatusSlug),
         ]);
     }
 }
