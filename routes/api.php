@@ -31,7 +31,7 @@ Route::group([
 
         // Prices
         Route::post('prices/calculate', 'PricesApiController@calculatePrice')->name('api.prices.calculate');
-        Route::post('prices/calculate/shipping-fee', 'PricesApiController@calculateShippingFee')->name('api.prices.calculate.shipping-fee');
+        Route::post('prices/calculate/shipping', 'PricesApiController@calculateShipping')->name('api.prices.calculate.shipping');
 
         // Models
         Route::get('models/{model}', 'ModelsApiController@show')->name('api.models.show');
