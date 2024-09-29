@@ -69,7 +69,7 @@ return new class extends Migration
             $table->boolean('is_paid')->default(0);
             $table->dateTime('paid_at')->nullable();
             $table->integer('order_customer_lead_time')->default(1);
-            $table->dateTime('due_date')-index()->nullable();
+            $table->dateTime('due_date')->index()->nullable();
             $table->dateTime('arrived_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
