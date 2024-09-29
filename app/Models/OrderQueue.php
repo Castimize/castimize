@@ -28,6 +28,8 @@ class OrderQueue extends Model
      */
     protected $table = 'order_queue';
 
+    protected $with = ['upload'];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -58,11 +60,6 @@ class OrderQueue extends Model
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
             'contract_date' => 'datetime',
-            'status' => 'string',
-            'status_slug' => 'string',
-            'final_arrival_date' => 'datetime',
-            'target_date' => 'datetime',
-            'on_schedule' => 'boolean',
         ];
     }
 
@@ -83,7 +80,7 @@ class OrderQueue extends Model
     protected function status(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->statuses?->last()->status,
+            get: fn () => $this->getLastStatus()?->status,
         );
     }
 
@@ -93,8 +90,16 @@ class OrderQueue extends Model
     protected function statusSlug(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->statuses?->last()->slug,
+            get: fn () => $this->getLastStatus()?->orderStatus->slug,
         );
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastStatus(): mixed
+    {
+        return $this->orderQueueStatuses->last();
     }
 
     /**
@@ -186,7 +191,7 @@ class OrderQueue extends Model
     /**
      * @return HasMany
      */
-    public function statuses(): HasMany
+    public function orderQueueStatuses(): HasMany
     {
         return $this->hasMany(OrderQueueStatus::class);
     }
@@ -199,13 +204,14 @@ class OrderQueue extends Model
         return $this->hasOne(Rejection::class);
     }
 
+
     /**
-     * @return bool
+     * @return Carbon|CarbonImmutable|\Carbon\CarbonInterface|mixed
      */
-    public function calculatedTargetDate(): bool
+    public function calculatedTargetDate(): mixed
     {
-        $statusSlug = $this->statusSlug;
-        $finalArrivalDate = $this->final_arrival_date;
+        $statusSlug = $this->status_slug;
+        $finalArrivalDate = CarbonImmutable::parse($this->created_at)->addBusinessDays($this->upload->customer_lead_time);
 
         return match ($statusSlug) {
             'in-queue' => Carbon::parse($this->created_at)->addBusinessDays(1),
@@ -213,8 +219,7 @@ class OrderQueue extends Model
             'in-production' => $this->contract_date,
             'available-for-shipping' => $this->getAvailableForShippingDate($finalArrivalDate),
             'in-transit-to-dc' => $this->getInTransitToDcDate($finalArrivalDate),
-            'at-dc' => $finalArrivalDate->subDays($this->shippingFee->default_lead_time),
-            'in-transit-to-customer' => $finalArrivalDate,
+            'at-dc' => $finalArrivalDate->subBusinessDays($this->shippingFee->default_lead_time),
             default => $finalArrivalDate,
         };
     }
@@ -228,9 +233,9 @@ class OrderQueue extends Model
         // Closest date of:
         // OR: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day - manufacturing_costs.shipment_lead_time
         // OR: available for shipping + 2 business days
-        $lastStatus = $this->statuses?->last();
-        $targetDate = $finalArrivalDate->subDays($this->shippingFee->default_lead_time - $this->manufacturerCost->shipment_lead_time)->bussinessDays(1, 'sub');
-        if ($lastStatus->slug !== 'available-for-shipping') {
+        $lastStatus = $this->getLastStatus();
+        $targetDate = $finalArrivalDate->subBusinessDays($this->shippingFee->default_lead_time - $this->manufacturerCost->shipment_lead_time - 1);
+        if (!$lastStatus || $lastStatus->orderStatus->slug !== 'available-for-shipping') {
             return $targetDate;
         }
         $availableForShippingStatusDateCheck = Carbon::parse($lastStatus->created_at)->addBusinessDays(2);
@@ -246,12 +251,12 @@ class OrderQueue extends Model
         // Closest date of:
         // OR: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day
         // OR: manufacturing.shipments.sent_at + manufacturing_costs.shipment_lead_time
-        $lastStatus = $this->statuses?->last();
-        $targetDate = $finalArrivalDate->subDays($this->shippingFee->default_lead_time)->bussinessDays(1, 'sub');
-        if ($lastStatus->slug !== 'in-transit-to-dc') {
+        $lastStatus = $this->getLastStatus();
+        $targetDate = $finalArrivalDate->subBusinessDays($this->shippingFee->default_lead_time - 1);
+        if (!$lastStatus || $lastStatus->slug !== 'in-transit-to-dc') {
             return $targetDate;
         }
-        $inTransitToDcStatusDateCheck = Carbon::parse($this->manufacturerShipment->sent_at)->addDays($this->manufacturerCost->shipment_lead_time);
+        $inTransitToDcStatusDateCheck = Carbon::parse($this->manufacturerShipment->sent_at)->addBusinessDays($this->manufacturerCost->shipment_lead_time);
         return $targetDate->lt($inTransitToDcStatusDateCheck) ? $targetDate : $inTransitToDcStatusDateCheck;
     }
 }

@@ -5,11 +5,13 @@ namespace App\Nova;
 use App\Traits\Nova\CommonMetaDataTrait;
 use App\Traits\Nova\OrderQueueStatusFieldTrait;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use WesselPerik\StatusField\StatusField;
 
 class OrderQueue extends Resource
 {
@@ -70,7 +72,7 @@ class OrderQueue extends Resource
         'shippingFee',
         'manufacturerShipment',
         'customerShipment',
-        'statuses',
+        'orderQueueStatuses',
     ];
 
     /**
@@ -96,7 +98,7 @@ class OrderQueue extends Resource
                 ->sortable(),
 
             Text::make(__('Country'), function () {
-                    return $this->order->country->name;
+                    return $this->order->country->alpha2;
                 })
                 ->sortable(),
 
@@ -105,19 +107,20 @@ class OrderQueue extends Resource
             $this->getStatusCheckField(),
 
             Text::make(__('Country'), function () {
-                    return $this->order->country->name;
+                    return $this->order->country->alpha2;
                 })
                 ->sortable(),
 
             Text::make(__('Days till target date'), function () {
-                    $lastStatus = $this->statuses?->last();
-                    return $lastStatus && !$lastStatus->end_status ? now()->diffInDays($this->target_date) : '-';
+                    $lastStatus = $this->getLastStatus();
+                    //$finalArrivalDate = CarbonImmutable::parse($this->created_at)->addBusinessDays($this->upload->customer_lead_time);
+                    return $lastStatus && !$lastStatus?->orderStatus->end_status ? round(now()->diffInDays($this->target_date)) : '-';
                 })
                 ->sortable(),
 
             Text::make(__('Days till final arrival date'), function () {
-                    $lastStatus = $this->statuses?->last();
-                    return $lastStatus && !$lastStatus->end_status ? now()->diffInDays($this->final_arrival_date) : '-';
+                    $lastStatus = $this->getLastStatus();
+                    return $lastStatus && !$lastStatus?->orderStatus->end_status ? round(now()->diffInDays($this->final_arrival_date)) : '-';
                 })
                 ->sortable(),
 
@@ -127,7 +130,7 @@ class OrderQueue extends Resource
                 ->sortable(),
 
             Text::make(__('Total'), function () {
-                    return $this->order->total ? currencyFormatter((float)$this->order->total, $this->currency_code) : '';
+                    return $this->order->total ? currencyFormatter((float)$this->order->total, $this->order->currency_code) : '';
                 })
                 ->sortable(),
 

@@ -64,7 +64,6 @@ class Upload extends Model
             'due_date' => 'datetime',
             'completed_at' => 'datetime',
             'meta_data' => AsArrayObject::class,
-            'status' => 'string',
         ];
     }
 
@@ -115,10 +114,10 @@ class Upload extends Model
     /**
      * Interact with  status
      */
-    protected function status(): Attribute
+    protected function status_slug(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->orderQueue?->status,
+            get: fn () => $this->orderQueue?->status_slug,
         );
     }
 
