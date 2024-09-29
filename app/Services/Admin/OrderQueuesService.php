@@ -60,6 +60,7 @@ class OrderQueuesService
         return $orderQueue->statuses()->create([
             'order_status_id' => $orderStatus->id,
             'status' => $orderStatus->status,
+            'slug' => $orderStatus->slug,
         ]);
     }
 }

@@ -208,6 +208,7 @@ class OrdersService
             UploadToOrderQueue::dispatch($upload);
         }
         $order->order_customer_lead_time = $biggestCustomerLeadTime;
+        $order->due_date = Carbon::parse($order->created_at)->addBusinessDays($biggestCustomerLeadTime);
         $order->save();
 
         return $order;

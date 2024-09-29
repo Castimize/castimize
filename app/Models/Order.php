@@ -227,16 +227,6 @@ class Order extends Model
     }
 
     /**
-     * Interact with  due_date
-     */
-    protected function dueDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => Carbon::parse($this->created_at)->addBusinessDays($this->order_customer_lead_time),
-        );
-    }
-
-    /**
      * Interact with billing_name
      */
     protected function billingName(): Attribute
