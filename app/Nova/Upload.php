@@ -132,7 +132,7 @@ class Upload extends Resource
             Number::make(__('Quantity'), 'quantity'),
 
             Text::make(__('Price'), function () {
-                return $this->price ? currencyFormatter((float)$this->price, $this->currency_code) : '';
+                return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
             })
                 ->sortable(),
 
