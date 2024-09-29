@@ -41,6 +41,7 @@ class OrderQueuesService
                         $upload->model_volume_cc,
                         $upload->model_surface_area_cm2
                     ),
+                    'final_arrival_date' => Carbon::parse($upload->order->created_at)->addBusinessDays($upload->customer_lead_time),
                 ]);
             }
         }
@@ -61,6 +62,7 @@ class OrderQueuesService
             'order_status_id' => $orderStatus->id,
             'status' => $orderStatus->status,
             'slug' => $orderStatus->slug,
+            'target_date' => now()->addBusinessDays(1),
         ]);
     }
 }

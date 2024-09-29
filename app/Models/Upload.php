@@ -114,10 +114,10 @@ class Upload extends Model
     /**
      * Interact with  status
      */
-    protected function status_slug(): Attribute
+    protected function statusSlug(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->orderQueue?->status_slug,
+            get: fn () => $this->orderQueue?->getLastStatus()?->status_slug,
         );
     }
 

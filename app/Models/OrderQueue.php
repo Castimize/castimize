@@ -43,6 +43,7 @@ class OrderQueue extends Model
         'manufacturer_shipment_id',
         'manufacturer_cost_id',
         'customer_shipment_id',
+        'final_arrival_date',
         'contract_date',
         'manufacturer_costs',
         'total',
@@ -59,6 +60,7 @@ class OrderQueue extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'final_arrival_date' => 'datetime',
             'contract_date' => 'datetime',
         ];
     }
@@ -90,7 +92,17 @@ class OrderQueue extends Model
     protected function statusSlug(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->getLastStatus()?->orderStatus->slug,
+            get: fn () => $this->getLastStatus()?->slug,
+        );
+    }
+
+    /**
+     * Interact with  due_date
+     */
+    protected function dueDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->order->due_date,
         );
     }
 
@@ -100,16 +112,6 @@ class OrderQueue extends Model
     public function getLastStatus(): mixed
     {
         return $this->orderQueueStatuses->last();
-    }
-
-    /**
-     * Interact with  fina_arrival_date
-     */
-    protected function finalArrivalDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => CarbonImmutable::parse($this->created_at)->addBusinessDays($this->upload->customer_lead_time),
-        );
     }
 
     /**
@@ -196,6 +198,11 @@ class OrderQueue extends Model
         return $this->hasMany(OrderQueueStatus::class);
     }
 
+    public function latestOrderQueueStatus(): HasOne
+    {
+        return $this->hasOne(OrderQueueStatus::class)->latest();
+    }
+
     /**
      * @return HasOne
      */
@@ -235,7 +242,7 @@ class OrderQueue extends Model
         // OR: available for shipping + 2 business days
         $lastStatus = $this->getLastStatus();
         $targetDate = $finalArrivalDate->subBusinessDays($this->shippingFee->default_lead_time - $this->manufacturerCost->shipment_lead_time - 1);
-        if (!$lastStatus || $lastStatus->orderStatus->slug !== 'available-for-shipping') {
+        if (!$lastStatus || $lastStatus->slug !== 'available-for-shipping') {
             return $targetDate;
         }
         $availableForShippingStatusDateCheck = Carbon::parse($lastStatus->created_at)->addBusinessDays(2);

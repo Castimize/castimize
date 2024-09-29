@@ -83,6 +83,7 @@ class Order extends Model
         'is_paid',
         'paid_at',
         'order_customer_lead_time',
+        'due_date',
         'arrived_at',
     ];
 

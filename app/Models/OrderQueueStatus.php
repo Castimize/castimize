@@ -29,6 +29,7 @@ class OrderQueueStatus extends Model
         'order_status_id',
         'status',
         'slug',
+        'target_date',
     ];
 
     /**
@@ -42,6 +43,7 @@ class OrderQueueStatus extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'target_date' => 'datetime',
         ];
     }
 

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('order_status_id')->nullable()->index();
             $table->string('status');
             $table->string('slug')->index();
+            $table->dateTime('target_date')->index()->nullable();
             $table->timestamps();
             $table->softDeletes();
 

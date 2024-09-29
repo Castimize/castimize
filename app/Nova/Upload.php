@@ -144,8 +144,6 @@ class Upload extends Resource
                 ->asHtml()
                 ->sortable(),
 
-            $this->getStatusField(),
-
             Text::make(__('Due date'), function () {
                 return $this->due_date->format('d-m-Y H:i:s');
             }),

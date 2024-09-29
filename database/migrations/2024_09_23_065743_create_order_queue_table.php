@@ -20,7 +20,8 @@ return new class extends Migration
             $table->unsignedBigInteger('manufacturer_shipment_id')->nullable()->index();
             $table->unsignedBigInteger('manufacturer_cost_id')->nullable()->index();
             $table->unsignedBigInteger('customer_shipment_id')->nullable()->index();
-            $table->dateTime('contract_date')->nullable();
+            $table->dateTime('final_arrival_date')->index()->nullable();
+            $table->dateTime('contract_date')->index()->nullable();
             $table->float('manufacturer_costs')->nullable();
             $table->timestamps();
             $table->softDeletes();

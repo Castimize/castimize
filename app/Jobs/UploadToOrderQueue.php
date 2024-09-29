@@ -2,9 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Manufacturer;
 use App\Models\Upload;
-use App\Services\Admin\OrderQueuesService;
 use App\Services\Admin\UploadsService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
