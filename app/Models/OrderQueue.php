@@ -115,22 +115,12 @@ class OrderQueue extends Model
     }
 
     /**
-     * Interact with  target_date
-     */
-//    protected function targetDate(): Attribute
-//    {
-//        return Attribute::make(
-//            get: fn () => $this->calculatedTargetDate(),
-//        );
-//    }
-
-    /**
      * Interact with  on_schedule
      */
     protected function onSchedule(): Attribute
     {
         return Attribute::make(
-            get: fn () => !now()->gte($this->target_date),
+            get: fn () => !now()->gte($this->getLastStatus()->target_date),
         );
     }
 
