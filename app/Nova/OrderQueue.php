@@ -2,20 +2,24 @@
 
 namespace App\Nova;
 
+use App\Nova\Filters\DueDateDaterangepickerFilter;
+use App\Nova\Filters\OrderDateDaterangepickerFilter;
+use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Traits\Nova\CommonMetaDataTrait;
 use App\Traits\Nova\OrderQueueStatusFieldTrait;
 use Carbon\Carbon;
-use Carbon\CarbonImmutable;
-use Illuminate\Http\Request;
+use Exception;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use WesselPerik\StatusField\StatusField;
+use Rpj\Daterangepicker\DateHelper;
+use Titasgailius\SearchRelations\SearchesRelations;
 
 class OrderQueue extends Resource
 {
-    use CommonMetaDataTrait, OrderQueueStatusFieldTrait;
+    use CommonMetaDataTrait, OrderQueueStatusFieldTrait, SearchesRelations;
 
     /**
      * The model the resource corresponds to.
@@ -41,7 +45,7 @@ class OrderQueue extends Resource
      */
     public function title()
     {
-        return sprintf('%s %s', $this->order->order_number, $this->id);
+        return sprintf('%s-%s', $this->order->order_number, $this->id);
     }
 
     /**
@@ -59,7 +63,7 @@ class OrderQueue extends Resource
      * @var array
      */
     public static $sort = [
-        'id' => 'desc',
+        'created_at' => 'desc',
     ];
 
     /**
@@ -73,6 +77,23 @@ class OrderQueue extends Resource
         'manufacturerShipment',
         'customerShipment',
         'orderQueueStatuses',
+    ];
+
+    /**
+     * The relationship columns that should be searched.
+     *
+     * @var array
+     */
+    public static $searchRelations = [
+        'order' => [
+            'order_number',
+            'billing_first_name',
+            'billing_last_name',
+            'shipping_first_name',
+            'shipping_last_name',
+            'billing_country',
+            'shipping_country',
+        ],
     ];
 
     /**
@@ -98,7 +119,7 @@ class OrderQueue extends Resource
                 ->sortable(),
 
             Text::make(__('Country'), function () {
-                    return $this->order->country->alpha2;
+                    return strtoupper($this->order->country->alpha2);
                 })
                 ->sortable(),
 
@@ -106,19 +127,14 @@ class OrderQueue extends Resource
 
             $this->getStatusCheckField(),
 
-            Text::make(__('Country'), function () {
-                    return $this->order->country->alpha2;
-                })
-                ->sortable(),
-
-            Text::make(__('Days till target date'), function () {
+            Text::make(__('Days till TD'), function () {
                     $lastStatus = $this->getLastStatus();
                     //$finalArrivalDate = CarbonImmutable::parse($this->created_at)->addBusinessDays($this->upload->customer_lead_time);
                     return $lastStatus && !$lastStatus?->orderStatus->end_status ? round(now()->diffInDays($this->target_date)) : '-';
                 })
                 ->sortable(),
 
-            Text::make(__('Days till final arrival date'), function () {
+            Text::make(__('Days till FAD'), function () {
                     $lastStatus = $this->getLastStatus();
                     return $lastStatus && !$lastStatus?->orderStatus->end_status ? round(now()->diffInDays($this->final_arrival_date)) : '-';
                 })
@@ -134,14 +150,12 @@ class OrderQueue extends Resource
                 })
                 ->sortable(),
 
-            Text::make(__('Order date'), function () {
-                    return Carbon::parse($this->created_at)->format('d-m-Y H:i:s');
-                })
+            DateTime::make(__('Order date'), 'created_at')
+                ->displayUsing(fn ($value) => $value ? $value->format('d-m-Y H:i:s') : '')
                 ->sortable(),
 
-            Text::make(__('Due date'), function () {
-                    return $this->order->due_date->format('d-m-Y H:i:s');
-                })
+            DateTime::make(__('Due date'), 'due_date')
+                ->displayUsing(fn ($value) => $value ? $value->format('d-m-Y H:i:s') : '')
                 ->sortable(),
 
             Text::make(__('Arrived at'), function () {
@@ -166,10 +180,16 @@ class OrderQueue extends Resource
      *
      * @param NovaRequest $request
      * @return array
+     * @throws Exception
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            (new OrderDateDaterangepickerFilter( DateHelper::ALL))
+                ->setMaxDate(Carbon::today()),
+            (new DueDateDaterangepickerFilter( DateHelper::ALL)),
+            (new OrderQueueOrderStatusFilter()),
+        ];
     }
 
     /**

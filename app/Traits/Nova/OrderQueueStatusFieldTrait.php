@@ -4,7 +4,6 @@ namespace App\Traits\Nova;
 
 use Laravel\Nova\Exceptions\HelperNotSupported;
 use Laravel\Nova\Fields\Text;
-use WesselPerik\StatusField\StatusField;
 
 trait OrderQueueStatusFieldTrait
 {
@@ -88,6 +87,10 @@ trait OrderQueueStatusFieldTrait
                 return '<span data-toggle="tooltip" data-placement="top" title="' . __('On schedule') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(34 197 94)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></span>';
             }
             return '<span data-toggle="tooltip" data-placement="top" title="' . __('Behind schedule') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(239 68 68)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>';
-        })->asHtml();
+        })
+            ->asHtml()
+            ->canSee(function () {
+                return !in_array($this->getLastStatus()?->slug, ['cancelled']);
+            });
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Filters\Filter;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class OrderStatusFilter extends Filter
+class OrderQueueOrderStatusFilter extends Filter
 {
     /**
      * The filter's component.
@@ -15,6 +15,16 @@ class OrderStatusFilter extends Filter
      * @var string
      */
     public $component = 'select-filter';
+
+    /**
+     * Get the displayable name of the filter.
+     *
+     * @return string
+     */
+    public function name()
+    {
+        return __('Order queue status');
+    }
 
     /**
      * Apply the filter to the given query.
@@ -26,8 +36,15 @@ class OrderStatusFilter extends Filter
      */
     public function apply(NovaRequest $request, $query, $value)
     {
-        return $query;
-//        return $query->where('status', $value);
+        return $query->whereHas('orderQueueStatuses', function ($q) use ($value) {
+                $q->where('slug', $value)
+                    ->whereIn('id', function ($query) {
+                        $query
+                            ->selectRaw('max(id)')
+                            ->from('order_queue_statuses')
+                            ->whereColumn('order_queue_id', 'order_queue.id');
+                    });
+            });
     }
 
     /**
@@ -38,6 +55,6 @@ class OrderStatusFilter extends Filter
      */
     public function options(NovaRequest $request)
     {
-        return OrderStatus::all()->pluck('status', 'slug')->toArray();
+        return OrderStatus::all()->pluck('slug', 'status')->toArray();
     }
 }
