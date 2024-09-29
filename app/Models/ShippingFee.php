@@ -51,6 +51,7 @@ class ShippingFee extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'calculated_total' => 'float',
         ];
     }
 

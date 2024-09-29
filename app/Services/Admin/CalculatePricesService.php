@@ -2,9 +2,11 @@
 
 namespace App\Services\Admin;
 
+use App\Models\Country;
 use App\Models\ManufacturerCost;
 use App\Models\Material;
 use App\Models\Price;
+use App\Models\ShippingFee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -87,5 +89,52 @@ class CalculatePricesService
         }
 
         return (float)$total;
+    }
+
+    /**
+     * @param Request $request
+     * @return ShippingFee
+     */
+    public function calculateShippingFee(Request $request): ShippingFee
+    {
+        $country = Country::with(['logisticsZone.shippingFee'])->where('alpha2', $request->country)->first();
+        if ($country === null || $country->logisticsZone === null || $country->logisticsZone->shippingFee) {
+            throw new NotFoundHttpException(__('404 not found'));
+        }
+        $shippingFee = $country->logisticsZone->shippingFee;
+        $shippingFee->calculated_total = $shippingFee->default_rate;
+        $totalVolume = $this->getTotalVolumeOfUploads($request->uploads);
+        if ($totalVolume > $shippingFee->cc_threshold_1) {
+            $shippingFee->calculated_total += ($shippingFee->rate_increase_1 / 100) * $shippingFee->default_rate;
+        }
+        if ($totalVolume > $shippingFee->cc_threshold_2) {
+            $shippingFee->calculated_total += ($shippingFee->rate_increase_2 / 100) * $shippingFee->default_rate;
+        }
+        if ($totalVolume > $shippingFee->cc_threshold_3) {
+            $shippingFee->calculated_total += ($shippingFee->rate_increase_3 / 100) * $shippingFee->default_rate;
+        }
+
+        return $shippingFee;
+    }
+
+    /**
+     * @param array $uploads
+     * @return float|int|null
+     */
+    private function getTotalVolumeOfUploads(array $uploads): float|int|null
+    {
+        $totalVolume = 0.00;
+        foreach ($uploads as $upload) {
+            $quantity = $upload['quantity'];
+            $volume = 0;
+            foreach ($upload['meta_data'] as $metaData) {
+                if ($metaData['key'] === '_p3d_stats_box_volume') {
+                    $volume = $metaData['value'];
+                }
+            }
+            $volume *= $quantity;
+            $totalVolume += $volume;
+        }
+        return $totalVolume;
     }
 }

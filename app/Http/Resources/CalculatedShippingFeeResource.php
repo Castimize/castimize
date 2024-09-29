@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Http\Resources;
+
+use App\Models\Price;
+use App\Models\ShippingFee;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class CalculatedShippingFeeResource extends JsonResource
+{
+    /**
+     * The resource that this resource collects.
+     *
+     * @var string
+     */
+    public $collects = ShippingFee::class;
+
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'logistics_zone_id' => $this->logistics_zone_id,
+            'currency_id' => $this->currency_id,
+            'name' => $this->name,
+            'default_rate' => $this->default_rate,
+            'currency_code' => $this->currency_code,
+            'default_lead_time' => $this->default_lead_time,
+            'cc_threshold_1' => $this->cc_threshold_1,
+            'rate_increase_1' => $this->rate_increase_1,
+            'cc_threshold_2' => $this->cc_threshold_2,
+            'rate_increase_2' => $this->rate_increase_2,
+            'cc_threshold_3' => $this->cc_threshold_3,
+            'rate_increase_3' => $this->rate_increase_3,
+            'calculated_total' => $this->calculated_total,
+        ];
+    }
+}
