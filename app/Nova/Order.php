@@ -129,15 +129,12 @@ class Order extends Resource
                 ->sortable(),
 
             Text::make(__('Due date'), function () {
-                    return $this->due_date->format('d-m-Y H:i:s');
+                    return $this->due_date ? Carbon::parse($this->due_date)->format('d-m-Y H:i:s') : '';
                 })
                 ->sortable(),
 
             Text::make(__('Arrived at'), function () {
-                    if ($this->arrived_at === null) {
-                        return '-';
-                    }
-                    return Carbon::parse($this->arrived_at)->format('d-m-Y H:i:s');
+                    return $this->arrived_at ? Carbon::parse($this->arrived_at)->format('d-m-Y H:i:s') : '-';
                 })
                 ->sortable(),
         ];
@@ -164,7 +161,7 @@ class Order extends Resource
                 ->sortable(),
 
             Text::make(__('Due date'), function () {
-                    return $this->due_date->format('d-m-Y H:i:s');
+                    return $this->due_date ? Carbon::parse($this->due_date)->format('d-m-Y H:i:s') : '';
                 })
                 ->sortable(),
 
