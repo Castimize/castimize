@@ -59,7 +59,7 @@ class OrderQueuesService
     {
         // Create a order queue status in-queue
         $orderStatus = OrderStatus::where('slug', $orderStatusSlug)->first();
-        return $orderQueue->statuses()->create([
+        return $orderQueue->orderQueueStatuses()->create([
             'order_status_id' => $orderStatus->id,
             'status' => $orderStatus->status,
             'slug' => $orderStatus->slug,
