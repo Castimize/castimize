@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('order_queue_id')->index();
             $table->unsignedBigInteger('order_status_id')->nullable()->index();
             $table->string('status');
+            $table->string('slug')->index();
             $table->timestamps();
             $table->softDeletes();
 

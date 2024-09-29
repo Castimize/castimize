@@ -28,6 +28,7 @@ class OrderQueueStatus extends Model
         'order_queue_id',
         'order_status_id',
         'status',
+        'slug',
     ];
 
     /**

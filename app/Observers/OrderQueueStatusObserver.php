@@ -16,6 +16,7 @@ class OrderQueueStatusObserver
             $orderStatus = OrderStatus::find($orderQueueStatus->order_queue_status_id);
             if ($orderStatus) {
                 $orderQueueStatus->status = $orderStatus->status;
+                $orderQueueStatus->slug = $orderStatus->slug;
             }
         }
     }
