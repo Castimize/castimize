@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('logistics_zone_id')->index()->nullable();
             $table->string('name');
-            $table->string('alpha2');
+            $table->string('alpha2')->index();
             $table->string('alpha3');
             $table->timestamps();
             $table->softDeletes();

@@ -4,6 +4,7 @@ namespace App\Nova;
 
 use App\Nova\Filters\DueDateDaterangepickerFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
+use App\Nova\Filters\OrderQueueCountryFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Traits\Nova\CommonMetaDataTrait;
 use App\Traits\Nova\OrderQueueStatusFieldTrait;
@@ -185,6 +186,7 @@ class OrderQueue extends Resource
     public function filters(NovaRequest $request)
     {
         return [
+            (new OrderQueueCountryFilter()),
             (new OrderDateDaterangepickerFilter( DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
             (new DueDateDaterangepickerFilter( DateHelper::ALL)),
