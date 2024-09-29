@@ -43,6 +43,7 @@ class OrderQueue extends Model
         'manufacturer_shipment_id',
         'manufacturer_cost_id',
         'customer_shipment_id',
+        'due_date',
         'final_arrival_date',
         'contract_date',
         'manufacturer_costs',
@@ -60,6 +61,7 @@ class OrderQueue extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'due_date' => 'datetime',
             'final_arrival_date' => 'datetime',
             'contract_date' => 'datetime',
         ];
@@ -93,16 +95,6 @@ class OrderQueue extends Model
     {
         return Attribute::make(
             get: fn () => $this->getLastStatus()?->slug,
-        );
-    }
-
-    /**
-     * Interact with  due_date
-     */
-    protected function dueDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->order->due_date,
         );
     }
 
@@ -203,7 +195,8 @@ class OrderQueue extends Model
 
 
     /**
-     * @return Carbon|CarbonImmutable|\Carbon\CarbonInterface|mixed
+     * @param $statusSlug
+     * @return mixed
      */
     public function calculateTargetDate($statusSlug): mixed
     {
@@ -219,10 +212,10 @@ class OrderQueue extends Model
     }
 
     /**
-     * @param CarbonImmutable $finalArrivalDate
+     * @param Carbon $finalArrivalDate
      * @return Carbon
      */
-    private function getAvailableForShippingDate(CarbonImmutable $finalArrivalDate): Carbon
+    private function getAvailableForShippingDate(Carbon $finalArrivalDate): Carbon
     {
         // Closest date of:
         // OR: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day - manufacturing_costs.shipment_lead_time
@@ -237,10 +230,10 @@ class OrderQueue extends Model
     }
 
     /**
-     * @param CarbonImmutable $finalArrivalDate
+     * @param Carbon $finalArrivalDate
      * @return Carbon
      */
-    private function getInTransitToDcDate(CarbonImmutable $finalArrivalDate): Carbon
+    private function getInTransitToDcDate(Carbon $finalArrivalDate): Carbon
     {
         // Closest date of:
         // OR: Target date: Final arrival date - shipping_fees.default_lead_time - 1 business day
