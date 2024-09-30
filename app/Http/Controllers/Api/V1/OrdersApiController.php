@@ -66,7 +66,7 @@ class OrdersApiController extends ApiController
                 $biggestCustomerLeadTime = $customerLeadTime;
             }
         }
-        $expectedDeliveryDate = now()->addBusinessDays($biggestCustomerLeadTime, 'add')->format('Y-m-d H:i:s');
+        $expectedDeliveryDate = now()->addBusinessDays($biggestCustomerLeadTime, 'add')->format('Y-m-d');
 
         return response()->json(['success' => true, 'expected_delivery_date' => $expectedDeliveryDate]);
     }
