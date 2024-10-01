@@ -39,7 +39,8 @@ class OrderQueuesService
                     'manufacturer_costs' => (new CalculatePricesService())->calculateCostsOfModel(
                         $manufacturerCost,
                         $upload->model_volume_cc,
-                        $upload->model_surface_area_cm2
+                        $upload->model_surface_area_cm2,
+                        $upload->quantity
                     ),
                     'due_date' => $upload->order->due_date,
                     'final_arrival_date' => Carbon::parse($upload->order->created_at)->addBusinessDays($upload->customer_lead_time),

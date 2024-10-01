@@ -76,9 +76,10 @@ class CalculatePricesService
      * @param ManufacturerCost $cost
      * @param float $materialVolume
      * @param float $surfaceArea
+     * @param int $quantity
      * @return float
      */
-    public function calculateCostsOfModel(ManufacturerCost $cost, float $materialVolume, float $surfaceArea): float
+    public function calculateCostsOfModel(ManufacturerCost $cost, float $materialVolume, float $surfaceArea, int $quantity = 1): float
     {
         if ($cost->setup_fee) {
             $total = $cost->setup_fee_amount + ($materialVolume * $cost->costs_volume_cc);
@@ -88,7 +89,7 @@ class CalculatePricesService
             $total = ($materialVolume * $cost->costs_volume_cc) + ($surfaceArea * $cost->costs_surface_cm2);
         }
 
-        return (float)$total;
+        return (float)($total * $quantity);
     }
 
     /**
