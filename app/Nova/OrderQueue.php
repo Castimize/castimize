@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\ExportLineItemsV1Action;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueCountryFilter;
@@ -125,6 +126,7 @@ class OrderQueue extends Resource
             ID::make()->sortable(),
 
             BelongsTo::make(__('Order'), 'order')
+                ->hideOnExport()
                 ->sortable(),
 
             Text::make(__('Customer'), function () {
@@ -133,11 +135,13 @@ class OrderQueue extends Resource
                         : '';
                 })
                 ->asHtml()
+                ->hideOnExport()
                 ->sortable(),
 
             Text::make(__('Country'), function () {
                     return strtoupper($this->order->country->alpha2);
                 })
+                ->hideOnExport()
                 ->sortable(),
 
             $this->getStatusField(),
@@ -149,35 +153,43 @@ class OrderQueue extends Resource
                     //$finalArrivalDate = CarbonImmutable::parse($this->created_at)->addBusinessDays($this->upload->customer_lead_time);
                     return $lastStatus && !$lastStatus?->orderStatus->end_status ? round(now()->diffInDays($this->target_date)) : '-';
                 })
+                ->hideOnExport()
                 ->sortable(),
 
             Text::make(__('Days till FAD'), function () {
                     $lastStatus = $this->getLastStatus();
                     return $lastStatus && !$lastStatus?->orderStatus->end_status ? round(now()->diffInDays($this->final_arrival_date)) : '-';
                 })
+                ->hideOnExport()
                 ->sortable(),
 
             Text::make(__('Order parts'), function () {
                     return $this->order->order_parts;
                 })
+                ->hideOnExport()
                 ->sortable(),
 
             Text::make(__('Total'), function () {
                     return $this->order->total ? currencyFormatter((float)$this->order->total, $this->order->currency_code) : '';
                 })
+                ->hideOnExport()
                 ->sortable(),
 
             DateTime::make(__('Order date'), 'created_at')
                 ->displayUsing(fn ($value) => $value ? $value->format('d-m-Y H:i:s') : '')
+                ->hideOnExport()
                 ->sortable(),
 
             DateTime::make(__('Due date'), 'due_date')
                 ->displayUsing(fn ($value) => $value ? $value->format('d-m-Y H:i:s') : '')
+                ->hideOnExport()
                 ->sortable(),
 
             Text::make(__('Arrived at'), function () {
                     return $this->order->arrived_at !== null ? Carbon::parse($this->order->arrived_at)->format('d-m-Y H:i:s') : '-';
-                })->sortable(),
+                })
+                ->hideOnExport()
+                ->sortable(),
         ];
     }
 
@@ -229,6 +241,8 @@ class OrderQueue extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            ExportLineItemsV1Action::make(),
+        ];
     }
 }

@@ -53,7 +53,9 @@ trait OrderQueueStatusFieldTrait
                 return '<span data-toggle="tooltip" data-placement="top" title="' . __('Reprinted') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="indigo-500" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg></span>';
             }
             return '<span data-toggle="tooltip" data-placement="top" title="' . __('Completed') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(34 197 94)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></svg>';
-        })->asHtml();
+        })
+            ->hideOnExport()
+            ->asHtml();
     }
 
     /**
@@ -89,6 +91,7 @@ trait OrderQueueStatusFieldTrait
             return '<span data-toggle="tooltip" data-placement="top" title="' . __('Behind schedule') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(239 68 68)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>';
         })
             ->asHtml()
+            ->hideOnExport()
             ->canSee(function () {
                 return !in_array($this->getLastStatus()?->slug, ['cancelled']);
             });
