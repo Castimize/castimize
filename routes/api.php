@@ -37,6 +37,9 @@ Route::group([
         Route::get('models/{model}', 'ModelsApiController@show')->name('api.models.show');
         Route::get('models/wp/{customerId}', 'ModelsApiController@showModelsWpCustomer')->name('api.models.show-customer-wp-models');
         Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
+
+        // Shippo
+        Route::post('shippo/validate-address', 'ShippoApiController@validateAddress')->name('api.shippo.validate-address');
     });
 
     // Woocommerce endpoints
