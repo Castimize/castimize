@@ -61,6 +61,7 @@ class OrdersApiController extends ApiController
         if (is_string($uploads)) {
             $uploads = json_decode($uploads, true, 512, JSON_THROW_ON_ERROR);
         }
+        Log::info(print_r($uploads, true));
 
         $biggestCustomerLeadTime = null;
         foreach ($uploads as $upload) {
