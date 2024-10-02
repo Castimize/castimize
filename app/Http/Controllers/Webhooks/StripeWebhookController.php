@@ -72,7 +72,7 @@ class StripeWebhookController extends Controller
 //            return $this->successMethod();
 //        }
 
-        Log::info('Order not found, payment intent' . print_r($paymentIntent->toArray(), true));
+//        Log::info('Order not found, payment intent' . print_r($paymentIntent->toArray(), true));
         return $this->successMethod();
     }
 
