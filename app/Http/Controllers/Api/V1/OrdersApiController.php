@@ -58,6 +58,10 @@ class OrdersApiController extends ApiController
         Log::info(print_r($request->all(), true));
         $country = Country::with('logisticsZone.shippingFee')->where('alpha2', $request->country)->first();
         $uploads = $request->uploads;
+        if (is_string($uploads)) {
+            $uploads = json_decode($uploads, true, 512, JSON_THROW_ON_ERROR);
+        }
+
         $biggestCustomerLeadTime = null;
         foreach ($uploads as $upload) {
             $material = Material::where('wp_id', $upload['material_id'])->first();
