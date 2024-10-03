@@ -64,7 +64,7 @@ class Price extends Resource
         ],
         'country' => [
             'name',
-            'alpah2',
+            'alpha2',
         ],
     ];
 
