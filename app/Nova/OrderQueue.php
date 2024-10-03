@@ -138,6 +138,10 @@ class OrderQueue extends Resource
                 ->hideOnExport()
                 ->sortable(),
 
+            BelongsTo::make(__('Manufacturer'), 'manufacturer')
+                ->hideOnExport()
+                ->sortable(),
+
             Text::make(__('Country'), function () {
                     return strtoupper($this->order->country->alpha2);
                 })
@@ -150,15 +154,32 @@ class OrderQueue extends Resource
 
             Text::make(__('Days till TD'), function () {
                     $lastStatus = $this->getLastStatus();
-                    //$finalArrivalDate = CarbonImmutable::parse($this->created_at)->addBusinessDays($this->upload->customer_lead_time);
-                    return $lastStatus && !$lastStatus?->orderStatus->end_status ? round(now()->diffInDays($this->target_date)) : '-';
+                    $dateNow = now();
+                    if ($lastStatus && !$lastStatus?->orderStatus->end_status) {
+                        $targetDate = Carbon::parse($this->target_date);
+                        if ($dateNow->gt($targetDate)) {
+                            return '- ' . round($targetDate->diffInDays($dateNow));
+                        }
+                        return round($dateNow->diffInDays($targetDate));
+                    }
+
+                    return '-';
                 })
                 ->hideOnExport()
                 ->sortable(),
 
             Text::make(__('Days till FAD'), function () {
                     $lastStatus = $this->getLastStatus();
-                    return $lastStatus && !$lastStatus?->orderStatus->end_status ? round(now()->diffInDays($this->final_arrival_date)) : '-';
+                    $dateNow = now();
+                    if ($lastStatus && !$lastStatus?->orderStatus->end_status) {
+                        $finalArrivalDate = Carbon::parse($this->final_arrival_date);
+                        if ($dateNow->gt($finalArrivalDate)) {
+                            return '- ' . round($finalArrivalDate->diffInDays($dateNow));
+                        }
+                        return round($dateNow->diffInDays($finalArrivalDate));
+                    }
+
+                    return '-';
                 })
                 ->hideOnExport()
                 ->sortable(),
