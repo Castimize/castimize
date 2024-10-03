@@ -17,6 +17,7 @@ use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 use Rpj\Daterangepicker\DateHelper;
 use Titasgailius\SearchRelations\SearchesRelations;
 
@@ -138,14 +139,16 @@ class OrderQueue extends Resource
                 ->hideOnExport()
                 ->sortable(),
 
-            BelongsTo::make(__('Manufacturer'), 'manufacturer')
-                ->hideOnExport()
-                ->sortable(),
-
             Text::make(__('Country'), function () {
                     return strtoupper($this->order->country->alpha2);
                 })
                 ->hideOnExport()
+                ->sortable(),
+
+            BelongsTo::make(__('Manufacturer'), 'manufacturer')
+                ->hideFromIndex(function (ResourceIndexRequest $request) {
+                    return $request->viaRelationship();
+                })
                 ->sortable(),
 
             $this->getStatusField(),
