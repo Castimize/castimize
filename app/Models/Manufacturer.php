@@ -35,7 +35,6 @@ class Manufacturer extends Model
         'lng',
         'address_line1',
         'address_line2',
-        'house_number',
         'postal_code',
         'city_id',
         'state_id',

@@ -36,7 +36,6 @@ class Invoice extends Model
         'contact_person',
         'address_line1',
         'address_line2',
-        'house_number',
         'postal_code',
         'city',
         'country',

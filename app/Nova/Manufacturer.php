@@ -193,17 +193,11 @@ class Manufacturer extends Resource
     protected function addressFields(): array
     {
         return [
-            Text::make(__('Street / House number'), function () {
-                return sprintf('%s %s', $this->address_line1, $this->house_number);
-            })->exceptOnForms(),
-
-            Text::make(__('Street'), 'address_line1')
-                ->onlyOnForms()
+            Text::make(__('Address line 1'), 'address_line1')
                 ->required()
                 ->sortable(),
 
-            Text::make(__('House number'), 'house_number')
-                ->onlyOnForms()
+            Text::make(__('Address line 2'), 'address_line2')
                 ->required()
                 ->sortable(),
 

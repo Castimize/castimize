@@ -42,9 +42,6 @@ class OrdersService
             $currency = Currency::where('code', 'USD')->first();
         }
 
-        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->billing['address_1'], $matchBilling);
-        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->shipping['address_1'], $matchShipping);
-
         $stripePaymentId = null;
         foreach ($request->meta_data as $orderMetaData) {
             if ($orderMetaData['key'] === '_stripe_intent_id') {
@@ -67,18 +64,16 @@ class OrdersService
             'billing_first_name' => $request->billing['first_name'],
             'billing_last_name' => $request->billing['last_name'],
             'billing_phone_number' => $request->billing['phone'],
-            'billing_address_line1' => $matchBilling[1] ?? $request->billing['address_1'],
+            'billing_address_line1' => $request->billing['address_1'],
             'billing_address_line2' => $request->billing['address_2'],
-            'billing_house_number' => $matchBilling[2] ?? null,
             'billing_postal_code' => $request->billing['postcode'],
             'billing_city' => $request->billing['city'],
             'billing_country' => $request->billing['country'],
             'shipping_first_name' => $request->shipping['first_name'],
             'shipping_last_name' => $request->shipping['last_name'],
             'shipping_phone_number' => $request->shipping['phone'],
-            'shipping_address_line1' => $matchShipping[1] ?? $request->shipping['address_1'],
+            'shipping_address_line1' => $request->shipping['address_1'],
             'shipping_address_line2' => $request->shipping['address_2'],
-            'shipping_house_number' => $matchShipping[2] ?? null,
             'shipping_postal_code' => $request->shipping['postcode'],
             'shipping_city' => $request->shipping['city'],
             'shipping_country' => $request->shipping['country'],

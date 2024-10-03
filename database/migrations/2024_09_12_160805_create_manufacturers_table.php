@@ -24,7 +24,6 @@ return new class extends Migration
             $table->string('lng')->nullable();
             $table->string('address_line1')->nullable();
             $table->string('address_line2')->nullable();
-            $table->string('house_number')->nullable();
             $table->string('postal_code')->nullable();
             $table->unsignedBigInteger('city_id')->nullable()->index();
             $table->unsignedBigInteger('state_id')->nullable()->index();

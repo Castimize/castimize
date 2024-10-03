@@ -24,7 +24,7 @@ class Address extends Resource
      */
     public function title()
     {
-        return sprintf('%s %s, %s %s', $this->address_line1, $this->house_number, $this->postal_code, $this->city?->name);
+        return sprintf('%s, %s, %s %s', $this->address_line1, $this->address_line2, $this->postal_code, $this->city?->name);
     }
 
     /**
@@ -58,17 +58,11 @@ class Address extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make(__('Street / House number'), function () {
-                return sprintf('%s %s', $this->address_line1, $this->house_number);
-            })->onlyOnIndex(),
-
-            Text::make(__('Street'), 'address_line1')
-                ->hideFromIndex()
+            Text::make(__('Address line 1'), 'address_line1')
                 ->required()
                 ->sortable(),
 
-            Text::make(__('House number'), 'house_number')
-                ->hideFromIndex()
+            Text::make(__('Address line 2'), 'address_line2')
                 ->required()
                 ->sortable(),
 

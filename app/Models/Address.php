@@ -29,7 +29,6 @@ class Address extends Model
         'lng',
         'address_line1',
         'address_line2',
-        'house_number',
         'postal_code',
         'city_id',
         'state_id',
@@ -56,7 +55,7 @@ class Address extends Model
      */
     public function getFullAddressAttribute(): ?string
     {
-        return $this->address_line1 . ' ' . $this->house_number . ', ' . $this->postal_code . ' ' . $this->city->name . ', ' . $this->country->name;
+        return $this->address_line1 . ' ' . $this->address_line2 . ', ' . $this->postal_code . ' ' . $this->city->name . ', ' . $this->country->name;
     }
 
     /**
@@ -64,7 +63,7 @@ class Address extends Model
      */
     public function getFullAddressWithBreaksAttribute(): ?string
     {
-        return $this->address_line1 . ' ' . $this->house_number . "<br>" . $this->postal_code . ' ' . $this->city->name . "<br>" . $this->country->name;
+        return $this->address_line1 . "<br>" . $this->address_line2 . "<br>" . $this->postal_code . ' ' . $this->city->name . "<br>" . $this->country->name;
     }
 
     /**

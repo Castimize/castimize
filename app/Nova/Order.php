@@ -360,9 +360,11 @@ class Order extends Resource
                 return $this->billing_name;
             })->exceptOnForms(),
 
-            Text::make(__('Billing Street / House number'), function () {
-                return sprintf('%s %s', $this->billing_address_line1, $this->billing_house_number);
-            })->onlyOnDetail(),
+            Text::make(__('Billing address line 1'), 'billing_address_1')
+                ->onlyOnDetail(),
+
+            Text::make(__('Billing address line 2'), 'billing_address_2')
+                ->onlyOnDetail(),
 
             Text::make(__('Billing Postal code, City'), function () {
                 return sprintf('%s, %s', $this->billing_postal_code, $this->billing_city);
@@ -377,11 +379,11 @@ class Order extends Resource
                 ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
-            Text::make(__('Billing Street'), 'billing_address_line2')
+            Text::make(__('Billing Address line 1'), 'billing_address_line1')
                 ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
-            Text::make(__('Billing House number'), 'billing_house_number')
+            Text::make(__('Billing Address line 2'), 'billing_address_line2')
                 ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
@@ -410,9 +412,11 @@ class Order extends Resource
                 return $this->shipping_name;
             })->exceptOnForms(),
 
-            Text::make(__('Shipping Street / House number'), function () {
-                return sprintf('%s %s', $this->shipping_address_line1, $this->shipping_house_number);
-            })->onlyOnDetail(),
+            Text::make(__('Shipping Address line 1'), 'shipping_address_1')
+                ->onlyOnDetail(),
+
+            Text::make(__('Shipping Address line 2'), 'shipping_address_2')
+                ->onlyOnDetail(),
 
             Text::make(__('Shipping Postal code, City'), function () {
                 return sprintf('%s, %s', $this->shipping_postal_code, $this->shipping_city);
@@ -427,11 +431,11 @@ class Order extends Resource
                 ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
-            Text::make(__('Shipping Street'), 'shipping_address_line2')
+            Text::make(__('Shipping Address line 1'), 'shipping_address_1')
                 ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
-            Text::make(__('Shipping House number'), 'shipping_house_number')
+            Text::make(__('Shipping Address line 2'), 'shipping_address_2')
                 ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 

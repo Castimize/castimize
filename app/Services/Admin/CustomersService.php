@@ -99,11 +99,8 @@ class CustomersService
         $customer->email = $request->email ?? $request->billing['email'];
         $customer->save();
 
-        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->billing['address_1'], $matchBilling);
-        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $request->shipping['address_1'], $matchShipping);
-
-        $billingAddress = $customer->addresses->where('postal_code', $request->billing['postcode'])->where('house_number', $matchBilling[2] ?? '-')->first();
-        $shippingAddress = $customer->addresses->where('postal_code', $request->shipping['postcode'])->where('house_number', $matchShipping[2] ?? '-')->first();
+        $billingAddress = $customer->addresses->where('postal_code', $request->billing['postcode'])->where('address_line1', $request->billing['address_1'] ?? '-')->first();
+        $shippingAddress = $customer->addresses->where('postal_code', $request->shipping['postcode'])->where('address_line1', $request->shipping['address_1'] ?? '-')->first();
         if ($billingAddress === null) {
             $billingAddress = $this->createAddress($request->billing);
             $customer->addresses()->wherePivot('default_billing', 1)->update(['default_billing' => 0]);
@@ -164,14 +161,11 @@ class CustomersService
             );
         }
 
-        preg_match('/^([^\d]*[^\d\s]) *(\d.*)$/', $input['address_1'], $match);
-
-        $address = Address::where('postal_code', $input['postcode'])->where('house_number', $match[2] ?? '-')->first();
+        $address = Address::where('postal_code', $input['postcode'])->where('address_line1', $input['address_1'] ?? '-')->first();
         if ($address === null) {
             $address = Address::create([
-                'address_line1' => $match[1] ?? $input['address_1'],
+                'address_line1' => $input['address_1'],
                 'address_line2' => $input['address_2'],
-                'house_number' => $match[2] ?? null,
                 'postal_code' => $input['postcode'],
                 'city_id' => $city?->id,
                 'state_id' => $state?->id,

@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('lng')->nullable();
             $table->string('address_line1');
             $table->string('address_line2')->nullable();
-            $table->string('house_number', 100);
             $table->string('postal_code');
             $table->unsignedBigInteger('city_id')->nullable()->index();
             $table->string('administrative_area')->nullable();
@@ -32,7 +31,7 @@ return new class extends Migration
             $table->foreign('country_id')->references('id')->on('countries')->onDelete('set null');
 
             $table->index(['lat', 'lng']);
-            $table->index(['postal_code', 'house_number']);
+            $table->index(['postal_code', 'address_line1']);
         });
 
         Schema::table('addresses', function (Blueprint $table) {

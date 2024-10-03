@@ -26,7 +26,6 @@ return new class extends Migration
             $table->string('contact_person');
             $table->string('address_line1');
             $table->string('address_line2')->nullable();
-            $table->string('house_number');
             $table->string('postal_code');
             $table->string('city');
             $table->string('country');
