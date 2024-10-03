@@ -14,11 +14,12 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
+use Titasgailius\SearchRelations\SearchesRelations;
 use Vyuldashev\NovaMoneyField\Money;
 
 class Price extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+    use ColumnTogglerTrait, CommonMetaDataTrait, SearchesRelations;
 
     /**
      * The model the resource corresponds to.
@@ -50,6 +51,21 @@ class Price extends Resource
      */
     public static $sort = [
         'id' => 'asc',
+    ];
+
+    /**
+     * The relationship columns that should be searched.
+     *
+     * @var array
+     */
+    public static $searchRelations = [
+        'material' => [
+            'name',
+        ],
+        'country' => [
+            'name',
+            'alpah2',
+        ],
     ];
 
     /**
