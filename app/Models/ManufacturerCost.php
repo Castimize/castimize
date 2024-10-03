@@ -34,6 +34,7 @@ class ManufacturerCost extends Model
         'setup_fee',
         'setup_fee_amount',
         'costs_volume_cc',
+        'minimum_per_stl',
         'costs_minimum_per_stl',
         'costs_surface_cm2',
         'currency_code',

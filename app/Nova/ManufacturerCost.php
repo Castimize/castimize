@@ -106,6 +106,11 @@ class ManufacturerCost extends Resource
                 ->step(1)
                 ->sortable(),
 
+            Number::make(__('Minimum per stl'), 'minimum_per_stl')
+                ->min(0)
+                ->step(0.01)
+                ->sortable(),
+
             \Laravel\Nova\Fields\Currency::make(__('Costs minimum per stl'), 'costs_minimum_per_stl')
                 ->min(0)
                 ->step(0.01)
