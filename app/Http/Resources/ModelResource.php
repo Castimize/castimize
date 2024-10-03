@@ -16,7 +16,7 @@ class ModelResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $thumb = sprintf('%s.thumb.png', $this->file_name);
+        $thumb = sprintf('%s.thumb.png', str_replace('_resized', '', $this->file_name));
         $metaData = $this->meta_data;
         if ($metaData) {
             for ($i = 0, $iMax = count($metaData); $i < $iMax; $i++) {
