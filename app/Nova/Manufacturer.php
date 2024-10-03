@@ -102,10 +102,9 @@ class Manufacturer extends Resource
 
             new Panel(__('Address'), $this->addressFields()),
 
-//            HasMany::make(__('Uploads'), 'uploads'),
+            HasMany::make(__('Line items'), 'orderQueues', OrderQueue::class),
 
             HasMany::make(__('Shipments'), 'shipments', ManufacturerShipment::class),
-
 
             HasMany::make(__('Costs'), 'costs', ManufacturerCost::class),
 

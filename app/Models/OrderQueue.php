@@ -79,6 +79,14 @@ class OrderQueue extends Model
     }
 
     /**
+     * @return mixed
+     */
+    public function getLastStatus(): mixed
+    {
+        return $this->orderQueueStatuses->last();
+    }
+
+    /**
      * Interact with  status
      */
     protected function status(): Attribute
@@ -99,11 +107,13 @@ class OrderQueue extends Model
     }
 
     /**
-     * @return mixed
+     * Interact with  on_schedule
      */
-    public function getLastStatus(): mixed
+    protected function targetDate(): Attribute
     {
-        return $this->orderQueueStatuses->last();
+        return Attribute::make(
+            get: fn () => $this->getLastStatus()->target_date,
+        );
     }
 
     /**
@@ -112,7 +122,7 @@ class OrderQueue extends Model
     protected function onSchedule(): Attribute
     {
         return Attribute::make(
-            get: fn () => !now()->gte($this->getLastStatus()->target_date),
+            get: fn () => !now()->gte($this->target_date),
         );
     }
 

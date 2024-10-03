@@ -116,6 +116,14 @@ class Manufacturer extends Model
     /**
      * @return HasMany
      */
+    public function orderQueues(): HasMany
+    {
+        return $this->hasMany(OrderQueue::class);
+    }
+
+    /**
+     * @return HasMany
+     */
     public function costs(): HasMany
     {
         return $this->hasMany(ManufacturerCost::class);
