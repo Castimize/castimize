@@ -169,7 +169,7 @@ class CustomersService
         $address = Address::where('postal_code', $input['postcode'])->where('house_number', $match[2] ?? '-')->first();
         if ($address === null) {
             $address = Address::create([
-                'address_line1' => $match[1] ?? null,
+                'address_line1' => $match[1] ?? $input['address_1'],
                 'address_line2' => $input['address_2'],
                 'house_number' => $match[2] ?? null,
                 'postal_code' => $input['postcode'],
