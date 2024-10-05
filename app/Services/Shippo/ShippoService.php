@@ -26,7 +26,7 @@ class ShippoService
         $this->fromAddress['validate'] = true;
         $shippoAddress = Shippo_Address::create($this->fromAddress);
 
-        $valid = $shippoAddress['validation_results']['is_valid'];
+        $valid = $shippoAddress['validation_results']['is_valid'] ? 1 : 0;
         $errorMessages = $shippoAddress['validation_results']['messages'];
         $addressChanged = false;
 
