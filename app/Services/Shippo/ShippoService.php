@@ -51,7 +51,7 @@ class ShippoService
         }
 
         $response = ['valid' => $valid, 'address' => $this->fromAddress, 'address_changed' => $addressChanged, 'messages' => $errorMessages];
-        Cache::put($cacheAddress, $response);
+        Cache::put(json_encode($cacheAddress, JSON_THROW_ON_ERROR), $response);
 
         return $response;
     }

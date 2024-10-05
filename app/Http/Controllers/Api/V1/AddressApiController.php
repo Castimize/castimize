@@ -38,8 +38,9 @@ class AddressApiController extends ApiController
         ];
         Log::info(print_r($addressData, true));
 
-        if (Cache::has($addressData)) {
-            $response = Cache::get($addressData);
+        $encodedData = json_encode($addressData, JSON_THROW_ON_ERROR);
+        if (Cache::has($encodedData)) {
+            $response = Cache::get($encodedData);
         } else {
             $response = (new ShippoService())->setFromAddress($addressData)->validateAddress();
         }
