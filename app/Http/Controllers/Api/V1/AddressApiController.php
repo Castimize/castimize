@@ -38,6 +38,7 @@ class AddressApiController extends ApiController
         ];
 
         $response = (new ShippoService())->setFromAddress($addressData)->validateAddress();
+        Log::info(print_r($response, true));
 
         return response()->json($response);
     }
