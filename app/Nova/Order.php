@@ -79,6 +79,23 @@ class Order extends Resource
     ];
 
     /**
+     * @param NovaRequest $request
+     * @param $query
+     * @return Builder
+     */
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        $query->withCount('uploads as uploads');
+        if (empty($request->get('orderBy'))) {
+            $query->getQuery()->orders = [];
+
+            return $query->orderBy(key(static::$sort), reset(static::$sort));
+        }
+
+        return $query;
+    }
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @param NovaRequest $request
@@ -237,23 +254,6 @@ class Order extends Resource
 
             Panel::make('Shipping address', $this->shippingAddressFields()),
         ];
-    }
-
-    /**
-     * @param NovaRequest $request
-     * @param $query
-     * @return Builder
-     */
-    public static function indexQuery(NovaRequest $request, $query)
-    {
-        $query->withCount('uploads as uploads');
-        if (empty($request->get('orderBy'))) {
-            $query->getQuery()->orders = [];
-
-            return $query->orderBy(key(static::$sort), reset(static::$sort));
-        }
-
-        return $query;
     }
 
     /**

@@ -149,7 +149,6 @@ class OrdersService
             $fileHeaders = get_headers($fileUrl);
             $withoutResizedFileName = str_replace('_resized', '', $fileName);
 
-
             try {
                 // Check files exists on local storage of site and not on R2
                 if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileName)) {

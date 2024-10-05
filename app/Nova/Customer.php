@@ -67,6 +67,23 @@ class Customer extends Resource
     ];
 
     /**
+     * @param NovaRequest $request
+     * @param $query
+     * @return Builder
+     */
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        $query->withCount('orders as orders');
+        if (empty($request->get('orderBy'))) {
+            $query->getQuery()->orders = [];
+
+            return $query->orderBy(key(static::$sort), reset(static::$sort));
+        }
+
+        return $query;
+    }
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @param NovaRequest $request
@@ -160,23 +177,6 @@ class Customer extends Resource
 
             new Panel(__('History'), $this->commonMetaData(true, false, false, false)),
         ];
-    }
-
-    /**
-     * @param NovaRequest $request
-     * @param $query
-     * @return Builder
-     */
-    public static function indexQuery(NovaRequest $request, $query)
-    {
-        $query->withCount('orders as orders');
-        if (empty($request->get('orderBy'))) {
-            $query->getQuery()->orders = [];
-
-            return $query->orderBy(key(static::$sort), reset(static::$sort));
-        }
-
-        return $query;
     }
 
     /**

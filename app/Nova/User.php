@@ -61,6 +61,29 @@ class User extends Resource
     ];
 
     /**
+     * @param NovaRequest $request
+     * @param $query
+     * @return Builder
+     */
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        /**
+         * @var $user \App\Models\User
+         */
+        $user = auth()->user();
+        if (!$user->isSuperAdmin()) {
+            $query->where('id', '>', 1);
+        }
+        if (empty($request->get('orderBy'))) {
+            $query->getQuery()->orders = [];
+
+            return $query->orderBy(key(static::$sort), reset(static::$sort));
+        }
+
+        return $query;
+    }
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @param NovaRequest $request
@@ -115,29 +138,6 @@ class User extends Resource
 
             new Panel(__('History'), $this->commonMetaData()),
         ];
-    }
-
-    /**
-     * @param NovaRequest $request
-     * @param $query
-     * @return Builder
-     */
-    public static function indexQuery(NovaRequest $request, $query)
-    {
-        /**
-         * @var $user \App\Models\User
-         */
-        $user = auth()->user();
-        if (!$user->isSuperAdmin()) {
-            $query->where('id', '>', 1);
-        }
-        if (empty($request->get('orderBy'))) {
-            $query->getQuery()->orders = [];
-
-            return $query->orderBy(key(static::$sort), reset(static::$sort));
-        }
-
-        return $query;
     }
 
     /**
