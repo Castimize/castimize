@@ -3,6 +3,7 @@
 namespace App\Services\Shippo;
 
 use Illuminate\Support\Facades\Cache;
+use JsonException;
 use Shippo_Address;
 
 class ShippoService
@@ -21,6 +22,7 @@ class ShippoService
 
     /**
      * @return array
+     * @throws JsonException
      */
     public function validateAddress(): array
     {
@@ -29,7 +31,14 @@ class ShippoService
         $shippoAddress = Shippo_Address::create($this->fromAddress);
 
         $valid = $shippoAddress['validation_results']['is_valid'] ? 1 : 0;
-        $errorMessages = $shippoAddress['validation_results']['messages'];
+        foreach ($shippoAddress['validation_results']['messages'] as $message) {
+            $errorMessages[] = [
+                'source' => $message['source'],
+                'code' => $message['code'],
+                'type' => $message['type'],
+                'text' => $message['text'],
+            ];
+        }
         $addressChanged = false;
         $this->fromAddress['object_id'] = $shippoAddress['object_id'];
 
