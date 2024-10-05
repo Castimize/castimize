@@ -2,6 +2,7 @@
 
 namespace App\Services\Shippo;
 
+use Illuminate\Support\Facades\Cache;
 use Shippo_Address;
 
 class ShippoService
@@ -23,12 +24,14 @@ class ShippoService
      */
     public function validateAddress(): array
     {
+        $cacheAddress = $this->fromAddress;
         $this->fromAddress['validate'] = true;
         $shippoAddress = Shippo_Address::create($this->fromAddress);
 
         $valid = $shippoAddress['validation_results']['is_valid'] ? 1 : 0;
         $errorMessages = $shippoAddress['validation_results']['messages'];
         $addressChanged = false;
+        $this->fromAddress['object_id'] = $shippoAddress['object_id'];
 
         if (
             $this->fromAddress['street1'] !== $shippoAddress['street1'] ||
@@ -47,7 +50,10 @@ class ShippoService
             $this->fromAddress['country'] = $shippoAddress['country'];
         }
 
-        return ['valid' => $valid, 'address' => $this->fromAddress, 'address_changed' => $addressChanged, 'messages' => $errorMessages];
+        $response = ['valid' => $valid, 'address' => $this->fromAddress, 'address_changed' => $addressChanged, 'messages' => $errorMessages];
+        Cache::put($cacheAddress, $response);
+
+        return $response;
     }
 
 //    public function rates(User $user, Product $product)

@@ -10,6 +10,7 @@ use App\Services\Shippo\ShippoService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Shippo_Address;
@@ -37,7 +38,11 @@ class AddressApiController extends ApiController
             'email' => $request->email,
         ];
 
-        $response = (new ShippoService())->setFromAddress($addressData)->validateAddress();
+        if (Cache::has($addressData)) {
+            $response = Cache::get($addressData);
+        } else {
+            $response = (new ShippoService())->setFromAddress($addressData)->validateAddress();
+        }
         Log::info(print_r($response, true));
 
         return response()->json($response);
