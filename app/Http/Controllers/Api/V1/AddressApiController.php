@@ -24,44 +24,46 @@ class AddressApiController extends ApiController
      */
     public function validate(Request $request): JsonResponse
     {
-        $addressData = [
-            'name' => $request->name,
-            'company' => $request->company,
-            'street1' => $request->address_1,
-            'street2' => $request->address_2,
-            'city' => $request->city,
-            'state' => $request->state,
-            'zip' => $request->postal_code,
-            'country' => $request->country,
-            'email' => $request->email,
-            'validate' => true,
-        ];
-        $shippoService = new ShippoService();
+        Log::info(print_r($request->all(), true));
+//        $addressData = [
+//            'name' => $request->name,
+//            'company' => $request->company,
+//            'street1' => $request->address_1,
+//            'street2' => $request->address_2,
+//            'city' => $request->city,
+//            'state' => $request->state,
+//            'zip' => $request->postal_code,
+//            'country' => $request->country,
+//            'email' => $request->email,
+//            'validate' => true,
+//        ];
+//        $shippoService = new ShippoService();
+//
+//        $shippoAddress = $shippoService->setFromAddress($addressData)->validateAddress();
+//
+//        $valid = $shippoAddress['validation_results']['is_valid'];
+//        $errorMessages = $shippoAddress['validation_results']['messages'];
+//        $addressChanged = false;
+//
+//        if (
+//            $addressData['street1'] !== $shippoAddress['street1'] ||
+//            $addressData['street2'] !== $shippoAddress['street2'] ||
+//            $addressData['city'] !== $shippoAddress['city'] ||
+//            $addressData['state'] !== $shippoAddress['state'] ||
+//            $addressData['zip'] !== $shippoAddress['zip'] ||
+//            $addressData['country'] !== $shippoAddress['country']
+//        ) {
+//            $addressChanged = true;
+//            $addressData['street1'] = $shippoAddress['street1'];
+//            $addressData['street2'] = $shippoAddress['street2'];
+//            $addressData['city'] = $shippoAddress['city'];
+//            $addressData['state'] = $shippoAddress['state'];
+//            $addressData['zip'] = $shippoAddress['zip'];
+//            $addressData['country'] = $shippoAddress['country'];
+//        }
 
-        $shippoAddress = $shippoService->setFromAddress($addressData)->validateAddress();
-
-        $valid = $shippoAddress['validation_results']['is_valid'];
-        $errorMessages = $shippoAddress['validation_results']['messages'];
-        $addressChanged = false;
-
-        if (
-            $addressData['street1'] !== $shippoAddress['street1'] ||
-            $addressData['street2'] !== $shippoAddress['street2'] ||
-            $addressData['city'] !== $shippoAddress['city'] ||
-            $addressData['state'] !== $shippoAddress['state'] ||
-            $addressData['zip'] !== $shippoAddress['zip'] ||
-            $addressData['country'] !== $shippoAddress['country']
-        ) {
-            $addressChanged = true;
-            $addressData['street1'] = $shippoAddress['street1'];
-            $addressData['street2'] = $shippoAddress['street2'];
-            $addressData['city'] = $shippoAddress['city'];
-            $addressData['state'] = $shippoAddress['state'];
-            $addressData['zip'] = $shippoAddress['zip'];
-            $addressData['country'] = $shippoAddress['country'];
-        }
-
-        return response()->json(['valid' => $valid, 'address' => $addressData, 'address_changed' => $addressChanged, 'messages' => $errorMessages]);
+//        return response()->json(['valid' => $valid, 'address' => $addressData, 'address_changed' => $addressChanged, 'messages' => $errorMessages]);
+        return response()->json([]);
     }
 
     /**
