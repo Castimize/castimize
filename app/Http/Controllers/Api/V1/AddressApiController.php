@@ -25,18 +25,18 @@ class AddressApiController extends ApiController
      */
     public function validate(Request $request): JsonResponse
     {
-        Log::info(print_r($request->all(), true));
         $addressData = [
             'name' => $request->name,
-            'company' => $request->company,
+            'company' => $request->company ?? null,
             'street1' => $request->address_1,
-            'street2' => $request->address_2,
+            'street2' => $request->address_2 ?? null,
             'city' => $request->city,
-            'state' => $request->state,
+            'state' => $request->state ?? null,
             'zip' => $request->postal_code,
             'country' => $request->country,
             'email' => $request->email,
         ];
+        Log::info(print_r($addressData, true));
 
         if (Cache::has($addressData)) {
             $response = Cache::get($addressData);
