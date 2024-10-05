@@ -6,6 +6,7 @@ use App\Http\Resources\CalculatedPriceResource;
 use App\Http\Resources\CalculatedShippingFeeResource;
 use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\ModelsService;
+use App\Services\Shippo\ShippoService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,27 +16,52 @@ use Shippo_Address;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
-class ShippoApiController extends ApiController
+class AddressApiController extends ApiController
 {
     /**
      * @param Request $request
      * @return JsonResponse
      */
-    public function validateAddress(Request $request): JsonResponse
+    public function validate(Request $request): JsonResponse
     {
-        $fromAddress = Shippo_Address::create( [
+        $addressData = [
             'name' => $request->name,
             'company' => $request->company,
             'street1' => $request->address_1,
+            'street2' => $request->address_2,
             'city' => $request->city,
             'state' => $request->state,
             'zip' => $request->postal_code,
             'country' => $request->country,
             'email' => $request->email,
             'validate' => true,
-        ]);
+        ];
+        $shippoService = new ShippoService();
 
-        dd($fromAddress);
+        $shippoAddress = $shippoService->setFromAddress($addressData)->validateAddress();
+
+        $valid = $shippoAddress['validation_results']['is_valid'];
+        $errorMessages = $shippoAddress['validation_results']['messages'];
+        $addressChanged = false;
+
+        if (
+            $addressData['street1'] !== $shippoAddress['street1'] ||
+            $addressData['street2'] !== $shippoAddress['street2'] ||
+            $addressData['city'] !== $shippoAddress['city'] ||
+            $addressData['state'] !== $shippoAddress['state'] ||
+            $addressData['zip'] !== $shippoAddress['zip'] ||
+            $addressData['country'] !== $shippoAddress['country']
+        ) {
+            $addressChanged = true;
+            $addressData['street1'] = $shippoAddress['street1'];
+            $addressData['street2'] = $shippoAddress['street2'];
+            $addressData['city'] = $shippoAddress['city'];
+            $addressData['state'] = $shippoAddress['state'];
+            $addressData['zip'] = $shippoAddress['zip'];
+            $addressData['country'] = $shippoAddress['country'];
+        }
+
+        return response()->json(['valid' => $valid, 'address' => $addressData, 'address_changed' => $addressChanged, 'messages' => $errorMessages]);
     }
 
     /**

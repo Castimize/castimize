@@ -39,7 +39,7 @@ Route::group([
         Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
 
         // Shippo
-        Route::post('shippo/validate-address', 'ShippoApiController@validateAddress')->name('api.shippo.validate-address');
+        Route::post('address/validate', 'AddressApiController@validate')->name('api.address.validate');
     });
 
     // Woocommerce endpoints
