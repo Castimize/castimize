@@ -59,10 +59,31 @@ class ShippoService
             $this->fromAddress['country'] = $shippoAddress['country'];
         }
 
-        $response = ['valid' => $valid, 'address' => $this->fromAddress, 'address_changed' => $addressChanged, 'messages' => $errorMessages];
-        Cache::put(json_encode($cacheAddress, JSON_THROW_ON_ERROR), $response);
+        return ['valid' => $valid, 'address' => $this->fromAddress, 'address_changed' => $addressChanged, 'messages' => $errorMessages];
+    }
 
-        return $response;
+    /**
+     * @param array $params
+     * @return string
+     * @throws JsonException
+     */
+    public function getCacheKey(array $params): string
+    {
+        if (isset($params['service'])) {
+            unset($params['service']);
+        }
+
+        if (isset($params['rate_id'])) {
+            unset($params['rate_id']);
+        }
+
+        $params['api'] = config('services.shippo.key');
+
+        if (isset($params['function'])) {
+            unset($params['function']);
+        }
+
+        return md5(json_encode($params, JSON_THROW_ON_ERROR));
     }
 
 //    public function rates(User $user, Product $product)

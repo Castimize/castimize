@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use JsonException;
 use Shippo_Address;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -22,6 +23,7 @@ class AddressApiController extends ApiController
     /**
      * @param Request $request
      * @return JsonResponse
+     * @throws JsonException
      */
     public function validate(Request $request): JsonResponse
     {
@@ -38,12 +40,11 @@ class AddressApiController extends ApiController
         ];
         Log::info(print_r($addressData, true));
 
-        $encodedData = json_encode($addressData, JSON_THROW_ON_ERROR);
-//        if (Cache::has($encodedData)) {
-//            $response = Cache::get($encodedData);
-//        } else {
-            $response = (new ShippoService())->setFromAddress($addressData)->validateAddress();
-//        }
+        $shippoService = new ShippoService();
+        $cacheKey = $shippoService->getCacheKey($addressData);
+        $response = Cache::remember($cacheKey, 31556926, function() use ($shippoService, $addressData) {
+            return $shippoService->setFromAddress($addressData)->validateAddress();
+        });
         Log::info(print_r($response, true));
 
         return response()->json($response);
