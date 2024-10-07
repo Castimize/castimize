@@ -364,10 +364,10 @@ class Order extends Resource
                 return $this->billing_name;
             })->exceptOnForms(),
 
-            Text::make(__('Billing address line 1'), 'billing_address_1')
+            Text::make(__('Billing address line 1'), 'billing_address_line1')
                 ->onlyOnDetail(),
 
-            Text::make(__('Billing address line 2'), 'billing_address_2')
+            Text::make(__('Billing address line 2'), 'billing_address_line2')
                 ->onlyOnDetail(),
 
             Text::make(__('Billing postal code, City'), function () {
@@ -422,10 +422,10 @@ class Order extends Resource
                 return $this->shipping_name;
             })->exceptOnForms(),
 
-            Text::make(__('Shipping address line 1'), 'shipping_address_1')
+            Text::make(__('Shipping address line 1'), 'shipping_address_line1')
                 ->onlyOnDetail(),
 
-            Text::make(__('Shipping address line 2'), 'shipping_address_2')
+            Text::make(__('Shipping address line 2'), 'shipping_address_line2')
                 ->onlyOnDetail(),
 
             Text::make(__('Shipping postal code, City'), function () {
