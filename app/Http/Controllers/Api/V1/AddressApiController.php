@@ -27,10 +27,6 @@ class AddressApiController extends ApiController
      */
     public function validate(Request $request): JsonResponse
     {
-        if (empty($request->country)) {
-            return ['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []];
-        }
-
         $addressData = [
             'name' => $request->name,
             'company' => $request->company ?? null,
