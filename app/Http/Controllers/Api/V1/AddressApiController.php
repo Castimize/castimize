@@ -45,7 +45,7 @@ class AddressApiController extends ApiController
         Log::info(print_r($addressData, true));
 
         if (empty($addressData['country'])) {
-            return ['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []];
+            return response()->json(['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []]);
         }
 
         $shippoService = new ShippoService();
