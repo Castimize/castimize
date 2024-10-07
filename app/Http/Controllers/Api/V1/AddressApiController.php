@@ -27,6 +27,10 @@ class AddressApiController extends ApiController
      */
     public function validate(Request $request): JsonResponse
     {
+        if (empty($request->country)) {
+            return ['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []];
+        }
+
         $addressData = [
             'name' => $request->name,
             'company' => $request->company ?? null,
@@ -39,6 +43,10 @@ class AddressApiController extends ApiController
             'email' => $request->email,
         ];
         Log::info(print_r($addressData, true));
+
+        if (empty($addressData['country'])) {
+            return ['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []];
+        }
 
         $shippoService = new ShippoService();
         $cacheKey = $shippoService->getCacheKey($addressData);
