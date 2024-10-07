@@ -43,7 +43,11 @@ class OrdersService
         }
 
         $stripePaymentId = null;
+        $billingVatNumber = null;
         foreach ($request->meta_data as $orderMetaData) {
+            if ($orderMetaData['key'] === '_billing_eu_vat_number') {
+                $billingVatNumber = $orderMetaData['value'];
+            }
             if ($orderMetaData['key'] === '_stripe_intent_id') {
                 $stripePaymentId = $orderMetaData['value'];
             }
@@ -70,6 +74,7 @@ class OrdersService
             'billing_postal_code' => $request->billing['postcode'],
             'billing_city' => $request->billing['city'],
             'billing_country' => $request->billing['country'],
+            'billing_vat_number' => $billingVatNumber,
             'shipping_first_name' => $request->shipping['first_name'],
             'shipping_last_name' => $request->shipping['last_name'],
             'shipping_company' => $request->shipping['company'],
