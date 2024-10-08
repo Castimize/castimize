@@ -89,4 +89,20 @@ class OrdersApiController extends ApiController
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
+
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function updateOrderWp(Request $request): JsonResponse
+    {
+        Log::info(print_r($request->all(), true));
+//        $order = (new OrdersService())->storeOrderWpFromApi($request);
+//
+//        return (new OrderResource($order))
+//            ->response()
+//            ->setStatusCode(Response::HTTP_CREATED);
+        return response()->json($request->all());
+    }
 }
