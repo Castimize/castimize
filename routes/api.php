@@ -52,5 +52,5 @@ Route::group([
         ->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
 
     Route::middleware(ValidateWcWebhookSignature::class)
-        ->post('orders/wp/update', 'OrdersApiController@updateOrderWp')->name('api.orders.store-order-wp-update');
+        ->patch('orders/wp/update', 'OrdersApiController@updateOrderWp')->name('api.orders.store-order-wp-update');
 });
