@@ -49,8 +49,8 @@ class CustomersService
             'wp_id' => $request->customer_id,
             'first_name' => $request->first_name ?? $request->billing['first_name'],
             'last_name' => $request->last_name ?? $request->billing['last_name'],
-            'email' => $request->email ?? $request->billing['email'],
-            'phone' => $request->phone ?? $request->billing['phone'],
+            'email' => $request->email ?? $request->billing['email'] ?? null,
+            'phone' => $request->phone ?? $request->billing['phone'] ?? null,
             'created_by' => 1,
             'updated_by' => 1,
         ]);
@@ -64,7 +64,7 @@ class CustomersService
                 'default_billing' => 1,
                 'default_shipping' => 0,
                 'contact_name' => sprintf('%s %s', $request->billing['first_name'], $request->billing['last_name']),
-                'phone' => $request->billing['phone'],
+                'phone' => $request->billing['phone'] ?? null,
             ];
             $customer->addresses()->attach($billingAddress, $pivotData);
 
@@ -72,7 +72,7 @@ class CustomersService
                 'default_billing' => 0,
                 'default_shipping' => 1,
                 'contact_name' => sprintf('%s %s', $request->shipping['first_name'], $request->shipping['last_name']),
-                'phone' => $request->shiping['phone'],
+                'phone' => $request->shiping['phone'] ?? null,
             ];
             $customer->addresses()->attach($shippingAddress, $pivotData);
         } else {
@@ -80,7 +80,7 @@ class CustomersService
                 'default_billing' => 1,
                 'default_shipping' => 1,
                 'contact_name' => sprintf('%s %s', $request->billing['first_name'], $request->billing['last_name']),
-                'phone' => $request->billing['phone'],
+                'phone' => $request->billing['phone'] ?? null,
             ];
             $customer->addresses()->attach($billingAddress, $pivotData);
         }
@@ -96,7 +96,7 @@ class CustomersService
     {
         $customer->first_name = $request->first_name ?? $request->billing['first_name'];
         $customer->last_name = $request->last_name ?? $request->billing['last_name'];
-        $customer->email = $request->email ?? $request->billing['email'];
+        $customer->email = $request->email ?? $request->billing['email'] ?? null;
         $customer->save();
 
         $billingAddress = $customer->addresses->where('postal_code', $request->billing['postcode'])->where('address_line1', $request->billing['address_1'] ?? '-')->first();
@@ -113,7 +113,7 @@ class CustomersService
                 'default_billing' => 1,
                 'default_shipping' => 0,
                 'contact_name' => sprintf('%s %s', $request->billing['first_name'], $request->billing['last_name']),
-                'phone' => $request->billing['phone'],
+                'phone' => $request->billing['phone'] ?? null,
             ];
             $customer->addresses()->attach($billingAddress, $pivotData);
 
@@ -121,7 +121,7 @@ class CustomersService
                 'default_billing' => 0,
                 'default_shipping' => 1,
                 'contact_name' => sprintf('%s %s', $request->shipping['first_name'], $request->shipping['last_name']),
-                'phone' => $request->shipping['phone'],
+                'phone' => $request->shipping['phone'] ?? null,
             ];
             $customer->addresses()->attach($shippingAddress, $pivotData);
         } else {
@@ -129,7 +129,7 @@ class CustomersService
                 'default_billing' => 1,
                 'default_shipping' => 1,
                 'contact_name' => sprintf('%s %s', $request->billing['first_name'], $request->billing['last_name']),
-                'phone' => $request->billing['phone'],
+                'phone' => $request->billing['phone'] ?? null,
             ];
             $customer->addresses()->attach($billingAddress, $pivotData);
         }
@@ -165,7 +165,7 @@ class CustomersService
         if ($address === null) {
             $address = Address::create([
                 'address_line1' => $input['address_1'],
-                'address_line2' => $input['address_2'],
+                'address_line2' => $input['address_2'] ?? null,
                 'postal_code' => $input['postcode'],
                 'city_id' => $city?->id,
                 'state_id' => $state?->id,
