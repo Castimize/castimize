@@ -78,7 +78,7 @@ class OrdersService
             'shipping_first_name' => $request->shipping['first_name'],
             'shipping_last_name' => $request->shipping['last_name'],
             'shipping_company' => $request->shipping['company'],
-            'shipping_phone_number' => $request->shipping['phone'],
+            'shipping_phone_number' => $request->shipping['phone'] ?? null,
             'shipping_address_line1' => $request->shipping['address_1'],
             'shipping_address_line2' => $request->shipping['address_2'],
             'shipping_postal_code' => $request->shipping['postcode'],
