@@ -90,7 +90,6 @@ class OrdersApiController extends ApiController
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-
     /**
      * @param Request $request
      * @return JsonResponse
