@@ -43,14 +43,25 @@ class CustomersService
         }
         $currency = Currency::where('code', $request->currency)->first();
 
+        $vatNumber = null;
+        if ($request->has('meta_data')) {
+            foreach ($request->meta_data as $orderMetaData) {
+                if ($orderMetaData['key'] === '_billing_eu_vat_number') {
+                    $vatNumber = $orderMetaData['value'];
+                }
+            }
+        }
+
         $customer = Customer::create([
             'country_id' => $country->id,
             'currency_id' => $currency?->id,
             'wp_id' => $request->customer_id,
             'first_name' => $request->first_name ?? $request->billing['first_name'],
             'last_name' => $request->last_name ?? $request->billing['last_name'],
+            'company' => $request->billing['company'] ?? $request->shipping['company'] ?? null,
             'email' => $request->email ?? $request->billing['email'] ?? null,
             'phone' => $request->phone ?? $request->billing['phone'] ?? null,
+            'vat_number' => $vatNumber,
             'created_by' => 1,
             'updated_by' => 1,
         ]);

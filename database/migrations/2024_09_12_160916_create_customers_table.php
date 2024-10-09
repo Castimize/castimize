@@ -19,8 +19,10 @@ return new class extends Migration
             $table->integer('wp_id')->index()->nullable();
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
+            $table->string('company')->nullable();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
+            $table->string('vat_number')->nullable();
             $table->text('comments')->nullable();
             $table->string('visitor', 45)->nullable();
             $table->string('device_platform')->nullable();

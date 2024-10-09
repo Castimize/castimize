@@ -113,10 +113,15 @@ class Customer extends Resource
             Text::make(__('Last name'), 'last_name')
                 ->onlyOnForms(),
 
+            Text::make(__('Company'), 'company'),
+
             Email::make(__('Email'), 'email')
                 ->sortable(),
 
             TelInput::make(__('Phone'), 'phone')
+                ->hideFromIndex(),
+
+            TelInput::make(__('Vat number'), 'vat_number')
                 ->hideFromIndex(),
 
             RelationshipCount::make(__('# Orders'), 'orders')
