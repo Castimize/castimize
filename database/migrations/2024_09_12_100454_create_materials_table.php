@@ -41,6 +41,7 @@ return new class extends Migration
             $table->float('maximum_volume')->nullable();
             $table->float('minimum_box_volume')->nullable();
             $table->float('maximum_box_volume')->nullable();
+            $table->float('density')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

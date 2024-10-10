@@ -149,6 +149,10 @@ class Material extends Resource
             Text::make(__('Maximum box volume'), 'maximum_box_volume')
                 ->hideByDefault(),
 
+            Text::make(__('Density'), 'density')
+                ->help(__('Unit in g/cm3'))
+                ->hideByDefault(),
+
             Number::make(__('Discount'), 'discount')
                 ->help(__('In percentage'))
                 ->sizeOnDetail('w-1/4')

@@ -55,6 +55,7 @@ class Material extends Model
         'maximum_volume',
         'minimum_box_volume',
         'maximum_box_volume',
+        'density',
     ];
 
     /**
