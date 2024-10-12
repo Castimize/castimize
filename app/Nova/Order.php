@@ -124,7 +124,7 @@ class Order extends Resource
                 ->sortable(),
 
             Text::make(__('Country'), function () {
-                    return $this->getCustomerCountry();
+                    return $this->customer_country;
                 })
                 ->sortable(),
 
@@ -198,7 +198,7 @@ class Order extends Resource
             BelongsTo::make(__('Customer'), 'customer'),
 
             Text::make(__('Country'), function () {
-                    return $this->getCustomerCountry();
+                    return $this->customer_country;
                 })
                 ->sortable(),
 
@@ -403,6 +403,8 @@ class Order extends Resource
                 ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
+            Text::make(__('Billing state'), 'billing_state'),
+
             Text::make(__('Billing country'), 'billing_country'),
 
             Text::make(__('Billing vat number'), 'billing_vat_number'),
@@ -460,6 +462,8 @@ class Order extends Resource
             Text::make(__('Shipping city'), 'shipping_city')
                 ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
+
+            Text::make(__('Shipping state'), 'shipping_state'),
 
             Text::make(__('Shipping country'), 'shipping_country'),
 

@@ -47,6 +47,7 @@ class Order extends Model
         'billing_address_line2',
         'billing_postal_code',
         'billing_city',
+        'billing_state',
         'billing_country',
         'shipping_first_name',
         'shipping_last_name',
@@ -55,6 +56,7 @@ class Order extends Model
         'shipping_address_line2',
         'shipping_postal_code',
         'shipping_city',
+        'shipping_state',
         'shipping_country',
         'service_id',
         'service_fee',
@@ -104,6 +106,8 @@ class Order extends Model
             'meta_data' => AsArrayObject::class,
             'billing_name' => 'string',
             'shipping_name' => 'string',
+            'billing_address' => AsArrayObject::class,
+            'shipping_address' => AsArrayObject::class,
         ];
     }
 
@@ -236,12 +240,63 @@ class Order extends Model
     }
 
     /**
+     * @return Attribute
+     */
+    protected function billingAddress(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => [
+                'first_name' => $this->billing_first_name,
+                'last_name' => $this->billing_first_name,
+                'company' => $this->billing_company,
+                'address_line1' => $this->billing_address_line1,
+                'address_line2' => $this->billing_address_line2,
+                'postal_code' => $this->billing_postal_code,
+                'city' => $this->billing_city,
+                'country' => $this->billing_country,
+                'phone' => $this->billing_phone_number,
+                'vat_number' => $this->billing_vat_number,
+            ],
+        );
+    }
+
+    /**
      * Interact with shipping_name
      */
     protected function shippingName(): Attribute
     {
         return Attribute::make(
             get: fn () => sprintf('%s %s', $this->shipping_first_name, $this->shipping_last_name),
+        );
+    }
+
+    /**
+     * @return Attribute
+     */
+    protected function shippingAddress(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => [
+                'first_name' => $this->shipping_first_name,
+                'last_name' => $this->shipping_first_name,
+                'company' => $this->shipping_company,
+                'address_line1' => $this->shipping_address_line1,
+                'address_line2' => $this->shipping_address_line2,
+                'postal_code' => $this->shipping_postal_code,
+                'city' => $this->shipping_city,
+                'country' => $this->shipping_country,
+                'phone' => $this->shipping_phone_number,
+            ],
+        );
+    }
+
+    /**
+     * @return Attribute
+     */
+    protected function customerCountry(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->customer?->country?->name ?? '',
         );
     }
 
@@ -299,14 +354,6 @@ class Order extends Model
     public function rejections(): HasMany
     {
         return $this->hasMany(Rejection::class);
-    }
-
-    /**
-     * @return string
-     */
-    public function getCustomerCountry(): string
-    {
-        return $this->customer?->country?->name ?? '';
     }
 
     /**
