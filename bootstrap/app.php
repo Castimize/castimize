@@ -19,7 +19,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('nova.login'));
         $middleware->validateCsrfTokens(
             // Specify the routes to exclude from CSRF protection
-            except: ['payment/providers/stripe/callback', 'login', 'register']
+            except: [
+                'webhooks/payment/stripe/callback',
+                'webhooks/shipping/shippo/callback',
+                'login',
+                'register',
+            ]
         );
     })
     ->withExceptions(function (Exceptions $exceptions) {
