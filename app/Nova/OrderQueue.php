@@ -2,6 +2,8 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\PoAcceptedAtDcStatusAction;
+use App\Nova\Actions\PoManualChangeStatusOrderAction;
 use App\Nova\Actions\ExportLineItemsV1Action;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
@@ -13,6 +15,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
@@ -151,6 +154,9 @@ class OrderQueue extends Resource
                 })
                 ->sortable(),
 
+            Boolean::make(__('Status manual changed'), 'status_manual_changed')
+                ->onlyOnDetail(),
+
             $this->getStatusField(),
 
             $this->getStatusCheckField(),
@@ -254,7 +260,8 @@ class OrderQueue extends Resource
      */
     public function lenses(NovaRequest $request)
     {
-        return [];
+        return [
+        ];
     }
 
     /**
@@ -266,6 +273,7 @@ class OrderQueue extends Resource
     public function actions(NovaRequest $request)
     {
         return [
+            PoManualChangeStatusOrderAction::make(),
             ExportLineItemsV1Action::make(),
         ];
     }

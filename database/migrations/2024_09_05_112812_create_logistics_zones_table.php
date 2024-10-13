@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('logistics_zones', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('shipping_servicelevel_token')->nullable()->default('ups_standard');
             $table->timestamps();
             $table->softDeletes();
         });

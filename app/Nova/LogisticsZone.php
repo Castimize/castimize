@@ -3,11 +3,13 @@
 namespace App\Nova;
 
 
+use App\Services\Shippo\ShippoService;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
@@ -64,6 +66,10 @@ class LogisticsZone extends Resource
                 ->sortable()
                 ->required()
                 ->rules('max:255'),
+
+            Select::make(__('Shipping service level token'), 'shipping_servicelevel_token')
+                ->options(ShippoService::SERVICES)
+                ->displayUsingLabels(),
 
             HasOne::make(__('Shipping fee'), 'shippingFee')
                 ->sortable(),

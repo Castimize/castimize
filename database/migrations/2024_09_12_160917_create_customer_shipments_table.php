@@ -18,15 +18,20 @@ return new class extends Migration
             $table->dateTime('sent_at')->nullable();
             $table->dateTime('arrived_at')->nullable();
             $table->dateTime('expected_delivery_date')->nullable();
-            $table->string('ups_tracking', 500)->nullable();
-            $table->tinyText('ups_tracking_manual')->nullable();
-            $table->boolean('ups_service')->default(false);
             $table->integer('total_parts')->nullable();
             $table->float('total_costs')->nullable();
             $table->dateTime('service_lead_time')->nullable();
             $table->float('service_costs')->nullable();
             $table->string('currency_code')->default('USD');
-            $table->integer('type')->nullable();
+            $table->string('tracking_number', 500)->nullable();
+            $table->tinyText('tracking_manual')->nullable();
+            $table->string('shippo_shipment_id')->nullable();
+            $table->json('shippo_shipment_meta_data')->nullable();
+            $table->string('shippo_transaction_id')->nullable();
+            $table->json('shippo_transaction_meta_data')->nullable();
+            $table->string('label_url', 500)->nullable();
+            $table->string('commercial_invoice_url', 500)->nullable();
+            $table->string('qr_code_url', 500)->nullable();
 
             $table->timestamps();
             $table->softDeletes();

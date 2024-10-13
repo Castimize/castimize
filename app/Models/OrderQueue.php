@@ -48,6 +48,7 @@ class OrderQueue extends Model
         'contract_date',
         'manufacturer_costs',
         'total',
+        'status_manual_changed',
     ];
 
     /**
@@ -64,6 +65,7 @@ class OrderQueue extends Model
             'due_date' => 'datetime',
             'final_arrival_date' => 'datetime',
             'contract_date' => 'datetime',
+            'status_manual_changed' => 'boolean',
         ];
     }
 
@@ -117,12 +119,22 @@ class OrderQueue extends Model
     }
 
     /**
-     * Interact with  on_schedule
+     * Interact with on_schedule
      */
     protected function onSchedule(): Attribute
     {
         return Attribute::make(
             get: fn () => !now()->gte($this->target_date),
+        );
+    }
+
+    /**
+     * Interact with customer_shipment_select_name
+     */
+    protected function customerShipmentSelectName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => sprintf('%s-%s %s', $this->id, $this->order->order_number, $this->order->billing_name),
         );
     }
 

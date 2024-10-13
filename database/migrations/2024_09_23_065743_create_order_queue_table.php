@@ -24,6 +24,7 @@ return new class extends Migration
             $table->dateTime('final_arrival_date')->index();
             $table->dateTime('contract_date')->index()->nullable();
             $table->float('manufacturer_costs')->nullable();
+            $table->boolean('status_manual_changed')->default(false)->index()->nullable();
             $table->timestamps();
             $table->softDeletes();
 
