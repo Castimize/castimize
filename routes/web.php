@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::group([
     'namespace' => 'App\Http\Controllers',
 ], function () {
-    Route::post('/payment/providers/stripe/callback', 'Webhooks\StripeWebhookController@handleWebhook')
+    Route::post('/webhooks/payment/stripe/callback', 'Webhooks\StripeWebhookController@handleWebhook')
+        ->name('webhooks.payment.stripe.callback')
         ->middleware(VerifyStripeWebhookSignature::class);
 });
