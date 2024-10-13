@@ -13,4 +13,6 @@ Route::group([
     Route::post('/webhooks/payment/stripe/callback', 'Webhooks\StripeWebhookController@handleWebhook')
         ->name('webhooks.payment.stripe.callback')
         ->middleware(VerifyStripeWebhookSignature::class);
+    Route::post('/webhooks/shipping/shippo/callback', 'Webhooks\ShippoWebhookController@handleWebhook')
+        ->name('webhooks.shipping.shippo.callback');
 });
