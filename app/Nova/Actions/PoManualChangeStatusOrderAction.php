@@ -19,6 +19,16 @@ class PoManualChangeStatusOrderAction extends Action
     use InteractsWithQueue, Queueable;
 
     /**
+     * The single value that should be used to represent the resource when being displayed.
+     *
+     * @return mixed
+     */
+    public function title()
+    {
+        return __('Change status manual');
+    }
+
+    /**
      * Perform the action on the given models.
      *
      * @param ActionFields $fields

@@ -248,13 +248,16 @@ class Order extends Model
             get: fn () => [
                 'first_name' => $this->billing_first_name,
                 'last_name' => $this->billing_first_name,
+                'name' => $this->billing_name,
                 'company' => $this->billing_company,
                 'address_line1' => $this->billing_address_line1,
                 'address_line2' => $this->billing_address_line2,
                 'postal_code' => $this->billing_postal_code,
                 'city' => $this->billing_city,
+                'state' => $this->billing_state,
                 'country' => $this->billing_country,
                 'phone' => $this->billing_phone_number,
+                'email' => $this->email,
                 'vat_number' => $this->billing_vat_number,
             ],
         );
@@ -279,13 +282,16 @@ class Order extends Model
             get: fn () => [
                 'first_name' => $this->shipping_first_name,
                 'last_name' => $this->shipping_first_name,
+                'name' => $this->shipping_name,
                 'company' => $this->shipping_company,
                 'address_line1' => $this->shipping_address_line1,
                 'address_line2' => $this->shipping_address_line2,
                 'postal_code' => $this->shipping_postal_code,
                 'city' => $this->shipping_city,
+                'state' => $this->shipping_state,
                 'country' => $this->shipping_country,
-                'phone' => $this->shipping_phone_number,
+                'phone' => $this->shipping_phone_number ?? $this->billing_phone_number,
+                'email' => $this->email,
             ],
         );
     }

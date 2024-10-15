@@ -103,7 +103,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     }),
 
                 MenuSection::make(__('Logistics'), [
-                    //MenuItem::resource(CustomerShipment::class),
+                    MenuItem::resource(CustomerShipment::class),
                     MenuItem::resource(LogisticsZone::class),
                     MenuItem::resource(ShippingFee::class),
                     MenuItem::resource(Country::class),

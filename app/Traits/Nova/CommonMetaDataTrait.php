@@ -29,6 +29,7 @@ trait CommonMetaDataTrait
             $createdAt->onlyOnDetail();
         }
         $creator = BelongsTo::make(__('By'), 'creator', __CLASS__)
+            ->displayUsing(fn ($user) => $user ? $user->name : '-')
             ->sizeOnDetail('w-1/2')
             ->hideWhenCreating()
             ->hideWhenUpdating()
@@ -47,6 +48,7 @@ trait CommonMetaDataTrait
             $updatedAt->onlyOnDetail();
         }
         $editor = BelongsTo::make(__('By'), 'editor', __CLASS__)
+            ->displayUsing(fn ($user) => $user ? $user->name : '-')
             ->sizeOnDetail('w-1/2')
             ->hideWhenCreating()
             ->hideWhenUpdating()
@@ -70,6 +72,7 @@ trait CommonMetaDataTrait
                 ->onlyOnDetail(),
 
             BelongsTo::make(__('By'), 'destroyer', __CLASS__)
+                ->displayUsing(fn ($user) => $user ? $user->name : '-')
                 ->sizeOnDetail('w-1/2')
                 ->hideWhenCreating()
                 ->hideWhenUpdating()

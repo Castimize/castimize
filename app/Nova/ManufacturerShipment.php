@@ -74,9 +74,9 @@ class ManufacturerShipment extends Resource
 
             Text::make(__('Type'), 'type'),
 
-            Text::make(__('UPS  tracking'), 'ups_tracking'),
+            Text::make(__('Tracking number'), 'tracking_number'),
 
-            Textarea::make(__('UPS tracking manual'), 'ups_tracking_manual')
+            Textarea::make(__('Tracking manual'), 'tracking_manual')
                 ->hideFromIndex(),
 
             Number::make(__('Total parts'), 'total_parts')

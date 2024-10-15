@@ -24,10 +24,11 @@ return new class extends Migration
             $table->float('service_costs')->nullable();
             $table->string('currency_code')->default('USD');
             $table->string('tracking_number', 500)->nullable();
+            $table->string('tracking_url', 500)->nullable();
             $table->tinyText('tracking_manual')->nullable();
-            $table->string('shippo_shipment_id')->nullable();
+            $table->string('shippo_shipment_id')->nullable()->index();
             $table->json('shippo_shipment_meta_data')->nullable();
-            $table->string('shippo_transaction_id')->nullable();
+            $table->string('shippo_transaction_id')->nullable()->index();
             $table->json('shippo_transaction_meta_data')->nullable();
             $table->string('label_url', 500)->nullable();
             $table->string('commercial_invoice_url', 500)->nullable();

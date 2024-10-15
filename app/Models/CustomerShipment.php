@@ -2,17 +2,28 @@
 
 namespace App\Models;
 
+use App\Observers\CustomerShipmentObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+#[ObservedBy([CustomerShipmentObserver::class])]
 class CustomerShipment extends Model
 {
     use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+
+    public $selectedPOs;
+    public $fromAddress = [];
+    public $toAddress = [];
+    public $parcel = [];
 
     protected $revisionForceDeleteEnabled = true;
     protected $revisionCreationsEnabled = true;
@@ -25,18 +36,25 @@ class CustomerShipment extends Model
     protected $fillable = [
         'customer_id',
         'currency_id',
+        'eta',
         'sent_at',
         'arrived_at',
         'expected_delivery_date',
-        'ups_tracking',
-        'ups_tracking_manual',
-        'ups_service',
         'total_parts',
         'total_costs',
         'service_lead_time',
         'service_costs',
         'currency_code',
-        'type',
+        'tracking_number',
+        'tracking_url',
+        'tracking_manual',
+        'shippo_shipment_id',
+        'shippo_shipment_meta_data',
+        'shippo_transaction_id',
+        'shippo_transaction_meta_data',
+        'label_url',
+        'commercial_invoice_url',
+        'qr_code_url',
     ];
 
     /**
@@ -55,7 +73,9 @@ class CustomerShipment extends Model
             'time_in_transit' => 'integer',
             'expected_delivery_date' => 'datetime',
             'service_lead_time' => 'datetime',
-            'ups_service'=> 'boolean',
+            'shippo_shipment_meta_data' => 'json',
+            'shippo_transaction_meta_data' => 'json',
+            'selected_pos' => AsArrayObject::class,
         ];
     }
 
@@ -98,5 +118,32 @@ class CustomerShipment extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function orderQueues(): HasMany
+    {
+        return $this->hasMany(OrderQueue::class);
+    }
+
+    /**
+     * @return MorphMany
+     */
+    public function trackingStatuses(): MorphMany
+    {
+        return $this->morphMany(
+            TrackingStatus::class,
+            'model',
+        );
     }
 }

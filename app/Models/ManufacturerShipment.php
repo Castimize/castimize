@@ -4,10 +4,12 @@ namespace App\Models;
 
 use App\Observers\ManufacturerShipmentObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
@@ -28,15 +30,24 @@ class ManufacturerShipment extends Model
     protected $fillable = [
         'manufacturer_id',
         'currency_id',
+        'eta',
         'sent_at',
         'arrived_at',
         'expected_delivery_date',
-        'ups_tracking',
-        'ups_tracking_manual',
         'total_parts',
         'total_costs',
         'currency_code',
         'type',
+        'tracking_number',
+        'tracking_url',
+        'tracking_manual',
+        'shippo_shipment_id',
+        'shippo_shipment_meta_data',
+        'shippo_transaction_id',
+        'shippo_transaction_meta_data',
+        'label_url',
+        'commercial_invoice_url',
+        'qr_code_url',
     ];
 
     /**
@@ -54,6 +65,8 @@ class ManufacturerShipment extends Model
             'arrived_at' => 'datetime',
             'time_in_transit' => 'integer',
             'expected_delivery_date' => 'datetime',
+            'shippo_shipment_meta_data' => AsArrayObject::class,
+            'shippo_transaction_meta_data' => AsArrayObject::class,
         ];
     }
 
@@ -82,5 +95,16 @@ class ManufacturerShipment extends Model
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
+    }
+
+    /**
+     * @return MorphMany
+     */
+    public function trackingStatuses(): MorphMany
+    {
+        return $this->morphMany(
+            TrackingStatus::class,
+            'model',
+        );
     }
 }

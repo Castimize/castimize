@@ -40,7 +40,7 @@ class AcceptRejectionAction extends Action implements ShouldQueue
 
             // ToDo: Mail to customer with note Castimize CRON
 
-            $model->note_castimized = $fields->note_castimize;
+            $model->note_castimize = $fields->note_castimize;
             $model->accepted_at = now();
             $model->save();
         }

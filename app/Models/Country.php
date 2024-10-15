@@ -14,6 +14,37 @@ class Country extends Model
 {
     use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
 
+    public const EU_COUNTRIES = [
+        'AT',
+        'BE',
+        'BG',
+        'CY',
+        'DE',
+        'DK',
+        'ES',
+        'EE',
+        'FI',
+        'FR',
+        'GR',
+        'HR',
+        'HU',
+        'IE',
+        'IT',
+        'LV',
+        'LT',
+        'LU',
+        'MT',
+        'NL',
+        'PL',
+        'PT',
+        'CZ',
+        'RO',
+        'GB',
+        'SK',
+        'SI',
+        'SE',
+    ];
+
     protected $revisionForceDeleteEnabled = true;
     protected $revisionCreationsEnabled = true;
 

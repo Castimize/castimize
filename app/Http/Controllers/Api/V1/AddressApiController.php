@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Resources\CalculatedPriceResource;
 use App\Http\Resources\CalculatedShippingFeeResource;
+use App\Services\Admin\ShippingService;
 use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\ModelsService;
 use App\Services\Shippo\ShippoService;
@@ -44,11 +45,7 @@ class AddressApiController extends ApiController
             return response()->json(['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []]);
         }
 
-        $shippoService = new ShippoService();
-        $cacheKey = $shippoService->getCacheKey($addressData);
-        $response = Cache::remember($cacheKey, 31556926, function() use ($shippoService, $addressData) {
-            return $shippoService->setFromAddress($addressData)->validateAddress();
-        });
+        $response = (new ShippingService())->setFromAddress($addressData)->validateAddress('From');
         Log::info(print_r($response, true));
 
         return response()->json($response);

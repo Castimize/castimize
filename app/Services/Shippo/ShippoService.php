@@ -92,6 +92,10 @@ class ShippoService
 
     private $_customsDeclaration;
 
+    private $_shipment;
+
+    private $_transaction;
+
     public function __construct(
         public GeneralSettings $generalSettings,
         public CustomsItemSettings $customsItemSettings,
@@ -165,11 +169,41 @@ class ShippoService
     }
 
     /**
+     * @param Shippo_Object $shipmentFromAddress
+     * @return $this
+     */
+    public function setShipmentFromAddress(Shippo_Object $shipmentFromAddress): static
+    {
+        $this->_shipmentFromAddress = $shipmentFromAddress;
+        return $this;
+    }
+
+    /**
      * @return Shippo_Object
      */
     public function getShipmentToAddress(): Shippo_Object
     {
         return $this->_shipmentToAddress;
+    }
+
+    /**
+     * @param Shippo_Object $shipmentToAddress
+     * @return $this
+     */
+    public function setShipmentToAddress(Shippo_Object $shipmentToAddress): static
+    {
+        $this->_shipmentToAddress = $shipmentToAddress;
+        return $this;
+    }
+
+    public function getShipment(): Shippo_Object
+    {
+        return $this->_shipment;
+    }
+
+    public function getTransaction(): Shippo_Object
+    {
+        return $this->_transaction;
     }
 
     /**
@@ -302,11 +336,11 @@ class ShippoService
     }
 
     /**
-     * @return Shippo_Object
+     * @return static
      */
-    public function createShipment(): Shippo_Object
+    public function createShipment(): static
     {
-        return Shippo_Shipment::create([
+        $this->_shipment = Shippo_Shipment::create([
             'object_purpose' => 'PURCHASE',
             'address_from' => $this->_shipmentFromAddress,
             'address_to' => $this->_shipmentToAddress,
@@ -317,6 +351,8 @@ class ShippoService
             ],
             'async' => false,
         ]);
+
+        return $this;
     }
 
     /**
@@ -324,35 +360,37 @@ class ShippoService
      *
      * @param int $customerShipmentId
      * @param $rateId -- object_id from rates_list
-     * @return Shippo_Object
+     * @return static
      */
-    public function createLabel(int $customerShipmentId, $rateId): Shippo_Object
+    public function createLabel(int $customerShipmentId, $rateId): static
     {
-        return Shippo_Transaction::create([
+        $this->_transaction = Shippo_Transaction::create([
             'rate' => $rateId,
             'label_file_type' => 'PDF',
-            'async' => false,
             'metadata' => sprintf('customer_shipment:%s', $customerShipmentId),
+            'async' => false,
         ]);
+
+        return $this;
     }
 
-    /**
-     * Create the shipping label transaction
-     *
-     * @param $shippoShipment
-     * @param int $customerShipmentId
-     * @param string $servicelevelToken
-     * @return Shippo_Object
-     */
-    public function createLabelInstant($shippoShipment, int $customerShipmentId, string $servicelevelToken): Shippo_Object
-    {
-        return Shippo_Transaction::create([
-            'shipment' => $shippoShipment,
-            'servicelevel_token' => $servicelevelToken,
-            'label_file_type' => 'PDF',
-            'metadata' => sprintf('customer_shipment:%s', $customerShipmentId),
-        ]);
-    }
+//    /**
+//     * Create the shipping label transaction
+//     *
+//     * @param $shippoShipment
+//     * @param int $customerShipmentId
+//     * @param string $servicelevelToken
+//     * @return Shippo_Object
+//     */
+//    public function createLabelInstant($shippoShipment, int $customerShipmentId, string $servicelevelToken): Shippo_Object
+//    {
+//        return Shippo_Transaction::create([
+//            'shipment' => $shippoShipment,
+//            'label_file_type' => 'PDF',
+//            'metadata' => sprintf('customer_shipment:%s', $customerShipmentId),
+//            'servicelevel_token' => $servicelevelToken,
+//        ]);
+//    }
 
     /**
      * @param array $params
@@ -373,6 +411,19 @@ class ShippoService
             'requested_end_time' => $params['requested_end_time'],
             'is_test' => true,
         ]);
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'fromAddress' => $this->_shipmentFromAddress,
+            'toAddress' => $this->_shipmentToAddress,
+            'parcel' => $this->_parcel,
+            'customs_items' => $this->_customsItems,
+            'customs_declaration' => $this->_customsDeclaration,
+            'shipment' => $this->_shipment,
+            'transaction' => $this->_transaction,
+        ];
     }
 
     protected function initPackageTypes(): void
