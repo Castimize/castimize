@@ -97,6 +97,7 @@ class ShippingService
         $shippoAddress = $this->createShippoAddress($type);
         $address = $this->$getAddressMethod();
         $valid = $shippoAddress['validation_results']['is_valid'] ? 1 : 0;
+        $errorMessages = [];
         foreach ($shippoAddress['validation_results']['messages'] as $message) {
             $errorMessages[] = [
                 'source' => $message['source'],
