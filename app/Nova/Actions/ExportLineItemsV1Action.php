@@ -39,13 +39,7 @@ class ExportLineItemsV1Action extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-//        dd($models);
-//        $collect = collect();
-//        foreach ($models as $model) {
-//            $collect->push($model);
-//        }
         $response = Excel::download(new ExportLineItemsV1($models), $fields->filename);
-        //dd($response);
 
         if (!$response instanceof BinaryFileResponse || $response->isInvalid()) {
             return Action::danger(__('Resource could not be exported.'));

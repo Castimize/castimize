@@ -8,6 +8,7 @@ use App\Nova\ComplaintReason;
 use App\Nova\Country;
 use App\Nova\Currency;
 use App\Nova\Customer;
+use App\Nova\CustomerShipment;
 use App\Nova\Dashboards\Main;
 use App\Nova\Language;
 use App\Nova\LogisticsZone;
@@ -20,17 +21,22 @@ use App\Nova\OrderQueue;
 use App\Nova\Price;
 use App\Nova\Rejection;
 use App\Nova\RejectionReason;
+use App\Nova\Settings\Billing\AddressSettings;
+use App\Nova\Settings\Shipping\CustomsItemSettings;
+use App\Nova\Settings\Shipping\DcSettings;
+use App\Nova\Settings\Shipping\GeneralSettings;
+use App\Nova\Settings\Shipping\ParcelSettings;
+use App\Nova\Settings\Shipping\PickupSettings;
 use App\Nova\ShippingFee;
 use App\Nova\State;
-use App\Nova\Upload;
 use App\Nova\User;
 use CodencoDev\NovaGridSystem\NovaGridSystem;
+use Devloops\NovaSystemSettings\NovaSystemSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Kaiserkiwi\NovaQueueManagement\Resources\FailedJob;
 use Kaiserkiwi\NovaQueueManagement\Resources\Job;
 use Kaiserkiwi\NovaQueueManagement\Tool;
-use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
@@ -97,6 +103,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     }),
 
                 MenuSection::make(__('Logistics'), [
+                    //MenuItem::resource(CustomerShipment::class),
                     MenuItem::resource(LogisticsZone::class),
                     MenuItem::resource(ShippingFee::class),
                     MenuItem::resource(Country::class),
@@ -138,6 +145,14 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(State::class),
                     MenuItem::resource(City::class),
                 ])->icon('globe')
+                    ->collapsable()
+                    ->canSee(function (NovaRequest $request) {
+                        return $request->user()->isSuperAdmin() || $request->user()->isAdmin();
+                    }),
+
+                MenuSection::make(__('Settings'), [
+                    MenuItem::externalLink(__('System settings'), '/admin/system-settings'),
+                ])->icon('cog')
                     ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isSuperAdmin() || $request->user()->isAdmin();
@@ -228,6 +243,19 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             }),
             new NovaGridSystem(),
             new Tool(),
+            NovaSystemSettings::make([
+                // General
+
+                // Billing
+                AddressSettings::make(),
+
+                // Shipping
+                GeneralSettings::make(),
+                DcSettings::make(),
+                ParcelSettings::make(),
+                CustomsItemSettings::make(),
+                PickupSettings::make(),
+            ]),
         ];
     }
 

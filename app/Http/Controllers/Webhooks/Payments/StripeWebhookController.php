@@ -1,25 +1,23 @@
 <?php
 
-namespace App\Http\Controllers\Webhooks;
+namespace App\Http\Controllers\Webhooks\Payments;
 
-use App\Http\Controllers\Controller;
-use App\Models\Order;
-use Carbon\Carbon;
+use App\Http\Controllers\Webhooks\WebhookController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use JsonException;
 use Stripe\Event;
 use Stripe\PaymentIntent;
 use Symfony\Component\HttpFoundation\Response;
 use UnexpectedValueException;
 
-class StripeWebhookController extends Controller
+class StripeWebhookController extends WebhookController
 {
     /**
      * StripeWebhookController constructor.
      */
     public function __construct()
     {
+        parent::__construct();
     }
 
     /**
@@ -86,38 +84,5 @@ class StripeWebhookController extends Controller
         $orderId = $intent->charges->data[0]->metadata->order_id;
         //event(new OrderPaymentCanceled($orderId, $payload));
         return $this->successMethod();
-    }
-
-    /**
-     * Handle successful calls on the controller.
-     *
-     * @param array $parameters
-     * @return Response
-     */
-    protected function successMethod(array $parameters = []): Response
-    {
-        return new Response('Webhook Handled', 200);
-    }
-
-    /**
-     * Handle calls to missing methods on the controller.
-     *
-     * @param array $parameters
-     * @return Response
-     */
-    protected function missingMethod(array $parameters = []): Response
-    {
-        return new Response;
-    }
-
-    /**
-     * Handle calls to invalid payload on the controller.
-     *
-     * @param array $parameters
-     * @return Response
-     */
-    protected function invalidMethod(): Response
-    {
-        return new Response('', Response::HTTP_BAD_REQUEST);
     }
 }

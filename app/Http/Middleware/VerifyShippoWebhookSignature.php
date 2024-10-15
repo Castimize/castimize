@@ -19,11 +19,7 @@ class VerifyShippoWebhookSignature
      */
     public function handle(Request $request, Closure $next): Response
     {
-        Log::info($request->header());
-        Log::info($request->getContent());
-        Log::info(print_r($request->all(), true));
-
-
+        // For now just continue
         return $next($request);
     }
 }

@@ -26,7 +26,6 @@ return new class extends Migration
 
             $table->index(['model_id', 'model_type']);
 
-
             $table->primary(['address_id', 'model_id', 'model_type'],
                 'model_has_addresses_address_model_type_primary');
         });
