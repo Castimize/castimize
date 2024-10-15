@@ -31,7 +31,6 @@
         "league/flysystem-aws-s3-v3": "^3.0",
         "maatwebsite/laravel-nova-excel": "^1.3",
         "outl1ne/nova-multiselect-field": "^4.6",
-        "pavloniym/nova-action-buttons": "^1.1",
         "picqer/exact-php-client": "^4.4",
         "predis/predis": "^2.2",
         "psr/simple-cache": "^2.0",

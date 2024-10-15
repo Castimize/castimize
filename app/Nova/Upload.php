@@ -14,8 +14,6 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 use Laravel\Nova\Panel;
-use Pavloniym\ActionButtons\ActionButton;
-use Pavloniym\ActionButtons\ActionButtons;
 
 class Upload extends Resource
 {

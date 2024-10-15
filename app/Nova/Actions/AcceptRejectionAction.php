@@ -21,7 +21,7 @@ class AcceptRejectionAction extends Action implements ShouldQueue
      *
      * @return mixed
      */
-    public function title()
+    public function name()
     {
         return __('Accept rejection');
     }

@@ -23,7 +23,7 @@ class PoManualChangeStatusOrderAction extends Action
      *
      * @return mixed
      */
-    public function title()
+    public function name()
     {
         return __('Change status manual');
     }

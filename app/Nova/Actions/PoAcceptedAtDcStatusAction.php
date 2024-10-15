@@ -21,7 +21,7 @@ class PoAcceptedAtDcStatusAction extends Action implements ShouldQueue
      *
      * @return mixed
      */
-    public function title()
+    public function name()
     {
         return __('Accepted at DC');
     }

@@ -22,7 +22,7 @@ class DeclineRejectionAction extends Action
      *
      * @return mixed
      */
-    public function title()
+    public function name()
     {
         return __('Decline rejection');
     }

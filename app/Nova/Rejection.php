@@ -14,8 +14,6 @@ use Laravel\Nova\Fields\Image;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Pavloniym\ActionButtons\ActionButton;
-use Pavloniym\ActionButtons\ActionButtons;
 use WesselPerik\StatusField\StatusField;
 
 class Rejection extends Resource

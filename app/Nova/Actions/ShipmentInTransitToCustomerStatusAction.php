@@ -22,7 +22,7 @@ class ShipmentInTransitToCustomerStatusAction extends Action implements ShouldQu
      *
      * @return mixed
      */
-    public function title()
+    public function name()
     {
         return __('In transit to customer');
     }

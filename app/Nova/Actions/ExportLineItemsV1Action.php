@@ -25,7 +25,7 @@ class ExportLineItemsV1Action extends Action
      *
      * @return mixed
      */
-    public function title()
+    public function name()
     {
         return __('Export items');
     }
@@ -69,7 +69,7 @@ class ExportLineItemsV1Action extends Action
     protected function getDownloadUrl(string $filePath, string $fileName): string
     {
         return URL::temporarySignedRoute('laravel-nova-excel.download', now()->addMinutes(1), [
-            'path'     => encrypt($filePath),
+            'path' => encrypt($filePath),
             'filename' => $fileName,
         ]);
     }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d72b83959f8756fc0bdaf1bbf25da12f",
+    "content-hash": "67cca7cce4e15964b7c7bad4262a08b2",
     "packages": [
         {
             "name": "automattic/woocommerce",
@@ -5073,53 +5073,6 @@
                 "source": "https://github.com/outl1ne/nova-translations-loader/tree/5.0.2"
             },
             "time": "2024-03-13T08:57:31+00:00"
-        },
-        {
-            "name": "pavloniym/nova-action-buttons",
-            "version": "v1.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pavloniym/nova-action-buttons.git",
-                "reference": "387e5228a4146ef7c78a70aaced494e207a25cba"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pavloniym/nova-action-buttons/zipball/387e5228a4146ef7c78a70aaced494e207a25cba",
-                "reference": "387e5228a4146ef7c78a70aaced494e207a25cba",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.3|^8.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Pavloniym\\ActionButtons\\FieldServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Pavloniym\\ActionButtons\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "A Laravel Nova field.",
-            "keywords": [
-                "actions",
-                "buttons",
-                "laravel",
-                "nova"
-            ],
-            "support": {
-                "issues": "https://github.com/pavloniym/nova-action-buttons/issues",
-                "source": "https://github.com/pavloniym/nova-action-buttons/tree/v1.1.1"
-            },
-            "time": "2023-03-24T17:59:15+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",

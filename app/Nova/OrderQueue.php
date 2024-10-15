@@ -260,8 +260,7 @@ class OrderQueue extends Resource
      */
     public function lenses(NovaRequest $request)
     {
-        return [
-        ];
+        return [];
     }
 
     /**
