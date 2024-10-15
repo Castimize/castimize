@@ -110,6 +110,19 @@ class CustomerShipment extends Resource
     }
 
     /**
+     * Build a "detail" query for the given resource.
+     *
+     * @param NovaRequest $request
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public static function detailQuery(NovaRequest $request, $query)
+    {
+        $query->withCount('orderQueues as order_queues_count');
+        return parent::detailQuery($request, $query);
+    }
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @param NovaRequest $request
