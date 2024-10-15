@@ -13,7 +13,4 @@ Route::group([
     Route::post('/webhooks/shipping/shippo/callback', 'Webhooks\Shipping\ShippoWebhookController@handleWebhook')
         ->name('webhooks.shipping.shippo.callback')
         ->middleware(VerifyShippoWebhookSignature::class);
-    Route::post('/webhooks/shipping/ups/oath', 'Webhooks\Shipping\UpsWebhookController@handleOath')
-        ->name('webhooks.shipping.ups.oath')
-        ->middleware(VerifyShippoWebhookSignature::class);
 });
