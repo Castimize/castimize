@@ -14,7 +14,7 @@ use Laravel\Nova\Fields\Heading;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class PoManualChangeStatusOrderAction extends Action
+class PoChangeStatusOrderManualAction extends Action
 {
     use InteractsWithQueue, Queueable;
 

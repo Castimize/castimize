@@ -3,7 +3,7 @@
 namespace App\Nova;
 
 use App\Nova\Actions\PoAcceptedAtDcStatusAction;
-use App\Nova\Actions\PoManualChangeStatusOrderAction;
+use App\Nova\Actions\PoChangeStatusOrderManualAction;
 use App\Nova\Actions\ExportLineItemsV1Action;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
@@ -272,7 +272,7 @@ class OrderQueue extends Resource
     public function actions(NovaRequest $request)
     {
         return [
-            PoManualChangeStatusOrderAction::make(),
+            PoChangeStatusOrderManualAction::make(),
             ExportLineItemsV1Action::make(),
         ];
     }
