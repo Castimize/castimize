@@ -45,7 +45,8 @@ class AddressApiController extends ApiController
             return response()->json(['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []]);
         }
 
-        $response = (new ShippingService())->setFromAddress($addressData)->validateAddress('From');
+        $shippingService = app(ShippingService::class);
+        $response = $shippingService->setFromAddress($addressData)->validateAddress('From');
         Log::info(print_r($response, true));
 
         return response()->json($response);
