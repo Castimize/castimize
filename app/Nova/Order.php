@@ -10,23 +10,14 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
-use Laravel\Nova\Fields\DateTime;
-use Laravel\Nova\Fields\Email;
-use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Image;
-use Laravel\Nova\Fields\Number;
-use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Rpj\Daterangepicker\DateHelper;
-use Rpj\Daterangepicker\Daterangepicker;
-use Saumini\Count\RelationshipCount;
 use Tomodo531\FilterableFilters\FilterableFilters;
-use Wame\TelInput\TelInput;
 use WesselPerik\StatusField\StatusField;
 
 class Order extends Resource

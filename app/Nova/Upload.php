@@ -162,17 +162,6 @@ class Upload extends Resource
                 return '-';
             }),
 
-            ActionButtons::make(__('Order queue'))->collection([
-                ActionButton::make(__('Add'))
-                    ->icon('Add')
-                    ->action(new UploadToOrderQueueAction(), $this->resource->id),
-//                    ->canSee(function () {
-//                        return !$this->resource->orderQueue;
-//                    }),
-            ])->canSee(function () {
-                return !$this->orderQueue;
-            }),
-
             BelongsTo::make(__('Order queue'), 'orderQueue')
                 ->canSee(function () {
                     return $this->orderQueue;

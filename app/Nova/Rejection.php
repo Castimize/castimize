@@ -123,17 +123,6 @@ class Rejection extends Resource
             BelongsTo::make(__('Manufacturer'), 'manufacturer')
                 ->sortable(),
 
-            ActionButtons::make(__('Status'))->collection([
-                ActionButton::make(__('Accept rejection'))
-                    ->icon('check-circe')
-                    ->action(new AcceptRejectionAction(), $this->resource->id),
-                ActionButton::make(__('Decline rejection'))
-                    ->icon('x-circle')
-                    ->action(new DeclineRejectionAction(), $this->resource->id),
-            ])->canSee(function () {
-                return $this->resource->accepted_at === null && $this->resource->declined_at === null;
-            }),
-
             StatusField::make(__('Status'))
                 ->icons([
                     'x-circle' => $this->declined_at !== null,
@@ -200,6 +189,9 @@ class Rejection extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            (new AcceptRejectionAction()),
+            (new DeclineRejectionAction()),
+        ];
     }
 }
