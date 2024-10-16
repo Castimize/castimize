@@ -150,6 +150,8 @@ return [
 
     'currency' => 'USD',
 
+    'supported_currencies' => ['EUR', 'GBP', 'DKK', 'CAD'],
+
     /*
     |--------------------------------------------------------------------------
     | Branding

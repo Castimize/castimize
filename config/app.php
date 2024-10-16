@@ -86,6 +86,10 @@ return [
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
+    'currency' => 'USD',
+
+    'supported_currencies' => ['EUR', 'GBP', 'DKK', 'CAD'],
+
     /*
     |--------------------------------------------------------------------------
     | Encryption Key

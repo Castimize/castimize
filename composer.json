@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ashallendesign/laravel-exchange-rates": "^7.6",
         "cmixin/business-day": "^1.18",
         "codenco-dev/nova-grid-system": "^2.0",
         "codexshaper/laravel-woocommerce": "^3.0",
