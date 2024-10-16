@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('billing_last_name')->nullable();
             $table->string('billing_company')->nullable();
             $table->string('billing_phone_number')->nullable();
+            $table->string('billing_email')->nullable();
             $table->string('billing_address_line1')->nullable();
             $table->string('billing_address_line2')->nullable();
             $table->string('billing_postal_code')->nullable();
@@ -38,6 +39,7 @@ return new class extends Migration
             $table->string('shipping_last_name')->nullable();
             $table->string('shipping_company')->nullable();
             $table->string('shipping_phone_number')->nullable();
+            $table->string('shipping_email')->nullable();
             $table->string('shipping_address_line1')->nullable();
             $table->string('shipping_address_line2')->nullable();
             $table->string('shipping_postal_code')->nullable();

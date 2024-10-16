@@ -400,7 +400,11 @@ class Order extends Resource
 
             Text::make(__('Billing vat number'), 'billing_vat_number'),
 
-            Text::make(__('Billing phone'), 'billing_phone_number'),
+            Text::make(__('Billing phone'), 'billing_phone_number')
+                ->hideFromIndex(),
+
+            Text::make(__('Billing email'), 'billing_email')
+                ->hideFromIndex(),
         ];
     }
 
@@ -459,6 +463,9 @@ class Order extends Resource
             Text::make(__('Shipping country'), 'shipping_country'),
 
             Text::make(__('Shipping phone'), 'shipping_phone_number')
+                ->hideFromIndex(),
+
+            Text::make(__('Shipping email'), 'shipping_email')
                 ->hideFromIndex(),
         ];
     }

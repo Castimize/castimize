@@ -43,6 +43,7 @@ class Order extends Model
         'billing_first_name',
         'billing_last_name',
         'billing_phone_number',
+        'billing_email',
         'billing_address_line1',
         'billing_address_line2',
         'billing_postal_code',
@@ -52,6 +53,7 @@ class Order extends Model
         'shipping_first_name',
         'shipping_last_name',
         'shipping_phone_number',
+        'shipping_email',
         'shipping_address_line1',
         'shipping_address_line2',
         'shipping_postal_code',
@@ -257,7 +259,7 @@ class Order extends Model
                 'state' => $this->billing_state,
                 'country' => $this->billing_country,
                 'phone' => $this->billing_phone_number,
-                'email' => $this->email,
+                'email' => $this->billing_email ?? $this->email,
                 'vat_number' => $this->billing_vat_number,
             ],
         );
@@ -290,8 +292,8 @@ class Order extends Model
                 'city' => $this->shipping_city,
                 'state' => $this->shipping_state,
                 'country' => $this->shipping_country,
-                'phone' => $this->shipping_phone_number ?? $this->billing_phone_number,
-                'email' => $this->email,
+                'phone' => $this->shipping_phone_number ?? null,
+                'email' => $this->shipping_email,
             ],
         );
     }
