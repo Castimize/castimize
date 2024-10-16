@@ -88,7 +88,7 @@ return [
 
     'currency' => 'USD',
 
-    'supported_currencies' => ['EUR', 'GBP', 'DKK', 'CAD'],
+    'supported_currencies' => ['EUR', 'GBP'],
 
     /*
     |--------------------------------------------------------------------------

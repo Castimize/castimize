@@ -39,7 +39,7 @@ class AddressApiController extends ApiController
             'country' => $request->country,
             'email' => $request->email,
         ];
-        Log::info(print_r($addressData, true));
+//        Log::info(print_r($addressData, true));
 
         if (empty($addressData['country'])) {
             return response()->json(['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []]);
@@ -47,7 +47,7 @@ class AddressApiController extends ApiController
 
         $shippingService = app(ShippingService::class);
         $response = $shippingService->setFromAddress($addressData)->validateAddress('From');
-        Log::info(print_r($response, true));
+//        Log::info(print_r($response, true));
 
         return response()->json($response);
     }
