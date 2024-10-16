@@ -4,7 +4,9 @@ namespace App\Console\Commands;
 
 use App\Models\CurrencyHistoryRate;
 use AshAllenDesign\LaravelExchangeRates\Classes\ExchangeRate;
+use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class GetCurrencyHistoricalRates extends Command
 {
@@ -29,18 +31,21 @@ class GetCurrencyHistoricalRates extends Command
     {
         $baseCurrency = config('app.currency');
         $supportedCurrencies = config('app.supported_currencies');
-        $exchangeRates = app(ExchangeRate::class);
+        try {
+            $exchangeRates = app(ExchangeRate::class);
 
-        $result = $exchangeRates->exchangeRate($baseCurrency, $supportedCurrencies);
+            $result = $exchangeRates->exchangeRate($baseCurrency, $supportedCurrencies);
 
-        foreach ($result as $convertCurrency => $rate) {
-            CurrencyHistoryRate::create([
-                'base_currency' => $baseCurrency,
-                'convert_currency' => $convertCurrency,
-                'rate' => $rate,
-                'historical_date' => now()->format('Y-m-d'),
-            ]);
+            foreach ($result as $convertCurrency => $rate) {
+                CurrencyHistoryRate::create([
+                    'base_currency' => $baseCurrency,
+                    'convert_currency' => $convertCurrency,
+                    'rate' => $rate,
+                    'historical_date' => now()->format('Y-m-d'),
+                ]);
+            }
+        } catch (Exception $e) {
+            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
-
     }
 }
