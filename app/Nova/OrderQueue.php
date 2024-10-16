@@ -200,7 +200,7 @@ class OrderQueue extends Resource
                 ->sortable(),
 
             Text::make(__('Total'), function () {
-                    return $this->order->total ? currencyFormatter((float)$this->order->total, $this->order->currency_code) : '';
+                    return $this->upload->total ? currencyFormatter((float)$this->upload->total, $this->upload->currency_code) : '';
                 })
                 ->hideOnExport()
                 ->sortable(),
