@@ -259,7 +259,7 @@ class Order extends Model
                 'state' => $this->billing_state,
                 'country' => $this->billing_country,
                 'phone' => $this->billing_phone_number,
-                'email' => $this->billing_email ?? $this->email,
+                'email' => $this->billing_email,
                 'vat_number' => $this->billing_vat_number,
             ],
         );
@@ -292,7 +292,7 @@ class Order extends Model
                 'city' => $this->shipping_city,
                 'state' => $this->shipping_state,
                 'country' => $this->shipping_country,
-                'phone' => $this->shipping_phone_number ?? null,
+                'phone' => $this->shipping_phone_number,
                 'email' => $this->shipping_email,
             ],
         );
