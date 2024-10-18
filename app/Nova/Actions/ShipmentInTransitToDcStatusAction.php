@@ -13,7 +13,7 @@ use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class ShipmentInTransitToCustomerStatusAction extends Action implements ShouldQueue
+class ShipmentInTransitToDcStatusAction extends Action implements ShouldQueue
 {
     use InteractsWithQueue, Queueable;
 
@@ -24,7 +24,7 @@ class ShipmentInTransitToCustomerStatusAction extends Action implements ShouldQu
      */
     public function name()
     {
-        return __('In transit to customer');
+        return __('In transit to DC');
     }
 
     /**
@@ -40,11 +40,11 @@ class ShipmentInTransitToCustomerStatusAction extends Action implements ShouldQu
         foreach ($models as $model) {
             $model->sent_at = $fields->sent_at ?? now();
             foreach ($model->orderQueues as $orderQueue) {
-                $orderQueuesService->setStatus($orderQueue, 'in-transit-to-customer');
+                $orderQueuesService->setStatus($orderQueue, 'in-transit-to-dc');
             }
         }
 
-        return ActionResponse::message(__('PO\'s successfully in transit to customer.'));
+        return ActionResponse::message(__('PO\'s successfully in transit to DC.'));
     }
 
     /**

@@ -10,10 +10,9 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
-use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class ShipmentInTransitToCustomerStatusAction extends Action implements ShouldQueue
+class PoAvailabaleForShippingStatusAction extends Action implements ShouldQueue
 {
     use InteractsWithQueue, Queueable;
 
@@ -24,7 +23,7 @@ class ShipmentInTransitToCustomerStatusAction extends Action implements ShouldQu
      */
     public function name()
     {
-        return __('In transit to customer');
+        return __('Available for shipping');
     }
 
     /**
@@ -38,13 +37,10 @@ class ShipmentInTransitToCustomerStatusAction extends Action implements ShouldQu
     {
         $orderQueuesService = new OrderQueuesService();
         foreach ($models as $model) {
-            $model->sent_at = $fields->sent_at ?? now();
-            foreach ($model->orderQueues as $orderQueue) {
-                $orderQueuesService->setStatus($orderQueue, 'in-transit-to-customer');
-            }
+            $orderQueuesService->setStatus($model, 'available-for-shipping');
         }
 
-        return ActionResponse::message(__('PO\'s successfully in transit to customer.'));
+        return ActionResponse::message(__('PO\'s successfully available for shipping'));
     }
 
     /**
@@ -55,8 +51,6 @@ class ShipmentInTransitToCustomerStatusAction extends Action implements ShouldQu
      */
     public function fields(NovaRequest $request)
     {
-        return [
-            DateTime::make(__('Date sent at'), 'sent_at')->help(__('Leave empty to set sent_at at now()')),
-        ];
+        return [];
     }
 }
