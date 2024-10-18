@@ -26,6 +26,7 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Outl1ne\MultiselectField\Multiselect;
 use Rpj\Daterangepicker\DateHelper;
+use Whitecube\NovaFlexibleContent\Flexible;
 
 class CustomerShipment extends Resource
 {
@@ -230,9 +231,50 @@ class CustomerShipment extends Resource
     public function fieldsForCreate(NovaRequest $request)
     {
         return [
+//            Flexible::make('Content')
+//                ->button(__('Add PO to shipment'))
+//                ->addLayout(__('PO for shipment'), 'flexiblePOs', [
+//                    Select::make('PO\'s', 'po')
+//                        ->options(
+//                            \App\Models\OrderQueue::with('orderQueueStatuses')
+//                                ->whereHas('orderQueueStatuses', function ($q) {
+//                                    $q->where('slug', 'at-dc')
+//                                        ->whereIn('id', function ($query) {
+//                                            $query
+//                                                ->selectRaw('max(id)')
+//                                                ->from('order_queue_statuses')
+//                                                ->whereColumn('order_queue_id', 'order_queue.id');
+//                                        });
+//                                })
+//                                ->whereNull('customer_shipment_id')
+//                                ->get()
+//                                ->pluck('customer_shipment_select_name', 'id')
+//                                ->toArray()
+//                        ),
+//                    Text::make(__('Material'), 'material')
+//                        ->dependsOn(
+//                            ['flexible-content'],
+//                            function (Text $field, NovaRequest $request, FormData $formData) {
+////                                if ($formData) {
+////                                    dd($formData);
+////                                }
+////                                if (is_array($formData->po) && count($formData->selectedPOs) > 0) {
+////                                    $firstPO = $formData->selectedPOs[0];
+////                                    $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
+////                                        $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
+////                                        if ($orderQueue === null) {
+////                                            return [];
+////                                        }
+////                                        return $orderQueue->order->shipping_address;
+////                                    });
+////                                    $field->value = $toAddress['name'];
+////                                }
+//                            }
+//                        ),
+//                ]),
             Multiselect::make('PO\'s', 'selectedPOs')
                 ->options(
-                    \App\Models\OrderQueue::with('orderQueueStatuses')
+                    \App\Models\OrderQueue::with(['order', 'orderQueueStatuses'])
                         ->whereHas('orderQueueStatuses', function ($q) {
                             $q->where('slug', 'at-dc')
                                 ->whereIn('id', function ($query) {
@@ -244,6 +286,8 @@ class CustomerShipment extends Resource
                         })
                         ->whereNull('customer_shipment_id')
                         ->get()
+                        ->sortBy('order.order_number')
+                        ->sortBy('id')
                         ->pluck('customer_shipment_select_name', 'id')
                         ->toArray()
                 )
