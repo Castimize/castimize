@@ -3,16 +3,19 @@
 namespace App\Services\Shippo;
 
 use App\Models\Material;
+use App\Models\Order;
 use App\Models\Upload;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\GeneralSettings;
 use App\Nova\Settings\Shipping\PickupSettings;
+use Carbon\Carbon;
 use JsonException;
 use Shippo_Address;
 use Shippo_CustomsDeclaration;
 use Shippo_CustomsItem;
 use Shippo_Object;
+use Shippo_Order;
 use Shippo_Parcel;
 use Shippo_Pickup;
 use Shippo_Shipment;
@@ -85,6 +88,10 @@ class ShippoService
     private $_shipmentFromAddress;
 
     private $_shipmentToAddress;
+
+    private $_orderLineItems = [];
+
+    private $_order;
 
     private $_parcel;
 
@@ -196,11 +203,25 @@ class ShippoService
         return $this;
     }
 
+    /**
+     * @return Shippo_Object
+     */
+    public function getOrder(): Shippo_Object
+    {
+        return $this->_order;
+    }
+
+    /**
+     * @return Shippo_Object
+     */
     public function getShipment(): Shippo_Object
     {
         return $this->_shipment;
     }
 
+    /**
+     * @return Shippo_Object
+     */
     public function getTransaction(): Shippo_Object
     {
         return $this->_transaction;
@@ -258,6 +279,56 @@ class ShippoService
     }
 
     /**
+     * @param $lineItems
+     * @return $this
+     */
+    public function createOrderLineItems($lineItems): static
+    {
+        foreach ($lineItems as $lineItem) {
+            $this->_orderLineItems[] = [
+                'currency' => $lineItem->currency,
+                'quantity' => $lineItem->quantity,
+                'title' => $lineItem->name,
+                'total_price' => $lineItem->total,
+                'weight' => $lineItem->model_box_volume * $lineItem->material->density + $this->customsItemSettings->bag, // (in gram) = volume (cm3) * density + bag
+                'weight_unit' => $this->customsItemSettings->massUnit,
+            ];
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Order $order
+     * @return $this
+     */
+    public function createOrder(Order $order): static
+    {
+        $weight = 0;
+        foreach ($this->_orderLineItems as $lineItem) {
+            $weight += $lineItem['weight'];
+        }
+        $this->_order = Shippo_Order::create([
+            'currency' => $order->currency_code,
+            'notes' => $order->comments,
+            'order_number' => $order->order_number,
+            'order_status' => 'PAID',
+            'placed_at' => str_replace('+00:00', 'Z', Carbon::parse($order->created_at)->setTimezone('UTC')->format('c')),
+            'shipping_cost' => (string)$order->shipping_fee,
+            'shipping_cost_currency' => $order->currency_code,
+            'total_price' => (string)$order->total,
+            'total_tax' => (string)$order->total_tax,
+            'weight' => $weight,
+            'weight_unit' => $this->customsItemSettings->massUnit,
+            'from_address' => $this->_shipmentFromAddress,
+            'to_address' => $this->_shipmentToAddress,
+            'line_items' => $this->_orderLineItems,
+        ]);
+
+        return $this;
+    }
+
+    /**
      * @param array $params
      * @return static
      */
@@ -289,10 +360,11 @@ class ShippoService
             $description = $material->hs_code_description;
             $tariffNUmber = $material->hs_code;
         }
+        $netWeight = $upload->model_box_volume * $material->density + $this->customsItemSettings->bag;
         $customsItem = Shippo_CustomsItem::create([
             'description' => $description,
             'quantity' => $upload->quantity,
-            'net_weight' => $upload->model_box_volume * $material->density + $this->customsItemSettings->bag, // (in gram) = volume (cm3) * density + bag
+            'net_weight' => round($netWeight, 2), // (in gram) = volume (cm3) * density + bag
             'mass_unit' => $this->customsItemSettings->massUnit,
             'value_amount' => $upload->total,
             'value_currency' => $upload->currency_code ?? 'USD',

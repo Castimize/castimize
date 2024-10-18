@@ -134,7 +134,7 @@ class OrderQueue extends Model
     protected function customerShipmentSelectName(): Attribute
     {
         return Attribute::make(
-            get: fn () => sprintf('%s-%s %s', $this->id, $this->order->order_number, $this->order->billing_name),
+            get: fn () => sprintf('%s-%s (%s) %s', $this->id, $this->order->order_number, $this->order->uploads->count(), $this->order->billing_name),
         );
     }
 

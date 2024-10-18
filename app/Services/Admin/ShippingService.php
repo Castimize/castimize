@@ -4,6 +4,8 @@ namespace App\Services\Admin;
 
 use App\Models\Country;
 use App\Models\CustomerShipment;
+use App\Models\Order;
+use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\GeneralSettings;
 use App\Services\Shippo\ShippoService;
 use Carbon\Carbon;
@@ -61,8 +63,9 @@ class ShippingService
 
     /**
      * @param GeneralSettings $generalSettings
+     * @param DcSettings $dcSettings
      */
-    public function __construct(public GeneralSettings $generalSettings)
+    public function __construct(public GeneralSettings $generalSettings, public DcSettings $dcSettings)
     {
         $this->_shippoService = app(ShippoService::class);
     }
@@ -130,6 +133,26 @@ class ShippingService
     }
 
     /**
+     * @param Order $order
+     * @return void
+     * @throws Shippo_ApiError
+     */
+    public function createShippoCustomerOrder(Order $order): void
+    {
+        $fromAddress = $this->mapDcDefaultToShippoAddress();
+        $toAddress = $this->mapToShippoAddress($order->shipping_address);
+
+        $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
+        $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
+
+        $this->_shippoService
+            ->setShipmentFromAddress($shippoFromAddress)
+            ->setShipmentToAddress($shippoToAddress)
+            ->createOrderLineItems($order->uploads)
+            ->createOrder($order);
+    }
+
+    /**
      * @param CustomerShipment $customerShipment
      * @return array
      * @throws Shippo_ApiError
@@ -186,29 +209,27 @@ class ShippingService
             );
         }
 
-        if ($rate) {
-            $this->_shippoService = $this->_shippoService
-                ->createLabel($customerShipment->id, $rate['object_id']);
-            $transaction = $this->_shippoService->getTransaction();
-            Log::info(print_r($transaction, true));
-            if ($transaction && $transaction['status'] === 'SUCCESS') {
-                return $this->_shippoService->toArray();
-            }
+        $this->_shippoService = $this->_shippoService
+            ->createLabel($customerShipment->id, $rate['object_id']);
+        $transaction = $this->_shippoService->getTransaction();
+        Log::info(print_r($transaction, true));
+        if ($transaction && $transaction['status'] === 'SUCCESS') {
+            return $this->_shippoService->toArray();
+        }
 
-            $errorMessages = [];
-            foreach ($transaction['messages'] as $message) {
-                $errorMessages[] = $message['text'];
-            }
-            if (!empty($errorMessages)) {
-                throw new Shippo_ApiError(
-                    sprintf(
-                        '%s%s%s',
-                        __('Transaction unsuccessful.'),
-                        PHP_EOL,
-                        implode(PHP_EOL, $errorMessages)
-                    )
-                );
-            }
+        $errorMessages = [];
+        foreach ($transaction['messages'] as $message) {
+            $errorMessages[] = $message['text'];
+        }
+        if (!empty($errorMessages)) {
+            throw new Shippo_ApiError(
+                sprintf(
+                    '%s%s%s',
+                    __('Transaction unsuccessful.'),
+                    PHP_EOL,
+                    implode(PHP_EOL, $errorMessages)
+                )
+            );
         }
     }
 
@@ -245,6 +266,24 @@ class ShippingService
             'zip' => $address['postal_code'],
             'country' => $address['country'],
             'email' => $address['email'],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function mapDcDefaultToShippoAddress(): array
+    {
+        return [
+            'name' => $this->dcSettings->name,
+            'company' => $this->dcSettings->company,
+            'street1' => $this->dcSettings->addressLine1,
+            'street2' => $this->dcSettings->addressLine2,
+            'city' => $this->dcSettings->city,
+            'state' => $this->dcSettings->state,
+            'zip' => $this->dcSettings->postalCode,
+            'country' => $this->dcSettings->country,
+            'email' => $this->dcSettings->email,
         ];
     }
 
