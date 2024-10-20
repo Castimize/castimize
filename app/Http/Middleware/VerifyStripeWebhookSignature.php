@@ -19,8 +19,8 @@ class VerifyStripeWebhookSignature
      */
     public function handle(Request $request, Closure $next): Response
     {
-        Log::info($request->header());
-        Log::info($request->getContent());
+//        Log::info($request->header());
+//        Log::info($request->getContent());
         try {
             WebhookSignature::verifyHeader(
                 $request->getContent(),
