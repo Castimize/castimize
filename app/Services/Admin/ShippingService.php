@@ -266,6 +266,7 @@ class ShippingService
             'zip' => $address['postal_code'],
             'country' => $address['country'],
             'email' => $address['email'],
+            'phone' => $address['phone'],
         ];
     }
 
@@ -284,6 +285,7 @@ class ShippingService
             'zip' => $this->dcSettings->postalCode,
             'country' => $this->dcSettings->country,
             'email' => $this->dcSettings->email,
+            'phone' => $this->dcSettings->phone,
         ];
     }
 
