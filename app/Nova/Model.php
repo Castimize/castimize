@@ -104,7 +104,7 @@ class Model extends Resource
                 })
                 ->step(1),
 
-            new Panel(__('History'), $this->commonMetaData(true, true, false, false)),
+            new Panel(__('History'), $this->commonMetaData(showCreatedAtOnIndex: true, showUpdatedAtOnIndex: false, showEditorOnIndex: false)),
         ];
     }
 
@@ -127,9 +127,7 @@ class Model extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [
-
-        ];
+        return [];
     }
 
     /**

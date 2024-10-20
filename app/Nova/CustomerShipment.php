@@ -4,10 +4,10 @@ namespace App\Nova;
 
 use App\Nova\Actions\ShipmentInTransitToCustomerStatusAction;
 use App\Nova\Filters\CreatedAtDaterangepickerFilter;
+use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Services\Shippo\ShippoService;
 use App\Traits\Nova\CommonMetaDataTrait;
-use App\Traits\Nova\DcFromAddressTrait;
 use Carbon\Carbon;
 use Castimize\SelectWithOverview\SelectWithOverview;
 use Exception;
@@ -18,6 +18,7 @@ use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\Heading;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphMany;
 use Laravel\Nova\Fields\Number;
@@ -25,13 +26,11 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
-use Outl1ne\MultiselectField\Multiselect;
 use Rpj\Daterangepicker\DateHelper;
-use Whitecube\NovaFlexibleContent\Flexible;
 
 class CustomerShipment extends Resource
 {
-    use CommonMetaDataTrait, DcFromAddressTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -231,76 +230,49 @@ class CustomerShipment extends Resource
      */
     public function fieldsForCreate(NovaRequest $request)
     {
+        $dcSettings = (new DcSettings());
+        $parcelSettings = (new ParcelSettings());
+
         return [
             SelectWithOverview::make('PO\'s', 'selectedPOs')
                 ->placeholder(__('Select PO\'s'))
                 ->options(\App\Models\OrderQueue::getAtDcOrderQueueOptions())
                 ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders()),
 
-            new Panel(__('From address'), $this->fromAddressFields()),
+            Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')->asHtml(),
 
-            new Panel(__('To address'), $this->toAddressFields()),
+            Text::make(__('Name'), 'from_address_name')
+                ->default($dcSettings->name),
 
-            new Panel(__('Parcel settings'), $this->parcelFields()),
-        ];
-    }
+            Text::make(__('Company'), 'from_address_company')
+                ->default($dcSettings->company),
 
-    /**
-     * Get the cards available for the request.
-     *
-     * @param NovaRequest $request
-     * @return array
-     */
-    public function cards(NovaRequest $request)
-    {
-        return [];
-    }
+            Text::make(__('Address 1'), 'from_address_address_line1')
+                ->default($dcSettings->addressLine1),
 
-    /**
-     * Get the filters available for the resource.
-     *
-     * @param NovaRequest $request
-     * @return array
-     * @throws Exception
-     */
-    public function filters(NovaRequest $request)
-    {
-        return [
-            (new CreatedAtDaterangepickerFilter( DateHelper::ALL))
-                ->setMaxDate(Carbon::today()),
-        ];
-    }
+            Text::make(__('Address 2'), 'from_address_address_line2')
+                ->default($dcSettings->addressLine2),
 
-    /**
-     * Get the lenses available for the resource.
-     *
-     * @param NovaRequest $request
-     * @return array
-     */
-    public function lenses(NovaRequest $request)
-    {
-        return [];
-    }
+            Text::make(__('Postal code'), 'from_address_postal_code')
+                ->default($dcSettings->postalCode),
 
-    /**
-     * Get the actions available for the resource.
-     *
-     * @param NovaRequest $request
-     * @return array
-     */
-    public function actions(NovaRequest $request)
-    {
-        return [
-            ShipmentInTransitToCustomerStatusAction::make(),
-        ];
-    }
+            Text::make(__('City'), 'from_address_city')
+                ->default($dcSettings->city),
 
-    /**
-     * @return array
-     */
-    private function toAddressFields(): array
-    {
-        return [
+            Text::make(__('State'), 'from_address_state')
+                ->default($dcSettings->state),
+
+            Text::make(__('Country'), 'from_address_country')
+                ->default($dcSettings->country),
+
+            Text::make(__('Phone'), 'from_address_phone')
+                ->default($dcSettings->phone),
+
+            Text::make(__('Email'), 'from_address_email')
+                ->default($dcSettings->email),
+
+            Heading::make('<h3 class="font-normal text-xl">' . __('To address') . '</h3>')->asHtml(),
+
             Text::make(__('Name'), 'to_address_name')
                 ->dependsOn(
                     ['selectedPOs'],
@@ -480,16 +452,9 @@ class CustomerShipment extends Resource
                         }
                     }
                 ),
-        ];
-    }
 
-    /**
-     * @return array
-     */
-    private function parcelFields(): array
-    {
-        $parcelSettings = (new ParcelSettings());
-        return [
+            Heading::make('<h3 class="font-normal text-xl">' . __('Parcel settings') . '</h3>')->asHtml(),
+
             Select::make(__('Distance unit'), 'parcel_distance_unit')
                 ->default($parcelSettings->distanceUnit)
                 ->options(ShippoService::DISTANCE_UNITS)
@@ -510,6 +475,56 @@ class CustomerShipment extends Resource
 
             Number::make(__('Weight'), 'parcel_weight')
                 ->default($parcelSettings->weight),
+        ];
+    }
+
+    /**
+     * Get the cards available for the request.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function cards(NovaRequest $request)
+    {
+        return [];
+    }
+
+    /**
+     * Get the filters available for the resource.
+     *
+     * @param NovaRequest $request
+     * @return array
+     * @throws Exception
+     */
+    public function filters(NovaRequest $request)
+    {
+        return [
+            (new CreatedAtDaterangepickerFilter( DateHelper::ALL))
+                ->setMaxDate(Carbon::today()),
+        ];
+    }
+
+    /**
+     * Get the lenses available for the resource.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function lenses(NovaRequest $request)
+    {
+        return [];
+    }
+
+    /**
+     * Get the actions available for the resource.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function actions(NovaRequest $request)
+    {
+        return [
+            ShipmentInTransitToCustomerStatusAction::make(),
         ];
     }
 }

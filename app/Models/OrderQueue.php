@@ -218,6 +218,14 @@ class OrderQueue extends Model
         return $this->hasOne(Rejection::class);
     }
 
+    /**
+     * @return HasOne
+     */
+    public function reprint(): HasOne
+    {
+        return $this->hasOne(Reprint::class);
+    }
+
     public static function getAtDcOrderQueueOptions(): array
     {
         return self::with(['order', 'orderQueueStatuses'])

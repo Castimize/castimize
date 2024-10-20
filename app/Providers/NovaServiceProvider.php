@@ -21,6 +21,8 @@ use App\Nova\OrderQueue;
 use App\Nova\Price;
 use App\Nova\Rejection;
 use App\Nova\RejectionReason;
+use App\Nova\ReprintCulprit;
+use App\Nova\ReprintReason;
 use App\Nova\Settings\Billing\AddressSettings;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use App\Nova\Settings\Shipping\DcSettings;
@@ -75,7 +77,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(OrderQueue::class),
                     MenuItem::resource(Customer::class),
                     MenuItem::resource(Rejection::class),
-                    MenuItem::resource(RejectionReason::class),
                 ])->icon('clipboard-list')
                     ->collapsable()
                     ->canSee(function (NovaRequest $request) {
@@ -93,7 +94,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('Materials'), [
                     MenuItem::resource(Material::class),
                     MenuItem::resource(Price::class),
-                    MenuItem::resource(MaterialGroup::class),
                     MenuItem::resource(Model::class),
 //                    MenuItem::resource(PreferredManufacturer::class),
                 ])->icon('collection')
@@ -115,7 +115,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make(__('Complaints'), [
                     MenuItem::resource(Complaint::class),
-                    MenuItem::resource(ComplaintReason::class),
                 ])->icon('exclamation-circle')
                     ->collapsable()
                     ->canSee(function (NovaRequest $request) {
@@ -152,6 +151,11 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make(__('Settings'), [
                     MenuItem::externalLink(__('System settings'), '/admin/system-settings'),
+                    MenuItem::resource(MaterialGroup::class),
+                    MenuItem::resource(ReprintCulprit::class),
+                    MenuItem::resource(ReprintReason::class),
+                    MenuItem::resource(RejectionReason::class),
+                    MenuItem::resource(ComplaintReason::class),
                 ])->icon('cog')
                     ->collapsable()
                     ->canSee(function (NovaRequest $request) {

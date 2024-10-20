@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('reprints', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('order_queue_id')->index();
             $table->unsignedBigInteger('reprint_culprit_id')->index();
             $table->unsignedBigInteger('reprint_reason_id')->nullable()->index();
             $table->string('reason');
             $table->timestamps();
             $table->softDeletes();
 
+            $table->foreign('order_queue_id')->references('id')->on('order_queue')->onDelete('cascade');
             $table->foreign('reprint_culprit_id')->references('id')->on('reprint_culprits')->onDelete('cascade');
             $table->foreign('reprint_reason_id')->references('id')->on('reprint_reasons')->onDelete('set null');
         });
