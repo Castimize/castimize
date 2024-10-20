@@ -228,7 +228,8 @@ class OrderQueue extends Model
 
     public static function getAtDcOrderQueueOptions(): array
     {
-        return self::with(['order', 'orderQueueStatuses'])
+        $options = [];
+        $orderQueues = self::with(['order.orderQueues', 'orderQueueStatuses'])
             ->whereHas('orderQueueStatuses', function ($q) {
                 $q->where('slug', 'at-dc')
                     ->whereIn('id', function ($query) {
@@ -241,9 +242,46 @@ class OrderQueue extends Model
             ->whereNull('customer_shipment_id')
             ->get()
             ->sortBy('order.order_number')
-            ->sortBy('id')
-            ->pluck('customer_shipment_select_name', 'id')
-            ->toArray();
+            ->sortBy('id');
+
+        $ordersAllAtDc = [];
+        foreach ($orderQueues as $orderQueue) {
+            if (!array_key_exists($orderQueue->order_id, $ordersAllAtDc)) {
+                $allAtDc = true;
+                $allOrderQueues = $orderQueue->order->orderQueues;
+                foreach ($allOrderQueues as $oq) {
+                    if (in_array($oq->getLastStatus()->slug, OrderStatus::MANUFACTURER_STATUSES, true)) {
+                        $allAtDc = false;
+                    }
+                }
+                $ordersAllAtDc[$orderQueue->order_id] = $allAtDc;
+            }
+
+            $label = sprintf('%s - %s', ($ordersAllAtDc[$orderQueue->order_id] ? 'V' : 'X'), $orderQueue->customer_shipment_select_name);
+
+            $options[] = [
+                'label' => $label,
+                'value' => $orderQueue->id,
+                'all_at_dc' => $ordersAllAtDc[$orderQueue->order_id],
+            ];
+        }
+        return $options;
+//        return self::with(['order', 'orderQueueStatuses'])
+//            ->whereHas('orderQueueStatuses', function ($q) {
+//                $q->where('slug', 'at-dc')
+//                    ->whereIn('id', function ($query) {
+//                        $query
+//                            ->selectRaw('max(id)')
+//                            ->from('order_queue_statuses')
+//                            ->whereColumn('order_queue_id', 'order_queue.id');
+//                    });
+//            })
+//            ->whereNull('customer_shipment_id')
+//            ->get()
+//            ->sortBy('order.order_number')
+//            ->sortBy('id')
+//            ->pluck('customer_shipment_select_name', 'id')
+//            ->toArray();
     }
 
     public static function getOverviewHeaders(): array

@@ -359,6 +359,14 @@ class Order extends Model
     /**
      * @return HasMany
      */
+    public function orderQueues(): HasMany
+    {
+        return $this->hasMany(OrderQueue::class);
+    }
+
+    /**
+     * @return HasMany
+     */
     public function rejections(): HasMany
     {
         return $this->hasMany(Rejection::class);

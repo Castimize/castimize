@@ -31,28 +31,29 @@ class SelectWithOverview extends Field
         if (is_callable($options)) $options = call_user_func($options);
         $options = collect($options ?: []);
 
-        $isOptionGroup = $options->contains(function ($label, $value) {
-            return is_array($label);
-        });
-
-        if ($isOptionGroup) {
-            $_options = $options
-                ->map(function ($value, $key) {
-                    return collect($value + ['value' => $key]);
-                })
-                ->groupBy('group')
-                ->map(function ($value, $key) {
-                    return ['label' => $key, 'values' => $value->map->only(['label', 'value'])->toArray()];
-                })
-                ->values()
-                ->toArray();
-
-            return $this->withMeta(['options' => $_options]);
-        }
+//        $isOptionGroup = $options->contains(function ($label, $value) {
+//            return is_array($label);
+//        });
+//
+//        if ($isOptionGroup) {
+//            $_options = $options
+//                ->map(function ($value, $key) {
+//                    return collect($value + ['value' => $key]);
+//                })
+//                ->groupBy('group')
+//                ->map(function ($value, $key) {
+//                    return ['label' => $key, 'values' => $value->map->only(['label', 'value'])->toArray()];
+//                })
+//                ->values()
+//                ->toArray();
+//
+//            return $this->withMeta(['options' => $_options]);
+//        }
+//        dd($options);
 
         return $this->withMeta([
-            'options' => $options->map(function ($label, $value) {
-                return ['label' => $label, 'value' => $value];
+            'options' => $options->map(function ($option) {
+                return ['label' => $option['label'], 'value' => $option['value'], 'all_at_dc' => $option['all_at_dc']];
             })->values()->all(),
         ]);
     }

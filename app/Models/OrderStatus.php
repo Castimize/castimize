@@ -15,6 +15,22 @@ class OrderStatus extends Model
     protected $revisionForceDeleteEnabled = true;
     protected $revisionCreationsEnabled = true;
 
+    public const array MANUFACTURER_STATUSES = [
+        'in-queue',
+        'in-production',
+        'available-for-shipping',
+        'in-transit-to-dc',
+        'rejection-request',
+        'reprinted',
+    ];
+
+    public const array DC_STATUSES = [
+        'at-dc',
+        'in-transit-to-customer',
+        'completed',
+        'cancelled',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *

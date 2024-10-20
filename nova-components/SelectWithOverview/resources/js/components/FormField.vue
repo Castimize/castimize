@@ -17,8 +17,7 @@
                          label="label"
                          track-by="value"
                          :preselect-first="false"
-                         :taggable="true"
-                         @tag="addTag"
+                         :show-labels="true"
                          @select="handleChange"
                          @remove="handleRemove"
             >
@@ -39,8 +38,6 @@
 import {DependentFormField, HandlesValidationErrors} from 'laravel-nova';
 import Multiselect from 'vue-multiselect';
 import OverviewTable from "./OverviewTable.vue";
-import filter from "lodash/filter";
-import map from "lodash/map";
 
 export default {
     mixins: [DependentFormField, HandlesValidationErrors],
@@ -53,7 +50,7 @@ export default {
     }),
 
     methods: {
-        addTag (newTag) {
+        addTag(newTag) {
             const tag = {
                 label: newTag,
                 value: newTag.substring(0, 2) + Math.floor((Math.random() * 10000000))
