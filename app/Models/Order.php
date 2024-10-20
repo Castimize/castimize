@@ -292,8 +292,8 @@ class Order extends Model
                 'city' => $this->shipping_city,
                 'state' => $this->shipping_state,
                 'country' => $this->shipping_country,
-                'phone' => $this->shipping_phone_number ?? $this->billing_phone_number,
-                'email' => $this->shipping_email ?? $this->billing_email,
+                'phone' => !empty($this->shipping_phone_number) ? $this->shipping_phone_number : $this->billing_phone_number,
+                'email' => !empty($this->shipping_email) ? $this->shipping_email : $this->billing_email,
             ],
         );
     }
