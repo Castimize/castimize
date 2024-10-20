@@ -16,7 +16,7 @@ Route::group([
         'middleware' => ['auth:sanctum', AuthGates::class],
     ], function () {
         // Users
-        Route::get('user', 'UsersApiController@show');
+        Route::get('user', 'UsersApiController@show')->name('api.users.get-user');
         Route::post('users/wp', 'UsersApiController@storeUserWp')->name('api.users.store-user-wp');
         Route::delete('users/wp', 'UsersApiController@deleteUserWp')->name('api.users.delete-user-wp');
 
@@ -24,7 +24,7 @@ Route::group([
         Route::get('customers/wp', 'CustomersApiController@showCustomerWp')->name('api.customers.show-customer-wp');
         Route::get('customers/{customer}', 'CustomersApiController@show')->name('api.customers.show');
 
-        //Orders
+        // Orders
         Route::post('orders/calculate-expected-delivery-date', 'OrdersApiController@calculateExpectedDeliveryDate')->name('api.orders.calculate-expected-delivery-date');
         Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');
         Route::get('orders/{order}', 'OrdersApiController@show')->name('api.orders.show');

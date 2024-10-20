@@ -3,7 +3,9 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "build-select-with-overview": "cd nova-components/SelectWithOverview && npm run dev",
+        "build-select-with-overview-prod": "cd nova-components/SelectWithOverview && npm run prod"
     },
     "devDependencies": {
         "axios": "^1.7.4",

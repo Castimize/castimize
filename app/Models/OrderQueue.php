@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Nova\Settings\Shipping\CustomsItemSettings;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use stdClass;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
@@ -215,6 +218,78 @@ class OrderQueue extends Model
         return $this->hasOne(Rejection::class);
     }
 
+    public static function getAtDcOrderQueueOptions(): array
+    {
+        return self::with(['order', 'orderQueueStatuses'])
+            ->whereHas('orderQueueStatuses', function ($q) {
+                $q->where('slug', 'at-dc')
+                    ->whereIn('id', function ($query) {
+                        $query
+                            ->selectRaw('max(id)')
+                            ->from('order_queue_statuses')
+                            ->whereColumn('order_queue_id', 'order_queue.id');
+                    });
+            })
+            ->whereNull('customer_shipment_id')
+            ->get()
+            ->sortBy('order.order_number')
+            ->sortBy('id')
+            ->pluck('customer_shipment_select_name', 'id')
+            ->toArray();
+    }
+
+    public static function getOverviewHeaders(): array
+    {
+        return [
+            'material' => __('Material'),
+            'id' => __('PO'),
+            'parts' => __('# Parts'),
+            'box_volume_cm3' => __('Box volume (cm3)'),
+            'weight' => __('Weight (g)'),
+            'costs' => __('Costs'),
+        ];
+    }
+
+    public function getOverviewItem(): array
+    {
+        $customsItemSettings = app(CustomsItemSettings::class);
+        $netWeight = $this->upload->model_box_volume * $this->upload->material->density + $customsItemSettings->bag;
+        return [
+            'material' => $this->upload->material_name,
+            'id' => $this->id,
+            'parts' => $this->upload->model_parts,
+            'box_volume_cm3' => $this->upload->model_box_volume,
+            'weight' => round($netWeight, 2),
+            'costs' => currencyFormatter((float)$this->upload->total, $this->upload->currency_code),
+        ];
+    }
+
+    public static function getOverviewFooter(Collection $items): array
+    {
+        $customsItemSettings = app(CustomsItemSettings::class);
+        $totalParts = 0;
+        $totalBoxVolume = 0;
+        $totalWeight = 0;
+        $totalCosts = 0;
+        $currencyCode = 'USD';
+
+        foreach ($items as $item) {
+            $totalParts += $item->upload->model_parts;
+            $totalBoxVolume += $item->upload->model_box_volume;
+            $totalWeight += ($item->upload->model_box_volume * $item->upload->material->density + $customsItemSettings->bag);
+            $totalCosts += $item->upload->total;
+            $currencyCode = $item->upload->currency_code;
+        }
+
+        return [
+            'material' => '',
+            'id' => '',
+            'parts' => $totalParts,
+            'box_volume_cm3' => $totalBoxVolume,
+            'weight' => round($totalWeight, 2),
+            'costs' => currencyFormatter((float)$totalCosts, $currencyCode),
+        ];
+    }
 
     /**
      * @param $statusSlug

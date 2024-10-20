@@ -9,6 +9,7 @@ use App\Services\Shippo\ShippoService;
 use App\Traits\Nova\CommonMetaDataTrait;
 use App\Traits\Nova\DcFromAddressTrait;
 use Carbon\Carbon;
+use Castimize\SelectWithOverview\SelectWithOverview;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -231,67 +232,10 @@ class CustomerShipment extends Resource
     public function fieldsForCreate(NovaRequest $request)
     {
         return [
-//            Flexible::make('Content')
-//                ->button(__('Add PO to shipment'))
-//                ->addLayout(__('PO for shipment'), 'flexiblePOs', [
-//                    Select::make('PO\'s', 'po')
-//                        ->options(
-//                            \App\Models\OrderQueue::with('orderQueueStatuses')
-//                                ->whereHas('orderQueueStatuses', function ($q) {
-//                                    $q->where('slug', 'at-dc')
-//                                        ->whereIn('id', function ($query) {
-//                                            $query
-//                                                ->selectRaw('max(id)')
-//                                                ->from('order_queue_statuses')
-//                                                ->whereColumn('order_queue_id', 'order_queue.id');
-//                                        });
-//                                })
-//                                ->whereNull('customer_shipment_id')
-//                                ->get()
-//                                ->pluck('customer_shipment_select_name', 'id')
-//                                ->toArray()
-//                        ),
-//                    Text::make(__('Material'), 'material')
-//                        ->dependsOn(
-//                            ['flexible-content'],
-//                            function (Text $field, NovaRequest $request, FormData $formData) {
-////                                if ($formData) {
-////                                    dd($formData);
-////                                }
-////                                if (is_array($formData->po) && count($formData->selectedPOs) > 0) {
-////                                    $firstPO = $formData->selectedPOs[0];
-////                                    $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
-////                                        $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
-////                                        if ($orderQueue === null) {
-////                                            return [];
-////                                        }
-////                                        return $orderQueue->order->shipping_address;
-////                                    });
-////                                    $field->value = $toAddress['name'];
-////                                }
-//                            }
-//                        ),
-//                ]),
-            Multiselect::make('PO\'s', 'selectedPOs')
-                ->options(
-                    \App\Models\OrderQueue::with(['order', 'orderQueueStatuses'])
-                        ->whereHas('orderQueueStatuses', function ($q) {
-                            $q->where('slug', 'at-dc')
-                                ->whereIn('id', function ($query) {
-                                    $query
-                                        ->selectRaw('max(id)')
-                                        ->from('order_queue_statuses')
-                                        ->whereColumn('order_queue_id', 'order_queue.id');
-                                });
-                        })
-                        ->whereNull('customer_shipment_id')
-                        ->get()
-                        ->sortBy('order.order_number')
-                        ->sortBy('id')
-                        ->pluck('customer_shipment_select_name', 'id')
-                        ->toArray()
-                )
-                ->onlyOnForms(),
+            SelectWithOverview::make('PO\'s', 'selectedPOs')
+                ->placeholder(__('Select PO\'s'))
+                ->options(\App\Models\OrderQueue::getAtDcOrderQueueOptions())
+                ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders()),
 
             new Panel(__('From address'), $this->fromAddressFields()),
 
