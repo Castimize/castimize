@@ -40,6 +40,11 @@ class PoChangeStatusOrderManualAction extends Action
         $orderQueuesService = new OrderQueuesService();
         foreach ($models as $model) {
             $orderQueuesService->setStatus($model, $fields->order_status);
+
+            if ($fields->order_status === 'in-production') {
+                $model->contract_date = now()->addBusinessDays($model->manufacturerCost->shipment_lead_time, 'add')->format('Y-m-d H:i:s');
+            }
+
             // Set status manual changed to order queue
             $model->status_manual_changed = true;
             $model->save();

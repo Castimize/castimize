@@ -2,6 +2,7 @@
 
 namespace App\Nova\Actions;
 
+use App\Models\OrderQueue;
 use App\Services\Admin\OrderQueuesService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -37,7 +38,23 @@ class PoInProductionStatusAction extends Action implements ShouldQueue
     {
         $orderQueuesService = new OrderQueuesService();
         foreach ($models as $model) {
+            $hasEndStatus = [];
+            /** @var $model OrderQueue */
+            if ($model->getLastStatus()->end_status) {
+                $hasEndStatus[] = $model->id;
+            }
+
+            if (count($hasEndStatus) > 0) {
+                return ActionResponse::danger(
+                    __('You selected PO\'s :pos which cannot be changed anymore, because it already has an end status', [
+                        'pos' => implode(', ', $hasEndStatus),
+                    ])
+                );
+            }
+        }
+        foreach ($models as $model) {
             $orderQueuesService->setStatus($model, 'in-production');
+            $model->contract_date = now()->addBusinessDays($model->manufacturerCost->shipment_lead_time, 'add')->format('Y-m-d H:i:s');
         }
 
         return ActionResponse::message(__('PO\'s successfully in production.'));

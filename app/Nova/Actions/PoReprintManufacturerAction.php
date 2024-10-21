@@ -17,7 +17,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class PoReprintDcAction extends Action
+class PoReprintManufacturerAction extends Action
 {
     use InteractsWithQueue, Queueable;
 
@@ -61,7 +61,7 @@ class PoReprintDcAction extends Action
              * @var $model OrderQueue
              */
             $model->reprint()->create([
-                'reprint_culprit_id' => $fields->reprint_culprint_id,
+                'reprint_culprit_id' => 1, // ToDo: set culprit id of manufacturer
                 'reprint_reason_id' => $fields->reprint_reason_id,
                 'reason' => $fields->reason,
             ]);
@@ -81,6 +81,7 @@ class PoReprintDcAction extends Action
                 'customer_shipment_id' => $model->customer_shipment_id,
                 'due_date' => $model->due_date,
                 'final_arrival_date' => $model->final_arrival_date,
+                'contract_date' => $model->contract_date,
             ]);
             $orderQueuesService->setStatus($newOrderQueue, 'in-queue');
         }
@@ -97,10 +98,10 @@ class PoReprintDcAction extends Action
     public function fields(NovaRequest $request)
     {
         return [
-            Select::make(__('Reprint culprit'),'reprint_culprit_id')
-                ->options(
-                    ReprintCulprit::all()->pluck('culprit', 'id')->toArray()
-                )->displayUsingLabels(),
+//            Select::make(__('Reprint culprit'),'reprint_culprit_id')
+//                ->options(
+//                    ReprintCulprit::all()->pluck('culprit', 'id')->toArray()
+//                )->displayUsingLabels(),
 
 
             Select::make(__('Reprint reason'),'reprint_reason_id')

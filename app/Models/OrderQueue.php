@@ -50,6 +50,7 @@ class OrderQueue extends Model
         'final_arrival_date',
         'contract_date',
         'manufacturer_costs',
+        'currency_code',
         'total',
         'status_manual_changed',
     ];
