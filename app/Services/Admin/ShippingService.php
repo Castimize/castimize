@@ -201,8 +201,10 @@ class ShippingService
             }
             throw new Shippo_ApiError(
                 sprintf(
-                    '%s%s%s',
+                    '%s%s%s%s%s',
                     __('No rates found for this shipment.'),
+                    PHP_EOL,
+                    print_r($this->_shippoService->toArray(), true),
                     PHP_EOL,
                     implode(PHP_EOL, $errorMessages)
                 )
@@ -224,8 +226,10 @@ class ShippingService
         if (!empty($errorMessages)) {
             throw new Shippo_ApiError(
                 sprintf(
-                    '%s%s%s',
+                    '%s%s%s%s%s',
                     __('Transaction unsuccessful.'),
+                    PHP_EOL,
+                    print_r($this->_shippoService->toArray(), true),
                     PHP_EOL,
                     implode(PHP_EOL, $errorMessages)
                 )
