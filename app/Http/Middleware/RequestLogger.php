@@ -2,12 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\LogRequest;
+use App\Services\Admin\LogRequestService;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 class RequestLogger
 {
@@ -18,23 +16,8 @@ class RequestLogger
      */
     public function handle(Request $request, Closure $next): Response
     {
-        try {
-            $requestToLog = $request;
-            $requestToLog->headers->remove('authorization');
-
-            LogRequest::create([
-                'path_info' => $requestToLog->path(),
-                'request_uri' => $requestToLog->getRequestUri(),
-                'method' => $requestToLog->method(),
-                'remote_address' => $requestToLog->ip(),
-                'user_agent' => $requestToLog->userAgent(),
-                'server' => $requestToLog->server(),
-                'headers' => $requestToLog->header(),
-                'request' => $requestToLog->all(),
-            ]);
-        } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
-        }
+        $logRequestService = new LogRequestService();
+        $logRequestService->logRequest($request);
 
         return $next($request);
     }
