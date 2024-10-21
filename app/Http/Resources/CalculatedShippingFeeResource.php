@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Price;
 use App\Models\ShippingFee;
+use App\Services\Admin\CurrencyService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,6 +24,7 @@ class CalculatedShippingFeeResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $currencyService = app(CurrencyService::class);
         return [
             'logistics_zone_id' => $this->logistics_zone_id,
             'currency_id' => $this->currency_id,
@@ -36,7 +38,7 @@ class CalculatedShippingFeeResource extends JsonResource
             'rate_increase_2' => $this->rate_increase_2,
             'cc_threshold_3' => $this->cc_threshold_3,
             'rate_increase_3' => $this->rate_increase_3,
-            'calculated_total' => $this->calculated_total,
+            'calculated_total' => $currencyService->convertCurrency(config('app.currency'), $request->currency, $this->calculated_total),
         ];
     }
 }
