@@ -44,12 +44,16 @@ class OrdersService
 
         $stripePaymentId = null;
         $billingVatNumber = null;
+        $shippingEmail = null;
         foreach ($request->meta_data as $orderMetaData) {
             if ($orderMetaData['key'] === '_billing_eu_vat_number') {
                 $billingVatNumber = $orderMetaData['value'];
             }
             if ($orderMetaData['key'] === '_stripe_intent_id') {
                 $stripePaymentId = $orderMetaData['value'];
+            }
+            if ($orderMetaData['key'] === '_shipping_email') {
+                $shippingEmail = $orderMetaData['value'];
             }
         }
 
@@ -80,8 +84,8 @@ class OrdersService
             'shipping_first_name' => $request->shipping['first_name'],
             'shipping_last_name' => $request->shipping['last_name'],
             'shipping_company' => $request->shipping['company'],
-            'shipping_phone_number' => $request->shipping['phone'] ?? null,
-            'shipping_email' => $request->shipping['email'] ?? null,
+            'shipping_phone_number' => $request->shipping['phone'] ?? $request->billing['phone'],
+            'shipping_email' => $shippingEmail ?? $request->billing['email'],
             'shipping_address_line1' => $request->shipping['address_1'],
             'shipping_address_line2' => $request->shipping['address_2'],
             'shipping_postal_code' => $request->shipping['postcode'],
