@@ -235,6 +235,8 @@ class ShippingService
                 )
             );
         }
+
+        return [];
     }
 
     /**
