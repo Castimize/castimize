@@ -22,7 +22,7 @@ class PricesApiController extends ApiController
      */
     public function calculatePrice(Request $request): JsonResponse|CalculatedPriceResource
     {
-        Log::info(print_r($request->all(), true));
+//        Log::info(print_r($request->all(), true));
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         try {
