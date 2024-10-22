@@ -57,8 +57,8 @@ class ShippoWebhookController extends WebhookController
     {
         Log::info('Shippo track created');
         $shipment = null;
-        if (str_contains($data['meta_data'], ':')) {
-            [$typeShipment, $shipmentId] = explode(':', $data['meta_data']);
+        if (str_contains($data['metadata'], ':')) {
+            [$typeShipment, $shipmentId] = explode(':', $data['metadata']);
             if ($typeShipment === 'customer_shipment') {
                 $shipment = CustomerShipment::where('id', $shipmentId)->where('shippo_transaction_id', $data['object_id'])->first();
             }
@@ -84,8 +84,8 @@ class ShippoWebhookController extends WebhookController
     {
         Log::info('Shippo track updated');
         $shipment = null;
-        if (str_contains($data['meta_data'], ':')) {
-            [$typeShipment, $shipmentId] = explode(':', $data['meta_data']);
+        if (str_contains($data['metadata'], ':')) {
+            [$typeShipment, $shipmentId] = explode(':', $data['metadata']);
             if ($typeShipment === 'customer_shipment') {
                 $shipment = CustomerShipment::where('id', $shipmentId)->where('shippo_transaction_id', $data['object_id'])->first();
             }
