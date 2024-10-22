@@ -82,7 +82,7 @@ class ShippingService
         $createAddressMethod = 'create' . $type . 'Address';
         $cacheKey = $this->_shippoService->getCacheKey($this->$getAddressMethod());
 
-        return Cache::remember($cacheKey . '_v2.2', 31556926, function() use ($getAddressMethod, $setAddressMethod, $createAddressMethod, $getShipmentAddressMethod) {
+        return Cache::remember($cacheKey . '_v3', 31556926, function() use ($getAddressMethod, $setAddressMethod, $createAddressMethod, $getShipmentAddressMethod) {
             return $this->_shippoService->$setAddressMethod($this->$getAddressMethod())
                 ->$createAddressMethod(true)
                 ->$getShipmentAddressMethod();
@@ -113,16 +113,15 @@ class ShippingService
         $address['object_id'] = $shippoAddress['object_id'];
 
         if (
+            !empty($shippoAddress['street_no']) ||
             $address['street1'] !== $shippoAddress['street1'] ||
-            $address['street2'] !== $shippoAddress['street2'] ||
             $address['city'] !== $shippoAddress['city'] ||
             $address['state'] !== $shippoAddress['state'] ||
             $address['zip'] !== $shippoAddress['zip'] ||
             $address['country'] !== $shippoAddress['country']
         ) {
             $addressChanged = true;
-            $address['street1'] = $shippoAddress['street1'];
-            $address['street2'] = $shippoAddress['street2'];
+            $address['street1'] = $shippoAddress['street1'] . (!empty($shippoAddress['street_no']) ? ' ' . $shippoAddress['street_no'] : '');
             $address['city'] = $shippoAddress['city'];
             $address['state'] = $shippoAddress['state'];
             $address['zip'] = $shippoAddress['zip'];
