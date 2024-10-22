@@ -22,6 +22,7 @@ class LogRequest extends Model
      * @var array<int, string>
      */
     protected  $fillable = [
+        'type',
         'path_info',
         'request_uri',
         'method',
@@ -30,6 +31,7 @@ class LogRequest extends Model
         'server',
         'headers',
         'request',
+        'response',
     ];
 
     /**
@@ -46,6 +48,7 @@ class LogRequest extends Model
             'server' => AsArrayObject::class,
             'headers' => AsArrayObject::class,
             'request' => AsArrayObject::class,
+            'response' => AsArrayObject::class,
         ];
     }
 }

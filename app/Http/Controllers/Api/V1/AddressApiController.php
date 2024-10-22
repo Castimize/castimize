@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Resources\CalculatedShippingFeeResource;
+use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ShippingService;
 use App\Services\Admin\CalculatePricesService;
 use Illuminate\Http\JsonResponse;
@@ -33,15 +34,16 @@ class AddressApiController extends ApiController
             'country' => $request->country,
             'email' => $request->email,
         ];
-//        Log::info(print_r($addressData, true));
 
         if (empty($addressData['country'])) {
-            return response()->json(['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []]);
+            $response = ['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []];
+            LogRequestService::addResponse($request, $response);
+            return response()->json($response);
         }
 
         $shippingService = app(ShippingService::class);
         $response = $shippingService->setFromAddress($addressData)->validateAddress('From');
-//        Log::info(print_r($response, true));
+        LogRequestService::addResponse($request, $response);
 
         return response()->json($response);
     }
@@ -52,7 +54,6 @@ class AddressApiController extends ApiController
      */
     public function calculateShipping(Request $request): JsonResponse|CalculatedShippingFeeResource
     {
-//        Log::info(print_r($request->all(), true));
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         try {
@@ -63,6 +64,8 @@ class AddressApiController extends ApiController
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        return new CalculatedShippingFeeResource($shippingFee);
+        $response = new CalculatedShippingFeeResource($shippingFee);
+        LogRequestService::addResponse($request, $response);
+        return $response;
     }
 }

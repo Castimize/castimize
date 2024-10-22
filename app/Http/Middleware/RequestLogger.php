@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\LogRequest;
 use App\Services\Admin\LogRequestService;
 use Closure;
 use Illuminate\Http\Request;
@@ -16,8 +17,11 @@ class RequestLogger
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $logRequestService = new LogRequestService();
-        $logRequestService->logRequest($request);
+        $logRequest = LogRequestService::logRequest($request);
+
+        if ($logRequest instanceof LogRequest) {
+            $request->request->add(['log_request_id' => $logRequest->id]);
+        }
 
         return $next($request);
     }

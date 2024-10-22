@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('log_requests', function (Blueprint $table) {
             $table->id();
+            $table->string('type')->default('incoming');
             $table->string('path_info')->nullable();
             $table->string('request_uri')->nullable();
             $table->string('method')->nullable();
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->json('server')->nullable();
             $table->json('headers')->nullable();
             $table->json('request')->nullable();
+            $table->json('response')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

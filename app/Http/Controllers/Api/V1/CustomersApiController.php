@@ -8,6 +8,7 @@ use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Services\Admin\CustomersService;
+use App\Services\Admin\LogRequestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -24,7 +25,9 @@ class CustomersApiController extends ApiController
     {
         abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return new CustomerResource($customer);
+        $response = new CustomerResource($customer);
+        LogRequestService::addResponse(request(), $response);
+        return $response;
     }
 
     /**
@@ -37,7 +40,9 @@ class CustomersApiController extends ApiController
         if ($customer === null) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
-        return new CustomerResource($customer);
+        $response = new CustomerResource($customer);
+        LogRequestService::addResponse($request, $response);
+        return $response;
     }
 
     /**
@@ -46,7 +51,6 @@ class CustomersApiController extends ApiController
      */
     public function storeCustomerWp(Request $request): JsonResponse
     {
-        Log::info(print_r($request->all(), true));
         return response()->json($request->all());
 //        return response()->json($request->all());
 //        $customer = (new CustomersService())->storeCustomerFromWpApi($request);
@@ -62,7 +66,6 @@ class CustomersApiController extends ApiController
      */
     public function updateCustomerWp(Request $request): JsonResponse
     {
-        Log::info(print_r($request->all(), true));
         return response()->json($request->all());
 //        $customer = (new CustomersService())->storeCustomerFromApi($request);
 //

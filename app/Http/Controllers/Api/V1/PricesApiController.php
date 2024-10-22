@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Resources\CalculatedPriceResource;
 use App\Http\Resources\CalculatedShippingFeeResource;
 use App\Services\Admin\CalculatePricesService;
+use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ModelsService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -37,7 +38,9 @@ class PricesApiController extends ApiController
             (new ModelsService())->storeModelFromApi($request);
         }
 
-        return new CalculatedPriceResource($price);
+        $response = new CalculatedPriceResource($price);
+        LogRequestService::addResponse($request, $response);
+        return $response;
     }
 
     /**
@@ -57,6 +60,8 @@ class PricesApiController extends ApiController
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        return new CalculatedShippingFeeResource($shippingFee);
+        $response = new CalculatedShippingFeeResource($shippingFee);
+        LogRequestService::addResponse($request, $response);
+        return $response;
     }
 }

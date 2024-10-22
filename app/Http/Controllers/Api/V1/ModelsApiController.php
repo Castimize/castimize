@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Resources\ModelResource;
 use App\Models\Customer;
 use App\Models\Model;
+use App\Services\Admin\LogRequestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -22,7 +23,9 @@ class ModelsApiController extends ApiController
     {
         abort_if(Gate::denies('viewModel'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return new ModelResource($model);
+        $response = new ModelResource($model);
+        LogRequestService::addResponse(request(), $response);
+        return $response;
     }
 
     /**
@@ -35,7 +38,10 @@ class ModelsApiController extends ApiController
         if ($customer === null) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
-        return ModelResource::collection($customer->models->keyBy->id);
+
+        $response = ModelResource::collection($customer->models->keyBy->id);
+        LogRequestService::addResponse(request(), $response);
+        return $response;
     }
 
     /**
@@ -44,8 +50,6 @@ class ModelsApiController extends ApiController
      */
     public function storeFromUpload(Request $request): JsonResponse
     {
-        Log::info(print_r($request->all(), true));
-
         return response()->json($request->toArray());
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Requests\DeleteUserRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\Admin\LogRequestService;
 use App\Services\Admin\UsersService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -21,7 +22,9 @@ class UsersApiController extends ApiController
     {
         abort_if(Gate::denies('viewUser'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return new UserResource(auth()->user());
+        $response = new UserResource(auth()->user());
+        LogRequestService::addResponse(request(), $response);
+        return $response;
     }
 
     /**
@@ -36,8 +39,9 @@ class UsersApiController extends ApiController
             abort(Response::HTTP_UNPROCESSABLE_ENTITY, '422 Unable to add user');
         }
 
-        return (new UserResource($user))
-            ->response()
+        $response = new UserResource($user);
+        LogRequestService::addResponse($request, $response);
+        return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
