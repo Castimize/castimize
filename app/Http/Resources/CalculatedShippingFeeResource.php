@@ -38,8 +38,8 @@ class CalculatedShippingFeeResource extends JsonResource
             'rate_increase_2' => $this->rate_increase_2,
             'cc_threshold_3' => $this->cc_threshold_3,
             'rate_increase_3' => $this->rate_increase_3,
-            'calculated_total' => $this->calculated_total,
-//            'calculated_total' => $currencyService->convertCurrency(config('app.currency'), $request->currency, $this->calculated_total),
+//            'calculated_total' => $this->calculated_total,
+            'calculated_total' => $currencyService->convertCurrency(config('app.currency'), $request->currency, $this->calculated_total),
         ];
     }
 }
