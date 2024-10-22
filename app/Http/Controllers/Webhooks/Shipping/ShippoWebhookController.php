@@ -24,7 +24,7 @@ class ShippoWebhookController extends WebhookController
     {
         try {
             $shippoRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-            $event = $shippoRequest->event;
+            $event = $shippoRequest['event'];
         } catch(UnexpectedValueException $e) {
             Log::error($e->getMessage());
             // Invalid payload
@@ -37,10 +37,10 @@ class ShippoWebhookController extends WebhookController
         // Handle the event
         switch ($event) {
             case 'transaction_created':
-                $this->handleTrackCreated($shippoRequest->data);
+                $this->handleTrackCreated($shippoRequest['data']);
                 break;
             case 'track_updated':
-                $this->handleTrackUpdated($shippoRequest->data);
+                $this->handleTrackUpdated($shippoRequest['data']);
                 break;
             default:
                 echo 'Received unknown event type ' . $event;
@@ -56,19 +56,21 @@ class ShippoWebhookController extends WebhookController
     protected function handleTrackCreated($data): void
     {
         Log::info('Shippo track created');
-        [$typeShipment, $shipmentId] = explode(':', $data->meta_data);
         $shipment = null;
-        if ($typeShipment === 'customer_shipment') {
-            $shipment = CustomerShipment::where('id', $shipmentId)->where('shippo_transaction_id', $data->object_id)->first();
+        if (str_contains($data['meta_data'], ':')) {
+            [$typeShipment, $shipmentId] = explode(':', $data['meta_data']);
+            if ($typeShipment === 'customer_shipment') {
+                $shipment = CustomerShipment::where('id', $shipmentId)->where('shippo_transaction_id', $data['object_id'])->first();
+            }
         }
 
         if ($shipment) {
-            $shipment->tracking_number = $shipment->tracking_number ?? $data->tracking_number;
-            $shipment->tracking_url = $shipment->tracking_url ?? $data->tracking_url;
-            $shipment->label_url = $shipment->label_url ?? $data->label_url;
-            $shipment->commercial_invoice_url = $shipment->commercial_invoice_url ?? $data->commercial_invoice_url;
-            $shipment->qr_code_url = $shipment->qr_code_url ?? $data->qr_code_url;
-            $shipment->expected_delivery_date = $shipment->expected_delivery_date ?? $data->eta;
+            $shipment->tracking_number = $shipment->tracking_number ?? $data['tracking_number'];
+            $shipment->tracking_url = $shipment->tracking_url ?? $data['tracking_url'];
+            $shipment->label_url = $shipment->label_url ?? $data['label_url'];
+            $shipment->commercial_invoice_url = $shipment->commercial_invoice_url ?? $data['commercial_invoice_url'];
+            $shipment->qr_code_url = $shipment->qr_code_url ?? $data['qr_code_url'];
+            $shipment->expected_delivery_date = $shipment->expected_delivery_date ?? $data['eta'];
             $shipment->shippo_transaction_meta_data = $data;
             $shipment->save();
         }
@@ -81,25 +83,27 @@ class ShippoWebhookController extends WebhookController
     protected function handleTrackUpdated($data): void
     {
         Log::info('Shippo track updated');
-        [$typeShipment, $shipmentId] = explode(':', $data->meta_data);
         $shipment = null;
-        if ($typeShipment === 'customer_shipment') {
-            $shipment = CustomerShipment::where('id', $shipmentId)->where('shippo_transaction_id', $data->object_id)->first();
+        if (str_contains($data['meta_data'], ':')) {
+            [$typeShipment, $shipmentId] = explode(':', $data['meta_data']);
+            if ($typeShipment === 'customer_shipment') {
+                $shipment = CustomerShipment::where('id', $shipmentId)->where('shippo_transaction_id', $data['object_id'])->first();
+            }
         }
 
         if ($shipment) {
             $shipment->trackingStatuses()->create([
-                'object_id' => $data->tracking_status->object_id,
-                'status' => $data->tracking_status->status,
-                'sub_status' => $data->tracking_status->substatus,
-                'status_details' => $data->tracking_status->status_details,
-                'status_date' => Carbon::parse($data->tracking_status->status_date),
-                'location' => $data->tracking_status->location,
+                'object_id' => $data['tracking_status']['object_id'],
+                'status' => $data['tracking_status']['status'],
+                'sub_status' => $data['tracking_status']['substatus'],
+                'status_details' => $data['tracking_status']['status_details'],
+                'status_date' => Carbon::parse($data['tracking_status']['status_date']),
+                'location' => $data['tracking_status']['location'],
                 'meta_data' => $data,
             ]);
 
-            if ($data->tracking_status->status === 'DELIVERED') {
-                $shipment->arrived_at = Carbon::parse($data->tracking_status->status_date);
+            if ($data['tracking_status']['status'] === 'DELIVERED') {
+                $shipment->arrived_at = Carbon::parse($data['tracking_status']['status_date']);
                 $shipment->save();
 
                 $orderQueuesService = new OrderQueuesService();
