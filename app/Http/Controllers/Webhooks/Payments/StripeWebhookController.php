@@ -13,21 +13,13 @@ use UnexpectedValueException;
 class StripeWebhookController extends WebhookController
 {
     /**
-     * StripeWebhookController constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Handle a Stripe webhook call.
      *
      * @param Request $request
      * @return Response
      * @throws JsonException
      */
-    public function handleWebhook(Request $request): Response
+    public function __invoke(Request $request): Response
     {
         try {
             $event = Event::constructFrom(

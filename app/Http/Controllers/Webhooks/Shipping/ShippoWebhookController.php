@@ -15,23 +15,13 @@ use UnexpectedValueException;
 class ShippoWebhookController extends WebhookController
 {
     /**
-     * ShippoWebhookController constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Handle a Shippo webhook call.
      *
      * @param Request $request
      * @return Response
      */
-    public function handleWebhook(Request $request): Response
+    public function __invoke(Request $request): Response
     {
-        Log::info(print_r($request->all(), true));
-
         try {
             $shippoRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
             $event = $shippoRequest->event;
@@ -63,7 +53,7 @@ class ShippoWebhookController extends WebhookController
      * @param $data
      * @return void
      */
-    public function handleTrackCreated($data): void
+    protected function handleTrackCreated($data): void
     {
         Log::info('Shippo track created');
         [$typeShipment, $shipmentId] = explode(':', $data->meta_data);
@@ -88,7 +78,7 @@ class ShippoWebhookController extends WebhookController
      * @param $data
      * @return void
      */
-    public function handleTrackUpdated($data): void
+    protected function handleTrackUpdated($data): void
     {
         Log::info('Shippo track updated');
         [$typeShipment, $shipmentId] = explode(':', $data->meta_data);
