@@ -25,7 +25,8 @@ class CalculatedPriceResource extends JsonResource
     {
         $currencyService = app(CurrencyService::class);
         return [
-            'total' => $currencyService->convertCurrency(config('app.currency'), $request->currency, $this->calculated_total),
+            'total' => $this->calculated_total,
+//            'total' => $currencyService->convertCurrency(config('app.currency'), $request->currency, $this->calculated_total),
         ];
     }
 }
