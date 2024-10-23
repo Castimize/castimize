@@ -57,6 +57,7 @@ class OrdersService
             }
         }
 
+        $isPaid = $request->date_paid !== null;
         $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_created_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE'));
 
         $order = Order::create([
@@ -66,6 +67,7 @@ class OrdersService
             'country_id' => $country->id,
             'order_number' => $request->number,
             'order_key' => $request->order_key,
+            'status' => $request->status,
             'first_name' => $request->billing['first_name'],
             'last_name' => $request->billing['last_name'],
             'email' => $request->billing['email'],
@@ -112,8 +114,8 @@ class OrdersService
             'meta_data' => $request->meta_data,
             'comments' => $request->customer_note,
             'promo_code' => null,
-            'is_paid' => true,
-            'paid_at' => $createdAt,
+            'is_paid' => $isPaid !== null,
+            'paid_at' => $request->date_paid,
             'created_by' => $systemUser->id,
             'created_at' => $createdAt,
             'updated_by' => $systemUser->id,
@@ -219,8 +221,10 @@ class OrdersService
                 'updated_by' => $systemUser->id,
             ]);
 
-            // Set upload to order queue
-            UploadToOrderQueue::dispatch($upload);
+            if ($isPaid) {
+                // Set upload to order queue
+                UploadToOrderQueue::dispatch($upload);
+            }
         }
         $order->order_customer_lead_time = $biggestCustomerLeadTime;
         $order->due_date = Carbon::parse($order->created_at)->addBusinessDays($biggestCustomerLeadTime);

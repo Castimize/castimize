@@ -311,28 +311,32 @@ class Order extends Resource
     {
         return StatusField::make(__('Status'))
             ->icons([
-                'dots-circle-horizontal' => $this->status === 'processing',
+                'dots-circle-horizontal' => $this->status === 'pending',
+                'refresh' => $this->status === 'processing',
                 'clock' => $this->status === 'overdue',
                 'exclamation' => $this->status === 'almost-overdue',
                 'check-circle' => $this->status === 'completed',
                 'x-circle' => $this->status === 'canceled',
             ])
             ->tooltip([
-                'dots-circle-horizontal' => __('In process since :date', ['date' => Carbon::parse($this->created_at)->format('d-m-Y H:i:s')]),
+                'dots-circle-horizontal' => __('Pending'),
+                'refresh' => __('In process since :date', ['date' => Carbon::parse($this->created_at)->format('d-m-Y H:i:s')]),
                 'clock' => __('Overdue since :days', ['days' => $this->daysOverdue()]),
                 'exclamation' => __('Almost overdue'),
                 'check-circle' => __('Completed'),
                 'x-circle' => __('Cancelled'),
             ])
             ->info([
-                'dots-circle-horizontal' => __('In process'),
+                'dots-circle-horizontal' => __('Pending'),
+                'refresh' => __('In process'),
                 'clock' => __('Overdue since :days', ['days' => $this->daysOverdue()]),
                 'exclamation' => __('Almost overdue'),
                 'check-circle' => __('Completed'),
                 'x-circle' => __('Cancelled'),
             ])
             ->color([
-                'dots-circle-horizontal' => 'grey-500',
+                'pending' => 'grey-500',
+                'dots-circle-horizontal' => 'cyan-500',
                 'clock' => 'orange-500',
                 'exclamation' => 'yellow-500',
                 'check-circle' => 'green-500',

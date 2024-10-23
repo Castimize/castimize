@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Webhooks\Payments;
 
 use App\Http\Controllers\Webhooks\WebhookController;
+use App\Jobs\UploadToOrderQueue;
+use App\Models\Order;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use JsonException;
 use Stripe\Event;
@@ -53,28 +56,40 @@ class StripeWebhookController extends WebhookController
      */
     protected function handlePaymentIntentSucceeded(PaymentIntent $paymentIntent): Response
     {
-        // For now already handled by woocommerce and order is already paid
-//        $order = Order::where('order_number', $paymentIntent->metadata->order_id)->first();
-//        if ($order !== null) {
-//            $order->is_paid = true;
-//            $order->paid_at = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'));
-//            $order->save();
-//            return $this->successMethod();
-//        }
+        $order = Order::with(['uploads'])
+            ->where('order_number', $paymentIntent->metadata->order_id)
+            ->first();
 
-//        Log::info('Order not found, payment intent' . print_r($paymentIntent->toArray(), true));
+        if ($order !== null) {
+            $order->status = 'processing';
+            $order->is_paid = true;
+            $order->paid_at = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'));
+            $order->save();
+
+            foreach ($order->uploads as $upload) {
+                // Set upload to order queue
+                UploadToOrderQueue::dispatch($upload);
+            }
+        }
+
         return $this->successMethod();
     }
 
     /**
-     * @param $payload
+     * @param PaymentIntent $paymentIntent
      * @return Response
      */
-    protected function handlePaymentIntentCanceled($payload): Response
+    protected function handlePaymentIntentCanceled(PaymentIntent $paymentIntent): Response
     {
-        $intent = $payload->data->object;
-        $orderId = $intent->charges->data[0]->metadata->order_id;
-        //event(new OrderPaymentCanceled($orderId, $payload));
+        $order = Order::with(['uploads'])
+            ->where('order_number', $paymentIntent->metadata->order_id)
+            ->first();
+
+        if ($order !== null) {
+            $order->status = 'canceled';
+            $order->save();
+            $order->delete();
+        }
         return $this->successMethod();
     }
 }
