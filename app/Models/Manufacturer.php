@@ -135,4 +135,12 @@ class Manufacturer extends Model
     {
         return $this->hasMany(ManufacturerShipment::class);
     }
+
+    /**
+     * @return HasMany
+     */
+    public function reprints(): HasMany
+    {
+        return $this->hasMany(Reprint::class);
+    }
 }

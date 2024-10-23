@@ -68,8 +68,8 @@ class Complaint extends Resource
                 ->hideFromIndex()
                 ->sortable(),
 
-//            BelongsTo::make(__('Upload'), 'upload')
-//                ->sortable(),
+            BelongsTo::make(__('Upload'), 'upload')
+                ->sortable(),
 
             BelongsTo::make(__('Order'), 'order')
                 ->hideFromIndex()

@@ -106,6 +106,8 @@ class Manufacturer extends Resource
 
             HasMany::make(__('Shipments'), 'shipments', ManufacturerShipment::class),
 
+            HasMany::make(__('Reprints'), 'reprints', Reprint::class),
+
             HasMany::make(__('Costs'), 'costs', ManufacturerCost::class),
 
             new Panel(__('History'), $this->commonMetaData(false, false, false, false)),

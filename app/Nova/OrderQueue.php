@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -42,7 +43,7 @@ class OrderQueue extends Resource
      */
     public static function label()
     {
-        return __('Line items');
+        return __('PO\'s');
     }
 
     /**
@@ -52,7 +53,7 @@ class OrderQueue extends Resource
      */
     public function title()
     {
-        return sprintf('%s-%s', $this->order->order_number, $this->id);
+        return $this->customer_shipment_select_name;
     }
 
     /**
@@ -220,6 +221,9 @@ class OrderQueue extends Resource
                 })
                 ->hideOnExport()
                 ->sortable(),
+
+            HasOne::make(__('Reprint'), 'reprint')
+                ->onlyOnDetail(),
         ];
     }
 

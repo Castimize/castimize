@@ -22,6 +22,7 @@ class Reprint extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'manufacturer_id',
         'order_queue_id',
         'reprint_culprit_id',
         'reprint_reason_id',
@@ -40,6 +41,14 @@ class Reprint extends Model
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function manufacturer(): BelongsTo
+    {
+        return $this->belongsTo(Manufacturer::class);
     }
 
     /**

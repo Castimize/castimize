@@ -72,7 +72,7 @@ class Rejection extends Resource
             BelongsTo::make(__('Order'), 'order'),
 
             DateTime::make(__('Order date'), function () {
-                return $this->getOrderDate();
+                return $this->order_date;
             })
                 ->exceptOnForms(),
 
@@ -113,7 +113,7 @@ class Rejection extends Resource
                 ->sortable(),
 
             DateTime::make(__('Order date'), function () {
-                return $this->getOrderDate();
+                return $this->order_date;
             })
                 ->sortable(),
 

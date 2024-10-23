@@ -3,7 +3,11 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Reprint extends Resource
@@ -18,9 +22,12 @@ class Reprint extends Resource
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
-     * @var string
+     * @return mixed
      */
-    public static $title = 'id';
+    public function title()
+    {
+        return sprintf('%s-%s', $this->order_queue_id, $this->manufacturer_id);
+    }
 
     /**
      * The columns that should be searched.
@@ -29,6 +36,15 @@ class Reprint extends Resource
      */
     public static $search = [
         'id',
+    ];
+
+    /**
+     * Default ordering for index query.
+     *
+     * @var array
+     */
+    public static $sort = [
+        'id' => 'desc',
     ];
 
     /**
@@ -41,6 +57,24 @@ class Reprint extends Resource
     {
         return [
             ID::make()->sortable(),
+
+            BelongsTo::make(__('PO'), 'orderQueue', OrderQueue::class)
+                ->sortable(),
+
+            BelongsTo::make(__('Manufacturer'), 'manufacturer')
+                ->sortable(),
+
+            BelongsTo::make(__('Reprint culprit'), 'reprintCulprit')
+                ->hideFromIndex()
+                ->sortable(),
+
+            BelongsTo::make(__('Reprint reason'), 'reprintReason')
+                ->hideFromIndex()
+                ->sortable(),
+
+            Textarea::make(__('Reason'), 'reason')
+                ->help(__('Add extra explanation besides the default reprint reason'))
+                ->sortable(),
         ];
     }
 
