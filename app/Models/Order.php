@@ -391,4 +391,16 @@ class Order extends Model
     {
         return $this->uploads()->sum('model_parts');
     }
+
+    public function allOrderQueuesEndStatus(): bool
+    {
+        $return = true;
+        foreach ($this->uploads as $upload) {
+            $orderQueueStatus = $upload->orderQueue->getLastStatus();
+            if (!$orderQueueStatus->orderStatus->end_status) {
+                $return = false;
+            }
+        }
+        return $return;
+    }
 }

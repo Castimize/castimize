@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Webhooks\Shipping;
 
 use App\Http\Controllers\Webhooks\WebhookController;
 use App\Models\CustomerShipment;
+use App\Models\ManufacturerShipment;
 use App\Services\Admin\OrderQueuesService;
+use App\Services\Woocommerce\WoocommerceApiService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -62,6 +64,11 @@ class ShippoWebhookController extends WebhookController
             if ($typeShipment === 'customer_shipment') {
                 $shipment = CustomerShipment::where('id', $shipmentId)->where('shippo_transaction_id', $data['object_id'])->first();
             }
+        } else if ($data['transaction']) {
+            $shipment = CustomerShipment::where('shippo_transaction_id', $data['transaction'])->first();
+            if ($shipment === null) {
+                $shipment = ManufacturerShipment::where('shippo_transaction_id', $data['transaction'])->first();
+            }
         }
 
         if ($shipment) {
@@ -89,26 +96,44 @@ class ShippoWebhookController extends WebhookController
             if ($typeShipment === 'customer_shipment') {
                 $shipment = CustomerShipment::where('id', $shipmentId)->where('shippo_transaction_id', $data['object_id'])->first();
             }
+        } else if ($data['transaction']) {
+            $shipment = CustomerShipment::where('shippo_transaction_id', $data['transaction'])->first();
+            if ($shipment === null) {
+                $shipment = ManufacturerShipment::where('shippo_transaction_id', $data['transaction'])->first();
+            }
         }
 
         if ($shipment) {
             $shipment->trackingStatuses()->create([
                 'object_id' => $data['tracking_status']['object_id'],
                 'status' => $data['tracking_status']['status'],
-                'sub_status' => $data['tracking_status']['substatus'],
+                'sub_status' => $data['tracking_status']['substatus']['text'] ?? null,
                 'status_details' => $data['tracking_status']['status_details'],
                 'status_date' => Carbon::parse($data['tracking_status']['status_date']),
                 'location' => $data['tracking_status']['location'],
                 'meta_data' => $data,
             ]);
 
-            if ($data['tracking_status']['status'] === 'DELIVERED') {
-                $shipment->arrived_at = Carbon::parse($data['tracking_status']['status_date']);
-                $shipment->save();
+            if ($shipment instanceof CustomerShipment) {
+                if ($data['tracking_status']['status'] === 'DELIVERED') {
+                    $shipment->arrived_at = Carbon::parse($data['tracking_status']['status_date']);
+                    $shipment->save();
 
-                $orderQueuesService = new OrderQueuesService();
-                foreach ($shipment->orderQueues as $orderQueue) {
-                    $orderQueuesService->setStatus($orderQueue, 'completed');
+                    $orderQueuesService = new OrderQueuesService();
+                    $orders = [];
+                    foreach ($shipment->orderQueues as $orderQueue) {
+                        if (!array_key_exists($orderQueue->order_id, $orders)) {
+                            $orders[$orderQueue->order_id] = $orderQueue->order;
+                        }
+                        $orderQueuesService->setStatus($orderQueue, 'completed');
+                    }
+
+                    // ToDo: If all order queues completed, update order in woocommerce to customer
+                    foreach ($orders as $order) {
+                        if ($order->allOrderQueuesEndStatus()) {
+                            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, 'completed');
+                        }
+                    }
                 }
             }
         }
