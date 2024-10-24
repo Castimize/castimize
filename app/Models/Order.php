@@ -40,6 +40,7 @@ class Order extends Model
         'first_name',
         'last_name',
         'email',
+        'status',
         'billing_first_name',
         'billing_last_name',
         'billing_phone_number',

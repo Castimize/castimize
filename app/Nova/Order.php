@@ -136,6 +136,16 @@ class Order extends Resource
                 })
                 ->sortable(),
 
+            Text::make(__('Paid at'), function () {
+                if ($this->paid_at === null) {
+                    return __('Not paid');
+                }
+                return Carbon::parse($this->paid_at)->format('d-m-Y H:i:s');
+            })
+                ->sortable(),
+
+            Text::make(__('Payment method'), 'payment_method'),
+
             Text::make(__('Due date'), function () {
                     return $this->due_date ? Carbon::parse($this->due_date)->format('d-m-Y H:i:s') : '';
                 })
@@ -175,6 +185,8 @@ class Order extends Resource
                     return Carbon::parse($this->paid_at)->format('d-m-Y H:i:s');
                 })
                 ->sortable(),
+
+            Text::make(__('Payment method'), 'payment_method'),
 
             Text::make(__('Due date'), function () {
                     return $this->due_date ? Carbon::parse($this->due_date)->format('d-m-Y H:i:s') : '';
