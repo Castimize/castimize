@@ -19,7 +19,6 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Rpj\Daterangepicker\DateHelper;
 use Tomodo531\FilterableFilters\FilterableFilters;
-use WesselPerik\StatusField\StatusField;
 
 class Order extends Resource
 {
@@ -327,43 +326,24 @@ class Order extends Resource
     }
 
     /**
-     * @return StatusField
+     * @return mixed
      */
-    protected function getStatusField(): StatusField
+    protected function getStatusField(): mixed
     {
-        return StatusField::make(__('Status'))
-            ->icons([
-                'dots-circle-horizontal' => $this->status === 'pending',
-                'refresh' => $this->status === 'processing',
-                'clock' => $this->status === 'overdue',
-                'exclamation' => $this->status === 'almost-overdue',
-                'check-circle' => $this->status === 'completed',
-                'x-circle' => $this->status === 'canceled',
-            ])
-            ->tooltip([
-                'dots-circle-horizontal' => __('Pending'),
-                'refresh' => __('In process since :date', ['date' => Carbon::parse($this->created_at)->format('d-m-Y H:i:s')]),
-                'clock' => __('Overdue since :days', ['days' => $this->daysOverdue()]),
-                'exclamation' => __('Almost overdue'),
-                'check-circle' => __('Completed'),
-                'x-circle' => __('Cancelled'),
-            ])
-            ->info([
-                'dots-circle-horizontal' => __('Pending'),
-                'refresh' => __('In process'),
-                'clock' => __('Overdue since :days', ['days' => $this->daysOverdue()]),
-                'exclamation' => __('Almost overdue'),
-                'check-circle' => __('Completed'),
-                'x-circle' => __('Cancelled'),
-            ])
-            ->color([
-                'pending' => 'grey-500',
-                'dots-circle-horizontal' => 'stone-500',
-                'clock' => 'orange-500',
-                'exclamation' => 'yellow-500',
-                'check-circle' => 'green-500',
-                'x-circle' => 'red-500',
-            ]);
+        return Text::make(__('Status'), function () {
+            return match ($this->status) {
+                'pending' => '<span data-toggle="tooltip" data-placement="top" title="' . __('Pending') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(107 114 128)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
+                'processing' => '<span data-toggle="tooltip" data-placement="top" title="' . __('In process since :date', ['date' => Carbon::parse($this->created_at)->format('d-m-Y H:i:s')]) . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(6 182 212)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></span>',
+                'overdue' => '<span data-toggle="tooltip" data-placement="top" title="' . __('Overdue since :days', ['days' => $this->daysOverdue()]) . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(249 115 22)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
+                'almost-overdue' => '<span data-toggle="tooltip" data-placement="top" title="' . __('Almost overdue') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(234 179 8)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></span>',
+                'completed' => '<span data-toggle="tooltip" data-placement="top" title="' . __('Completed') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(34 197 94)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
+                'canceled' => '<span data-toggle="tooltip" data-placement="top" title="' . __('Canceled') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(239 68 68)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
+                default => ''
+            };
+        })
+            ->hideOnExport()
+            ->asHtml();
+
     }
 
     /**

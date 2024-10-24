@@ -28,7 +28,7 @@ class OrderStatus extends Model
         'at-dc',
         'in-transit-to-customer',
         'completed',
-        'cancelled',
+        'canceled',
     ];
 
     /**
