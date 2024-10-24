@@ -7,6 +7,7 @@ use App\Nova\Filters\CreatedAtDaterangepickerFilter;
 use App\Nova\Filters\StatusFilter;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Carbon\Carbon;
+use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
@@ -22,7 +23,7 @@ use WesselPerik\StatusField\StatusField;
 
 class Order extends Resource
 {
-    use CommonMetaDataTrait;
+    use CommonMetaDataTrait, ColumnTogglerTrait;
 
     /**
      * The model the resource corresponds to.
@@ -144,7 +145,8 @@ class Order extends Resource
             })
                 ->sortable(),
 
-            Text::make(__('Payment method'), 'payment_method'),
+            Text::make(__('Payment method'), 'payment_method')
+                ->hideByDefault(),
 
             Text::make(__('Due date'), function () {
                     return $this->due_date ? Carbon::parse($this->due_date)->format('d-m-Y H:i:s') : '';
@@ -356,7 +358,7 @@ class Order extends Resource
             ])
             ->color([
                 'pending' => 'grey-500',
-                'dots-circle-horizontal' => 'cyan-500',
+                'dots-circle-horizontal' => 'stone-500',
                 'clock' => 'orange-500',
                 'exclamation' => 'yellow-500',
                 'check-circle' => 'green-500',
