@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Webhooks\Payments;
 use App\Http\Controllers\Webhooks\WebhookController;
 use App\Jobs\UploadToOrderQueue;
 use App\Models\Order;
+use App\Services\Admin\LogRequestService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use JsonException;
 use Stripe\Event;
 use Stripe\PaymentIntent;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 use UnexpectedValueException;
 
 class StripeWebhookController extends WebhookController
@@ -70,6 +73,12 @@ class StripeWebhookController extends WebhookController
                 // Set upload to order queue
                 UploadToOrderQueue::dispatch($upload);
             }
+
+            try {
+                LogRequestService::addResponse(request(), $order);
+            } catch (Throwable $exception) {
+                Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            }
         }
 
         return $this->successMethod();
@@ -89,6 +98,12 @@ class StripeWebhookController extends WebhookController
             $order->status = 'canceled';
             $order->save();
             $order->delete();
+
+            try {
+                LogRequestService::addResponse(request(), $order);
+            } catch (Throwable $exception) {
+                Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            }
         }
         return $this->successMethod();
     }
