@@ -32,6 +32,7 @@ class LogRequest extends Model
         'headers',
         'request',
         'response',
+        'http_code',
     ];
 
     /**

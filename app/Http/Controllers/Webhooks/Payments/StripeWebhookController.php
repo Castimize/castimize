@@ -32,6 +32,7 @@ class StripeWebhookController extends WebhookController
                 json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)
             );
         } catch(UnexpectedValueException $e) {
+            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
             // Invalid payload
             return $this->invalidMethod();
         }

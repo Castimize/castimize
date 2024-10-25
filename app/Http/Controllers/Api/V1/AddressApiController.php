@@ -58,6 +58,7 @@ class AddressApiController extends ApiController
         try {
             $shippingFee = (new CalculatePricesService())->calculateShippingFee($request);
         } catch (UnprocessableEntityHttpException $e) {
+            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
             return response()->json([
                 'errors' => $e->getMessage(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);

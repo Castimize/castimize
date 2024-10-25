@@ -9,9 +9,11 @@ use App\Nova\Settings\Shipping\CustomsItemSettings;
 use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\GeneralSettings;
 use App\Nova\Settings\Shipping\PickupSettings;
+use App\Services\Admin\LogRequestService;
 use Carbon\Carbon;
 use JsonException;
 use Shippo_Address;
+use Shippo_ApiRequestor;
 use Shippo_CustomsDeclaration;
 use Shippo_CustomsItem;
 use Shippo_Object;
@@ -262,6 +264,13 @@ class ShippoService
             $this->_fromAddress['validate'] = true;
         }
         $this->_shipmentFromAddress = Shippo_Address::create($this->_fromAddress);
+        $this->logShippoCall(
+            pathInfo: 'addresses',
+            requestUri: 'addresses',
+            method: 'POST',
+            request: $this->_fromAddress,
+            response: (array)$this->_shipmentFromAddress
+        );
         return $this;
     }
 
@@ -275,6 +284,13 @@ class ShippoService
             $this->_toAddress['validate'] = true;
         }
         $this->_shipmentToAddress = Shippo_Address::create($this->_toAddress);
+        $this->logShippoCall(
+            pathInfo: 'addresses',
+            requestUri: 'addresses',
+            method: 'POST',
+            request: $this->_toAddress,
+            response: (array)$this->_shipmentToAddress
+        );
         return $this;
     }
 
@@ -412,7 +428,7 @@ class ShippoService
      */
     public function createShipment(): static
     {
-        $this->_shipment = Shippo_Shipment::create([
+        $data = [
             'object_purpose' => 'PURCHASE',
             'address_from' => $this->_shipmentFromAddress,
             'address_to' => $this->_shipmentToAddress,
@@ -422,7 +438,15 @@ class ShippoService
                 $this->generalSettings->upsCarrierAccount,
             ],
             'async' => false,
-        ]);
+        ];
+        $this->_shipment = Shippo_Shipment::create($data);
+        $this->logShippoCall(
+            pathInfo: 'shipments',
+            requestUri: 'shipments',
+            method: 'POST',
+            request: $data,
+            response: (array)$this->_shipment
+        );
 
         return $this;
     }
@@ -436,12 +460,20 @@ class ShippoService
      */
     public function createLabel(int $customerShipmentId, $rateId): static
     {
-        $this->_transaction = Shippo_Transaction::create([
+        $data = [
             'rate' => $rateId,
             'label_file_type' => 'PDF',
             'metadata' => sprintf('customer_shipment:%s', $customerShipmentId),
             'async' => false,
-        ]);
+        ];
+        $this->_transaction = Shippo_Transaction::create($data);
+        $this->logShippoCall(
+            pathInfo: 'transactions',
+            requestUri: 'transactions',
+            method: 'POST',
+            request: $data,
+            response: (array)$this->_transaction
+        );
 
         return $this;
     }
@@ -496,6 +528,20 @@ class ShippoService
             'shipment' => $this->_shipment,
             'transaction' => $this->_transaction,
         ];
+    }
+
+    private function logShippoCall(string $pathInfo, string $requestUri, string $method, $request, $response): void
+    {
+        $headers = (new Shippo_ApiRequestor(''))->getRequestHeaders();
+        LogRequestService::logRequestOutgoing(
+            pathInfo: 'https://api.goshippo.com/' . $pathInfo,
+            requestUri: 'https://api.goshippo.com/' . $requestUri,
+            userAgent: 'Shippo/v1 PHPBindings/0.0.1',
+            method: $method,
+            headers: $headers,
+            request: $request,
+            response: $response,
+        );
     }
 
     protected function initPackageTypes(): void

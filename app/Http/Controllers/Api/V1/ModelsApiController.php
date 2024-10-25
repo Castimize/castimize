@@ -36,6 +36,7 @@ class ModelsApiController extends ApiController
     {
         $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
         if ($customer === null) {
+            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 

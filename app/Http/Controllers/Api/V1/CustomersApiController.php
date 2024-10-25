@@ -38,6 +38,7 @@ class CustomersApiController extends ApiController
     {
         $customer = Customer::where('wp_id', $request->wp_id)->first();
         if ($customer === null) {
+            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $response = new CustomerResource($customer);
@@ -81,6 +82,7 @@ class CustomersApiController extends ApiController
     {
         $customer = Customer::where('wp_id', $request->id)->first();
         if ($customer === null) {
+            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $customer->delete();
