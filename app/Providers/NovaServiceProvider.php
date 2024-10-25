@@ -12,6 +12,7 @@ use App\Nova\CustomerShipment;
 use App\Nova\Dashboards\Main;
 use App\Nova\Language;
 use App\Nova\LogisticsZone;
+use App\Nova\LogRequest;
 use App\Nova\Manufacturer;
 use App\Nova\Material;
 use App\Nova\MaterialGroup;
@@ -180,6 +181,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('Queue'), [
                     MenuItem::resource(Job::class)->withBadge(fn() => \Kaiserkiwi\NovaQueueManagement\Models\Job::count()),
                     MenuItem::resource(FailedJob::class)->withBadge(fn() => \Kaiserkiwi\NovaQueueManagement\Models\FailedJob::count()),
+                    MenuItem::resource(LogRequest::class),
                 ])->icon('collection')
                     ->collapsable()
                     ->canSee(function (NovaRequest $request) {

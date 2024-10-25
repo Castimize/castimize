@@ -14,15 +14,16 @@ return new class extends Migration
         Schema::create('log_requests', function (Blueprint $table) {
             $table->id();
             $table->string('type')->default('incoming');
-            $table->string('path_info')->nullable();
+            $table->string('path_info')->nullable()->index();
             $table->string('request_uri')->nullable();
-            $table->string('method')->nullable();
+            $table->string('method')->nullable()->index();
             $table->string('remote_address')->nullable();
-            $table->string('user_agent')->nullable();
+            $table->string('user_agent')->nullable()->index();
             $table->json('server')->nullable();
             $table->json('headers')->nullable();
             $table->json('request')->nullable();
             $table->json('response')->nullable();
+            $table->integer('http_code')->default(200)->index();
             $table->timestamps();
             $table->softDeletes();
         });
