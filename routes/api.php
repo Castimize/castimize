@@ -51,8 +51,10 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
         Route::middleware(ValidateWcWebhookSignature::class)
             ->delete('customers/wp', 'CustomersApiController@deleteCustomerWp')->name('api.customers.delete-customer.wp');
 
-        Route::post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
+        Route::middleware(ValidateWcWebhookSignature::class)
+            ->post('orders/wp', 'OrdersApiController@storeOrderWp')->name('api.orders.store-order-wp');
 
-        Route::post('orders/wp/update', 'OrdersApiController@updateOrderWp')->name('api.orders.store-order-wp-update');
+        Route::middleware(ValidateWcWebhookSignature::class)
+            ->post('orders/wp/update', 'OrdersApiController@updateOrderWp')->name('api.orders.store-order-wp-update');
     });
 });
