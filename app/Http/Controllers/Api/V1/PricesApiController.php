@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Resources\CalculatedPriceResource;
 use App\Http\Resources\CalculatedShippingFeeResource;
-use App\Jobs\StoreModelFromApi;
 use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ModelsService;
@@ -36,7 +35,7 @@ class PricesApiController extends ApiController
         }
 
         if ($request->has('file_name', 'original_file_name') && $request->get('file_name') !== null && $request->get('original_file_name') !== null) {
-            StoreModelFromApi::dispatch($request);
+            (new ModelsService())->storeModelFromApi($request);
         }
 
         $response = new CalculatedPriceResource($price);
