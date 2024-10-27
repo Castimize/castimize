@@ -76,7 +76,7 @@ class ShippoWebhookController extends WebhookController
             $shipment->tracking_url = $shipment->tracking_url ?? $data['tracking_url'];
             $shipment->label_url = $shipment->label_url ?? $data['label_url'];
             $shipment->commercial_invoice_url = $shipment->commercial_invoice_url ?? $data['commercial_invoice_url'];
-            $shipment->qr_code_url = $shipment->qr_code_url ?? $data['qr_code_url'];
+            $shipment->qr_code_url = $shipment->qr_code_url ?? $data['qr_code_url'] ?? null;
             $shipment->expected_delivery_date = $shipment->expected_delivery_date ?? $data['eta'];
             $shipment->shippo_transaction_meta_data = $data;
             $shipment->save();
