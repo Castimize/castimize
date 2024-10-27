@@ -24,6 +24,9 @@ class Manufacturer extends Model
     protected $revisionForceDeleteEnabled = true;
     protected $revisionCreationsEnabled = true;
 
+    public $cityName;
+    public $stateName;
+
     /**
      * The attributes that are mass assignable.
      *

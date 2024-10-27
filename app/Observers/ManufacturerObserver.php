@@ -2,8 +2,11 @@
 
 namespace App\Observers;
 
+use App\Models\City;
 use App\Models\Country;
 use App\Models\Manufacturer;
+use App\Models\State;
+use Illuminate\Support\Str;
 
 class ManufacturerObserver
 {
@@ -38,6 +41,28 @@ class ManufacturerObserver
             if ($country) {
                 $manufacturer->country_code = strtoupper($country->alpha2);
             }
+        }
+        $state = $manufacturer->state;
+        if ($manufacturer->isDirty('stateName')) {
+            $state = State::firstOrCreate([
+                'name' => $manufacturer->stateName,
+            ], [
+                'name' => $manufacturer->stateName,
+                'slug' => Str::slug($manufacturer->stateName),
+                'country_id' => $manufacturer->country_id,
+            ]);
+            $manufacturer->state_id = $state->id;
+        }
+        if ($manufacturer->isDirty('cityName')) {
+            $city = City::firstOrCreate([
+                'name' => $manufacturer->cityName,
+            ], [
+                'name' => $manufacturer->cityName,
+                'slug' => Str::slug($manufacturer->cityName),
+                'state_id' => $state?->id,
+                'country_id' => $manufacturer->country_id,
+            ]);
+            $manufacturer->city_id = $city?->id;
         }
 
         $manufacturer->validateAddress();

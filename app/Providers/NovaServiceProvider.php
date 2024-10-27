@@ -71,9 +71,12 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                         MenuItem::resource(Manufacturer\Po::class),
                         MenuItem::resource(Manufacturer\Shipment::class),
                     ])->icon('truck'),
-//                    MenuSection::make(__('Settings'), [
-//                        MenuItem::externalLink(__('Information'), sprintf('/admin/resources/manufacturers/%s/edit', $request->user()->manufacturer->id)),
-//                    ])->icon('cog'),
+                    MenuSection::make(__('Settings'), [
+                        MenuItem::make(
+                            __('Profile'),
+                            "/resources/profiles/{$request->user()->manufacturer->id}/edit"
+                        ),
+                    ])->icon('cog'),
                 ];
             }
             return [

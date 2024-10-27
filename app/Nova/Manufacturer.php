@@ -211,10 +211,10 @@ class Manufacturer extends Resource
                 ->required()
                 ->sortable(),
 
-            Text::make(__('City'))
+            BelongsTo::make(__('City'), 'city', City::class)
                 ->sortable(),
 
-            Text::make(__('State'))
+            BelongsTo::make(__('State'), 'state', State::class)
                 ->hideFromIndex()
                 ->nullable()
                 ->sortable(),

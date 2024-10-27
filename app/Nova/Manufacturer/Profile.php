@@ -15,13 +15,16 @@ use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Email;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Nova;
 use Laravel\Nova\Panel;
 use Wame\TelInput\TelInput;
 
-class Information extends Resource
+class Profile extends Resource
 {
     use ColumnTogglerTrait, CommonMetaDataTrait;
 
@@ -58,6 +61,12 @@ class Information extends Resource
         'id' => 'desc',
     ];
 
+    public function __construct($resource = null)
+    {
+        Nova::withBreadcrumbs(false);
+        parent::__construct($resource);
+    }
+
     /**
      * Get the fields displayed by the resource.
      *
@@ -69,12 +78,8 @@ class Information extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make(__('Name'), 'name')
+            Text::make(__('Company name'), 'name')
                 ->required(),
-
-            BelongsTo::make(__('User'), 'user')
-                ->showCreateRelationButton()
-                ->modalSize('7xl'),
 
             Text::make(__('COC number'), 'coc_number'),
 
@@ -82,22 +87,24 @@ class Information extends Resource
 
             Text::make(__('IBAN'), 'iban'),
 
-            Text::make(__('Contact name'), 'contact_name_1'),
+            Text::make(__('Contact name'), 'contact_name_1')
+                ->required(),
 
             Text::make(__('Contact name 2'), 'contact_name_2'),
 
             TelInput::make(__('Phone'), 'phone_1')
+                ->required()
                 ->sortable(),
 
             Email::make(__('Email'), 'email')
+                ->required()
                 ->sortable(),
 
             Email::make(__('Billing email'), 'billing_email')
                 ->sortable(),
 
-            Textarea::make(__('Comments'), 'comments'),
-
             BelongsTo::make(__('Country'), 'country', Country::class)
+                ->required()
                 ->sortable(),
 
             BelongsTo::make(__('Language'), 'language')
@@ -109,47 +116,6 @@ class Information extends Resource
                 ->sortable(),
 
             new Panel(__('Address'), $this->addressFields()),
-
-            HasMany::make(__('Line items'), 'orderQueues', OrderQueue::class),
-
-            HasMany::make(__('Shipments'), 'shipments', ManufacturerShipment::class),
-
-            HasMany::make(__('Reprints'), 'reprints', Reprint::class),
-
-            HasMany::make(__('Costs'), 'costs', ManufacturerCost::class),
-
-            new Panel(__('History'), $this->commonMetaData(false, false, false, false)),
-        ];
-    }
-
-    /**
-     * Get the fields displayed by the resource on index page.
-     *
-     * @param NovaRequest $request
-     * @return array
-     */
-    public function fieldsForIndex(NovaRequest $request)
-    {
-        return [
-            ID::make()->sortable(),
-
-            Text::make(__('Name'), 'name')
-                ->sortable(),
-
-            Text::make(__('City'), 'city')
-                ->onlyOnIndex()
-                ->sortable(),
-
-            BelongsTo::make(__('Country'), 'country')
-                ->sortable(),
-
-            TelInput::make(__('Phone'), 'phone_1')
-                ->sortable(),
-
-            Email::make(__('Email'), 'email')
-                ->sortable(),
-
-            BelongsTo::make(__('User'), 'user'),
         ];
     }
 
@@ -217,18 +183,23 @@ class Information extends Resource
                 ->required()
                 ->sortable(),
 
-            Text::make(__('City'))
+            Text::make(__('City'), 'cityName', function () {
+                    return $this->city?->name ?? null;
+                })
+                ->required()
                 ->sortable(),
 
-            Text::make(__('State'))
-                ->hideFromIndex()
-                ->nullable()
+            Text::make(__('State'), 'stateName', function () {
+                return $this->state?->name ?? null;
+            })
                 ->sortable(),
+        ];
+    }
 
-            Text::make(__('Country'), 'country_code')
-                ->onlyOnDetail()
-                ->nullable()
-                ->sortable(),
+    protected function changePasswordFields(): array
+    {
+        return [
+            Password::make(__('Password'), 'password'),
         ];
     }
 }
