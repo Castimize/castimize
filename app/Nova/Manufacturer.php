@@ -66,7 +66,9 @@ class Manufacturer extends Resource
             Text::make(__('Name'), 'name')
                 ->required(),
 
-            BelongsTo::make(__('User'), 'user'),
+            BelongsTo::make(__('User'), 'user')
+                ->showCreateRelationButton()
+                ->modalSize('7xl'),
 
             Text::make(__('COC number'), 'coc_number'),
 
@@ -89,7 +91,7 @@ class Manufacturer extends Resource
 
             Textarea::make(__('Comments'), 'comments'),
 
-            BelongsTo::make(__('Country'), 'country')
+            BelongsTo::make(__('Country'), 'country', Country::class)
                 ->sortable(),
 
             BelongsTo::make(__('Language'), 'language')
@@ -128,7 +130,7 @@ class Manufacturer extends Resource
             Text::make(__('Name'), 'name')
                 ->sortable(),
 
-            BelongsTo::make(__('City'), 'city')
+            Text::make(__('City'), 'city')
                 ->onlyOnIndex()
                 ->sortable(),
 
@@ -140,6 +142,8 @@ class Manufacturer extends Resource
 
             Email::make(__('Email'), 'email')
                 ->sortable(),
+
+            BelongsTo::make(__('User'), 'user'),
         ];
     }
 
@@ -200,20 +204,24 @@ class Manufacturer extends Resource
                 ->sortable(),
 
             Text::make(__('Address line 2'), 'address_line2')
-                ->required()
+                ->nullable()
                 ->sortable(),
 
             Text::make(__('Postal code'), 'postal_code')
                 ->required()
                 ->sortable(),
 
-            BelongsTo::make(__('City'))
-                ->showCreateRelationButton()
+            Text::make(__('City'))
                 ->sortable(),
 
-            BelongsTo::make(__('State'))
-                ->showCreateRelationButton()
+            Text::make(__('State'))
                 ->hideFromIndex()
+                ->nullable()
+                ->sortable(),
+
+            Text::make(__('Country'), 'country_code')
+                ->onlyOnDetail()
+                ->nullable()
                 ->sortable(),
         ];
     }

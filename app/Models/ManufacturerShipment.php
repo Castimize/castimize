@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
@@ -18,6 +19,11 @@ use Wildside\Userstamps\Userstamps;
 class ManufacturerShipment extends Model
 {
     use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+
+    public $selectedPOs;
+    public $fromAddress = [];
+    public $toAddress = [];
+    public $parcel = [];
 
     protected $revisionForceDeleteEnabled = true;
     protected $revisionCreationsEnabled = true;
@@ -82,6 +88,17 @@ class ManufacturerShipment extends Model
     }
 
     /**
+     * Interact with total_costs
+     */
+    protected function totalCosts(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
      * @return BelongsTo
      */
     public function manufacturer(): BelongsTo
@@ -95,6 +112,14 @@ class ManufacturerShipment extends Model
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function orderQueues(): HasMany
+    {
+        return $this->hasMany(OrderQueue::class);
     }
 
     /**

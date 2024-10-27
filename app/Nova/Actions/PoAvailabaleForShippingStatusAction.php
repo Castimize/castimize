@@ -24,7 +24,7 @@ class PoAvailabaleForShippingStatusAction extends Action implements ShouldQueue
      */
     public function name()
     {
-        return __('Available for shipping');
+        return __('Produced');
     }
 
     /**

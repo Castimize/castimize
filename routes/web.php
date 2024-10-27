@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ModelsDownloadController;
+use App\Http\Controllers\PrivateRejectionImageController;
 use App\Http\Controllers\Webhooks\Payments\StripeWebhookController;
 use App\Http\Controllers\Webhooks\Shipping\ShippoWebhookController;
 use App\Http\Middleware\RequestLogger;
@@ -19,3 +21,8 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             ->middleware(VerifyShippoWebhookSignature::class);
     });
 });
+
+Route::get('/models/download', ModelsDownloadController::class)
+    ->name('models.download');
+Route::get('/images/rejections/{id}', PrivateRejectionImageController::class)
+    ->name('images.rejections');

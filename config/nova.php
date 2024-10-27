@@ -201,8 +201,8 @@ return [
     */
 
     'impersonation' => [
-        'started' => '/',
-        'stopped' => '/',
+        'started' => '/admin',
+        'stopped' => '/admin',
     ],
 
     'vendors' => [

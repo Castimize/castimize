@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -65,12 +66,17 @@ class User extends Authenticatable
         ];
     }
 
-    public function identifiableName()
+    public function manufacturer(): HasOne
+    {
+        return $this->hasOne(Manufacturer::class);
+    }
+
+    public function identifiableName(): string
     {
         return sprintf('%s %s', $this->first_name, $this->last_name);
     }
 
-    public function isBackendUser()
+    public function isBackendUser(): bool
     {
         return $this->isSuperAdmin() ||
             $this->isAdmin() ||
@@ -102,6 +108,15 @@ class User extends Authenticatable
     public function isCustomerSupport(): bool
     {
         return $this->hasRole('customer-support');
+    }
+
+    /**
+     * Determines if the User is Customer support
+     * @return bool
+     */
+    public function isManufacturer(): bool
+    {
+        return $this->hasRole('manufacturer');
     }
 
     /**

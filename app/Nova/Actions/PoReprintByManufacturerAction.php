@@ -17,7 +17,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class PoReprintManufacturerAction extends Action
+class PoReprintByManufacturerAction extends Action
 {
     use InteractsWithQueue, Queueable;
 
@@ -98,12 +98,6 @@ class PoReprintManufacturerAction extends Action
     public function fields(NovaRequest $request)
     {
         return [
-//            Select::make(__('Reprint culprit'),'reprint_culprit_id')
-//                ->options(
-//                    ReprintCulprit::all()->pluck('culprit', 'id')->toArray()
-//                )->displayUsingLabels(),
-
-
             Select::make(__('Reprint reason'),'reprint_reason_id')
                 ->options(
                     ReprintReason::all()->pluck('reason', 'id')->toArray()

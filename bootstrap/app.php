@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(
             // Specify the routes to exclude from CSRF protection
             except: [
+                'models/download',
                 'webhooks/payment/stripe/callback',
                 'webhooks/shipping/shippo/callback',
                 'login',

@@ -7,6 +7,7 @@ use App\Nova\Actions\DeclineRejectionAction;
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
@@ -88,7 +89,14 @@ class Rejection extends Resource
 
             Image::make(__('Photo'), 'photo')
                 ->disk('r2_private')
-                ->path('admin/rejections'),
+                ->path('admin/rejections')
+                ->maxWidth(1024)
+                ->thumbnail(function($value, $disk) {
+                    return 'data: image/png;base64,' . base64_encode(Storage::disk('r2_private')->get($value));
+                })
+                ->preview(function($value, $disk) {
+                    return 'data: image/png;base64,' . base64_encode(Storage::disk('r2_private')->get($value));
+                }),
 
             DateTime::make(__('Approved at'), 'approved_at')
                 ->exceptOnForms(),
@@ -139,8 +147,6 @@ class Rejection extends Resource
                 ->canSee(function () {
                     return $this->resource->accepted_at !== null || $this->resource->declined_at !== null;
                 }),
-
-            Image::make(__('Photo'), 'photo'),
 
             Text::make(__('Reason'), 'reason_manufacturer'),
 

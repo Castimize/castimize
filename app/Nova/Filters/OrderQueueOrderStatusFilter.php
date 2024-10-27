@@ -36,15 +36,7 @@ class OrderQueueOrderStatusFilter extends Filter
      */
     public function apply(NovaRequest $request, $query, $value)
     {
-        return $query->whereHas('orderQueueStatuses', function ($q) use ($value) {
-                $q->where('slug', $value)
-                    ->whereIn('id', function ($query) {
-                        $query
-                            ->selectRaw('max(id)')
-                            ->from('order_queue_statuses')
-                            ->whereColumn('order_queue_id', 'order_queue.id');
-                    });
-            });
+        return $query->whereHasLastOrderQueueStatus($value);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Models\Country;
 use App\Models\CustomerShipment;
+use App\Models\ManufacturerShipment;
 use App\Models\Order;
 use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\GeneralSettings;
@@ -99,15 +100,20 @@ class ShippingService
         $getAddressMethod = 'get' . $type . 'Address';
         $shippoAddress = $this->createShippoAddress($type);
         $address = $this->$getAddressMethod();
-        $valid = $shippoAddress['validation_results']['is_valid'] ? 1 : 0;
+        $valid = 1;
+        if (app()->environment('production') && is_array($shippoAddress['validation_results'])) {
+            $valid = $shippoAddress['validation_results']['is_valid'] ? 1 : 0;
+        }
         $errorMessages = [];
-        foreach ($shippoAddress['validation_results']['messages'] as $message) {
-            $errorMessages[] = [
-                'source' => $message['source'],
-                'code' => $message['code'],
-                'type' => $message['type'],
-                'text' => $message['text'],
-            ];
+        if (is_array($shippoAddress['validation_results']) && array_key_exists('messages', $shippoAddress['validation_results'])) {
+            foreach ($shippoAddress['validation_results']['messages'] as $message) {
+                $errorMessages[] = [
+                    'source' => $message['source'],
+                    'code' => $message['code'],
+                    'type' => $message['type'],
+                    'text' => $message['text'],
+                ];
+            }
         }
         $addressChanged = false;
         $address['object_id'] = $shippoAddress['object_id'];
@@ -187,6 +193,92 @@ class ShippingService
                 'importer_reference' => $orderNumber,
                 'currency' => $currency,
                 'eori_number' => strtoupper($customerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
+            ])
+            ->createShipment();
+        $shippoShipment = $this->_shippoService->getShipment();
+        $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
+
+        if ($rate === null) {
+            $errorMessages = [];
+            foreach ($shippoShipment['messages'] as $message) {
+                $errorMessages[] = $message['text'];
+            }
+            throw new Shippo_ApiError(
+                sprintf(
+                    '%s%s%s%s%s',
+                    __('No rates found for this shipment.'),
+                    PHP_EOL,
+                    print_r($this->_shippoService->toArray(), true),
+                    PHP_EOL,
+                    implode(PHP_EOL, $errorMessages)
+                )
+            );
+        }
+
+        $this->_shippoService = $this->_shippoService
+            ->createLabel($customerShipment->id, $rate['object_id']);
+        $transaction = $this->_shippoService->getTransaction();
+        Log::info(print_r($transaction, true));
+        if ($transaction && $transaction['status'] === 'SUCCESS') {
+            return $this->_shippoService->toArray();
+        }
+
+        $errorMessages = [];
+        foreach ($transaction['messages'] as $message) {
+            $errorMessages[] = $message['text'];
+        }
+        if (!empty($errorMessages)) {
+            throw new Shippo_ApiError(
+                sprintf(
+                    '%s%s%s%s%s',
+                    __('Transaction unsuccessful.'),
+                    PHP_EOL,
+                    print_r($this->_shippoService->toArray(), true),
+                    PHP_EOL,
+                    implode(PHP_EOL, $errorMessages)
+                )
+            );
+        }
+
+        return [];
+    }
+
+    /**
+     * @param ManufacturerShipment $manufacturerShipment
+     * @return array
+     * @throws Shippo_ApiError
+     */
+    public function createShippoManufacturerShipment(ManufacturerShipment $manufacturerShipment): array
+    {
+        $fromAddress = $this->mapToShippoAddress($manufacturerShipment->fromAddress);
+        $toAddress = $this->mapToShippoAddress($manufacturerShipment->toAddress);
+
+        $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
+        $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
+
+        $this->_shippoService
+            ->setShipmentFromAddress($shippoFromAddress)
+            ->setShipmentToAddress($shippoToAddress)
+            ->createParcel($manufacturerShipment->parcel);
+
+        $orderNumber = null;
+        $currency = null;
+        $shippingCountry = null;
+        foreach ($manufacturerShipment->selectedPOs as $selectedPO) {
+            if ($orderNumber === null) {
+                $orderNumber = $selectedPO->upload->order->order_number;
+                $currency = $selectedPO->upload->order->currency_code;
+                $shippingCountry = $selectedPO->upload->order->shipping_country;
+            }
+            $this->_shippoService->createCustomsItem($selectedPO->upload);
+        }
+
+        $this->_shippoService
+            ->createCustomsDeclaration([
+                'exporter_reference' => $manufacturerShipment->id,
+                'importer_reference' => $orderNumber,
+                'currency' => $currency,
+                'eori_number' => strtoupper($manufacturerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
             ])
             ->createShipment();
         $shippoShipment = $this->_shippoService->getShipment();

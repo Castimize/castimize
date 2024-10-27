@@ -25,8 +25,9 @@ return new class extends Migration
             $table->string('address_line1')->nullable();
             $table->string('address_line2')->nullable();
             $table->string('postal_code')->nullable();
-            $table->unsignedBigInteger('city_id')->nullable()->index();
-            $table->unsignedBigInteger('state_id')->nullable()->index();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('country_code')->nullable();
             $table->string('administrative_area')->nullable();
             $table->string('contact_name_1')->nullable();
             $table->string('contact_name_2')->nullable();
@@ -38,6 +39,7 @@ return new class extends Migration
             $table->string('vat_number')->nullable();
             $table->string('iban')->nullable();
             $table->string('bic')->nullable();
+            $table->string('timezone')->default('Europe/Amsterdam');
             $table->text('comments')->nullable();
             $table->string('visitor', 45)->nullable();
             $table->string('device_platform')->nullable();
@@ -50,8 +52,6 @@ return new class extends Migration
             $table->foreign('country_id')->references('id')->on('countries')->onDelete('set null');
             $table->foreign('language_id')->references('id')->on('languages')->onDelete('set null');
             $table->foreign('currency_id')->references('id')->on('currencies')->onDelete('set null');
-            $table->foreign('city_id')->references('id')->on('cities')->onDelete('set null');
-            $table->foreign('state_id')->references('id')->on('states')->onDelete('set null');
         });
 
         Schema::table('manufacturers', function (Blueprint $table) {

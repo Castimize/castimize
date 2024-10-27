@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use Carbon\Carbon;
-use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
-use stdClass;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
@@ -143,6 +141,16 @@ class OrderQueue extends Model
     }
 
     /**
+     * Interact with manufacturer_shipment_select_name
+     */
+    protected function manufacturerShipmentSelectName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => sprintf('%s-%s %s (%s)', $this->order->order_number, $this->id, $this->upload->material_name, $this->upload->material->materialGroup->name),
+        );
+    }
+
+    /**
      * @return BelongsTo
      */
     public function manufacturer(): BelongsTo
@@ -227,19 +235,24 @@ class OrderQueue extends Model
         return $this->hasOne(Reprint::class);
     }
 
+    public function scopeWhereHasLastOrderQueueStatus($query, string $statusSlug)
+    {
+        $query->whereHas('orderQueueStatuses', function ($q) use ($statusSlug) {
+            $q->where('slug', $statusSlug)
+                ->whereIn('id', function ($query) {
+                    $query
+                        ->selectRaw('max(id)')
+                        ->from('order_queue_statuses')
+                        ->whereColumn('order_queue_id', 'order_queue.id');
+                });
+        });
+    }
+
     public static function getAtDcOrderQueueOptions(): array
     {
         $options = [];
         $orderQueues = self::with(['order.orderQueues', 'orderQueueStatuses'])
-            ->whereHas('orderQueueStatuses', function ($q) {
-                $q->where('slug', 'at-dc')
-                    ->whereIn('id', function ($query) {
-                        $query
-                            ->selectRaw('max(id)')
-                            ->from('order_queue_statuses')
-                            ->whereColumn('order_queue_id', 'order_queue.id');
-                    });
-            })
+            ->whereHasLastOrderQueueStatus('at-dc')
             ->whereNull('customer_shipment_id')
             ->get()
             ->sortBy('order.order_number')
@@ -258,7 +271,7 @@ class OrderQueue extends Model
                 $ordersAllAtDc[$orderQueue->order_id] = $allAtDc;
             }
 
-            $label = sprintf('%s - %s', ($ordersAllAtDc[$orderQueue->order_id] ? 'V' : 'X'), $orderQueue->customer_shipment_select_name);
+            $label = sprintf('%s - %s', ($ordersAllAtDc[$orderQueue->order_id] ? 'V' : 'X'), $orderQueue->manufacturer_shipment_select_name);
 
             $options[] = [
                 'label' => $label,
@@ -267,22 +280,26 @@ class OrderQueue extends Model
             ];
         }
         return $options;
-//        return self::with(['order', 'orderQueueStatuses'])
-//            ->whereHas('orderQueueStatuses', function ($q) {
-//                $q->where('slug', 'at-dc')
-//                    ->whereIn('id', function ($query) {
-//                        $query
-//                            ->selectRaw('max(id)')
-//                            ->from('order_queue_statuses')
-//                            ->whereColumn('order_queue_id', 'order_queue.id');
-//                    });
-//            })
-//            ->whereNull('customer_shipment_id')
-//            ->get()
-//            ->sortBy('order.order_number')
-//            ->sortBy('id')
-//            ->pluck('customer_shipment_select_name', 'id')
-//            ->toArray();
+    }
+
+    public static function getAvailableForShippingOrderQueueOptions(): array
+    {
+        $options = [];
+        $orderQueues = self::with(['upload.material.materialGroup', 'order.orderQueues', 'orderQueueStatuses'])
+            ->whereHasLastOrderQueueStatus('in-queue')
+            ->whereNull('customer_shipment_id')
+            ->get()
+            ->sortBy('order.order_number')
+            ->sortBy('id');
+
+        foreach ($orderQueues as $orderQueue) {
+            $options[] = [
+                'label' => $orderQueue->manufacturer_shipment_select_name,
+                'value' => $orderQueue->id,
+                'group' => $orderQueue->upload->material->materialGroup->name,
+            ];
+        }
+        return $options;
     }
 
     public static function getOverviewHeaders(): array
@@ -297,21 +314,23 @@ class OrderQueue extends Model
         ];
     }
 
-    public function getOverviewItem(): array
+    public function getOverviewItem(bool $isCustomerShipment = true): array
     {
         $customsItemSettings = app(CustomsItemSettings::class);
         $netWeight = $this->upload->model_box_volume * $this->upload->material->density + $customsItemSettings->bag;
+        $costs = $isCustomerShipment ? (float)$this->upload->total : (float)$this->manufacturer_costs;
+        $currencyCode = $isCustomerShipment ? $this->upload->currency_code : $this->currency_code;
         return [
             'material' => $this->upload->material_name,
             'id' => $this->id,
             'parts' => $this->upload->model_parts,
             'box_volume_cm3' => $this->upload->model_box_volume,
             'weight' => round($netWeight, 2),
-            'costs' => currencyFormatter((float)$this->upload->total, $this->upload->currency_code),
+            'costs' => currencyFormatter($costs, $currencyCode),
         ];
     }
 
-    public static function getOverviewFooter(Collection $items): array
+    public static function getOverviewFooter(Collection $items, bool $isCustomerShipment = true): array
     {
         $customsItemSettings = app(CustomsItemSettings::class);
         $totalParts = 0;
@@ -324,8 +343,8 @@ class OrderQueue extends Model
             $totalParts += $item->upload->model_parts;
             $totalBoxVolume += $item->upload->model_box_volume;
             $totalWeight += ($item->upload->model_box_volume * $item->upload->material->density + $customsItemSettings->bag);
-            $totalCosts += $item->upload->total;
-            $currencyCode = $item->upload->currency_code;
+            $totalCosts += $isCustomerShipment ? (float)$item->upload->total : (float)$item->manufacturer_costs;;
+            $currencyCode = $isCustomerShipment ? $item->upload->currency_code : $item->currency_code;
         }
 
         return [

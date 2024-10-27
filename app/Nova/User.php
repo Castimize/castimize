@@ -4,6 +4,9 @@ namespace App\Nova;
 
 
 use App\Traits\Nova\CommonMetaDataTrait;
+use DateTimeZone;
+use Gldrenthe89\NovaStringGeneratorField\NovaGeneratePassword;
+use Gldrenthe89\NovaStringGeneratorField\NovaGenerateString;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules;
 use Jeffbeltran\SanctumTokens\SanctumTokens;
@@ -12,6 +15,7 @@ use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphToMany;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
@@ -91,6 +95,7 @@ class User extends Resource
      */
     public function fields(NovaRequest $request)
     {
+        $timezones = DateTimeZone::listIdentifiers();
         return [
             ID::make()->sortable(),
 
@@ -101,6 +106,10 @@ class User extends Resource
                 ->maxWidth(50)
                 ->disk(env('FILESYSTEM_DISK'))
                 ->path('admin/users'),
+
+            Text::make(__('Role'), function () {
+                return $this->getRoleNames()->first();
+            })->exceptOnForms(),
 
             Text::make(__('Name'), function () {
                 return sprintf('%s %s', $this->first_name, $this->last_name);
@@ -118,6 +127,10 @@ class User extends Resource
                 ->rules('max:255')
                 ->onlyOnForms(),
 
+            NovaGenerateString::make(__('Username'), 'username')
+                ->length(12)
+                ->excludeRules(['symbols']),
+
             Text::make(__('Email'))
                 ->sortable()
                 ->required()
@@ -125,11 +138,15 @@ class User extends Resource
                 ->creationRules('unique:users,email')
                 ->updateRules('unique:users,email,{{resourceId}}'),
 
-            Password::make(__('Password'))
+            NovaGeneratePassword::make(__('Password'), 'password')
                 ->onlyOnForms()
+                ->length(24)
                 ->required()
-                ->creationRules(Rules\Password::defaults())
-                ->updateRules('nullable', Rules\Password::defaults()),
+                ->updateRules('nullable'),
+
+            Select::make(__('Timezone'), 'timezone')
+                ->options(array_combine($timezones, $timezones))
+                ->default(config('app.timezone')),
 
             SanctumTokens::make(),
 

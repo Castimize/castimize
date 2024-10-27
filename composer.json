@@ -9,7 +9,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ext-zip": "*",
+        "abordage/nova-html-card": "^0.3.1",
         "ashallendesign/laravel-exchange-rates": "^7.6",
+        "badinansoft/table-footer": "^1.0",
+        "castimize/po-status-card": "@dev",
+        "castimize/select-manufacturer-with-overview": "@dev",
+        "castimize/select-with-overview": "@dev",
         "cmixin/business-day": "^1.18",
         "codenco-dev/nova-grid-system": "^2.0",
         "codexshaper/laravel-woocommerce": "^3.0",
@@ -22,6 +28,7 @@
         "digital-creative/resource-navigation-tab": "^2.1",
         "eminiarts/nova-tabs": "^2.2",
         "ferdiunal/nova-editable-field": "^1.0",
+        "gldrenthe89/nova-string-generator-field": "^3.1",
         "guzzlehttp/guzzle": "^7.9",
         "jeffbeltran/sanctum-tokens": "^2.1",
         "kaiserkiwi/nova-queue-management": "^1.2",
@@ -30,18 +37,22 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.0",
+        "league/flysystem-ziparchive": "^3.29",
         "maatwebsite/laravel-nova-excel": "^1.3",
         "outl1ne/nova-multiselect-field": "^4.6",
         "picqer/exact-php-client": "^4.4",
         "predis/predis": "^2.2",
         "psr/simple-cache": "^2.0",
         "ranium/laravel-seedonce": "^1.6",
+        "reedware/nova-text-filter": "^2.0",
         "rpj/daterangepicker": "^0.0.8",
         "saumini/count": "^1.0",
         "sentry/sentry-laravel": "^4.8",
         "sereny/nova-permissions": "^1.6",
         "shippo/shippo-php": "1.*",
+        "slash2nl/nova-back-button": "^2.0",
         "spatie/laravel-permission": "^6.9",
+        "stechstudio/laravel-zipstream": "^5.1",
         "stripe/stripe-php": "^15.8",
         "titasgailius/search-relations": "^2.0",
         "tomodo531/filterable-filters": "^2.0",
@@ -49,8 +60,7 @@
         "wamesk/laravel-nova-tel-input": "^1.0",
         "wesselperik/nova-status-field": "^2.1",
         "whitecube/nova-flexible-content": "^1.1",
-        "wildside/userstamps": "^2.4",
-        "castimize/select-with-overview": "@dev"
+        "wildside/userstamps": "^2.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -116,6 +126,14 @@
         "0": {
             "type": "path",
             "url": "./nova-components/SelectWithOverview"
+        },
+        "1": {
+            "type": "path",
+            "url": "./nova-components/PoStatusCard"
+        },
+        "2": {
+            "type": "path",
+            "url": "./nova-components/SelectManufacturerWithOverview"
         }
     }
 }

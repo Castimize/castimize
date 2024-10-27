@@ -63,10 +63,17 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         Nova::withBreadcrumbs();
 
         Nova::mainMenu(function (Request $request) {
-            if ($request->user()->hasRole('manufacturer')) {
+            if ($request->user()->isManufacturer()) {
                 return [
                     MenuSection::dashboard(Main::class)
                         ->icon('chart-bar'),
+                    MenuSection::make(__('PO\'s'), [
+                        MenuItem::resource(Manufacturer\Po::class),
+                        MenuItem::resource(Manufacturer\Shipment::class),
+                    ])->icon('truck'),
+//                    MenuSection::make(__('Settings'), [
+//                        MenuItem::externalLink(__('Information'), sprintf('/admin/resources/manufacturers/%s/edit', $request->user()->manufacturer->id)),
+//                    ])->icon('cog'),
                 ];
             }
             return [

@@ -5,7 +5,11 @@
         "dev": "vite",
         "build": "vite build",
         "build-select-with-overview": "cd nova-components/SelectWithOverview && npm run dev",
-        "build-select-with-overview-prod": "cd nova-components/SelectWithOverview && npm run prod"
+        "build-select-with-overview-prod": "cd nova-components/SelectWithOverview && npm run prod",
+        "build-po-status-card": "cd nova-components/PoStatusCard && npm run dev",
+        "build-po-status-card-prod": "cd nova-components/PoStatusCard && npm run prod",
+        "build-select-manufacturer-with-overview": "cd nova-components/SelectManufacturerWithOverview && npm run dev",
+        "build-select-manufacturer-with-overview-prod": "cd nova-components/SelectManufacturerWithOverview && npm run prod"
     },
     "devDependencies": {
         "axios": "^1.7.4",

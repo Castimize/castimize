@@ -17,7 +17,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class PoReprintDcAction extends Action
+class PoReprintByDcAction extends Action
 {
     use InteractsWithQueue, Queueable;
 

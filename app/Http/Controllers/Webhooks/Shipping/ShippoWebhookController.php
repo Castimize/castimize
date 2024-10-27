@@ -135,6 +135,16 @@ class ShippoWebhookController extends WebhookController
                         }
                     }
                 }
+            } else if ($shipment instanceof ManufacturerShipment) {
+                if ($data['tracking_status']['status'] === 'DELIVERED') {
+                    $shipment->arrived_at = Carbon::parse($data['tracking_status']['status_date']);
+                    $shipment->save();
+
+                    $orderQueuesService = new OrderQueuesService();
+                    foreach ($shipment->orderQueues as $orderQueue) {
+                        $orderQueuesService->setStatus($orderQueue, 'at-dc');
+                    }
+                }
             }
         }
     }

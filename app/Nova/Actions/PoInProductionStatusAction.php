@@ -24,7 +24,7 @@ class PoInProductionStatusAction extends Action implements ShouldQueue
      */
     public function name()
     {
-        return __('In production');
+        return __('Accept');
     }
 
     /**
@@ -57,7 +57,7 @@ class PoInProductionStatusAction extends Action implements ShouldQueue
             $model->contract_date = now()->addBusinessDays($model->manufacturerCost->shipment_lead_time, 'add')->format('Y-m-d H:i:s');
         }
 
-        return ActionResponse::message(__('PO\'s successfully in production.'));
+        return ActionResponse::message(__('PO\'s successfully accepted.'));
     }
 
     /**
