@@ -38,7 +38,8 @@ class Complaint extends Resource
      */
     public static $search = [
         'id',
-        'name',
+        'reason',
+        'complaintReason.reason',
     ];
 
     /**
