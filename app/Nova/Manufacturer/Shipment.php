@@ -9,7 +9,6 @@ use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Nova\TrackingStatus;
 use App\Services\Shippo\ShippoService;
 use Castimize\SelectManufacturerWithOverview\SelectManufacturerWithOverview;
-use Castimize\SelectWithOverview\SelectWithOverview;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\DateTime;

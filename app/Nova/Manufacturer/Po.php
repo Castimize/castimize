@@ -174,7 +174,6 @@ class Po extends Resource
     public function filters(NovaRequest $request)
     {
         return [
-//            (new OrderQueueCountryFilter()),
             (new OrderDateDaterangepickerFilter( DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
             (new DueDateDaterangepickerFilter( DateHelper::ALL)),

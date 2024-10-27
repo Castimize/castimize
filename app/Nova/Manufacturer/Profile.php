@@ -4,21 +4,13 @@ namespace App\Nova\Manufacturer;
 
 
 use App\Nova\Country;
-use App\Nova\ManufacturerCost;
-use App\Nova\ManufacturerShipment;
-use App\Nova\OrderQueue;
-use App\Nova\Reprint;
 use App\Nova\Resource;
-use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Email;
-use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Password;
-use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Nova;
 use Laravel\Nova\Panel;
@@ -26,7 +18,7 @@ use Wame\TelInput\TelInput;
 
 class Profile extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+    use ColumnTogglerTrait;
 
     /**
      * The model the resource corresponds to.
@@ -138,9 +130,7 @@ class Profile extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [
-
-        ];
+        return [];
     }
 
     /**
