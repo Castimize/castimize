@@ -30,7 +30,7 @@ class TrackingStatus extends Resource
      */
     public function title()
     {
-        return sprintf('%s, %s', $this->modelShipment->id, $this->status);
+        return sprintf('%s, %s', ($this->modelShipment?->id ?? null), $this->status);
     }
 
     /**
