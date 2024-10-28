@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use JsonException;
+use Stripe\Charge;
 use Stripe\Event;
 use Stripe\PaymentIntent;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,6 +47,9 @@ class StripeWebhookController extends WebhookController
                 $paymentIntent = $event->data->object; // contains a \Stripe\PaymentIntent
                 // Then define and call a method to handle the successful payment intent.
                 $this->handlePaymentIntentSucceeded($paymentIntent);
+                break;
+            case 'charge.refunded':
+                $charge = $event->data->object; // contains a \Stripe\Charge
                 break;
             default:
                 echo 'Received unknown event type ' . $event->type;
@@ -107,5 +111,23 @@ class StripeWebhookController extends WebhookController
             }
         }
         return $this->successMethod();
+    }
+
+    protected function handleChargeRefunded(Charge $charge): Response
+    {
+        $order = Order::with(['uploads'])
+            ->where('order_number', $charge->metadata->order_id)
+            ->first();
+
+        if ($order !== null && $charge->status === 'succeeded' && $charge->refunded) {
+            $order->total_refund = $charge->amount_refunded;
+            $order->save();
+
+            try {
+                LogRequestService::addResponse(request(), $order);
+            } catch (Throwable $exception) {
+                Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            }
+        }
     }
 }
