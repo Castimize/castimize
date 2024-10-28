@@ -131,6 +131,12 @@ class Order extends Resource
                 })
                 ->sortable(),
 
+            Text::make(__('Total refund'), function () {
+                    return $this->total_refund ? currencyFormatter((float)$this->total_refund, $this->currency_code) : '';
+                })
+                ->hideByDefault()
+                ->sortable(),
+
             Text::make(__('Created at'), function () {
                     return Carbon::parse($this->created_at)->format('d-m-Y H:i:s');
                 })
@@ -205,6 +211,10 @@ class Order extends Resource
 
             Text::make(__('Total'), function () {
                 return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
+            }),
+
+            Text::make(__('Total refund'), function () {
+                return $this->total_refund ? currencyFormatter((float)$this->total_refund ,$this->currency_code) : '';
             }),
 
             BelongsTo::make(__('Customer'), 'customer'),

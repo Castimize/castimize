@@ -2,10 +2,12 @@
 
 namespace App\Nova\Actions;
 
+use App\Jobs\CheckOrderAllRejected;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
@@ -35,14 +37,23 @@ class AcceptRejectionAction extends Action implements ShouldQueue
      */
     public function handle(ActionFields $fields, Collection $models)
     {
+        $orders = [];
         foreach ($models as $model) {
-            // ToDo: Refund customer CRON
-
-            // ToDo: Mail to customer with note Castimize CRON
-
             $model->note_castimize = $fields->note_castimize;
             $model->accepted_at = now();
             $model->save();
+            if (!array_key_exists($model->order_id, $orders)) {
+                $orders[$model->order_id] = $model->order;
+            }
+        }
+
+        foreach ($orders as $order) {
+            $cacheKey = sprintf('create-order-all-rejected-job-%s', $order->id);
+
+            if (!Cache::has($cacheKey)) {
+                CheckOrderAllRejected::dispatch($order)->delay(now()->addHours(2));
+                Cache::forever($cacheKey, 1);
+            }
         }
 
         return ActionResponse::message(__('Rejection successfully accepted'));

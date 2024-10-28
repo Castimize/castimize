@@ -70,6 +70,7 @@ class Order extends Model
         'discount_fee_tax',
         'total',
         'total_tax',
+        'total_refund',
         'production_cost',
         'production_cost_tax',
         'currency_code',
@@ -203,6 +204,17 @@ class Order extends Model
      * Interact with  total_tax
      */
     protected function totalTax(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  total_refund
+     */
+    protected function totalRefund(): Attribute
     {
         return Attribute::make(
             get: fn ($value) => $value / 100,
