@@ -70,6 +70,20 @@ class Order extends Resource
     ];
 
     /**
+     * Indicates whether the resource should automatically poll for new resources.
+     *
+     * @var bool
+     */
+    public static $polling = true;
+
+    /**
+     * The interval at which Nova should poll for new resources.
+     *
+     * @var int
+     */
+    public static $pollingInterval = 60;
+
+    /**
      * @param NovaRequest $request
      * @param $query
      * @return Builder

@@ -67,13 +67,13 @@ trait ManufacturerPOFieldsTrait
                 ->sortable(),
 
             Text::make(__('Model costs'), function () {
-                return $this->manufacturing_costs ? currencyFormatter((float)($this->manufacturing_costs / $this->upload->quantity), $this->currency_code) : '';
+                return $this->manufacturer_costs ? currencyFormatter((float)($this->manufacturer_costs / $this->upload->quantity), $this->currency_code) : '';
             })
                 ->calculate('sum', __('Model costs'))
                 ->sortable(),
 
             Text::make(__('Total costs'), function () {
-                return $this->manufacturing_costs ? currencyFormatter((float)$this->manufacturing_costs, $this->currency_code) : '';
+                return $this->manufacturer_costs ? currencyFormatter((float)$this->manufacturer_costs, $this->currency_code) : '';
             })
                 ->calculate('sum', __('Total costs'))
                 ->sortable(),

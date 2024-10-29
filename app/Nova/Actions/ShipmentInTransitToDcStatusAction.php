@@ -13,7 +13,7 @@ use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class ShipmentInTransitToDcStatusAction extends Action implements ShouldQueue
+class ShipmentInTransitToDcStatusAction extends Action
 {
     use InteractsWithQueue, Queueable;
 

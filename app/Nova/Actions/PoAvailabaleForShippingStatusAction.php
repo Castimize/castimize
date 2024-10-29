@@ -13,7 +13,7 @@ use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class PoAvailabaleForShippingStatusAction extends Action implements ShouldQueue
+class PoAvailabaleForShippingStatusAction extends Action
 {
     use InteractsWithQueue, Queueable;
 
@@ -56,7 +56,7 @@ class PoAvailabaleForShippingStatusAction extends Action implements ShouldQueue
             $orderQueuesService->setStatus($model, 'available-for-shipping');
         }
 
-        return ActionResponse::message(__('PO\'s successfully available for shipping'));
+        return ActionResponse::visit('/resources/pos/lens/available-for-shipping');
     }
 
     /**

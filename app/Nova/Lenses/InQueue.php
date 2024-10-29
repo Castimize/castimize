@@ -6,6 +6,7 @@ use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Actions\PoInProductionStatusAction;
 use App\Nova\Actions\PoRejectByManufacturerAction;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
+use App\Nova\Filters\MaterialFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Traits\Nova\ManufacturerPOFieldsTrait;
@@ -35,6 +36,20 @@ class InQueue extends Lens
     ];
 
     /**
+     * Indicates whether the resource should automatically poll for new resources.
+     *
+     * @var bool
+     */
+    public static $polling = true;
+
+    /**
+     * The interval at which Nova should poll for new resources.
+     *
+     * @var int
+     */
+    public static $pollingInterval = 60;
+
+    /**
      * Get the query builder / paginator for the lens.
      *
      * @param LensRequest $request
@@ -44,7 +59,8 @@ class InQueue extends Lens
     public static function query(LensRequest $request, $query)
     {
         return $request->withOrdering($request->withFilters(
-            $query->whereHasLastOrderQueueStatus('in-queue')
+            $query->with(['orderQueueStatuses', 'manufacturerCost', 'upload'])
+                ->whereHasLastOrderQueueStatus('in-queue')
                 ->where('manufacturer_id', auth()->user()->manufacturer->id)
         ));
     }
@@ -74,7 +90,7 @@ class InQueue extends Lens
                 'available-for-shipping' => __('Available for shipping'),
                 'in-transit-to-dc' => __('In transit to dc'),
                 'at-dc' => __('Completed'),
-            ]),
+            ])->refreshIntervalSeconds(),
         ];
     }
 
@@ -87,6 +103,7 @@ class InQueue extends Lens
     public function filters(NovaRequest $request)
     {
         return [
+            (new MaterialFilter()),
             (new OrderDateDaterangepickerFilter( DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
             (new DueDateDaterangepickerFilter( DateHelper::ALL)),
@@ -103,7 +120,10 @@ class InQueue extends Lens
     public function actions(NovaRequest $request)
     {
         return [
-            PoInProductionStatusAction::make(),
+            PoInProductionStatusAction::make()
+                ->confirmText(__('Are you sure you want to move the selected PO\'s from In queue to In production?'))
+                ->confirmButtonText(__('Change status'))
+                ->cancelButtonText(__('Cancel')),
             PoRejectByManufacturerAction::make()
                 ->confirmText(__('Are you sure you want to reject the selected PO\'s?'))
                 ->confirmButtonText(__('Reject'))

@@ -75,7 +75,7 @@ class OrdersApiController extends ApiController
                 $biggestCustomerLeadTime = $customerLeadTime;
             }
         }
-        $expectedDeliveryDate = now()->addBusinessDays($biggestCustomerLeadTime, 'add')->toFormattedDateString();
+        $expectedDeliveryDate = now()->addBusinessDays($biggestCustomerLeadTime)->toFormattedDateString();
 
         $response = ['success' => true, 'expected_delivery_date' => $expectedDeliveryDate];
         LogRequestService::addResponse($request, $response);

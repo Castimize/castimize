@@ -5,12 +5,14 @@ namespace App\Nova\Lenses;
 use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Actions\ExportLineItemsV1Action;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
+use App\Nova\Filters\MaterialFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Traits\Nova\ManufacturerPOFieldsTrait;
 use Carbon\Carbon;
 use Castimize\PoStatusCard\PoStatusCard;
 use Illuminate\Database\Eloquent\Builder;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\LensRequest;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Lenses\Lens;
@@ -39,6 +41,20 @@ class AtDc extends Lens
     }
 
     /**
+     * Indicates whether the resource should automatically poll for new resources.
+     *
+     * @var bool
+     */
+    public static $polling = true;
+
+    /**
+     * The interval at which Nova should poll for new resources.
+     *
+     * @var int
+     */
+    public static $pollingInterval = 60;
+
+    /**
      * Get the query builder / paginator for the lens.
      *
      * @param LensRequest $request
@@ -61,7 +77,14 @@ class AtDc extends Lens
      */
     public function fields(NovaRequest $request)
     {
-        return $this->manufacturerPOFields();
+        $fields = $this->manufacturerPOFields();
+        $customerIdField = [
+            Text::make(__('Customer ID'), function () {
+                return $this->upload->customer_id;
+            }),
+        ];
+        array_splice( $fields, 1, 0, $customerIdField);
+        return $fields;
     }
 
     /**
@@ -78,7 +101,7 @@ class AtDc extends Lens
                 'in-production' => __('In production'),
                 'available-for-shipping' => __('Available for shipping'),
                 'in-transit-to-dc' => __('In transit to dc'),
-            ]),
+            ])->refreshIntervalSeconds(),
         ];
     }
 
@@ -91,6 +114,7 @@ class AtDc extends Lens
     public function filters(NovaRequest $request)
     {
         return [
+            (new MaterialFilter()),
             (new OrderDateDaterangepickerFilter( DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
             (new DueDateDaterangepickerFilter( DateHelper::ALL)),

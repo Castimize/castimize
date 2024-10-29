@@ -12,7 +12,6 @@ use Laravel\Nova\Http\Requests\NovaRequest;
  *
  * @package Castimize\SelectWithOverview\Http\Controllers
  * @date    06/05/2024
- * @author  Abdullah Al-Faqeir <abdullah@devloops.net>
  */
 class ApiController extends Controller
 {

@@ -75,6 +75,20 @@ class Shipment extends Resource
         'orderQueues',
     ];
 
+    /**
+     * Indicates whether the resource should automatically poll for new resources.
+     *
+     * @var bool
+     */
+    public static $polling = true;
+
+    /**
+     * The interval at which Nova should poll for new resources.
+     *
+     * @var int
+     */
+    public static $pollingInterval = 60;
+
     public function __construct($resource = null)
     {
         Nova::withBreadcrumbs(false);

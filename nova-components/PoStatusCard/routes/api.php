@@ -1,5 +1,6 @@
 <?php
 
+use Castimize\PoStatusCard\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/endpoint', function (Request $request) {
-//     //
-// });
+Route::name('nova.api.po-status-card.')
+    ->controller(ApiController::class)
+    ->group(function () {
+        Route::post('get-totals', 'getTotals')
+            ->name('get-totals');
+    });

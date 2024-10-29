@@ -19,6 +19,11 @@ class PoStatusCard extends Card
         return $this->withMeta(['statuses' => $statuses, 'statusesCount' => $count, 'statusesWidth' => (100 / $count)]);
     }
 
+    public function refreshIntervalSeconds(int $seconds = 60): PoStatusCard
+    {
+        return $this->withMeta(['refreshIntervalSeconds' => $seconds]);
+    }
+
     /**
      * Get the component name for the element.
      *

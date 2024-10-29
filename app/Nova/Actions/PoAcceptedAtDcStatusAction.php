@@ -13,7 +13,7 @@ use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class PoAcceptedAtDcStatusAction extends Action implements ShouldQueue
+class PoAcceptedAtDcStatusAction extends Action
 {
     use InteractsWithQueue, Queueable;
 

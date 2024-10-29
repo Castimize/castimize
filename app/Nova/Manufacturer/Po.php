@@ -4,6 +4,7 @@ namespace App\Nova\Manufacturer;
 
 use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
+use App\Nova\Filters\MaterialFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Nova\Lenses\AtDc;
@@ -55,6 +56,20 @@ class Po extends Resource
     {
         return sprintf('%s-%s', $this->order->order_number, $this->id);
     }
+
+    /**
+     * Indicates whether the resource should automatically poll for new resources.
+     *
+     * @var bool
+     */
+    public static $polling = true;
+
+    /**
+     * The interval at which Nova should poll for new resources.
+     *
+     * @var int
+     */
+    public static $pollingInterval = 60;
 
     /**
      * The columns that should be searched.
@@ -160,7 +175,7 @@ class Po extends Resource
                 'available-for-shipping' => __('Available for shipping'),
                 'in-transit-to-dc' => __('In transit to dc'),
                 'at-dc' => __('Completed'),
-            ]),
+            ])->refreshIntervalSeconds(),
         ];
     }
 
@@ -174,6 +189,7 @@ class Po extends Resource
     public function filters(NovaRequest $request)
     {
         return [
+            (new MaterialFilter()),
             (new OrderDateDaterangepickerFilter( DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
             (new DueDateDaterangepickerFilter( DateHelper::ALL)),

@@ -5,6 +5,7 @@ namespace App\Nova\Lenses;
 use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Actions\PoReprintByManufacturerAction;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
+use App\Nova\Filters\MaterialFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Traits\Nova\ManufacturerPOFieldsTrait;
@@ -33,6 +34,20 @@ class AvailableForShipping extends Lens
         'order.order_number',
         'upload.material_name',
     ];
+
+    /**
+     * Indicates whether the resource should automatically poll for new resources.
+     *
+     * @var bool
+     */
+    public static $polling = true;
+
+    /**
+     * The interval at which Nova should poll for new resources.
+     *
+     * @var int
+     */
+    public static $pollingInterval = 60;
 
     /**
      * Get the query builder / paginator for the lens.
@@ -76,7 +91,7 @@ class AvailableForShipping extends Lens
                 'in-production' => __('In production'),
                 'in-transit-to-dc' => __('In transit to dc'),
                 'at-dc' => __('Completed'),
-            ]),
+            ])->refreshIntervalSeconds(),
         ];
     }
 
@@ -89,6 +104,7 @@ class AvailableForShipping extends Lens
     public function filters(NovaRequest $request)
     {
         return [
+            (new MaterialFilter()),
             (new OrderDateDaterangepickerFilter( DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
             (new DueDateDaterangepickerFilter( DateHelper::ALL)),

@@ -4,6 +4,7 @@ namespace App\Nova;
 
 
 use App\Traits\Nova\CommonMetaDataTrait;
+use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\FormData;
@@ -50,6 +51,11 @@ class ManufacturerCost extends Resource
     public static $sort = [
         'id' => 'desc',
     ];
+
+    public function authorizedToDelete(Request $request)
+    {
+        return false;
+    }
 
     /**
      * Get the fields displayed by the resource.

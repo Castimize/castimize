@@ -121,7 +121,7 @@ export default {
             const {
                 data: {item},
             } = await Nova.request().post(
-                '/nova-vendor/select-with-overview/get-overview-item',
+                '/nova-vendor/select-manufacturer-with-overview/get-overview-item',
                 {
                     id: id
                 }
@@ -133,7 +133,7 @@ export default {
             const {
                 data: {footer},
             } = await Nova.request().post(
-                '/nova-vendor/select-with-overview/get-overview-footer',
+                '/nova-vendor/select-manufacturer-with-overview/get-overview-footer',
                 {
                     ids: this.selectedItems
                 }

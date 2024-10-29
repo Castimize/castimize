@@ -6,6 +6,7 @@ use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Actions\PoAvailabaleForShippingStatusAction;
 use App\Nova\Actions\PoReprintByManufacturerAction;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
+use App\Nova\Filters\MaterialFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Traits\Nova\ManufacturerPOFieldsTrait;
@@ -33,6 +34,20 @@ class InProduction extends Lens
         'order.order_number',
         'upload.material_name',
     ];
+
+    /**
+     * Indicates whether the resource should automatically poll for new resources.
+     *
+     * @var bool
+     */
+    public static $polling = true;
+
+    /**
+     * The interval at which Nova should poll for new resources.
+     *
+     * @var int
+     */
+    public static $pollingInterval = 60;
 
     /**
      * Get the query builder / paginator for the lens.
@@ -74,7 +89,7 @@ class InProduction extends Lens
                 'available-for-shipping' => __('Available for shipping'),
                 'in-transit-to-dc' => __('In transit to dc'),
                 'at-dc' => __('Completed'),
-            ]),
+            ])->refreshIntervalSeconds(),
         ];
     }
 
@@ -87,6 +102,7 @@ class InProduction extends Lens
     public function filters(NovaRequest $request)
     {
         return [
+            (new MaterialFilter()),
             (new OrderDateDaterangepickerFilter( DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
             (new DueDateDaterangepickerFilter( DateHelper::ALL)),
@@ -103,7 +119,10 @@ class InProduction extends Lens
     public function actions(NovaRequest $request)
     {
         return [
-            PoAvailabaleForShippingStatusAction::make(),
+            PoAvailabaleForShippingStatusAction::make()
+                ->confirmText(__('Are you sure you want to move the selected PO\'s from In production to Available for shipping?'))
+                ->confirmButtonText(__('Change status'))
+                ->cancelButtonText(__('Cancel')),
             PoReprintByManufacturerAction::make()
                 ->confirmText(__('Are you sure you want to reprint the selected PO\'s?'))
                 ->confirmButtonText(__('Reprint'))

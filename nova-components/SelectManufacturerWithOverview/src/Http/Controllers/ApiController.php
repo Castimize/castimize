@@ -10,9 +10,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 /**
  * Class ApiController.
  *
- * @package Castimize\SelectWithOverview\Http\Controllers
+ * @package Castimize\SelectManufacturerWithOverview\Http\Controllers
  * @date    06/05/2024
- * @author  Abdullah Al-Faqeir <abdullah@devloops.net>
  */
 class ApiController extends Controller
 {

@@ -3,9 +3,9 @@
 namespace App\Nova\Actions;
 
 use App\Models\OrderQueue;
+use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\OrderQueuesService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
@@ -13,7 +13,7 @@ use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class PoInProductionStatusAction extends Action implements ShouldQueue
+class PoInProductionStatusAction extends Action
 {
     use InteractsWithQueue, Queueable;
 
@@ -53,11 +53,26 @@ class PoInProductionStatusAction extends Action implements ShouldQueue
             }
         }
         foreach ($models as $model) {
+            if (!$model->manufacturerCost) {
+                $manufacturerCost = auth()->user()->manufacturer->costs->where('active', true)->where('material_id', $model->upload->material_id)->first();
+                if ($manufacturerCost) {
+                    $model->manufacturer_cost_id = $manufacturerCost->id;
+                    $model->manufacturer_costs = (new CalculatePricesService())->calculateCostsOfModel(
+                        $manufacturerCost,
+                        $model->upload->model_volume_cc,
+                        $model->upload->model_surface_area_cm2,
+                        $model->upload->quantity
+                    );
+                    $model->save();
+                    $model->load('manufacturerCost');
+                }
+            }
+            $model->contract_date = now()->addBusinessDays($model->manufacturerCost->shipment_lead_time)->format('Y-m-d H:i:s');
+            $model->save();
             $orderQueuesService->setStatus($model, 'in-production');
-            $model->contract_date = now()->addBusinessDays($model->manufacturerCost->shipment_lead_time, 'add')->format('Y-m-d H:i:s');
         }
 
-        return ActionResponse::message(__('PO\'s successfully accepted.'));
+        return ActionResponse::visit('/resources/pos/lens/in-production');
     }
 
     /**

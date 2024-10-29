@@ -83,6 +83,20 @@ class CustomerShipment extends Resource
         'orderQueues',
     ];
 
+    /**
+     * Indicates whether the resource should automatically poll for new resources.
+     *
+     * @var bool
+     */
+    public static $polling = true;
+
+    /**
+     * The interval at which Nova should poll for new resources.
+     *
+     * @var int
+     */
+    public static $pollingInterval = 60;
+
     public function authorizedToUpdate(Request $request)
     {
         return false;
