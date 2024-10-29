@@ -36,8 +36,6 @@ class CustomersApiController extends ApiController
      */
     public function showCustomerWp(ShowCustomerWpRequest $request): CustomerResource
     {
-        $customers = \Codexshaper\WooCommerce\Facades\Customer::all();
-        dd($customers);
         $customer = Customer::where('wp_id', $request->wp_id)->first();
         if ($customer === null) {
             LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
