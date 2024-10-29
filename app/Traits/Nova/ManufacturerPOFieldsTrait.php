@@ -15,8 +15,11 @@ trait ManufacturerPOFieldsTrait
     public function manufacturerPOFields(): array
     {
         return [
-            ID::make()->sortable()
-                ->calculate('count', __('Total Count')),
+            ID::make()->sortable(),
+
+            Text::make(__('Customer ID'), function () {
+                return $this->upload->customer_id;
+            }),
 
             Text::make(__('Order'), function() {
                 return $this->order->order_number;
@@ -33,49 +36,41 @@ trait ManufacturerPOFieldsTrait
             Number::make(__('# Models'), function () {
                 return $this->upload->quantity;
             })
-                ->calculate('sum', __('# Models'))
                 ->sortable(),
 
             Number::make(__('# Model parts'), function () {
                 return $this->upload->model_parts;
             })
-                ->calculate('sum', __('# Model parts'))
                 ->sortable(),
 
             Number::make(__('# Total parts'), function () {
                 return $this->upload->model_parts * $this->upload->quantity;
             })
-                ->calculate('sum', __('# Total parts'))
                 ->sortable(),
 
             Number::make(__('Model volume'), function () {
                 return $this->upload->model_volume_cc;
             })
-                ->calculate('sum', __('Model volume'))
                 ->sortable(),
 
             Number::make(__('Model surface area'), function () {
                 return $this->upload->model_surface_area_cm2;
             })
-                ->calculate('sum', __('Model surface area'))
                 ->sortable(),
 
             Number::make(__('Total surface area'), function () {
                 return $this->upload->model_surface_area_cm2 * $this->upload->quantity;
             })
-                ->calculate('sum', __('Total surface area'))
                 ->sortable(),
 
             Text::make(__('Model costs'), function () {
                 return $this->manufacturer_costs ? currencyFormatter((float)($this->manufacturer_costs / $this->upload->quantity), $this->currency_code) : '';
             })
-                ->calculate('sum', __('Model costs'))
                 ->sortable(),
 
             Text::make(__('Total costs'), function () {
                 return $this->manufacturer_costs ? currencyFormatter((float)$this->manufacturer_costs, $this->currency_code) : '';
             })
-                ->calculate('sum', __('Total costs'))
                 ->sortable(),
 
             DateTime::make(__('Entry date'), 'created_at')

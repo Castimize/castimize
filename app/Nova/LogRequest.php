@@ -146,6 +146,7 @@ class LogRequest extends Resource
         return [
             FilterableFilters::make(\App\Models\LogRequest::class)
                 ->fields([
+                    'type',
                     'method',
                     'http_code',
                     'user_agent',
