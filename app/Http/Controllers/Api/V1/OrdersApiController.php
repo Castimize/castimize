@@ -88,7 +88,10 @@ class OrdersApiController extends ApiController
      */
     public function storeOrderWp(Request $request): JsonResponse
     {
-        $order = (new OrdersService())->storeOrderWpFromApi($request);
+        $order = Order::where('wp_id', $request->id)->first();
+        if ($order === null) {
+            $order = (new OrdersService())->storeOrderWpFromApi($request);
+        }
 
         $response = new OrderResource($order);
         LogRequestService::addResponse($request, $response);
