@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "af41b2c966852ccb821ee9bbd32a9236",
+    "content-hash": "de0e2a9d3815bd50743cd1850a3540b8",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -346,64 +346,6 @@
                 "source": "https://github.com/aws/aws-sdk-php/tree/3.324.11"
             },
             "time": "2024-10-25T18:07:16+00:00"
-        },
-        {
-            "name": "badinansoft/table-footer",
-            "version": "1.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/badinansoft/table-footer.git",
-                "reference": "d523704b20e782aaa1f379fc8375247df658676e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/badinansoft/table-footer/zipball/d523704b20e782aaa1f379fc8375247df658676e",
-                "reference": "d523704b20e782aaa1f379fc8375247df658676e",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.1.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Badinansoft\\TableFooter\\ToolServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Badinansoft\\TableFooter\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "BadinanSoft",
-                    "email": "info@badinansoft.com"
-                },
-                {
-                    "name": "Shahab Zebari",
-                    "email": "me@shahabzebari.net"
-                }
-            ],
-            "description": "A Laravel Nova tool for adding a footer to a table, that will calculate the total of the columns",
-            "keywords": [
-                "BadinanSoft",
-                "Shahab Zebari",
-                "laravel",
-                "nova",
-                "table"
-            ],
-            "support": {
-                "issues": "https://github.com/badinansoft/table-footer/issues",
-                "source": "https://github.com/badinansoft/table-footer/tree/1.0.1"
-            },
-            "time": "2022-04-20T14:05:37+00:00"
         },
         {
             "name": "brick/math",

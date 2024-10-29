@@ -12,7 +12,6 @@
         "ext-zip": "*",
         "abordage/nova-html-card": "^0.3.1",
         "ashallendesign/laravel-exchange-rates": "^7.6",
-        "badinansoft/table-footer": "^1.0",
         "castimize/po-status-card": "@dev",
         "castimize/select-manufacturer-with-overview": "@dev",
         "castimize/select-with-overview": "@dev",

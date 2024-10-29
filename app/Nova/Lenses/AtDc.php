@@ -77,14 +77,7 @@ class AtDc extends Lens
      */
     public function fields(NovaRequest $request)
     {
-        $fields = $this->manufacturerPOFields();
-        $customerIdField = [
-            Text::make(__('Customer ID'), function () {
-                return $this->upload->customer_id;
-            }),
-        ];
-        array_splice( $fields, 1, 0, $customerIdField);
-        return $fields;
+        return $this->manufacturerPOFields();
     }
 
     /**

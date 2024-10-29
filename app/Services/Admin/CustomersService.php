@@ -21,8 +21,11 @@ class CustomersService
     public function storeCustomerFromWpApi($request): Customer
     {
         $customer = null;
-        if ($request->has('customer_id') && !empty($request->customer_id)) {
-            $customer = Customer::where('wp_id', $request->customer_id)->first();
+        if ($request->has('id') && !empty($request->id)) {
+            $customer = Customer::where('wp_id', $request->id)->first();
+        }
+        if ($customer === null && $request->has('email') && !empty($request->email)) {
+            $customer = Customer::where('email', $request->email)->first();
         }
 
         if ($customer === null) {
@@ -55,7 +58,7 @@ class CustomersService
         $customer = Customer::create([
             'country_id' => $country->id,
             'currency_id' => $currency?->id,
-            'wp_id' => $request->customer_id,
+            'wp_id' => $request->id,
             'first_name' => $request->first_name ?? $request->billing['first_name'],
             'last_name' => $request->last_name ?? $request->billing['last_name'],
             'company' => $request->billing['company'] ?? $request->shipping['company'] ?? null,
@@ -107,6 +110,7 @@ class CustomersService
      */
     private function updateCustomerFromWp(Customer $customer, $request): mixed
     {
+        $customer->wp_id = $request->id;
         $customer->first_name = $request->first_name ?? $request->billing['first_name'];
         $customer->last_name = $request->last_name ?? $request->billing['last_name'];
         $customer->email = $request->email ?? $request->billing['email'] ?? null;
