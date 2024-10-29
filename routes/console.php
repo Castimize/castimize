@@ -8,6 +8,6 @@ use Illuminate\Support\Facades\Schedule;
 //    $this->comment(Inspiring::quote());
 //})->purpose('Display an inspiring quote')->hourly();
 
-Schedule::command('app:get-currency-historical-rates')
+Schedule::command('castimize:get-currency-historical-rates')
     ->timezone('Europe/Amsterdam')
     ->at('0:01');

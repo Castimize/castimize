@@ -15,7 +15,7 @@ class GetCurrencyHistoricalRates extends Command
      *
      * @var string
      */
-    protected $signature = 'app:get-currency-historical-rates';
+    protected $signature = 'castimize:get-currency-historical-rates';
 
     /**
      * The console command description.
