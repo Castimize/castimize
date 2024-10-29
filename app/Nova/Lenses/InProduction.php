@@ -86,6 +86,7 @@ class InProduction extends Lens
         return [
             PoStatusCard::make()->statuses([
                 'in-queue' => __('In queue'),
+                'in-production' => __('In production'),
                 'available-for-shipping' => __('Available for shipping'),
                 'in-transit-to-dc' => __('In transit to dc'),
                 'at-dc' => __('Completed'),
