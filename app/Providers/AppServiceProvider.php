@@ -57,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
             Pdf::default()
                 ->withBrowsershot(function ($browsershot) {
                     $browsershot
-                        ->setIncludePath('$PATH:/usr/local/bin')
+                        ->setIncludePath('$PATH:/usr/bin')
                         ->setChromePath('/usr/bin/chromium-browser')
                         ->addChromiumArguments([
                             'headless=shell'
