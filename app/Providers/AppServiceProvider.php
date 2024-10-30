@@ -58,6 +58,7 @@ class AppServiceProvider extends ServiceProvider
                 ->withBrowsershot(function ($browsershot) {
                     $browsershot
                         ->setIncludePath('$PATH:/usr/local/bin')
+                        ->setChromePath('/usr/bin/chromium-browser')
                         ->addChromiumArguments([
                             'headless=shell'
                         ]);
