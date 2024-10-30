@@ -6,7 +6,6 @@ use App\Models\OrderQueue;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use function Spatie\LaravelPdf\Support\pdf;
 use Spatie\LaravelPdf\Facades\Pdf;
 
 class PoLabelsDownloadController extends Controller
@@ -36,8 +35,6 @@ class PoLabelsDownloadController extends Controller
             ->whereIn('id', $data['order_queue_ids'])
             ->get();
         $count = count($orderQueues);
-
-//        $zip = Zip::create($data['filename']);
 
         return Pdf::view('nova-pdf.po-label', compact('orderQueues', 'count'))
             ->download($request->filename);
