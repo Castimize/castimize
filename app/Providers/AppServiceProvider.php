@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Shippo;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -51,6 +52,17 @@ class AppServiceProvider extends ServiceProvider
 
             return $this;
         });
+
+        if ($this->app->environment('production')) {
+            Pdf::default()
+                ->withBrowsershot(function ($browsershot) {
+                    $browsershot
+                        ->setIncludePath('$PATH:/usr/local/bin')
+                        ->addChromiumArguments([
+                            'headless=shell'
+                        ]);
+                });
+        }
     }
 
     private function setBusinessDays()
