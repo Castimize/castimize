@@ -13,7 +13,7 @@ use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class PoAvailabaleForShippingStatusAction extends Action
+class PoAvailableForShippingStatusAction extends Action
 {
     use InteractsWithQueue, Queueable;
 

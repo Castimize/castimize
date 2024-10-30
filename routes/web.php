@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ModelsDownloadController;
+use App\Http\Controllers\PoLabelsDownloadController;
 use App\Http\Controllers\PrivateRejectionImageController;
 use App\Http\Controllers\Webhooks\Payments\StripeWebhookController;
 use App\Http\Controllers\Webhooks\Shipping\ShippoWebhookController;
@@ -24,5 +25,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
 
 Route::get('/models/download', ModelsDownloadController::class)
     ->name('models.download');
+Route::get('/po/labels/download', PoLabelsDownloadController::class)
+    ->name('po.labels.download');
 Route::get('/images/rejections/{id}', PrivateRejectionImageController::class)
     ->name('images.rejections');

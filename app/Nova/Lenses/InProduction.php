@@ -3,7 +3,8 @@
 namespace App\Nova\Lenses;
 
 use App\Nova\Actions\DownloadModelsAction;
-use App\Nova\Actions\PoAvailabaleForShippingStatusAction;
+use App\Nova\Actions\PoAvailableForShippingAndDownloadPoLabelsStatusAction;
+use App\Nova\Actions\PoAvailableForShippingStatusAction;
 use App\Nova\Actions\PoReprintByManufacturerAction;
 use App\Nova\Filters\ContractDateDaterangepickerFilter;
 use App\Nova\Filters\EntryDateDaterangepickerFilter;
@@ -120,9 +121,13 @@ class InProduction extends Lens
     public function actions(NovaRequest $request)
     {
         return [
-            PoAvailabaleForShippingStatusAction::make()
+            PoAvailableForShippingStatusAction::make()
                 ->confirmText(__('Are you sure you want to move the selected PO\'s from In production to Available for shipping?'))
                 ->confirmButtonText(__('Change status'))
+                ->cancelButtonText(__('Cancel')),
+            PoAvailableForShippingAndDownloadPoLabelsStatusAction::make()
+                ->confirmText(__('Are you sure you want to move the selected PO\'s from In production to Available for shipping and download the labels?'))
+                ->confirmButtonText(__('Change status and download'))
                 ->cancelButtonText(__('Cancel')),
             PoReprintByManufacturerAction::make()
                 ->confirmText(__('Are you sure you want to reprint the selected PO\'s?'))

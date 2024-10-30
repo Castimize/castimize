@@ -225,7 +225,6 @@ class Po extends Resource
                 ->confirmText(__('Are you sure you want to download the models from the selected PO\'s?'))
                 ->confirmButtonText(__('Download'))
                 ->cancelButtonText(__('Cancel')),
-//            ExportLineItemsV1Action::make(),
         ];
     }
 }

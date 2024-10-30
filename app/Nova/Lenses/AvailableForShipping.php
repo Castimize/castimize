@@ -3,6 +3,7 @@
 namespace App\Nova\Lenses;
 
 use App\Nova\Actions\DownloadModelsAction;
+use App\Nova\Actions\DownloadPoLabelsAction;
 use App\Nova\Actions\PoReprintByManufacturerAction;
 use App\Nova\Filters\ContractDateDaterangepickerFilter;
 use App\Nova\Filters\EntryDateDaterangepickerFilter;
@@ -124,6 +125,10 @@ class AvailableForShipping extends Lens
             PoReprintByManufacturerAction::make()
                 ->confirmText(__('Are you sure you want to reprint the selected PO\'s?'))
                 ->confirmButtonText(__('Reprint'))
+                ->cancelButtonText(__('Cancel')),
+            DownloadPoLabelsAction::make()
+                ->confirmText(__('Are you sure you want to download the labels from the selected PO\'s?'))
+                ->confirmButtonText(__('Download'))
                 ->cancelButtonText(__('Cancel')),
             DownloadModelsAction::make()
                 ->confirmText(__('Are you sure you want to download the models from the selected PO\'s?'))

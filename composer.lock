@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4c406bd01a2856a92653421e227d9708",
+    "content-hash": "e7f9a5462f90de1a69d6237f97fbe481",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -533,42 +533,6 @@
                 }
             ],
             "time": "2024-02-09T16:56:22+00:00"
-        },
-        {
-            "name": "castimize/export-to-pdf",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "./nova-components/ExportToPdf",
-                "reference": "b288d16e2626d3517cf12de0eda7bdf8d4c5dc5d"
-            },
-            "require": {
-                "php": "^7.3|^8.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Castimize\\ExportToPdf\\CardServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Castimize\\ExportToPdf\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "A Laravel Nova card.",
-            "keywords": [
-                "laravel",
-                "nova"
-            ],
-            "transport-options": {
-                "relative": true
-            }
         },
         {
             "name": "castimize/po-status-card",
@@ -7511,6 +7475,74 @@
             "time": "2022-05-10T11:23:37+00:00"
         },
         {
+            "name": "spatie/browsershot",
+            "version": "4.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/browsershot.git",
+                "reference": "601f2758191d8c46b2ea587eea935a87da4f39e8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/browsershot/zipball/601f2758191d8c46b2ea587eea935a87da4f39e8",
+                "reference": "601f2758191d8c46b2ea587eea935a87da4f39e8",
+                "shasum": ""
+            },
+            "require": {
+                "ext-fileinfo": "*",
+                "ext-json": "*",
+                "php": "^8.2",
+                "spatie/temporary-directory": "^2.0",
+                "symfony/process": "^6.0|^7.0"
+            },
+            "require-dev": {
+                "pestphp/pest": "^1.20",
+                "spatie/image": "^3.6",
+                "spatie/pdf-to-text": "^1.52",
+                "spatie/phpunit-snapshot-assertions": "^4.2.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\Browsershot\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://github.com/freekmurze",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Convert a webpage to an image or pdf using headless Chrome",
+            "homepage": "https://github.com/spatie/browsershot",
+            "keywords": [
+                "chrome",
+                "convert",
+                "headless",
+                "image",
+                "pdf",
+                "puppeteer",
+                "screenshot",
+                "webpage"
+            ],
+            "support": {
+                "source": "https://github.com/spatie/browsershot/tree/4.3.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-08-22T09:14:07+00:00"
+        },
+        {
             "name": "spatie/laravel-package-tools",
             "version": "1.16.5",
             "source": {
@@ -7569,6 +7601,91 @@
                 }
             ],
             "time": "2024-08-27T18:56:10+00:00"
+        },
+        {
+            "name": "spatie/laravel-pdf",
+            "version": "1.5.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-pdf.git",
+                "reference": "fadf23c6249c491fd4924f8ec37166a283269966"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-pdf/zipball/fadf23c6249c491fd4924f8ec37166a283269966",
+                "reference": "fadf23c6249c491fd4924f8ec37166a283269966",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^10.0|^11.0",
+                "php": "^8.2",
+                "spatie/browsershot": "^4.0",
+                "spatie/laravel-package-tools": "^1.16.1",
+                "spatie/temporary-directory": "^2.2.1"
+            },
+            "require-dev": {
+                "ext-imagick": "*",
+                "larastan/larastan": "^2.7.0",
+                "laravel/pint": "^1.13.7",
+                "nunomaduro/collision": "^7.10",
+                "orchestra/testbench": "^8.18",
+                "pestphp/pest": "^2.30",
+                "pestphp/pest-plugin-arch": "^2.5",
+                "pestphp/pest-plugin-laravel": "^2.2",
+                "phpstan/extension-installer": "^1.3.1",
+                "phpstan/phpstan-deprecation-rules": "^1.1.4",
+                "phpstan/phpstan-phpunit": "^1.3.15",
+                "spatie/image": "^3.3.2",
+                "spatie/laravel-ray": "^1.33",
+                "spatie/pdf-to-image": "^2.2",
+                "spatie/pdf-to-text": "^1.52.1",
+                "spatie/pest-expectations": "^1.5",
+                "spatie/pest-plugin-snapshots": "^2.1",
+                "spatie/pixelmatch-php": "^1.0",
+                "wnx/sidecar-browsershot": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Spatie\\LaravelPdf\\PdfServiceProvider"
+                    ],
+                    "aliases": {
+                        "LaravelPdf": "Pdf"
+                    }
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/Support/functions.php"
+                ],
+                "psr-4": {
+                    "Spatie\\LaravelPdf\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Create PDFs in Laravel apps",
+            "homepage": "https://github.com/spatie/laravel-pdf",
+            "keywords": [
+                "laravel",
+                "laravel-pdf",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/laravel-pdf/issues",
+                "source": "https://github.com/spatie/laravel-pdf/tree/1.5.2"
+            },
+            "time": "2024-07-16T07:42:10+00:00"
         },
         {
             "name": "spatie/laravel-permission",
@@ -13312,8 +13429,7 @@
     "stability-flags": {
         "castimize/po-status-card": 20,
         "castimize/select-manufacturer-with-overview": 20,
-        "castimize/select-with-overview": 20,
-        "castimize/export-to-pdf": 20
+        "castimize/select-with-overview": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
