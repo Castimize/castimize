@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "de0e2a9d3815bd50743cd1850a3540b8",
+    "content-hash": "4c406bd01a2856a92653421e227d9708",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -251,16 +251,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.324.11",
+            "version": "3.324.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "a667ca29db288af083c3d8cff2e7f32d89fd4cf0"
+                "reference": "781cb9594f7d1754c888452f980748115fd159d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/a667ca29db288af083c3d8cff2e7f32d89fd4cf0",
-                "reference": "a667ca29db288af083c3d8cff2e7f32d89fd4cf0",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/781cb9594f7d1754c888452f980748115fd159d3",
+                "reference": "781cb9594f7d1754c888452f980748115fd159d3",
                 "shasum": ""
             },
             "require": {
@@ -343,9 +343,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.324.11"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.324.13"
             },
-            "time": "2024-10-25T18:07:16+00:00"
+            "time": "2024-10-29T18:11:10+00:00"
         },
         {
             "name": "brick/math",
@@ -533,6 +533,42 @@
                 }
             ],
             "time": "2024-02-09T16:56:22+00:00"
+        },
+        {
+            "name": "castimize/export-to-pdf",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "./nova-components/ExportToPdf",
+                "reference": "b288d16e2626d3517cf12de0eda7bdf8d4c5dc5d"
+            },
+            "require": {
+                "php": "^7.3|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Castimize\\ExportToPdf\\CardServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Castimize\\ExportToPdf\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "A Laravel Nova card.",
+            "keywords": [
+                "laravel",
+                "nova"
+            ],
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "castimize/po-status-card",
@@ -935,16 +971,16 @@
         },
         {
             "name": "darkaonline/l5-swagger",
-            "version": "8.6.2",
+            "version": "8.6.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DarkaOnLine/L5-Swagger.git",
-                "reference": "9d72140330b5df4379b907d9582bf90b34ae59a2"
+                "reference": "b37695804b786c04ab4077ceb6c0f2907ccd0153"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DarkaOnLine/L5-Swagger/zipball/9d72140330b5df4379b907d9582bf90b34ae59a2",
-                "reference": "9d72140330b5df4379b907d9582bf90b34ae59a2",
+                "url": "https://api.github.com/repos/DarkaOnLine/L5-Swagger/zipball/b37695804b786c04ab4077ceb6c0f2907ccd0153",
+                "reference": "b37695804b786c04ab4077ceb6c0f2907ccd0153",
                 "shasum": ""
             },
             "require": {
@@ -1003,7 +1039,7 @@
             ],
             "support": {
                 "issues": "https://github.com/DarkaOnLine/L5-Swagger/issues",
-                "source": "https://github.com/DarkaOnLine/L5-Swagger/tree/8.6.2"
+                "source": "https://github.com/DarkaOnLine/L5-Swagger/tree/8.6.3"
             },
             "funding": [
                 {
@@ -1011,7 +1047,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-29T08:02:07+00:00"
+            "time": "2024-10-28T06:29:43+00:00"
         },
         {
             "name": "devloops/nova-system-settings",
@@ -1205,6 +1241,66 @@
                 "source": "https://github.com/dflydev/dflydev-dot-access-data/tree/v3.0.3"
             },
             "time": "2024-07-08T12:26:09+00:00"
+        },
+        {
+            "name": "digital-creative/chartjs-widget",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dcasia/chartjs-widget.git",
+                "reference": "73e93b6b40579f5e75ac3d1e4802cae7ccc00101"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dcasia/chartjs-widget/zipball/73e93b6b40579f5e75ac3d1e4802cae7ccc00101",
+                "reference": "73e93b6b40579f5e75ac3d1e4802cae7ccc00101",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/nova": "^4.28.0",
+                "php": ">=8.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "DigitalCreative\\ChartJsWidget\\WidgetServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "DigitalCreative\\ChartJsWidget\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rafael Milewski"
+                }
+            ],
+            "description": "A chartjs widget for laravel nova-dashboard.",
+            "keywords": [
+                "chartjs",
+                "dashboard",
+                "laravel",
+                "nova",
+                "nova-dashboard"
+            ],
+            "support": {
+                "issues": "https://github.com/dcasia/chartjs-widget/issues",
+                "source": "https://github.com/dcasia/chartjs-widget/tree/v1.0.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/milewski",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-10-28T11:44:46+00:00"
         },
         {
             "name": "digital-creative/collapsible-resource-manager",
@@ -1438,6 +1534,124 @@
                 }
             ],
             "time": "2023-11-14T05:48:09+00:00"
+        },
+        {
+            "name": "digital-creative/table-widget",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dcasia/table-widget.git",
+                "reference": "ed611f596b3aeecac307b0f91faadfbfa3ae141b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dcasia/table-widget/zipball/ed611f596b3aeecac307b0f91faadfbfa3ae141b",
+                "reference": "ed611f596b3aeecac307b0f91faadfbfa3ae141b",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/nova": "^4.0",
+                "php": ">=8.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "DigitalCreative\\TableWidget\\TableWidgetServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "DigitalCreative\\TableWidget\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rafael Milewski"
+                }
+            ],
+            "description": "A table widget for laravel nova-dashboard.",
+            "keywords": [
+                "laravel",
+                "nova",
+                "nova-dashboard",
+                "widget"
+            ],
+            "support": {
+                "issues": "https://github.com/dcasia/table-widget/issues",
+                "source": "https://github.com/dcasia/table-widget/tree/v1.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/milewski",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-10-24T13:51:48+00:00"
+        },
+        {
+            "name": "digital-creative/value-widget",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dcasia/value-widget.git",
+                "reference": "05be232e574438ccff2fd81baf4dfa1ba0776d63"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dcasia/value-widget/zipball/05be232e574438ccff2fd81baf4dfa1ba0776d63",
+                "reference": "05be232e574438ccff2fd81baf4dfa1ba0776d63",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/nova": "^4.0",
+                "php": ">=8.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "DigitalCreative\\ValueWidget\\ValueWidgetServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "DigitalCreative\\ValueWidget\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rafael Milewski"
+                }
+            ],
+            "description": "A basic widget for laravel nova-dashboard.",
+            "keywords": [
+                "laravel",
+                "nova",
+                "nova-dashboard",
+                "widget"
+            ],
+            "support": {
+                "issues": "https://github.com/dcasia/value-widget/issues",
+                "source": "https://github.com/dcasia/value-widget/tree/v1.0.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/milewski",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-10-24T14:56:22+00:00"
         },
         {
             "name": "doctrine/annotations",
@@ -12021,16 +12235,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "11.4.2",
+            "version": "11.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "1863643c3f04ad03dcb9c6996c294784cdda4805"
+                "reference": "e8e8ed1854de5d36c088ec1833beae40d2dedd76"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/1863643c3f04ad03dcb9c6996c294784cdda4805",
-                "reference": "1863643c3f04ad03dcb9c6996c294784cdda4805",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e8e8ed1854de5d36c088ec1833beae40d2dedd76",
+                "reference": "e8e8ed1854de5d36c088ec1833beae40d2dedd76",
                 "shasum": ""
             },
             "require": {
@@ -12101,7 +12315,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.4.2"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.4.3"
             },
             "funding": [
                 {
@@ -12117,7 +12331,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-10-19T13:05:19+00:00"
+            "time": "2024-10-28T13:07:50+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -13098,7 +13312,8 @@
     "stability-flags": {
         "castimize/po-status-card": 20,
         "castimize/select-manufacturer-with-overview": 20,
-        "castimize/select-with-overview": 20
+        "castimize/select-with-overview": 20,
+        "castimize/export-to-pdf": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

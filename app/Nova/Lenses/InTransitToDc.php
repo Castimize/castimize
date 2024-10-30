@@ -4,7 +4,9 @@ namespace App\Nova\Lenses;
 
 use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Actions\PoReprintByManufacturerAction;
+use App\Nova\Filters\ContractDateDaterangepickerFilter;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
+use App\Nova\Filters\EntryDateDaterangepickerFilter;
 use App\Nova\Filters\MaterialFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
@@ -89,7 +91,9 @@ class InTransitToDc extends Lens
                 'available-for-shipping' => __('Available for shipping'),
                 'in-transit-to-dc' => __('In transit to dc'),
                 'at-dc' => __('Completed'),
-            ])->refreshIntervalSeconds(),
+            ])
+                ->activeSlug('in-transit-to-dc')
+                ->refreshIntervalSeconds(),
         ];
     }
 
@@ -103,9 +107,8 @@ class InTransitToDc extends Lens
     {
         return [
             (new MaterialFilter()),
-            (new OrderDateDaterangepickerFilter( DateHelper::ALL))
-                ->setMaxDate(Carbon::today()),
-            (new DueDateDaterangepickerFilter( DateHelper::ALL)),
+            (new EntryDateDaterangepickerFilter( DateHelper::ALL)),
+            (new ContractDateDaterangepickerFilter( DateHelper::ALL)),
             (new OrderQueueOrderStatusFilter()),
         ];
     }

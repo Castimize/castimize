@@ -5,12 +5,11 @@ namespace App\Nova\Lenses;
 use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Actions\PoInProductionStatusAction;
 use App\Nova\Actions\PoRejectByManufacturerAction;
-use App\Nova\Filters\DueDateDaterangepickerFilter;
+use App\Nova\Filters\ContractDateDaterangepickerFilter;
+use App\Nova\Filters\EntryDateDaterangepickerFilter;
 use App\Nova\Filters\MaterialFilter;
-use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Traits\Nova\ManufacturerPOFieldsTrait;
-use Carbon\Carbon;
 use Castimize\PoStatusCard\PoStatusCard;
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Http\Requests\LensRequest;
@@ -91,7 +90,9 @@ class InQueue extends Lens
                 'available-for-shipping' => __('Available for shipping'),
                 'in-transit-to-dc' => __('In transit to dc'),
                 'at-dc' => __('Completed'),
-            ])->refreshIntervalSeconds(),
+            ])
+                ->activeSlug('in-queue')
+                ->refreshIntervalSeconds(),
         ];
     }
 
@@ -105,9 +106,8 @@ class InQueue extends Lens
     {
         return [
             (new MaterialFilter()),
-            (new OrderDateDaterangepickerFilter( DateHelper::ALL))
-                ->setMaxDate(Carbon::today()),
-            (new DueDateDaterangepickerFilter( DateHelper::ALL)),
+            (new EntryDateDaterangepickerFilter( DateHelper::ALL)),
+            (new ContractDateDaterangepickerFilter( DateHelper::ALL)),
             (new OrderQueueOrderStatusFilter()),
         ];
     }

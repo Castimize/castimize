@@ -9,7 +9,9 @@
         "build-po-status-card": "cd nova-components/PoStatusCard && npm run dev",
         "build-po-status-card-prod": "cd nova-components/PoStatusCard && npm run prod",
         "build-select-manufacturer-with-overview": "cd nova-components/SelectManufacturerWithOverview && npm run dev",
-        "build-select-manufacturer-with-overview-prod": "cd nova-components/SelectManufacturerWithOverview && npm run prod"
+        "build-select-manufacturer-with-overview-prod": "cd nova-components/SelectManufacturerWithOverview && npm run prod",
+        "build-export-to-pdf": "cd nova-components/ExportToPdf && npm run dev",
+        "build-export-to-pdf-prod": "cd nova-components/ExportToPdf && npm run prod"
     },
     "devDependencies": {
         "axios": "^1.7.4",

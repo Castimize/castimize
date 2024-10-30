@@ -18,7 +18,7 @@ class DueDateDaterangepickerFilter extends Daterangepicker
     private string $column = 'due_date';
 
     public function __construct(
-        private string $default = Helper::TODAY,
+        private string $default = Helper::ALL,
         private string $orderByColumn = 'id',
         private string $orderByDir = 'asc',
     ) {
@@ -96,7 +96,7 @@ class DueDateDaterangepickerFilter extends Daterangepicker
         $this->minDate = $minDate;
 
         if ($this->maxDate && $this->minDate->gt($this->maxDate)) {
-            throw new Exception('Date range picker: minDate must be lower or equals than maxDate.');
+            throw new Exception(__('Date range picker: minDate must be lower or equals than maxDate.'));
         }
 
         return $this;
@@ -107,7 +107,7 @@ class DueDateDaterangepickerFilter extends Daterangepicker
         $this->maxDate = $maxDate;
 
         if ($this->minDate && $this->maxDate->lt($this->minDate)) {
-            throw new Exception('Date range picker: maxDate must be greater or equals than minDate.');
+            throw new Exception(__('Date range picker: maxDate must be greater or equals than minDate.'));
         }
 
         return $this;

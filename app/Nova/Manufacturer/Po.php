@@ -3,9 +3,9 @@
 namespace App\Nova\Manufacturer;
 
 use App\Nova\Actions\DownloadModelsAction;
-use App\Nova\Filters\DueDateDaterangepickerFilter;
+use App\Nova\Filters\ContractDateDaterangepickerFilter;
+use App\Nova\Filters\EntryDateDaterangepickerFilter;
 use App\Nova\Filters\MaterialFilter;
-use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Nova\Lenses\AtDc;
 use App\Nova\Lenses\AvailableForShipping;
@@ -16,7 +16,6 @@ use App\Nova\Resource;
 use App\Traits\Nova\CommonMetaDataTrait;
 use App\Traits\Nova\ManufacturerPOFieldsTrait;
 use App\Traits\Nova\OrderQueueStatusFieldTrait;
-use Carbon\Carbon;
 use Castimize\PoStatusCard\PoStatusCard;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -190,9 +189,8 @@ class Po extends Resource
     {
         return [
             (new MaterialFilter()),
-            (new OrderDateDaterangepickerFilter( DateHelper::ALL))
-                ->setMaxDate(Carbon::today()),
-            (new DueDateDaterangepickerFilter( DateHelper::ALL)),
+            (new EntryDateDaterangepickerFilter( DateHelper::ALL)),
+            (new ContractDateDaterangepickerFilter( DateHelper::ALL)),
             (new OrderQueueOrderStatusFilter()),
         ];
     }

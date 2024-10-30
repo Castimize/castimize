@@ -1,11 +1,13 @@
 <template>
     <div
+        id="po-status-card"
         class="grid gap-4 mb-4 lg:mb-0 items-center justify-between min-h-8"
         :class="`grid-cols-${this.card.statusesCount}`"
     >
         <Card
             v-for="(status, slug) in this.card.statuses"
             class="px-6 py-3"
+            :class="{ active: this.activeSlug(slug)}"
         >
             <a class="flex items-center justify-center" :href="`/admin/resources/pos/lens/${slug}`">
                 <span data-toggle="tooltip" data-placement="top" :title="status">
@@ -48,9 +50,14 @@ export default {
             this.totals = totals;
             setTimeout(this.getTotals, this.refreshInterval);
         },
+
+        activeSlug(slug) {
+            return this.card.activeSlug === slug;
+        },
     },
 
   mounted() {
+        console.log(this.card.activeSlug);
       this.statuses = this.card.statuses;
       this.refreshInterval = this.card.refreshIntervalSeconds;
       this.getTotals();
@@ -60,3 +67,8 @@ export default {
   },
 }
 </script>
+<style>
+#po-status-card .active {
+    background-color: rgb(21 94 117) !important;
+}
+</style>

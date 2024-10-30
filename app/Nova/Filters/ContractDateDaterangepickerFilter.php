@@ -9,13 +9,13 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Rpj\Daterangepicker\DateHelper as Helper;
 use Rpj\Daterangepicker\Daterangepicker;
 
-class CreatedAtDaterangepickerFilter extends Daterangepicker
+class ContractDateDaterangepickerFilter extends Daterangepicker
 {
     private Carbon|null $minDate = null;
     private Carbon|null $maxDate = null;
     private array|null $ranges = null;
 
-    private string $column = 'created_at';
+    private string $column = 'contract_date';
 
     public function __construct(
         private string $default = Helper::ALL,
@@ -39,7 +39,7 @@ class CreatedAtDaterangepickerFilter extends Daterangepicker
      */
     public function name()
     {
-        return __('Created at');
+        return __('Contract date');
     }
 
     /**

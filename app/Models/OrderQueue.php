@@ -286,7 +286,7 @@ class OrderQueue extends Model
     {
         $options = [];
         $orderQueues = self::with(['upload.material.materialGroup', 'order.orderQueues', 'orderQueueStatuses'])
-            ->whereHasLastOrderQueueStatus('in-queue')
+            ->whereHasLastOrderQueueStatus('available-for-shipping')
             ->whereNull('customer_shipment_id')
             ->get()
             ->sortBy('order.order_number')

@@ -19,6 +19,11 @@ class PoStatusCard extends Card
         return $this->withMeta(['statuses' => $statuses, 'statusesCount' => $count, 'statusesWidth' => (100 / $count)]);
     }
 
+    public function activeSlug(string $slug): PoStatusCard
+    {
+        return $this->withMeta(['activeSlug' => $slug]);
+    }
+
     public function refreshIntervalSeconds(int $seconds = 60): PoStatusCard
     {
         return $this->withMeta(['refreshIntervalSeconds' => $seconds]);
