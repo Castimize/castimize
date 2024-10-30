@@ -58,8 +58,6 @@ class AppServiceProvider extends ServiceProvider
                 ->withBrowsershot(function ($browsershot) {
                     $browsershot
                         ->setIncludePath('$PATH:/usr/bin')
-//                        ->setNodeBinary('/usr/bin/node')
-//                        ->setNpmBinary('/usr/bin/npm')
                         ->setChromePath('/usr/bin/chromium-browser')
                         ->setCustomTempPath(storage_path())
                         ->addChromiumArguments([

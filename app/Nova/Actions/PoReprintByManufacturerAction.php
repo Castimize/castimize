@@ -61,6 +61,7 @@ class PoReprintByManufacturerAction extends Action
              * @var $model OrderQueue
              */
             $model->reprint()->create([
+                'manufacturer_id' => auth()->user()->manufacturer->id,
                 'reprint_culprit_id' => 1, // ToDo: set culprit id of manufacturer
                 'reprint_reason_id' => $fields->reprint_reason_id,
                 'reason' => $fields->reason,

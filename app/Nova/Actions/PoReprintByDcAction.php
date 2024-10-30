@@ -61,6 +61,7 @@ class PoReprintByDcAction extends Action
              * @var $model OrderQueue
              */
             $model->reprint()->create([
+                'manufacturer_id' => $model->manufacturer_id,
                 'reprint_culprit_id' => $fields->reprint_culprint_id,
                 'reprint_reason_id' => $fields->reprint_reason_id,
                 'reason' => $fields->reason,

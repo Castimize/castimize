@@ -4,6 +4,7 @@ namespace App\Nova\Actions;
 
 use App\Models\OrderQueueStatus;
 use App\Models\OrderStatus;
+use App\Services\Admin\OrderQueuesService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -36,20 +37,15 @@ class DeclineRejectionAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
+        $orderQueuesService = new OrderQueuesService();
         // New line in order queue status with slug in_production
         foreach ($models as $model) {
-            $orderStatus = OrderStatus::where('slug', 'in-production')->first();
-            OrderQueueStatus::create([
-                'order_queue_id' => $model->order_queue_id,
-                'order_status_id' => $orderStatus->id,
-                'status' => $orderStatus->status,
-            ]);
-
             $model->declined_at = now();
             $model->save();
 
-            return ActionResponse::message(__('Rejection declined and put back in queue on status in-production'));
+            $orderQueuesService->setStatus($model->orderQueue, 'in-production');
         }
+        return ActionResponse::message(__('Selected rejections declined and PO put back in queue on status in-production'));
     }
 
     /**

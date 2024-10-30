@@ -196,8 +196,14 @@ class Rejection extends Resource
     public function actions(NovaRequest $request)
     {
         return [
-            (new AcceptRejectionAction()),
-            (new DeclineRejectionAction()),
+            AcceptRejectionAction::make()
+                ->confirmText(__('Are you sure you want to accept the rejection from the selected PO\'s?'))
+                ->confirmButtonText(__('Accept rejection'))
+                ->cancelButtonText(__('Cancel')),
+            DeclineRejectionAction::make()
+                ->confirmText(__('Are you sure you want to decline the rejection from the selected PO\'s?'))
+                ->confirmButtonText(__('Decline rejection'))
+                ->cancelButtonText(__('Cancel')),
         ];
     }
 }
