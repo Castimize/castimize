@@ -61,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
 //                        ->setNodeBinary('/usr/bin/node')
 //                        ->setNpmBinary('/usr/bin/npm')
                         ->setChromePath('/usr/bin/chromium-browser')
+                        ->setCustomTempPath(storage_path())
                         ->addChromiumArguments([
                             'headless=shell'
                         ]);
