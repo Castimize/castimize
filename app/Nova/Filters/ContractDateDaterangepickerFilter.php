@@ -85,7 +85,7 @@ class ContractDateDaterangepickerFilter extends Daterangepicker
         [$start, $end] = Helper::getParsedDatesGroupedRanges($this->default);
 
         if ($start && $end) {
-            return $start->format('Y-m-d').' to '.$end->format('Y-m-d');
+            return __(':startDate to :endDate', ['startDate' => $start->format('Y-m-d'), 'endDate' => $end->format('Y-m-d')]);
         }
 
         return null;
@@ -118,7 +118,6 @@ class ContractDateDaterangepickerFilter extends Daterangepicker
      */
     public function setRanges(array $ranges): self
     {
-        $result = [];
         $result = collect($ranges)->mapWithKeys(function (array $item, string $key) {
             return [$key => (collect($item)->map(function (Carbon $date) {
                 return $date->format('Y-m-d');

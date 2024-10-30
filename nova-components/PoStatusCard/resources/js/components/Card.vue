@@ -7,7 +7,7 @@
         <Card
             v-for="(status, slug) in this.card.statuses"
             class="px-6 py-3"
-            :class="{ active: this.activeSlug(slug)}"
+            :class="{ 'dark:active-dark active-light': this.activeSlug(slug)}"
         >
             <a class="flex items-center justify-center" :href="`/admin/resources/pos/lens/${slug}`">
                 <span data-toggle="tooltip" data-placement="top" :title="status">
@@ -67,8 +67,3 @@ export default {
   },
 }
 </script>
-<style>
-#po-status-card .active {
-    background-color: rgb(21 94 117) !important;
-}
-</style>

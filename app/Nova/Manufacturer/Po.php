@@ -189,8 +189,8 @@ class Po extends Resource
     {
         return [
             (new MaterialFilter()),
-            (new EntryDateDaterangepickerFilter( DateHelper::ALL)),
-            (new ContractDateDaterangepickerFilter( DateHelper::ALL)),
+            EntryDateDaterangepickerFilter::make(),
+            ContractDateDaterangepickerFilter::make(),
             (new OrderQueueOrderStatusFilter()),
         ];
     }

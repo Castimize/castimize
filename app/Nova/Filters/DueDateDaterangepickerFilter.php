@@ -85,7 +85,7 @@ class DueDateDaterangepickerFilter extends Daterangepicker
         [$start, $end] = Helper::getParsedDatesGroupedRanges($this->default);
 
         if ($start && $end) {
-            return $start->format('Y-m-d').' to '.$end->format('Y-m-d');
+            return __(':startDate to :endDate', ['startDate' => $start->format('Y-m-d'), 'endDate' => $end->format('Y-m-d')]);
         }
 
         return null;

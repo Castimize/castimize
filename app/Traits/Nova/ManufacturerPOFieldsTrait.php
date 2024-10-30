@@ -73,6 +73,10 @@ trait ManufacturerPOFieldsTrait
             })
                 ->sortable(),
 
+            Text::make(__('Purity mark'), function () {
+                return $this->upload->material->materialGroup->name === 'Gold & Silver' ? __('Yes') : __('No');
+            }),
+
             DateTime::make(__('Entry date'), 'created_at')
                 ->displayUsing(fn ($value) => $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value, config('app.timezone'))->setTimezone(auth()->user()->timezone)->format('c') : '')
                 ->sortable(),

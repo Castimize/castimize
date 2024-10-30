@@ -1,1 +1,8 @@
 /* Nova Card CSS */
+:is(.dark .dark\:active-dark) {
+    background-color: rgb(21 94 117) !important;
+}
+.active-light {
+    background-color: rgb(21 94 117) !important;
+    color: rgb(226 232 240) !important;
+}
