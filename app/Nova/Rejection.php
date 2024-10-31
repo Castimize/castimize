@@ -134,18 +134,18 @@ class Rejection extends Resource
             StatusField::make(__('Status'))
                 ->icons([
                     'x-circle' => $this->declined_at !== null,
-                    'check-circle' => $this->accepted_at !== null,
+                    'check-circle' => $this->approved_at !== null,
                 ])
                 ->tooltip([
                     'x-circle' => __('Declined at :date', ['date' => $this->declined_at]),
-                    'check-circle' => __('Accepted at :date', ['date' => $this->accepted_at]),
+                    'check-circle' => __('Accepted at :date', ['date' => $this->approved_at]),
                 ])
                 ->color([
                     'x-circle' => 'red-500',
                     'check-circle' => 'green-500',
                 ])
                 ->canSee(function () {
-                    return $this->resource->accepted_at !== null || $this->resource->declined_at !== null;
+                    return $this->resource->approved_at !== null || $this->resource->declined_at !== null;
                 }),
 
             Text::make(__('Reason'), 'reason_manufacturer'),
