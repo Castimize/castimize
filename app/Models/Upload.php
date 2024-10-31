@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
@@ -90,7 +91,7 @@ class Upload extends Model
     }
 
     /**
-     * Interact with  subtotal
+     * Interact with  otal
      */
     protected function total(): Attribute
     {
@@ -101,7 +102,7 @@ class Upload extends Model
     }
 
     /**
-     * Interact with  subtotal_tax
+     * Interact with  total_tax
      */
     protected function totalTax(): Attribute
     {
@@ -112,12 +113,42 @@ class Upload extends Model
     }
 
     /**
+     * Interact with  manufacturer_costs
+     */
+    protected function manufacturerCosts(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->orderQueue->manufacturer_costs,
+        );
+    }
+
+    /**
+     * Interact with  profit
+     */
+    protected function profit(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ($this->total - $this->orderQueue->manufacturer_costs) / 100,
+        );
+    }
+
+    /**
      * Interact with  status
      */
     protected function statusSlug(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->orderQueue?->getLastStatus()?->status_slug,
+            get: fn () => $this->orderQueue->getLastStatus()->slug,
+        );
+    }
+
+    /**
+     * Interact with  status
+     */
+    protected function statusCreatedAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->orderQueue->getLastStatus()->created_at,
         );
     }
 
@@ -137,7 +168,7 @@ class Upload extends Model
     protected function completedAt(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->orderQueue?->statuses?->last()->orderStatus?->slug === 'completed' ? $this->orderQueue?->statuses?->last()->orderStatus?->created_at : null,
+            get: fn ($value) => $this->status_slug === 'completed' ? $this->status_created_at : null,
         );
     }
 
@@ -176,8 +207,13 @@ class Upload extends Model
     /**
      * @return HasOne
      */
-    public function  orderQueue(): HasOne
+    public function orderQueue(): HasOne
     {
-        return $this->hasOne(OrderQueue::class);
+        return $this->hasOne(OrderQueue::class)->latestOfMany();
+    }
+
+    public function orderQueues(): HasMany
+    {
+        return $this->hasMany(OrderQueue::class);
     }
 }
