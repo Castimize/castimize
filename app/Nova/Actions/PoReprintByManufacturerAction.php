@@ -70,19 +70,18 @@ class PoReprintByManufacturerAction extends Action
             $orderQueuesService->setStatus($model, 'reprinted');
 
             $newOrderQueue = OrderQueue::create([
+                'manufacturer_id' => $model->manufacturer_id,
                 'upload_id' => $model->upload_id,
                 'order_id' => $model->upload->order_id,
                 'shipping_fee_id' => $model->shipping_fee_id,
-                'manufacturer_id' => $model->manufacturer_id,
                 'manufacturer_shipment_id' => $model->manufacturer_shipment_id,
                 'manufacturer_cost_id' => $model->manufacturer_cost_id,
-                'manufacturer_costs' => $model->manufacturer_costs,
-                'total' => $model->total,
-                'currency_code' => $model->currency_code,
                 'customer_shipment_id' => $model->customer_shipment_id,
                 'due_date' => $model->due_date,
                 'final_arrival_date' => $model->final_arrival_date,
                 'contract_date' => $model->contract_date,
+                'manufacturer_costs' => $model->manufacturer_costs,
+                'currency_code' => $model->currency_code,
             ]);
             $orderQueuesService->setStatus($newOrderQueue, 'in-queue');
         }

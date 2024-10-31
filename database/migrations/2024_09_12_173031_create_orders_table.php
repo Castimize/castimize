@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('status')->default('processing');
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
-            $table->string('email')->nullable();
+            $table->string('email')->nullable()->index();
             $table->string('billing_first_name')->nullable();
             $table->string('billing_last_name')->nullable();
             $table->string('billing_company')->nullable();
