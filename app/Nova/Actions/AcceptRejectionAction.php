@@ -40,7 +40,7 @@ class AcceptRejectionAction extends Action implements ShouldQueue
         $orders = [];
         foreach ($models as $model) {
             $model->note_castimize = $fields->note_castimize;
-            $model->accepted_at = now();
+            $model->approved_at = now();
             $model->save();
             if (!array_key_exists($model->order_id, $orders)) {
                 $orders[$model->order_id] = $model->order;
