@@ -278,7 +278,7 @@ class ShippingService
                 'exporter_reference' => $manufacturerShipment->id,
                 'importer_reference' => $orderNumber,
                 'currency' => $currency,
-                'eori_number' => strtoupper($manufacturerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
+                'eori_number' => $this->generalSettings->eoriNumber,
             ])
             ->createShipment();
         $shippoShipment = $this->_shippoService->getShipment();
