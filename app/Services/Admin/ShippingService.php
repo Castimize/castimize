@@ -196,7 +196,6 @@ class ShippingService
             ])
             ->createShipment();
         $shippoShipment = $this->_shippoService->getShipment();
-        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 
         if ($rate === null) {
