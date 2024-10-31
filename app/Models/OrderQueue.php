@@ -271,7 +271,7 @@ class OrderQueue extends Model
                 $ordersAllAtDc[$orderQueue->order_id] = $allAtDc;
             }
 
-            $label = sprintf('%s - %s', ($ordersAllAtDc[$orderQueue->order_id] ? 'V' : 'X'), $orderQueue->manufacturer_shipment_select_name);
+            $label = sprintf('%s - %s', ($ordersAllAtDc[$orderQueue->order_id] ? 'V' : 'X'), $orderQueue->customer_shipment_select_name);
 
             $options[] = [
                 'label' => $label,
