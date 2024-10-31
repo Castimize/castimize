@@ -43,7 +43,7 @@ class DeclineRejectionAction extends Action
             $model->declined_at = now();
             $model->save();
 
-            $orderQueuesService->setStatus($model->orderQueue, 'in-production');
+            $orderQueuesService->setStatus($model->orderQueue);
         }
         return ActionResponse::message(__('Selected rejections declined and PO put back in queue on status in-production'));
     }
