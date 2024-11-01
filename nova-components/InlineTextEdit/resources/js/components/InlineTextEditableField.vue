@@ -5,11 +5,22 @@
         @click.stop="e => !e.target.classList.contains('inline-icon')"
         @dblclick.stop.capture="startEditing"
     >
-        <template v-if="!editing">
+        <template v-if="!editing && !isIndex">
             <EditIcon @click.stop.capture="startEditing" />
 
             <div :style="contentStyle" v-if="!hasValue"><p>&mdash;</p></div>
-            <div :style="contentStyle" v-else-if="field.asHtml" v-html="value"></div>
+            <span :style="contentStyle" v-else class="whitespace-no-wrap">{{ value }}</span>
+        </template>
+        <template v-else-if="!editing && isIndex">
+            <EditIcon @click.stop.capture="startEditing" />
+
+            <div :style="contentStyle" v-if="!hasValue"><p>&mdash;</p></div>
+            <div :style="contentStyle"
+                 v-else-if="this.fieldValue.length > 50"
+                 v-tooltip="value"
+            >
+                {{ truncateString(value) }}
+            </div>
             <span :style="contentStyle" v-else class="whitespace-no-wrap">{{ value }}</span>
         </template>
 
@@ -36,7 +47,7 @@ import CancelIcon from '../icons/CancelIcon';
 import ConfirmIcon from '../icons/ConfirmIcon';
 
 export default {
-    props: ['resourceName', 'field', 'width'],
+    props: ['resourceName', 'field', 'width', 'isIndex'],
     components: { EditIcon, CancelIcon, ConfirmIcon },
 
     data: () => ({
@@ -69,6 +80,11 @@ export default {
         cancelEditing() {
             if (this.loading) return;
             this.editing = false;
+        },
+
+        truncateString (value, length = 50) {
+            return value.length <= length ?
+                value : value.substring(0, length) + "...";
         },
 
         async updateFieldValue() {

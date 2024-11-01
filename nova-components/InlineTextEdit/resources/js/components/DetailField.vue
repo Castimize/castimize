@@ -1,7 +1,7 @@
 <template>
     <PanelItem :field="field">
         <template #value>
-            <InlineTextEditableField :field="field" :resourceName="resourceName" :width="750" />
+            <InlineTextEditableField :field="field" :resourceName="resourceName" :width="750" :is-index="false" />
         </template>
     </PanelItem>
 </template>

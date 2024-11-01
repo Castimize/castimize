@@ -1,5 +1,5 @@
 <template>
-    <InlineTextEditableField :field="field" :resourceName="resourceName" :width="300" />
+    <InlineTextEditableField :field="field" :resourceName="resourceName" :width="300" is-index="true" />
 </template>
 
 <script>
