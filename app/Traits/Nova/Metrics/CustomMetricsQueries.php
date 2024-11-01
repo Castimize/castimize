@@ -9,9 +9,9 @@ trait CustomMetricsQueries
     public function defaultRanges(): array
     {
         return [
-            30 => Nova::__('30 Days'),
-            60 => Nova::__('60 Days'),
-            365 => Nova::__('365 Days'),
+            '30' => Nova::__('30 Days'),
+            '60' => Nova::__('60 Days'),
+            '365' => Nova::__('365 Days'),
             'TODAY' => Nova::__('Today'),
             'MTD' => Nova::__('Month To Date'),
             'QTD' => Nova::__('Quarter To Date'),
@@ -22,9 +22,9 @@ trait CustomMetricsQueries
     public function addRangeToQuery(string $column, $range, $query)
     {
         return match ($range) {
-            30 => $query->whereBetween($column, [now()->subDays(30), now()]),
-            60 => $query->whereBetween($column, [now()->subDays(60), now()]),
-            365 => $query->whereBetween($column, [now()->subDays(365), now()]),
+            '30' => $query->whereBetween($column, [now()->subDays(30), now()]),
+            '60' => $query->whereBetween($column, [now()->subDays(60), now()]),
+            '365' => $query->whereBetween($column, [now()->subDays(365), now()]),
             'TODAY' => $query->where($column, '>=', now()->format('Y-m-d 00:00:00')),
             'MTD' => $query->whereBetween($column, [now()->startOfMonth()->format('Y-m-d 00:00:00'), now()]),
             'QTD' => $query->whereBetween($column, [now()->startOfQuarter()->format('Y-m-d 00:00:00'), now()]),

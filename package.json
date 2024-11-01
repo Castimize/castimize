@@ -11,7 +11,9 @@
         "build-select-manufacturer-with-overview": "cd nova-components/SelectManufacturerWithOverview && npm run dev",
         "build-select-manufacturer-with-overview-prod": "cd nova-components/SelectManufacturerWithOverview && npm run prod",
         "build-inline-text-edit": "cd nova-components/InlineTextEdit && npm run dev",
-        "build-inline-text-edit-prod": "cd nova-components/InlineTextEdit && npm run prod"
+        "build-inline-text-edit-prod": "cd nova-components/InlineTextEdit && npm run prod",
+        "build-custom-styles": "cd nova-components/CustomStyles && npm run dev",
+        "build-custom-styles-prod": "cd nova-components/CustomStyles && npm run prod"
     },
     "devDependencies": {
         "axios": "^1.7.4",

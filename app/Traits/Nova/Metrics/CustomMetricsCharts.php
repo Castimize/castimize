@@ -2,6 +2,7 @@
 
 namespace App\Traits\Nova\Metrics;
 
+use App\Models\Order;
 use App\Services\Admin\CurrencyService;
 use Carbon\CarbonPeriod;
 use Coroowicaksono\ChartJsIntegration\LineChart;
@@ -14,7 +15,7 @@ trait CustomMetricsCharts
     public function getRevenueCostsProfitPerDayMetric(): LineChart
     {
         $dateRanges = [];
-        $period = CarbonPeriod::create(now()->startOfMonth()->format('Y-m-d'), now()->format('Y-m-d'));
+        $period = CarbonPeriod::create(now()->subDays(30)->format('Y-m-d'), now()->format('Y-m-d'));
 
         foreach ($period as $date) {
             $dateRanges[] = $date->format('Y-m-d');
@@ -100,11 +101,48 @@ trait CustomMetricsCharts
                 ],
             ])
             ->options([
+                'legend' => [
+                    'display' => true,
+                    'position' => 'right',
+                ],
                 'btnFilter' => true,
                 'btnFilterDefault' => 'MTD',
                 'btnFilterList' => $this->defaultRanges(),
                 'xaxis' => [
                     'categories' => $xAxis,
+                ],
+            ])
+            ->width('full');
+    }
+
+    public function getOrdersPerDayMetric(): LineChart
+    {
+        return (new LineChart())
+            ->title(__('Orders Per Day'))
+            ->model(Order::class)
+            ->animations([
+                'enabled' => true,
+                'easing' => 'easeinout',
+            ])
+            ->options([
+                'legend' => [
+                    'display' => true,
+                    'position' => 'right',
+                ],
+                'btnFilter' => true,
+                'btnFilterDefault' => '30',
+                'btnFilterList' => $this->defaultRanges(),
+                'uom' => 'day',
+                //'sum' => 'order_number',
+                'queryFilter' => [
+                    [
+                        'key' => 'paid_at',
+                        'operator' => 'IS NOT NULL'
+                    ],
+                    [
+                        'key' => 'deleted_at',
+                        'operator' => 'IS NULL',
+                    ],
                 ],
             ])
             ->width('full');

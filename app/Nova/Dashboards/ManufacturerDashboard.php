@@ -21,7 +21,7 @@ class ManufacturerDashboard extends Dashboard
     public function cards()
     {
         return [
-            new Help,
+            Help::make(),
         ];
     }
 

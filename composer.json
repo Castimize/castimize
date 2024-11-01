@@ -62,7 +62,8 @@
         "wesselperik/nova-status-field": "^2.1",
         "whitecube/nova-flexible-content": "^1.1",
         "wildside/userstamps": "^2.4",
-        "castimize/inline-text-edit": "@dev"
+        "castimize/inline-text-edit": "@dev",
+        "castimize/custom-styles": "@dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -140,6 +141,10 @@
         "3": {
             "type": "path",
             "url": "./nova-components/InlineTextEdit"
+        },
+        "4": {
+            "type": "path",
+            "url": "./nova-components/CustomStyles"
         }
     }
 }

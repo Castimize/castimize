@@ -22,14 +22,15 @@ class CastimizeDashboard extends Dashboard
     {
         if (auth()->user()->isSuperAdmin()) {
             return [
-            NewOrders::make()->defaultRange('MTD'),
-            NewOrdersRevenue::make()->defaultRange('MTD'),
-            NewOrdersProfit::make()->defaultRange('MTD'),
-            $this->getRevenueCostsProfitPerDayMetric(),
+                NewOrders::make()->defaultRange('30'),
+                NewOrdersRevenue::make()->defaultRange('30'),
+                NewOrdersProfit::make()->defaultRange('30'),
+                $this->getRevenueCostsProfitPerDayMetric(),
+                $this->getOrdersPerDayMetric(),
             ];
         }
         return [
-            new Help,
+            Help::make(),
         ];
     }
 

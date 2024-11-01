@@ -1,0 +1,15 @@
+/* Nova Asset CSS */
+[aria-label="Select Ranges"] {
+    height: 2rem !important;
+}
+[aria-label="Select Ranges"] + svg {
+    display: none;
+}
+
+div[dusk*="main"] select {
+    height: 2rem !important;
+}
+
+div[dusk*="main"] select + svg {
+    display: none;
+}

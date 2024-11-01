@@ -27,7 +27,11 @@ class NewOrders extends Value
      */
     public function calculate(NovaRequest $request)
     {
-        return $this->count($request, Order::whereNotNull('paid_at')->whereNull('deleted_at'));
+        return $this->count(
+            $request,
+            Order::whereNotNull('paid_at')
+                ->whereNull('deleted_at')
+        );
     }
 
     /**
@@ -38,9 +42,9 @@ class NewOrders extends Value
     public function ranges()
     {
         return [
-            30 => Nova::__('30 Days'),
-            60 => Nova::__('60 Days'),
-            365 => Nova::__('365 Days'),
+            '30' => Nova::__('30 Days'),
+            '60' => Nova::__('60 Days'),
+            '365' => Nova::__('365 Days'),
             'TODAY' => Nova::__('Today'),
             'MTD' => Nova::__('Month To Date'),
             'QTD' => Nova::__('Quarter To Date'),
