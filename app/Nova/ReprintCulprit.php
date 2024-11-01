@@ -25,7 +25,7 @@ class ReprintCulprit extends Resource
      *
      * @var string
      */
-    public static $title = 'reason';
+    public static $title = 'culprit';
 
     /**
      * The columns that should be searched.
