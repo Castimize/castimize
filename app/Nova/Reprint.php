@@ -65,11 +65,9 @@ class Reprint extends Resource
                 ->sortable(),
 
             BelongsTo::make(__('Reprint culprit'), 'reprintCulprit')
-                ->hideFromIndex()
                 ->sortable(),
 
             BelongsTo::make(__('Reprint reason'), 'reprintReason')
-                ->hideFromIndex()
                 ->sortable(),
 
             Textarea::make(__('Reason'), 'reason')
