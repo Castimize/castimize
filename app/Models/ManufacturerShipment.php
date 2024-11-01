@@ -21,6 +21,7 @@ class ManufacturerShipment extends Model
     use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
 
     public $selectedPOs;
+
     public $fromAddress = [];
     public $toAddress = [];
     public $parcel = [];
@@ -44,6 +45,7 @@ class ManufacturerShipment extends Model
         'total_costs',
         'currency_code',
         'type',
+        'handles_own_shipping',
         'tracking_number',
         'tracking_url',
         'tracking_manual',

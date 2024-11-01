@@ -11,9 +11,11 @@ use App\Services\Shippo\ShippoService;
 use Castimize\SelectManufacturerWithOverview\SelectManufacturerWithOverview;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Heading;
+use Laravel\Nova\Fields\Hidden;
 use Laravel\Nova\Fields\MorphMany;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
@@ -231,6 +233,16 @@ class Shipment extends Resource
                 ->placeholder(__('Select PO\'s'))
                 ->options(\App\Models\OrderQueue::getAvailableForShippingOrderQueueOptions())
                 ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders()),
+
+            Heading::make('<h3 class="font-normal text-xl">' . __('General') . '</h3>')->asHtml()
+                ->canSee(function ($request) use ($manufacturer) {
+                    return $manufacturer->can_handle_own_shipping;
+                }),
+
+            Boolean::make(__('Handle your own shipping'), 'handles_own_shipping')
+                ->canSee(function ($request) use ($manufacturer) {
+                    return $manufacturer->can_handle_own_shipping;
+                }),
 
             Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')->asHtml(),
 

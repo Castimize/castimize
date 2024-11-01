@@ -303,7 +303,7 @@ class ShippingService
         }
 
         $this->_shippoService = $this->_shippoService
-            ->createLabel($customerShipment->id, $rate['object_id']);
+            ->createLabel($manufacturerShipment->id, $rate['object_id']);
         $transaction = $this->_shippoService->getTransaction();
         Log::info(print_r($transaction, true));
         if ($transaction && $transaction['status'] === 'SUCCESS') {

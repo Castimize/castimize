@@ -22,6 +22,7 @@ return new class extends Migration
             $table->float('total_costs')->nullable();
             $table->string('currency_code')->default('USD');
             $table->integer('type')->nullable();
+            $table->boolean('handles_own_shipping')->default(0);
             $table->string('tracking_number', 500)->nullable();
             $table->string('tracking_url', 500)->nullable();
             $table->tinyText('tracking_manual')->nullable();

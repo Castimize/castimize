@@ -6,6 +6,7 @@ namespace App\Nova;
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Email;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
@@ -88,6 +89,9 @@ class Manufacturer extends Resource
 
             Email::make(__('Billing email'), 'billing_email')
                 ->sortable(),
+
+            Boolean::make(__('Can handle own shipping'), 'can_handle_own_shipping')
+                ->help(__('If active the manufacturer can handle their own shipping')),
 
             Textarea::make(__('Comments'), 'comments'),
 

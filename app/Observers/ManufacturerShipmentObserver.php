@@ -103,22 +103,24 @@ class ManufacturerShipmentObserver
                 $selectedPO->save();
             }
 
-            $shippingService = app(ShippingService::class);
-            $response = $shippingService->createShippoManufacturerShipment($manufacturerShipment);
+            if (!$manufacturerShipment->handles_own_shipping) {
+                $shippingService = app(ShippingService::class);
+                $response = $shippingService->createShippoManufacturerShipment($manufacturerShipment);
 
-            if ($response['transaction'] && $response['transaction']['status'] === 'SUCCESS') {
-                $manufacturerShipment->shippo_shipment_id = $response['shipment']['object_id'];
-                $manufacturerShipment->shippo_shipment_meta_data = $response['shipment'];
-                $manufacturerShipment->expected_delivery_date = $response['shipment']['eta'];
-                $manufacturerShipment->tracking_number = $response['transaction']['tracking_number'];
-                $manufacturerShipment->tracking_url = $response['transaction']['tracking_url_provider'];
-                $manufacturerShipment->shippo_transaction_id = $response['transaction']['object_id'];
-                $manufacturerShipment->shippo_transaction_meta_data = $response['transaction'];
-                $manufacturerShipment->label_url = $response['transaction']['label_url'];
-                $manufacturerShipment->commercial_invoice_url = $response['transaction']['commercial_invoice_url'];
-                $manufacturerShipment->qr_code_url = $response['transaction']['qr_code_url'];
+                if ($response['transaction'] && $response['transaction']['status'] === 'SUCCESS') {
+                    $manufacturerShipment->shippo_shipment_id = $response['shipment']['object_id'];
+                    $manufacturerShipment->shippo_shipment_meta_data = $response['shipment'];
+                    $manufacturerShipment->expected_delivery_date = $response['shipment']['eta'];
+                    $manufacturerShipment->tracking_number = $response['transaction']['tracking_number'];
+                    $manufacturerShipment->tracking_url = $response['transaction']['tracking_url_provider'];
+                    $manufacturerShipment->shippo_transaction_id = $response['transaction']['object_id'];
+                    $manufacturerShipment->shippo_transaction_meta_data = $response['transaction'];
+                    $manufacturerShipment->label_url = $response['transaction']['label_url'];
+                    $manufacturerShipment->commercial_invoice_url = $response['transaction']['commercial_invoice_url'];
+                    $manufacturerShipment->qr_code_url = $response['transaction']['qr_code_url'];
 
-                $manufacturerShipment->save();
+                    $manufacturerShipment->save();
+                }
             }
         }
     }

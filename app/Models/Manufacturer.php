@@ -64,6 +64,7 @@ class Manufacturer extends Model
         'visitor',
         'device_platform',
         'device_type',
+        'can_handle_own_shipping',
         'last_active',
     ];
 

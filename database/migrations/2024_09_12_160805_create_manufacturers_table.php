@@ -44,6 +44,7 @@ return new class extends Migration
             $table->string('visitor', 45)->nullable();
             $table->string('device_platform')->nullable();
             $table->string('device_type')->nullable();
+            $table->boolean('can_handle_own_shipping')->default(false);
             $table->timestamp('last_active')->nullable();
             $table->timestamps();
             $table->softDeletes();
