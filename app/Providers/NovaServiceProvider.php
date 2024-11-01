@@ -9,7 +9,8 @@ use App\Nova\Country;
 use App\Nova\Currency;
 use App\Nova\Customer;
 use App\Nova\CustomerShipment;
-use App\Nova\Dashboards\Main;
+use App\Nova\Dashboards\CastimizeDashboard;
+use App\Nova\Dashboards\ManufacturerDashboard;
 use App\Nova\Language;
 use App\Nova\LogisticsZone;
 use App\Nova\LogRequest;
@@ -65,7 +66,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         Nova::mainMenu(function (Request $request) {
             if ($request->user()->isManufacturer()) {
                 return [
-                    MenuSection::dashboard(Main::class)
+                    MenuSection::dashboard(ManufacturerDashboard::class)
                         ->icon('chart-bar'),
                     MenuSection::make(__('PO\'s'), [
                         MenuItem::resource(Manufacturer\Po::class),
@@ -80,7 +81,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 ];
             }
             return [
-                MenuSection::dashboard(Main::class)
+                MenuSection::dashboard(CastimizeDashboard::class)
                     ->icon('chart-bar'),
 
                 MenuSection::make(__('Customers'), [
@@ -243,7 +244,12 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     protected function dashboards()
     {
         return [
-            new Main,
+            CastimizeDashboard::make()->canSee(function ($request) {
+                return $request->user()->isBackendUser();
+            }),
+            ManufacturerDashboard::make()->canSee(function ($request) {
+                return $request->user()->isManufacturer();
+            }),
         ];
     }
 

@@ -2,24 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Requests\DeleteCustomerRequest;
-use App\Http\Requests\ShowCustomerWpRequest;
 use App\Http\Requests\ShowOrderWpRequest;
-use App\Http\Requests\StoreCustomerRequest;
-use App\Http\Requests\StoreOrderRequest;
-use App\Http\Resources\CustomerResource;
 use App\Http\Resources\OrderResource;
 use App\Models\Country;
-use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Order;
-use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrdersService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use JsonException;
 use Symfony\Component\HttpFoundation\Response;
 

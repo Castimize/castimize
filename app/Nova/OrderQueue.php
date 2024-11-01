@@ -2,7 +2,6 @@
 
 namespace App\Nova;
 
-use App\Nova\Actions\PoAcceptedAtDcStatusAction;
 use App\Nova\Actions\PoChangeStatusOrderManualAction;
 use App\Nova\Actions\ExportLineItemsV1Action;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
@@ -12,6 +11,7 @@ use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Traits\Nova\CommonMetaDataTrait;
 use App\Traits\Nova\OrderQueueStatusFieldTrait;
 use Carbon\Carbon;
+use Castimize\InlineTextEdit\InlineTextEdit;
 use Exception;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
@@ -20,6 +20,7 @@ use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 use Rpj\Daterangepicker\DateHelper;
@@ -134,17 +135,17 @@ class OrderQueue extends Resource
                 ->hideOnExport()
                 ->sortable(),
 
-            Text::make(__('Customer'), function () {
-                    return $this->order
-                        ? '<span><a class="link-default" href="/admin/resources/customers/' . $this->order->customer_id . '">' . $this->order->billing_name . '</a></span>'
+            Text::make(__('Customer'), function ($model) {
+                    return $model->order
+                        ? '<span><a class="link-default" href="/admin/resources/customers/' . $model->order->customer_id . '">' . $model->order->billing_name . '</a></span>'
                         : '';
                 })
                 ->asHtml()
                 ->hideOnExport()
                 ->sortable(),
 
-            Text::make(__('Country'), function () {
-                    return strtoupper($this->order->country->alpha2);
+            Text::make(__('Country'), function ($model) {
+                    return $model->order ? strtoupper($model->order->country->alpha2) : null;
                 })
                 ->hideOnExport()
                 ->sortable(),
@@ -162,11 +163,11 @@ class OrderQueue extends Resource
 
             $this->getStatusCheckField(),
 
-            Text::make(__('Days till TD'), function () {
-                    $lastStatus = $this->getLastStatus();
+            Text::make(__('Days till TD'), function ($model) {
+                    $lastStatus = $model->getLastStatus();
                     $dateNow = now();
                     if ($lastStatus && !$lastStatus?->orderStatus->end_status) {
-                        $targetDate = Carbon::parse($this->target_date);
+                        $targetDate = Carbon::parse($model->target_date);
                         if ($dateNow->gt($targetDate)) {
                             return '- ' . round($targetDate->diffInDays($dateNow));
                         }
@@ -178,11 +179,11 @@ class OrderQueue extends Resource
                 ->hideOnExport()
                 ->sortable(),
 
-            Text::make(__('Days till FAD'), function () {
-                    $lastStatus = $this->getLastStatus();
+            Text::make(__('Days till FAD'), function ($model) {
+                    $lastStatus = $model->getLastStatus();
                     $dateNow = now();
                     if ($lastStatus && !$lastStatus?->orderStatus->end_status) {
-                        $finalArrivalDate = Carbon::parse($this->final_arrival_date);
+                        $finalArrivalDate = Carbon::parse($model->final_arrival_date);
                         if ($dateNow->gt($finalArrivalDate)) {
                             return '- ' . round($finalArrivalDate->diffInDays($dateNow));
                         }
@@ -194,14 +195,14 @@ class OrderQueue extends Resource
                 ->hideOnExport()
                 ->sortable(),
 
-            Text::make(__('Order parts'), function () {
-                    return $this->order->order_parts;
+            Text::make(__('Order parts'), function ($model) {
+                    return $model->order->order_parts;
                 })
                 ->hideOnExport()
                 ->sortable(),
 
-            Text::make(__('Total'), function () {
-                    return $this->upload->total ? currencyFormatter((float)$this->upload->total, $this->upload->currency_code) : '';
+            Text::make(__('Total'), function ($model) {
+                    return $model->upload->total ? currencyFormatter((float)$model->upload->total, $model->upload->currency_code) : '';
                 })
                 ->hideOnExport()
                 ->sortable(),
@@ -216,14 +217,18 @@ class OrderQueue extends Resource
                 ->hideOnExport()
                 ->sortable(),
 
-            Text::make(__('Arrived at'), function () {
-                    return $this->order->arrived_at !== null ? Carbon::parse($this->order->arrived_at)->format('d-m-Y H:i:s') : '-';
+            Text::make(__('Arrived at'), function ($model) {
+                    return $model->order->arrived_at !== null ? Carbon::parse($model->order->arrived_at)->format('d-m-Y H:i:s') : '-';
                 })
                 ->hideOnExport()
                 ->sortable(),
 
             HasOne::make(__('Reprint'), 'reprint')
                 ->onlyOnDetail(),
+
+            InlineTextEdit::make(__('Remarks'), 'remarks')
+                ->help(__('Max 500 characters'))
+                ->modelClass(\App\Models\OrderQueue::class),
         ];
     }
 

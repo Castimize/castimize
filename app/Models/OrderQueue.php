@@ -51,6 +51,7 @@ class OrderQueue extends Model
         'currency_code',
         'total',
         'status_manual_changed',
+        'remarks',
     ];
 
     /**
@@ -116,7 +117,7 @@ class OrderQueue extends Model
     protected function targetDate(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->getLastStatus()->target_date,
+            get: fn () => $this->getLastStatus()?->target_date,
         );
     }
 

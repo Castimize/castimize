@@ -25,7 +25,8 @@ return new class extends Migration
             $table->dateTime('contract_date')->index()->nullable();
             $table->float('manufacturer_costs')->nullable();
             $table->string('currency_code')->default('USD');
-            $table->boolean('status_manual_changed')->default(false)->index()->nullable();
+            $table->boolean('status_manual_changed')->default(false)->index();
+            $table->string('remarks', 500)->nullable();
             $table->timestamps();
             $table->softDeletes();
 

@@ -4,6 +4,7 @@ namespace App\Traits\Nova;
 
 use App\Nova\ManufacturerShipment;
 use Carbon\Carbon;
+use Castimize\InlineTextEdit\InlineTextEdit;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\ID;
@@ -84,6 +85,10 @@ trait ManufacturerPOFieldsTrait
             DateTime::make(__('Contract date'), 'contract_date')
                 ->displayUsing(fn ($value) => $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value, config('app.timezone'))->setTimezone(auth()->user()->timezone)->format('c') : '')
                 ->sortable(),
+
+            InlineTextEdit::make(__('Remarks'), 'remarks')
+                ->help(__('Max 500 characters'))
+                ->modelClass(\App\Models\OrderQueue::class),
 
             HasOne::make(__('Manufacturer shipment'), 'manufacturerShipment', ManufacturerShipment::class),
         ];
