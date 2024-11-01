@@ -23,6 +23,7 @@ use App\Nova\OrderQueue;
 use App\Nova\Price;
 use App\Nova\Rejection;
 use App\Nova\RejectionReason;
+use App\Nova\Reprint;
 use App\Nova\ReprintCulprit;
 use App\Nova\ReprintReason;
 use App\Nova\Settings\Billing\AddressSettings;
@@ -88,6 +89,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Order::class),
                     MenuItem::resource(OrderQueue::class),
                     MenuItem::resource(Customer::class),
+                    MenuItem::resource(Reprint::class),
                     MenuItem::resource(Rejection::class),
                 ])->icon('clipboard-list')
                     ->collapsable()
