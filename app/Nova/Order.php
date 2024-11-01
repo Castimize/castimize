@@ -250,6 +250,8 @@ class Order extends Resource
 
             HasMany::make(__('Uploads'), 'uploads'),
 
+            HasMany::make(__('Reprints'), 'reprints'),
+
             HasMany::make(__('Rejections'), 'rejections'),
 
             new Panel(__('History'), $this->commonMetaData(false, false, false, false)),

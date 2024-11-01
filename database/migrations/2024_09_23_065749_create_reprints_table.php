@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('manufacturer_id')->index();
             $table->unsignedBigInteger('order_queue_id')->index();
+            $table->unsignedBigInteger('order_id')->index();
             $table->unsignedBigInteger('reprint_culprit_id')->index();
             $table->unsignedBigInteger('reprint_reason_id')->nullable()->index();
             $table->string('reason');
@@ -23,6 +24,7 @@ return new class extends Migration
 
             $table->foreign('manufacturer_id')->references('id')->on('manufacturers')->onDelete('cascade');
             $table->foreign('order_queue_id')->references('id')->on('order_queue')->onDelete('cascade');
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->foreign('reprint_culprit_id')->references('id')->on('reprint_culprits')->onDelete('cascade');
             $table->foreign('reprint_reason_id')->references('id')->on('reprint_reasons')->onDelete('set null');
         });

@@ -24,6 +24,7 @@ class Reprint extends Model
     protected $fillable = [
         'manufacturer_id',
         'order_queue_id',
+        'order_id',
         'reprint_culprit_id',
         'reprint_reason_id',
         'reason',
@@ -57,6 +58,14 @@ class Reprint extends Model
     public function orderQueue(): BelongsTo
     {
         return $this->belongsTo(OrderQueue::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     /**

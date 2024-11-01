@@ -386,6 +386,14 @@ class Order extends Model
     }
 
     /**
+     * @return HasMany
+     */
+    public function reprints(): HasMany
+    {
+        return $this->hasMany(Reprint::class);
+    }
+
+    /**
      * Get the days overdue
      * @return float|null
      */
