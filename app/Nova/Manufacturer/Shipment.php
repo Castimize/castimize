@@ -114,8 +114,11 @@ class Shipment extends Resource
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        $query->where('manufacturer_id', auth()->user()->manufacturer->id)
-            ->withCount('orderQueues as order_queues_count');
+        if (!$request->viaRelationship()) {
+            $query = $query->where('manufacturer_id', auth()->user()->manufacturer->id);
+        }
+
+            $query->withCount('orderQueues as order_queues_count');
         if (empty($request->get('orderBy'))) {
             return $query->orderBy(key(static::$sort), reset(static::$sort));
         }
@@ -132,9 +135,27 @@ class Shipment extends Resource
      */
     public static function detailQuery(NovaRequest $request, $query)
     {
-        $query->where('manufacturer_id', auth()->user()->manufacturer->id)
-            ->withCount('orderQueues as order_queues_count');
+        if (!$request->viaRelationship() && auth()->user()->isManufacturer()) {
+            $query = $query->where('manufacturer_id', auth()->user()->manufacturer->id);
+        }
+
+        $query->withCount('orderQueues as order_queues_count');
         return parent::detailQuery($request, $query);
+    }
+
+    /**
+     * Return the location to redirect the user after creation.
+     *
+     * @param NovaRequest $request
+     * @param Resource $resource
+     * @return string
+     */
+    public static function redirectAfterCreate(NovaRequest $request, $resource)
+    {
+        if ($request->viaRelationship()) {
+            return '/resources/' . app($request->viaResource())::uriKey() . '/' . $request->viaResourceId;
+        }
+        return '/resources/' . static::uriKey() . '/' . $resource->getKey();
     }
 
     /**
@@ -224,9 +245,13 @@ class Shipment extends Resource
      */
     public function fieldsForCreate(NovaRequest $request)
     {
+        if ($request->viaRelationship()) {
+            $manufacturer = $request->findParentResource($request->viaResourceId)->model();
+        } else {
+            $manufacturer = auth()->user()->manufacturer;
+        }
         $dcSettings = (new DcSettings());
         $parcelSettings = (new ParcelSettings());
-        $manufacturer = auth()->user()->manufacturer;
 
         return [
             SelectManufacturerWithOverview::make('PO\'s', 'selectedPOs')

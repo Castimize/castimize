@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 
+use App\Nova\Manufacturer\Shipment;
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
@@ -110,7 +111,7 @@ class Manufacturer extends Resource
 
             HasMany::make(__('Line items'), 'orderQueues', OrderQueue::class),
 
-            HasMany::make(__('Shipments'), 'shipments', ManufacturerShipment::class),
+            HasMany::make(__('Shipments'), 'shipments', Shipment::class),
 
             HasMany::make(__('Reprints'), 'reprints', Reprint::class),
 
@@ -134,7 +135,7 @@ class Manufacturer extends Resource
             Text::make(__('Name'), 'name')
                 ->sortable(),
 
-            Text::make(__('City'), 'city')
+            BelongsTo::make(__('City'), 'city')
                 ->onlyOnIndex()
                 ->sortable(),
 
