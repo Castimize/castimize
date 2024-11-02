@@ -318,14 +318,14 @@ class OrderQueue extends Model
     public function getOverviewItem(bool $isCustomerShipment = true): array
     {
         $customsItemSettings = app(CustomsItemSettings::class);
-        $netWeight = $this->upload->model_box_volume * $this->upload->material->density + $customsItemSettings->bag;
+        $netWeight = ($this->upload->model_volume_cc * $this->upload->material->density + $customsItemSettings->bag) * $this->upload->quantity;
         $costs = $isCustomerShipment ? (float)$this->upload->total : (float)$this->manufacturer_costs;
         $currencyCode = $isCustomerShipment ? $this->upload->currency_code : $this->currency_code;
         return [
             'material' => $this->upload->material_name,
             'id' => $this->id,
-            'parts' => $this->upload->model_parts,
-            'box_volume_cm3' => $this->upload->model_box_volume,
+            'parts' => $this->upload->model_parts * $this->upload->quantity,
+            'box_volume_cm3' => $this->upload->model_box_volume * $this->upload->quantity,
             'weight' => round($netWeight, 2),
             'costs' => currencyFormatter($costs, $currencyCode),
         ];
@@ -341,9 +341,9 @@ class OrderQueue extends Model
         $currencyCode = 'USD';
 
         foreach ($items as $item) {
-            $totalParts += $item->upload->model_parts;
-            $totalBoxVolume += $item->upload->model_box_volume;
-            $totalWeight += ($item->upload->model_box_volume * $item->upload->material->density + $customsItemSettings->bag);
+            $totalParts += ($item->upload->model_parts * $item->upload->quantity);
+            $totalBoxVolume += ($item->upload->model_box_volume * $item->upload->quantity);
+            $totalWeight += (($item->upload->model_volume_cc * $item->upload->material->density + $customsItemSettings->bag) * $item->upload->quantity);
             $totalCosts += $isCustomerShipment ? (float)$item->upload->total : (float)$item->manufacturer_costs;;
             $currencyCode = $isCustomerShipment ? $item->upload->currency_code : $item->currency_code;
         }

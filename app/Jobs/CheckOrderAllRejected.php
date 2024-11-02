@@ -43,10 +43,10 @@ class CheckOrderAllRejected implements ShouldQueue
         }
 
         $data = [
-            'amount' => $refundAmount,
+            'amount' => (string)$refundAmount,
         ];
 
-        Refund::create($this->order->wp_id, $data);
+        \Codexshaper\WooCommerce\Facades\Order::createRefund($this->order->wp_id, $data);
 
         // ToDo: If no mail in woocommerce send email
 

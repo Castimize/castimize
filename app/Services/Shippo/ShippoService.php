@@ -376,7 +376,7 @@ class ShippoService
             $description = $material->hs_code_description;
             $tariffNUmber = $material->hs_code;
         }
-        $netWeight = $upload->model_box_volume * $material->density + $this->customsItemSettings->bag;
+        $netWeight = ($upload->model_volume_cc * $material->density + $this->customsItemSettings->bag) * $upload->quantity;
         $customsItem = Shippo_CustomsItem::create([
             'description' => $description,
             'quantity' => $upload->quantity,
