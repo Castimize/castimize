@@ -27,6 +27,7 @@ class Upload extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'wp_id',
         'order_id',
         'material_id',
         'customer_id',

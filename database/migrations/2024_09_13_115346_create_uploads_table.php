@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('uploads', function (Blueprint $table) {
             $table->id();
+            $table->integer('wp_id')->nullable();
             $table->unsignedBigInteger('order_id')->nullable()->index();
             $table->unsignedBigInteger('material_id')->nullable()->index();
             $table->unsignedBigInteger('customer_id')->nullable()->index();

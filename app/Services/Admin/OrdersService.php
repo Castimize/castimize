@@ -196,6 +196,7 @@ class OrdersService
             }
 
             $upload = $order->uploads()->create([
+                'wp_id' => $lineItem['id'] ?? null,
                 'material_id' => $material->id,
                 'customer_id' => $customer->id,
                 'currency_id' => $currency->id,
