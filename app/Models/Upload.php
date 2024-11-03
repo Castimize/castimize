@@ -47,6 +47,8 @@ class Upload extends Model
         'subtotal_tax',
         'total',
         'total_tax',
+        'total_refund',
+        'total_refund_tax',
         'currency_code',
         'customer_lead_time',
         'meta_data',
@@ -67,6 +69,14 @@ class Upload extends Model
             'completed_at' => 'datetime',
             'meta_data' => AsArrayObject::class,
         ];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastStatus(): mixed
+    {
+        return $this->orderQueue->getLastStatus();
     }
 
     /**
@@ -114,6 +124,28 @@ class Upload extends Model
     }
 
     /**
+     * Interact with  total_refund
+     */
+    protected function totalRefund(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  total_refund_tax
+     */
+    protected function totalRefundTax(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
      * Interact with  manufacturer_costs
      */
     protected function manufacturerCosts(): Attribute
@@ -139,7 +171,7 @@ class Upload extends Model
     protected function statusSlug(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->orderQueue->getLastStatus()->slug,
+            get: fn () => $this->getLastStatus()->slug,
         );
     }
 
@@ -149,7 +181,7 @@ class Upload extends Model
     protected function statusCreatedAt(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->orderQueue->getLastStatus()->created_at,
+            get: fn () => $this->getLastStatus()->created_at,
         );
     }
 

@@ -39,6 +39,7 @@ class FixOrderLineItemWpId extends Command
 
         foreach ($orders as $order) {
             $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($order->wp_id);
+
             if ($wpOrder) {
                 foreach ($order->uploads as $upload) {
                     $lineItemWpId = null;

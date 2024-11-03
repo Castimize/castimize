@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\PoCanceledStatusAction;
 use App\Nova\Actions\UploadToOrderQueueAction;
 use App\Traits\Nova\CommonMetaDataTrait;
 use App\Traits\Nova\OrderQueueStatusFieldTrait;
@@ -80,6 +81,15 @@ class Upload extends Resource
             Number::make(__('Quantity'), 'quantity'),
 
             \Laravel\Nova\Fields\Currency::make(__('Price'), 'total')
+                ->locale(config('app.format_locale'))
+                ->dependsOn(
+                    ['currency_code'],
+                    function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
+                        $field->currency($this->currency_code);
+                    }
+                ),
+
+            \Laravel\Nova\Fields\Currency::make(__('Refund total'), 'total_refund')
                 ->locale(config('app.format_locale'))
                 ->dependsOn(
                     ['currency_code'],
@@ -211,7 +221,11 @@ class Upload extends Resource
     public function actions(NovaRequest $request)
     {
         return [
-            (new UploadToOrderQueueAction()),
+            PoCanceledStatusAction::make()
+                ->confirmText(__('Are you sure you want to cancel and refund the selected uploads?'))
+                ->confirmButtonText(__('Confirm'))
+                ->cancelButtonText(__('Cancel')),
+            //UploadToOrderQueueAction::make(),
         ];
     }
 }

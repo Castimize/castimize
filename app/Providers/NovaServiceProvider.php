@@ -228,8 +228,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         Gate::define('viewNova', function ($user) {
             if ($user->isSuperAdmin() ||
-                $user->hasRole('admin') ||
-                $user->hasRole('supplier') ||
+                $user->isBackendUser() ||
                 $user->hasRole('manufacturer')
             ) {
                 return true;

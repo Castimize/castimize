@@ -67,4 +67,43 @@ class OrderQueuesService
             'target_date' => $orderQueue->calculateTargetDate($orderStatusSlug),
         ]);
     }
+
+    public function getRefundLineItem(OrderQueue $orderQueue, float $total, $wpOrderLinItems): array
+    {
+        $refundTax = $this->getRefundTax($orderQueue, $wpOrderLinItems);
+        $refundLineItem = [
+            'id' => (string)$orderQueue->upload->wp_id,
+            'refund_total' => $total,
+        ];
+        if (count($refundTax) > 0) {
+            $refundLineItem['refund_tax'] = $refundTax;
+        }
+        return $refundLineItem;
+    }
+
+    /**
+     * @param mixed $orderQueue
+     * @param $lineItems
+     * @return array|array[]
+     */
+    public function getRefundTax(mixed $orderQueue, $lineItems): array
+    {
+        $refundTax = [];
+        if ($orderQueue->upload->total_tax > 0.00) {
+            foreach ($lineItems as $lineItem) {
+                if ($lineItem->id === $orderQueue->upload->wp_id) {
+                    $taxId = $lineItem->taxes[0]?->id;
+                    if ($taxId) {
+                        $refundTax = [
+                            [
+                                'id' => $taxId,
+                                'amount' => (float)$orderQueue->upload->total_tax,
+                            ]
+                        ];
+                    }
+                }
+            }
+        }
+        return $refundTax;
+    }
 }

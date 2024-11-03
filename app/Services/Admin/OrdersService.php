@@ -10,6 +10,7 @@ use App\Models\Material;
 use App\Models\Model;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\Woocommerce\WoocommerceApiService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -17,6 +18,13 @@ use Illuminate\Support\Facades\Storage;
 
 class OrdersService
 {
+    public OrderQueuesService $orderQueuesService;
+
+    public function __construct()
+    {
+        $this->orderQueuesService = new OrderQueuesService();
+    }
+
     /**
      * Store a order completely from WP API request
      * @param $request
@@ -59,6 +67,11 @@ class OrdersService
 
         $isPaid = $request->date_paid !== null;
         $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $request->date_created_gmt), 'GMT')?->setTimezone(env('APP_TIMEZONE'));
+
+        $taxPercentage = null;
+        if (count($request->tax_lines) > 0) {
+            $taxPercentage = $request->tax_lines[0]->rate_percent;
+        }
 
         $order = Order::create([
             'wp_id' => $request->id,
@@ -105,6 +118,7 @@ class OrdersService
             'production_cost' => null,
             'production_cost_tax' => null,
             'prices_include_tax' => $request->prices_include_tax ?? true,
+            'tax_percentage' => $taxPercentage,
             'currency_code' => $request->currency ?? 'USD',
             'payment_method' => $request->payment_method_title,
             'payment_issuer' => $request->payment_method,
@@ -232,5 +246,104 @@ class OrdersService
         $order->save();
 
         return $order;
+    }
+
+    public function handleRejectionsAndRefund(Order $order, $orderQueues)
+    {
+        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($order->wp_id);
+
+        $refundAll = true;
+        $refundAmount = 0.00;
+        $refundTaxAmount = 0.00;
+        $lineItems = [];
+        foreach ($orderQueues as $orderQueue) {
+            if (!$orderQueue->rejection) {
+                $refundAll = false;
+            } else {
+                $refundAmount += $orderQueue->rejection->amount;
+                $refundTaxAmount += $orderQueue->upload->total_tax;
+                $lineItems[] = $this->orderQueuesService->getRefundLineItem($orderQueue, $orderQueue->rejection->amount, $wpOrder['line_items']);
+                $orderQueue->upload->total_refund = $refundAmount;
+                $orderQueue->upload->total_refund_tax = $orderQueue->upload->total_tax;
+                $orderQueue->upload->save();
+            }
+        }
+
+        $cancelOrder = false;
+        if ($refundAll) {
+            $refundAmount = $order->total;
+            $refundTaxAmount = $order->total_tax;
+            $cancelOrder = true;
+        }
+
+        if ($refundAmount > 0.00) {
+            $order->total_refund = $refundAmount;
+            $order->total_refund_tax = $refundTaxAmount;
+            if ($cancelOrder) {
+                $order->status = 'canceled';
+            }
+            $order->save();
+        }
+
+        $refundOrder = (new WoocommerceApiService())->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
+
+        if ($cancelOrder) {
+            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, 'canceled');
+        }
+
+        return $refundOrder;
+    }
+
+    public function handleManualRefund(Order $order, float $refundAmount)
+    {
+        $order->has_manual_refund = true;
+        $order->total_refund = $order->refund_amount;
+        if ($order->total_tax > 0.00) {
+            $order->total_refund_tax = ($order->tax_percentage / 100) * $order->refund_amount;
+        }
+        $order->save();
+
+        return (new WoocommerceApiService())->refundOrder($order->wp_id, (string)$refundAmount);
+    }
+
+    public function handleRefund(Order $order, $orderQueues)
+    {
+        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($order->wp_id);
+
+        $refundAmount = 0.00;
+        $refundTaxAmount = 0.00;
+        $lineItems = [];
+        foreach ($orderQueues as $orderQueue) {
+            $refundAmount += $orderQueue->upload->total;
+            $refundTaxAmount += $orderQueue->upload->total_tax;
+            $lineItems[] = $this->orderQueuesService->getRefundLineItem($orderQueue, $orderQueue->upload->total, $wpOrder['line_items']);
+            $orderQueue->upload->total_refund = $refundAmount;
+            $orderQueue->upload->total_refund_tax = $orderQueue->upload->total_tax;
+            $orderQueue->upload->save();
+        }
+
+        $cancelOrder = false;
+        if (count($orderQueues) === $order->orderQueues->count()) {
+            $refundAmount = $order->total;
+            $refundTaxAmount = $order->total_tax;
+            $cancelOrder = true;
+        }
+
+        if ($refundAmount > 0.00) {
+            $order->total_refund = $refundAmount;
+            $order->total_refund_tax = $refundTaxAmount;
+            if ($cancelOrder) {
+                $order->status = 'canceled';
+            }
+            $order->save();
+        }
+
+        $refundOrder = (new WoocommerceApiService())->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
+
+        if ($cancelOrder) {
+            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, 'canceled');
+        }
+
+        return $refundOrder;
     }
 }

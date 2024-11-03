@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\OrderManualRefundAction;
 use App\Nova\Filters\CreatedAtDaterangepickerFilter;
 
 use App\Nova\Filters\StatusFilter;
@@ -348,7 +349,14 @@ class Order extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            (new OrderManualRefundAction($this->model()))
+                ->showInline()
+                ->exceptOnIndex()
+                ->confirmText(__('Are you sure you want to refund this order?'))
+                ->confirmButtonText(__('Confirm'))
+                ->cancelButtonText(__('Cancel')),
+        ];
     }
 
     /**

@@ -71,8 +71,10 @@ class Order extends Model
         'total',
         'total_tax',
         'total_refund',
+        'total_refund_tax',
         'production_cost',
         'production_cost_tax',
+        'tax_percentage',
         'currency_code',
         'order_parts',
         'payment_method',
@@ -86,6 +88,7 @@ class Order extends Model
         'fast_delivery_lead_time',
         'is_paid',
         'paid_at',
+        'has_manual_refund',
         'order_customer_lead_time',
         'due_date',
         'arrived_at',
@@ -105,6 +108,7 @@ class Order extends Model
             'fast_delivery_lead_time' => 'datetime',
             'is_paid' => 'boolean',
             'paid_at' => 'datetime',
+            'has_manual_refund' => 'boolean',
             'due_date' => 'datetime',
             'arrived_at' => 'datetime',
             'meta_data' => AsArrayObject::class,
@@ -215,6 +219,17 @@ class Order extends Model
      * Interact with  total_refund
      */
     protected function totalRefund(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with  total_refund_tax
+     */
+    protected function totalRefundTax(): Attribute
     {
         return Attribute::make(
             get: fn ($value) => $value / 100,

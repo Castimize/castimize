@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\PoCanceledStatusAction;
 use App\Nova\Actions\PoChangeStatusOrderManualAction;
 use App\Nova\Actions\ExportLineItemsV1Action;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
@@ -20,7 +21,6 @@ use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 use Rpj\Daterangepicker\DateHelper;
@@ -281,8 +281,18 @@ class OrderQueue extends Resource
     public function actions(NovaRequest $request)
     {
         return [
-            PoChangeStatusOrderManualAction::make(),
-            ExportLineItemsV1Action::make(),
+            PoCanceledStatusAction::make()
+                ->confirmText(__('Are you sure you want to cancel and refund the selected PO\'s?'))
+                ->confirmButtonText(__('Confirm'))
+                ->cancelButtonText(__('Cancel')),
+            PoChangeStatusOrderManualAction::make()
+                ->confirmText(__('Are you sure you want to change the status manually from the selected PO\'s?'))
+                ->confirmButtonText(__('Confirm'))
+                ->cancelButtonText(__('Cancel')),
+            ExportLineItemsV1Action::make()
+                ->confirmText(__('Are you sure you want to export the selected PO\'s?'))
+                ->confirmButtonText(__('Export'))
+                ->cancelButtonText(__('Cancel')),
         ];
     }
 }

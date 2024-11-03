@@ -6,11 +6,6 @@ use Codexshaper\WooCommerce\Facades\Order;
 
 class WoocommerceApiService
 {
-    /**
-     * @param int $wpOrderId
-     * @param string $status
-     * @return mixed
-     */
     public function updateOrderStatus(int $wpOrderId, string $status)
     {
         $data = [
@@ -18,5 +13,18 @@ class WoocommerceApiService
         ];
 
         return Order::update($wpOrderId, $data);
+    }
+
+    public function refundOrder(int $wpOrderId, string $refundAmount, array $lineItems = [])
+    {
+        $data = [
+            'amount' => $refundAmount,
+        ];
+
+        if (!empty($lineItems)) {
+            $data['line_items'] = $lineItems;
+        }
+
+        return Order::createRefund($wpOrderId, $data);
     }
 }

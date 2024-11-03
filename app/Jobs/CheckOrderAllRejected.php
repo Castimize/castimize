@@ -3,7 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\Order;
-use Codexshaper\WooCommerce\Facades\Refund;
+use App\Services\Admin\OrderQueuesService;
+use App\Services\Admin\OrdersService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Cache;
@@ -17,7 +18,6 @@ class CheckOrderAllRejected implements ShouldQueue
      */
     public function __construct(private Order $order)
     {
-        //
     }
 
     /**
@@ -28,25 +28,19 @@ class CheckOrderAllRejected implements ShouldQueue
         $cacheKey = sprintf('create-order-all-rejected-job-%s', $this->order->id);
         $orderQueues = $this->order->orderQueues()->with(['rejection', 'upload'])->get();
 
-        $refundAll = true;
-        $refundAmount = 0.00;
+        $orderQueuesService = new OrderQueuesService();
+        $toRejectOrderQueues = [];
         foreach ($orderQueues as $orderQueue) {
-            if (!$orderQueue->rejection) {
-                $refundAll = false;
-            } else {
-                $refundAmount = $orderQueue->rejection->amount;
+            if ($orderQueue->rejection) {
+                $toRejectOrderQueues[] = $orderQueue;
+                $orderQueuesService->setStatus($orderQueue, 'canceled');
             }
         }
 
-        if ($refundAll) {
-            $refundAmount = $this->order->total;
+        if (!$this->order->has_manual_refund) {
+            $ordersService = new OrdersService();
+            $ordersService->handleRejectionsAndRefund($this->order, $toRejectOrderQueues);
         }
-
-        $data = [
-            'amount' => (string)$refundAmount,
-        ];
-
-        \Codexshaper\WooCommerce\Facades\Order::createRefund($this->order->wp_id, $data);
 
         // ToDo: If no mail in woocommerce send email
 
