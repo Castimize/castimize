@@ -55,9 +55,10 @@ return new class extends Migration
             $table->float('discount_fee_tax')->nullable();
             $table->float('total')->nullable();
             $table->float('total_tax')->nullable();
+            $table->float('total_refund')->nullable();
+            $table->float('total_refund_tax')->nullable();
             $table->float('production_cost')->nullable();
             $table->float('production_cost_tax')->nullable();
-//            $table->float('logistic_cost')->nullable();
             $table->string('currency_code')->default('USD');
             $table->integer('order_parts')->default(1);
             $table->string('payment_method')->nullable();
@@ -71,6 +72,7 @@ return new class extends Migration
             $table->dateTime('fast_delivery_lead_time')->nullable();
             $table->boolean('is_paid')->default(0);
             $table->dateTime('paid_at')->nullable();
+            $table->boolean('has_manual_refund')->default(0);
             $table->integer('order_customer_lead_time')->default(1);
             $table->dateTime('due_date')->index()->nullable();
             $table->dateTime('arrived_at')->nullable();

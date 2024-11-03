@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Webhooks\Payments;
 
 use App\Http\Controllers\Webhooks\WebhookController;
+use App\Jobs\SetOrderPaid;
 use App\Jobs\UploadToOrderQueue;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
@@ -64,27 +65,8 @@ class StripeWebhookController extends WebhookController
      */
     protected function handlePaymentIntentSucceeded(PaymentIntent $paymentIntent): Response
     {
-        $order = Order::with(['uploads'])
-            ->where('order_number', $paymentIntent->metadata->order_id)
-            ->first();
-
-        if ($order !== null) {
-            $order->status = 'processing';
-            $order->is_paid = true;
-            $order->paid_at = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'));
-            $order->save();
-
-            foreach ($order->uploads as $upload) {
-                // Set upload to order queue
-                UploadToOrderQueue::dispatch($upload);
-            }
-
-            try {
-                LogRequestService::addResponse(request(), $order);
-            } catch (Throwable $exception) {
-                Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
-            }
-        }
+        SetOrderPaid::dispatch($paymentIntent)
+            ->onQueue('stripe')->delay(now()->addMinute());
 
         return $this->successMethod();
     }

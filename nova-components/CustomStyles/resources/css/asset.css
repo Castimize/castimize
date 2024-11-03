@@ -13,3 +13,11 @@ div[dusk*="main"] select {
 div[dusk*="main"] select + svg {
     display: none;
 }
+
+select[dusk*="action-select"] {
+    height: 2rem !important;
+}
+
+select[dusk*="action-select"] + svg {
+    display: none;
+}
