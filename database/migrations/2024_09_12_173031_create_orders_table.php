@@ -59,6 +59,7 @@ return new class extends Migration
             $table->float('total_refund_tax')->nullable();
             $table->float('production_cost')->nullable();
             $table->float('production_cost_tax')->nullable();
+            $table->float('tax_percentage')->nullable();
             $table->string('currency_code')->default('USD');
             $table->integer('order_parts')->default(1);
             $table->string('payment_method')->nullable();

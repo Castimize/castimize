@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
+use App\Services\Admin\OrderQueuesService;
 use App\Services\Admin\UploadsService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Stripe\PaymentIntent;
 use Throwable;
 
-class SetOrderPaid implements ShouldQueue
+class SetOrderCanceled implements ShouldQueue
 {
     use Queueable;
 
@@ -32,7 +33,8 @@ class SetOrderPaid implements ShouldQueue
      */
     public function handle(): void
     {
-        $order = Order::with(['uploads'])
+        $orderQueuesService = new OrderQueuesService();
+        $order = Order::with(['uploads', 'orderQueues'])
             ->where('order_number', $this->paymentIntent->metadata->order_id)
             ->first();
 
@@ -41,16 +43,13 @@ class SetOrderPaid implements ShouldQueue
         }
 
         try {
-            $uploadsService = new UploadsService();
-            $order->status = 'processing';
-            $order->is_paid = true;
-            $order->paid_at = Carbon::createFromTimestamp($this->paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'))->format('Y-m-d H:i:s');
+            $order->status = 'canceled';
             $order->save();
-
-            foreach ($order->uploads as $upload) {
-                // Set upload to order queue
-                $uploadsService->setUploadToOrderQueue($upload);
+            foreach ($order->orderQueues as $orderQueue) {
+                $orderQueuesService->setStatus($orderQueue, 'canceled');
+                $orderQueue->delete();
             }
+            $order->delete();
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             $this->fail($e->getMessage());

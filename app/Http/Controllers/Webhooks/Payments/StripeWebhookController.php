@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Webhooks\Payments;
 
 use App\Http\Controllers\Webhooks\WebhookController;
+use App\Jobs\SetOrderCanceled;
 use App\Jobs\SetOrderPaid;
 use App\Jobs\UploadToOrderQueue;
 use App\Models\Order;
@@ -49,6 +50,14 @@ class StripeWebhookController extends WebhookController
                 // Then define and call a method to handle the successful payment intent.
                 $this->handlePaymentIntentSucceeded($paymentIntent);
                 break;
+            case 'payment_intent.canceled':
+                /**
+                 * @var $paymentIntent PaymentIntent
+                 */
+                $paymentIntent = $event->data->object; // contains a \Stripe\PaymentIntent
+                // Then define and call a method to handle the successful payment intent.
+                $this->handlePaymentIntentCanceled($paymentIntent);
+                break;
             case 'charge.refunded':
                 $charge = $event->data->object; // contains a \Stripe\Charge
                 break;
@@ -65,7 +74,12 @@ class StripeWebhookController extends WebhookController
      */
     protected function handlePaymentIntentSucceeded(PaymentIntent $paymentIntent): Response
     {
-        SetOrderPaid::dispatch($paymentIntent)
+        $logRequestId = null;
+        if (request()->has('log_request_id')) {
+            $logRequestId = request()->log_request_id;
+        }
+
+        SetOrderPaid::dispatch($paymentIntent, $logRequestId)
             ->onQueue('stripe')->delay(now()->addMinute());
 
         return $this->successMethod();
@@ -77,21 +91,14 @@ class StripeWebhookController extends WebhookController
      */
     protected function handlePaymentIntentCanceled(PaymentIntent $paymentIntent): Response
     {
-        $order = Order::with(['uploads'])
-            ->where('order_number', $paymentIntent->metadata->order_id)
-            ->first();
-
-        if ($order !== null) {
-            $order->status = 'canceled';
-            $order->save();
-            $order->delete();
-
-            try {
-                LogRequestService::addResponse(request(), $order);
-            } catch (Throwable $exception) {
-                Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
-            }
+        $logRequestId = null;
+        if (request()->has('log_request_id')) {
+            $logRequestId = request()->log_request_id;
         }
+
+        SetOrderCanceled::dispatch($paymentIntent, $logRequestId)
+            ->onQueue('stripe')->delay(now()->addMinute());
+
         return $this->successMethod();
     }
 
@@ -103,6 +110,9 @@ class StripeWebhookController extends WebhookController
 
         if ($order !== null && $charge->status === 'succeeded' && $charge->refunded) {
             $order->total_refund = $charge->amount_refunded;
+            if ($order->total === $order->total_refund) {
+                $order->total_refund_tax = $order->total_tax;
+            }
             $order->save();
 
             try {
@@ -111,5 +121,7 @@ class StripeWebhookController extends WebhookController
                 Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
             }
         }
+
+        return $this->successMethod();
     }
 }
