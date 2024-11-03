@@ -9,10 +9,12 @@ use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Nova\TrackingStatus;
 use App\Services\Shippo\ShippoService;
 use Castimize\SelectManufacturerWithOverview\SelectManufacturerWithOverview;
+use Epartment\NovaDependencyContainer\NovaDependencyContainer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Heading;
 use Laravel\Nova\Fields\Hidden;
@@ -265,8 +267,53 @@ class Shipment extends Resource
                 }),
 
             Boolean::make(__('Handle your own shipping'), 'handles_own_shipping')
+                ->default(false)
                 ->canSee(function ($request) use ($manufacturer) {
                     return $manufacturer->can_handle_own_shipping;
+                }),
+
+            Text::make(__('Tracking number'), 'tracking_number')
+                ->hide()
+                ->rules('sometimes')
+                ->dependsOn('handles_own_shipping', function (Text $field, NovaRequest $request, FormData $formData) {
+                    if ($formData->boolean('handles_own_shipping') === true) {
+                        $field->show();
+                    } else {
+                        $field->hide();
+                    }
+                }),
+
+            Text::make(__('Tracking url'), 'tracking_url')
+                ->hide()
+                ->rules('sometimes')
+                ->dependsOn('handles_own_shipping', function (Text $field, NovaRequest $request, FormData $formData) {
+                    if ($formData->boolean('handles_own_shipping') === true) {
+                        $field->show();
+                    } else {
+                        $field->hide();
+                    }
+                }),
+
+            Text::make(__('Label url'), 'label_url')
+                ->hide()
+                ->rules('sometimes')
+                ->dependsOn('handles_own_shipping', function (Text $field, NovaRequest $request, FormData $formData) {
+                    if ($formData->boolean('handles_own_shipping') === true) {
+                        $field->show();
+                    } else {
+                        $field->hide();
+                    }
+                }),
+
+            Text::make(__('Commercial invoice url'), 'commercial_invoice_url')
+                ->hide()
+                ->rules('sometimes')
+                ->dependsOn('handles_own_shipping', function (Text $field, NovaRequest $request, FormData $formData) {
+                    if ($formData->boolean('handles_own_shipping') === true) {
+                        $field->show();
+                    } else {
+                        $field->hide();
+                    }
                 }),
 
             Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')->asHtml(),

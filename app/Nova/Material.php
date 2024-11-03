@@ -155,53 +155,53 @@ class Material extends Resource
 
             Number::make(__('Discount'), 'discount')
                 ->help(__('In percentage'))
-                ->sizeOnDetail('w-1/4')
+//                ->sizeOnDetail('w-1/4')
                 ->step(0.01)
                 ->onlyOnForms(),
 
             Number::make(__('Bulk discount 10'), 'bulk_discount_10')
                 ->help(__('In percentage, for :amount pieces', ['amount' => 10]))
-                ->sizeOnDetail('w-1/4')
+//                ->sizeOnDetail('w-1/4')
                 ->step(0.01)
                 ->onlyOnForms(),
 
             Number::make(__('Bulk discount 25'), 'bulk_discount_25')
                 ->help(__('In percentage, for :amount pieces', ['amount' => 25]))
-                ->sizeOnDetail('w-1/4')
+//                ->sizeOnDetail('w-1/4')
                 ->step(0.01)
                 ->onlyOnForms(),
 
             Number::make(__('Bulk discount 50'), 'bulk_discount_50')
                 ->help(__('In percentage, for :amount pieces', ['amount' => 50]))
-                ->sizeOnDetail('w-1/4')
+//                ->sizeOnDetail('w-1/4')
                 ->step(0.01)
                 ->onlyOnForms(),
 
             Text::make(__('Discount'), function () {
                 return $this->discount ? $this->discount . '%' : '';
             })
-                ->sizeOnDetail('w-1/4')
+//                ->sizeOnDetail('w-1/4')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Text::make(__('Bulk discount 10'), function () {
                 return $this->bulk_discount_10 ? $this->bulk_discount_10 . '%' : '';
             })
-                ->sizeOnDetail('w-1/4')
+//                ->sizeOnDetail('w-1/4')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Text::make(__('Bulk discount 25'), function () {
                 return $this->bulk_discount_25 ? $this->bulk_discount_25 . '%' : '';
             })
-                ->sizeOnDetail('w-1/4')
+//                ->sizeOnDetail('w-1/4')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Text::make(__('Bulk discount 50'), function () {
                 return $this->bulk_discount_50 ? $this->bulk_discount_50 . '%' : '';
             })
-                ->sizeOnDetail('w-1/4')
+//                ->sizeOnDetail('w-1/4')
                 ->hideByDefault()
                 ->exceptOnForms(),
 

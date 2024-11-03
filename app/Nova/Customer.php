@@ -133,17 +133,17 @@ class Customer extends Resource
 
             Text::make(__('IP address'), 'visitor')
                 ->readonly()
-                ->sizeOnDetail('w-1/3')
+//                ->sizeOnDetail('w-1/3')
                 ->onlyOnDetail(),
 
             Text::make(__('Platform'), 'device_platform')
                 ->readonly()
-                ->sizeOnDetail('w-1/3')
+//                ->sizeOnDetail('w-1/3')
                 ->onlyOnDetail(),
 
             Text::make(__('Type'), 'device_type')
                 ->readonly()
-                ->sizeOnDetail('w-1/3')
+//                ->sizeOnDetail('w-1/3')
                 ->onlyOnDetail(),
 
             DateTime::make(__('Last active'), 'last_active')

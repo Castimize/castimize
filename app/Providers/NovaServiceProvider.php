@@ -35,7 +35,7 @@ use App\Nova\Settings\Shipping\PickupSettings;
 use App\Nova\ShippingFee;
 use App\Nova\State;
 use App\Nova\User;
-use CodencoDev\NovaGridSystem\NovaGridSystem;
+//use CodencoDev\NovaGridSystem\NovaGridSystem;
 use Devloops\NovaSystemSettings\NovaSystemSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -265,7 +265,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             (new NovaPermissions())->canSee(function ($request) {
                 return $request->user()->isSuperAdmin();
             }),
-            new NovaGridSystem(),
+//            new NovaGridSystem(),
             new Tool(),
             NovaSystemSettings::make([
                 // General

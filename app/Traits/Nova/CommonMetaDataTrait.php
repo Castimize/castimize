@@ -20,28 +20,28 @@ trait CommonMetaDataTrait
     {
         $createdAt = DateTime::make(__('Created'), 'created_at')
             ->displayUsing(fn ($value) => $value ? $value->format('D d/m/Y, g:ia') : '')
-            ->sizeOnDetail('w-1/2')
+//            ->sizeOnDetail('w-1/2')
             ->hideWhenCreating()
             ->hideWhenUpdating()
-            ->stackedOnDetail(false)
+//            ->stackedOnDetail(false)
             ->sortable();
         if (!$showCreatedAtOnIndex) {
             $createdAt->onlyOnDetail();
         }
         $creator = BelongsTo::make(__('By'), 'creator', __CLASS__)
             ->displayUsing(fn ($user) => $user ? $user->name : '-')
-            ->sizeOnDetail('w-1/2')
+//            ->sizeOnDetail('w-1/2')
             ->hideWhenCreating()
             ->hideWhenUpdating()
-            ->stackedOnDetail(false)
+//            ->stackedOnDetail(false)
             ->sortable();
         if (!$showCreatorOnIndex) {
             $creator->onlyOnDetail();
         }
         $updatedAt = DateTime::make(__('Updated'), 'updated_at')
             ->displayUsing(fn ($value) => $value ? $value->format('D d/m/Y, g:ia') : '')
-            ->sizeOnDetail('w-1/2')
-            ->stackedOnDetail(false)
+//            ->sizeOnDetail('w-1/2')
+//            ->stackedOnDetail(false)
             ->sortable()
             ->exceptOnForms();
         if (!$showUpdatedAtOnIndex) {
@@ -49,10 +49,10 @@ trait CommonMetaDataTrait
         }
         $editor = BelongsTo::make(__('By'), 'editor', __CLASS__)
             ->displayUsing(fn ($user) => $user ? $user->name : '-')
-            ->sizeOnDetail('w-1/2')
+//            ->sizeOnDetail('w-1/2')
             ->hideWhenCreating()
             ->hideWhenUpdating()
-            ->stackedOnDetail(false)
+//            ->stackedOnDetail(false)
             ->sortable()
             ->exceptOnForms();
         if (!$showEditorOnIndex) {
@@ -65,18 +65,18 @@ trait CommonMetaDataTrait
             $editor,
             DateTime::make(__('Deleted'), 'deleted_at')
                 ->displayUsing(fn ($value) => $value ? $value->format('D d/m/Y, g:ia') : '')
-                ->sizeOnDetail('w-1/2')
+//                ->sizeOnDetail('w-1/2')
                 ->hideWhenCreating()
                 ->hideWhenUpdating()
-                ->stackedOnDetail(false)
+//                ->stackedOnDetail(false)
                 ->onlyOnDetail(),
 
             BelongsTo::make(__('By'), 'destroyer', __CLASS__)
                 ->displayUsing(fn ($user) => $user ? $user->name : '-')
-                ->sizeOnDetail('w-1/2')
+//                ->sizeOnDetail('w-1/2')
                 ->hideWhenCreating()
                 ->hideWhenUpdating()
-                ->stackedOnDetail(false)
+//                ->stackedOnDetail(false)
                 ->onlyOnDetail(),
 
             Trix::make(__('Changes'), function() {
