@@ -14,6 +14,10 @@ class LogRequestService
             $requestToLog = $request;
             $requestToLog->headers->remove('authorization');
 
+            if ($requestToLog->path() === 'api/v1/prices/calculate/shipping') {
+                return null;
+            }
+
             return LogRequest::create([
                 'path_info' => $requestToLog->path(),
                 'request_uri' => $requestToLog->getRequestUri(),
@@ -55,6 +59,20 @@ class LogRequestService
     {
         if ($request->has('log_request_id')) {
             $logRequest = LogRequest::find($request->log_request_id);
+            if ($logRequest) {
+                $logRequest->response = $response;
+                $logRequest->http_code = $httpCode;
+                $logRequest->save();
+                return $logRequest;
+            }
+        }
+        return null;
+    }
+
+    public static function addResponseById(?int $logRequestId, $response, int $httpCode = 200): LogRequest|null
+    {
+        if ($logRequestId) {
+            $logRequest = LogRequest::find($logRequestId);
             if ($logRequest) {
                 $logRequest->response = $response;
                 $logRequest->http_code = $httpCode;

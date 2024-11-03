@@ -54,14 +54,14 @@ class PricesApiController extends ApiController
         try {
             $shippingFee = (new CalculatePricesService())->calculateShippingFee($request);
         } catch (UnprocessableEntityHttpException $e) {
-            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
+//            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
             return response()->json([
                 'errors' => $e->getMessage(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $response = new CalculatedShippingFeeResource($shippingFee);
-        LogRequestService::addResponse($request, $response);
-        return $response;
+        return new CalculatedShippingFeeResource($shippingFee);
+//        LogRequestService::addResponse($request, $response);
+//        return $response;
     }
 }
