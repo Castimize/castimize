@@ -41,19 +41,18 @@ class SetOrderPaid implements ShouldQueue
         }
 
         try {
-            $uploadsService = new UploadsService();
             $order->status = 'processing';
             $order->is_paid = true;
             $order->paid_at = Carbon::createFromTimestamp($this->paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'))->format('Y-m-d H:i:s');
             $order->save();
 
+            $uploadsService = new UploadsService();
             foreach ($order->uploads as $upload) {
                 // Set upload to order queue
                 $uploadsService->setUploadToOrderQueue($upload);
             }
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
-            $this->fail($e->getMessage());
         }
 
         try {
