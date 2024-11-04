@@ -70,7 +70,7 @@ class OrdersService
 
         $taxPercentage = null;
         if (count($request->tax_lines) > 0) {
-            $taxPercentage = $request->tax_lines[0]->rate_percent;
+            $taxPercentage = $request->tax_lines[0]['rate_percent'];
         }
 
         $order = Order::create([
