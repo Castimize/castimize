@@ -38,6 +38,7 @@ class SetOrderPaid implements ShouldQueue
 
         if ($order === null) {
             $this->release($this->timeout);
+            return;
         }
 
         try {
