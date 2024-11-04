@@ -104,12 +104,6 @@ class Po extends Resource
         'orderQueueStatuses',
     ];
 
-    public function __construct($resource = null)
-    {
-        Nova::withBreadcrumbs(false);
-        parent::__construct($resource);
-    }
-
     /**
      * @param NovaRequest $request
      * @param $query

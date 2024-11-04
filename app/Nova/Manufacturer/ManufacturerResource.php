@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Nova;
+namespace App\Nova\Manufacturer;
 
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Nova;
 use Laravel\Nova\Resource as NovaResource;
 
-abstract class Resource extends NovaResource
+abstract class ManufacturerResource extends NovaResource
 {
     public function __construct($resource = null)
     {
-        if (auth()->user()->isBackendUser()) {
-            Nova::withBreadcrumbs();
-        }
+        Nova::withBreadcrumbs(false);
         parent::__construct($resource);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Nova\Manufacturer;
 
+use Alexwenzel\DependencyContainer\DependencyContainer;
 use App\Nova\OrderQueue;
 use App\Nova\Resource;
 use App\Nova\Settings\Shipping\DcSettings;
@@ -9,7 +10,6 @@ use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Nova\TrackingStatus;
 use App\Services\Shippo\ShippoService;
 use Castimize\SelectManufacturerWithOverview\SelectManufacturerWithOverview;
-use Epartment\NovaDependencyContainer\NovaDependencyContainer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Boolean;
@@ -93,12 +93,6 @@ class Shipment extends Resource
      */
     public static $pollingInterval = 60;
 
-    public function __construct($resource = null)
-    {
-        Nova::withBreadcrumbs(false);
-        parent::__construct($resource);
-    }
-
     public function authorizedToUpdate(Request $request)
     {
         return false;
@@ -120,7 +114,7 @@ class Shipment extends Resource
             $query = $query->where('manufacturer_id', auth()->user()->manufacturer->id);
         }
 
-            $query->withCount('orderQueues as order_queues_count');
+        $query->withCount('orderQueues as order_queues_count');
         if (empty($request->get('orderBy'))) {
             return $query->orderBy(key(static::$sort), reset(static::$sort));
         }
@@ -261,10 +255,14 @@ class Shipment extends Resource
                 ->options(\App\Models\OrderQueue::getAvailableForShippingOrderQueueOptions())
                 ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders()),
 
-            Heading::make('<h3 class="font-normal text-xl">' . __('General') . '</h3>')->asHtml()
+            Heading::make('<h3 class="font-normal text-xl">' . __('General') . '</h3>')
+                ->asHtml()
                 ->canSee(function ($request) use ($manufacturer) {
                     return $manufacturer->can_handle_own_shipping;
                 }),
+
+            Hidden::make('manufacturer_id')
+                ->default($manufacturer->id),
 
             Boolean::make(__('Handle your own shipping'), 'handles_own_shipping')
                 ->default(false)
@@ -272,146 +270,120 @@ class Shipment extends Resource
                     return $manufacturer->can_handle_own_shipping;
                 }),
 
-            Text::make(__('Tracking number'), 'tracking_number')
-                ->hide()
-                ->rules('sometimes')
-                ->dependsOn('handles_own_shipping', function (Text $field, NovaRequest $request, FormData $formData) {
-                    if ($formData->boolean('handles_own_shipping') === true) {
-                        $field->show();
-                    } else {
-                        $field->hide();
-                    }
-                }),
+            DependencyContainer::make([
+                Heading::make('<h3 class="font-normal text-xl">' . __('Tracking') . '</h3>')
+                    ->asHtml(),
 
-            Text::make(__('Tracking url'), 'tracking_url')
-                ->hide()
-                ->rules('sometimes')
-                ->dependsOn('handles_own_shipping', function (Text $field, NovaRequest $request, FormData $formData) {
-                    if ($formData->boolean('handles_own_shipping') === true) {
-                        $field->show();
-                    } else {
-                        $field->hide();
-                    }
-                }),
+                Text::make(__('Tracking number'), 'tracking_number'),
 
-            Text::make(__('Label url'), 'label_url')
-                ->hide()
-                ->rules('sometimes')
-                ->dependsOn('handles_own_shipping', function (Text $field, NovaRequest $request, FormData $formData) {
-                    if ($formData->boolean('handles_own_shipping') === true) {
-                        $field->show();
-                    } else {
-                        $field->hide();
-                    }
-                }),
+                Text::make(__('Tracking url'), 'tracking_url'),
 
-            Text::make(__('Commercial invoice url'), 'commercial_invoice_url')
-                ->hide()
-                ->rules('sometimes')
-                ->dependsOn('handles_own_shipping', function (Text $field, NovaRequest $request, FormData $formData) {
-                    if ($formData->boolean('handles_own_shipping') === true) {
-                        $field->show();
-                    } else {
-                        $field->hide();
-                    }
-                }),
+                Text::make(__('Label url'), 'label_url'),
 
-            Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')->asHtml(),
+                Text::make(__('Commercial invoice url'), 'commercial_invoice_url'),
+            ])->dependsOn('handles_own_shipping', true),
 
-            Text::make(__('Name'), 'from_address_name')
-                ->default($manufacturer->contact_name_1),
+            DependencyContainer::make([
+                Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')
+                    ->asHtml(),
 
-            Text::make(__('Company'), 'from_address_company')
-                ->default($manufacturer->name),
+                Text::make(__('Name'), 'from_address_name')
+                    ->default($manufacturer->contact_name_1),
 
-            Text::make(__('Address 1'), 'from_address_address_line1')
-                ->default($manufacturer->address_line1),
+                Text::make(__('Company'), 'from_address_company')
+                    ->default($manufacturer->name),
 
-            Text::make(__('Address 2'), 'from_address_address_line2')
-                ->default($manufacturer->address_line2),
+                Text::make(__('Address 1'), 'from_address_address_line1')
+                    ->default($manufacturer->address_line1),
 
-            Text::make(__('Postal code'), 'from_address_postal_code')
-                ->default($manufacturer->postal_code),
+                Text::make(__('Address 2'), 'from_address_address_line2')
+                    ->default($manufacturer->address_line2),
 
-            Text::make(__('City'), 'from_address_city')
-                ->default($manufacturer->city?->name),
+                Text::make(__('Postal code'), 'from_address_postal_code')
+                    ->default($manufacturer->postal_code),
 
-            Text::make(__('State'), 'from_address_state')
-                ->default($manufacturer->state?->name),
+                Text::make(__('City'), 'from_address_city')
+                    ->default($manufacturer->city?->name),
 
-            Text::make(__('Country'), 'from_address_country')
-                ->default($manufacturer->country->alpha2),
+                Text::make(__('State'), 'from_address_state')
+                    ->default($manufacturer->state?->name),
 
-            Text::make(__('Phone'), 'from_address_phone')
-                ->default($manufacturer->phone_1),
+                Text::make(__('Country'), 'from_address_country')
+                    ->default($manufacturer->country->alpha2),
 
-            Text::make(__('Email'), 'from_address_email')
-                ->default($manufacturer->email),
+                Text::make(__('Phone'), 'from_address_phone')
+                    ->default($manufacturer->phone_1),
 
-            Heading::make('<h3 class="font-normal text-xl">' . __('To address') . '</h3>')->asHtml(),
+                Text::make(__('Email'), 'from_address_email')
+                    ->default($manufacturer->email),
 
-            Text::make(__('Name'), 'to_address_name')
-                ->readonly()
-                ->default($dcSettings->name),
+                Heading::make('<h3 class="font-normal text-xl">' . __('To address') . '</h3>')
+                    ->asHtml(),
 
-            Text::make(__('Company'), 'to_address_company')
-                ->readonly()
-                ->default($dcSettings->company),
+                Text::make(__('Name'), 'to_address_name')
+                    ->readonly()
+                    ->default($dcSettings->name),
 
-            Text::make(__('Address 1'), 'to_address_address_line1')
-                ->readonly()
-                ->default($dcSettings->addressLine1),
+                Text::make(__('Company'), 'to_address_company')
+                    ->readonly()
+                    ->default($dcSettings->company),
 
-            Text::make(__('Address 2'), 'to_address_address_line2')
-                ->readonly()
-                ->default($dcSettings->addressLine2),
+                Text::make(__('Address 1'), 'to_address_address_line1')
+                    ->readonly()
+                    ->default($dcSettings->addressLine1),
 
-            Text::make(__('Postal code'), 'to_address_postal_code')
-                ->readonly()
-                ->default($dcSettings->postalCode),
+                Text::make(__('Address 2'), 'to_address_address_line2')
+                    ->readonly()
+                    ->default($dcSettings->addressLine2),
 
-            Text::make(__('City'), 'to_address_city')
-                ->readonly()
-                ->default($dcSettings->city),
+                Text::make(__('Postal code'), 'to_address_postal_code')
+                    ->readonly()
+                    ->default($dcSettings->postalCode),
 
-            Text::make(__('State'), 'to_address_state')
-                ->readonly()
-                ->default($dcSettings->state),
+                Text::make(__('City'), 'to_address_city')
+                    ->readonly()
+                    ->default($dcSettings->city),
 
-            Text::make(__('Country'), 'to_address_country')
-                ->readonly()
-                ->default($dcSettings->country),
+                Text::make(__('State'), 'to_address_state')
+                    ->readonly()
+                    ->default($dcSettings->state),
 
-            Text::make(__('Phone'), 'to_address_phone')
-                ->readonly()
-                ->default($dcSettings->phone),
+                Text::make(__('Country'), 'to_address_country')
+                    ->readonly()
+                    ->default($dcSettings->country),
 
-            Text::make(__('Email'), 'to_address_email')
-                ->readonly()
-                ->default($dcSettings->email),
+                Text::make(__('Phone'), 'to_address_phone')
+                    ->readonly()
+                    ->default($dcSettings->phone),
 
-            Heading::make('<h3 class="font-normal text-xl">' . __('Parcel settings') . '</h3>')->asHtml(),
+                Text::make(__('Email'), 'to_address_email')
+                    ->readonly()
+                    ->default($dcSettings->email),
 
-            Select::make(__('Distance unit'), 'parcel_distance_unit')
-                ->default($parcelSettings->distanceUnit)
-                ->options(ShippoService::DISTANCE_UNITS)
-                ->displayUsingLabels(),
+                Heading::make('<h3 class="font-normal text-xl">' . __('Parcel settings') . '</h3>')
+                    ->asHtml(),
 
-            Number::make(__('Length'), 'parcel_length')
-                ->default($parcelSettings->length),
+                Select::make(__('Distance unit'), 'parcel_distance_unit')
+                    ->default($parcelSettings->distanceUnit)
+                    ->options(ShippoService::DISTANCE_UNITS)
+                    ->displayUsingLabels(),
 
-            Number::make(__('Width'), 'parcel_width')
-                ->default($parcelSettings->width),
+                Number::make(__('Length'), 'parcel_length')
+                    ->default($parcelSettings->length),
 
-            Number::make(__('Height'), 'parcel_height')
-                ->default($parcelSettings->height),
+                Number::make(__('Width'), 'parcel_width')
+                    ->default($parcelSettings->width),
 
-            Select::make(__('Mass unit'), 'parcel_mass_unit')
-                ->default($parcelSettings->massUnit)
-                ->options(ShippoService::MASS_UNITS)->displayUsingLabels(),
+                Number::make(__('Height'), 'parcel_height')
+                    ->default($parcelSettings->height),
 
-            Number::make(__('Weight'), 'parcel_weight')
-                ->default($parcelSettings->weight),
+                Select::make(__('Mass unit'), 'parcel_mass_unit')
+                    ->default($parcelSettings->massUnit)
+                    ->options(ShippoService::MASS_UNITS)->displayUsingLabels(),
+
+                Number::make(__('Weight'), 'parcel_weight')
+                    ->default($parcelSettings->weight),
+            ])->dependsOn('handles_own_shipping', false),
         ];
     }
 

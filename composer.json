@@ -11,6 +11,7 @@
         "php": "^8.2",
         "ext-zip": "*",
         "abordage/nova-html-card": "^0.3.1",
+        "alexwenzel/nova-dependency-container": "^1.12",
         "ashallendesign/laravel-exchange-rates": "^7.6",
         "castimize/custom-styles": "@dev",
         "castimize/inline-text-edit": "@dev",

@@ -53,12 +53,6 @@ class Profile extends Resource
         'id' => 'desc',
     ];
 
-    public function __construct($resource = null)
-    {
-        Nova::withBreadcrumbs(false);
-        parent::__construct($resource);
-    }
-
     /**
      * Get the fields displayed by the resource.
      *

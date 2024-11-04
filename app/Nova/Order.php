@@ -407,31 +407,31 @@ class Order extends Resource
 
             // Form fields
             Text::make(__('Billing first name'), 'billing_first_name')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Billing last name'), 'billing_last_name')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Billing company'), 'billing_company')
-                ->sizeOnForms('w-full')
+//                ->sizeOnForms('w-full')
                 ->onlyOnForms(),
 
             Text::make(__('Billing address line 1'), 'billing_address_line1')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Billing address line 2'), 'billing_address_line2')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Billing postal code'), 'billing_postal_code')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Billing city'), 'billing_city')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Billing state'), 'billing_state'),
@@ -471,31 +471,31 @@ class Order extends Resource
 
             // Form fields
             Text::make(__('Shipping first name'), 'shipping_first_name')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Shipping last name'), 'shipping_last_name')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Shipping company'), 'shipping_company')
-                ->sizeOnForms('w-full')
+//                ->sizeOnForms('w-full')
                 ->onlyOnForms(),
 
             Text::make(__('Shipping address line 1'), 'shipping_address_1')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Shipping address line 2'), 'shipping_address_2')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Shipping postal code'), 'shipping_postal_code')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Shipping city'), 'shipping_city')
-                ->sizeOnForms('w-1/2')
+//                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
             Text::make(__('Shipping state'), 'shipping_state'),

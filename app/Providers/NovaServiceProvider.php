@@ -62,7 +62,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         parent::boot();
 
-        Nova::withBreadcrumbs();
+//        Nova::withBreadcrumbs();
 
         Nova::mainMenu(function (Request $request) {
             if ($request->user()->isManufacturer()) {
