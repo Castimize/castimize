@@ -117,12 +117,11 @@ class CustomersService
         }
 
         $vatNumber = null;
-        foreach ($wpCustomer['meta_data'] as $orderMetaData) {
-            if ($orderMetaData->key === 'billing_eu_vat_number') {
-                $vatNumber = $orderMetaData->value;
+        foreach ($wpCustomer['meta_data'] as $metaData) {
+            if ($metaData->key === 'billing_eu_vat_number' && !empty($metaData->value)) {
+                $vatNumber = $metaData->value;
             }
         }
-
 
         $customer = Customer::create([
             'country_id' => $country->id,
