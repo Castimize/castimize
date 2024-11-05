@@ -17,6 +17,10 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class PricesApiController extends ApiController
 {
+    public function __construct(private ModelsService $modelsService, private CalculatePricesService $calculatePricesService)
+    {
+    }
+
     /**
      * @param Request $request
      * @return JsonResponse|CalculatedPriceResource
@@ -35,7 +39,7 @@ class PricesApiController extends ApiController
         }
 
         if ($request->has('file_name', 'original_file_name') && $request->get('file_name') !== null && $request->get('original_file_name') !== null) {
-            (new ModelsService())->storeModelFromApi($request);
+            $this->modelsService->storeModelFromApi($request);
         }
 
         $response = new CalculatedPriceResource($price);
@@ -52,7 +56,7 @@ class PricesApiController extends ApiController
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         try {
-            $shippingFee = (new CalculatePricesService())->calculateShippingFee($request);
+            $shippingFee = $this->calculatePricesService->calculateShippingFee($request);
         } catch (UnprocessableEntityHttpException $e) {
 //            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
             return response()->json([

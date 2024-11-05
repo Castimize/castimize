@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Requests\ShowOrderWpRequest;
 use App\Http\Resources\OrderResource;
+use App\Jobs\CreateOrderFromWp;
 use App\Models\Country;
 use App\Models\Material;
 use App\Models\Order;
@@ -84,25 +85,20 @@ class OrdersApiController extends ApiController
         return response()->json($response);
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function storeOrderWp(Request $request): JsonResponse
     {
-        $order = Order::where('wp_id', $request->id)->first();
-        if ($order === null) {
-            $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
-            if ($wpOrder === null) {
-                LogRequestService::addResponse($request, ['message' => '404 Not found WpOrder'], 404);
-                abort(Response::HTTP_NOT_FOUND, '404 Not found');
-            }
-            $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+        $logRequestId = null;
+        if ($request->has('log_request_id')) {
+            $logRequestId = $request->log_request_id;
         }
 
-        $response = new OrderResource($order);
-        LogRequestService::addResponse($request, $response);
-        return $response->response()
+        CreateOrderFromWp::dispatch($request->id, $logRequestId);
+
+        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
+        $response = $wpOrder;
+        LogRequestService::addResponse($request, $response->toArray());
+        return response()
+            ->json($response)
             ->setStatusCode(Response::HTTP_CREATED);
     }
 

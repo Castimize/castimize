@@ -55,8 +55,6 @@ class CustomersApiController extends ApiController
      */
     public function storeCustomerWp(Request $request): JsonResponse
     {
-        $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($request->id);
-        dd($wpCustomer);
         $customer = $this->customersService->storeCustomerFromWpCustomer($wpCustomer);
 
         $response = new CustomerResource($customer);
