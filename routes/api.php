@@ -28,7 +28,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             // Orders
             Route::post('orders/calculate-expected-delivery-date', 'OrdersApiController@calculateExpectedDeliveryDate')->name('api.orders.calculate-expected-delivery-date');
             Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');
-            Route::get('orders/{order}', 'OrdersApiController@show')->name('api.orders.show');
+            Route::get('orders/{order_number}', 'OrdersApiController@show')->name('api.orders.show');
 
             // Prices
             Route::post('prices/calculate', 'PricesApiController@calculatePrice')->name('api.prices.calculate');

@@ -17,13 +17,23 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OrdersApiController extends ApiController
 {
+    public function __construct(protected OrdersService $ordersService)
+    {
+    }
+
     /**
-     * @param Order $order
+     * @param int $orderNumber
      * @return OrderResource
      */
-    public function show(Order $order): OrderResource
+    public function show(int $orderNumber): OrderResource
     {
-        abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('viewOrder'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $order = Order::where('order_number', $orderNumber)->first();
+        if ($order === null) {
+            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
 
         $response = new OrderResource($order);
         LogRequestService::addResponse(request(), $response);
@@ -82,7 +92,12 @@ class OrdersApiController extends ApiController
     {
         $order = Order::where('wp_id', $request->id)->first();
         if ($order === null) {
-            $order = (new OrdersService())->storeOrderWpFromApi($request);
+            $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
+            if ($wpOrder === null) {
+                LogRequestService::addResponse($request, ['message' => '404 Not found WpOrder'], 404);
+                abort(Response::HTTP_NOT_FOUND, '404 Not found');
+            }
+            $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
         }
 
         $response = new OrderResource($order);
@@ -99,7 +114,7 @@ class OrdersApiController extends ApiController
     {
         $order = Order::where('wp_id', $request->id)->first();
         if ($order === null) {
-            $order = (new OrdersService())->storeOrderWpFromApi($request);
+            $order = (new OrdersService())->storeOrderFromWpApi($request);
         }
 
         $response = new OrderResource($order);

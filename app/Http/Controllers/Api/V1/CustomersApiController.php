@@ -16,6 +16,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CustomersApiController extends ApiController
 {
+    public function __construct(protected CustomersService $customersService)
+    {
+    }
+
     /**
      * @param Customer $customer
      * @return CustomerResource
@@ -51,7 +55,9 @@ class CustomersApiController extends ApiController
      */
     public function storeCustomerWp(Request $request): JsonResponse
     {
-        $customer = (new CustomersService())->storeCustomerFromWpApi($request);
+        $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($request->id);
+        dd($wpCustomer);
+        $customer = $this->customersService->storeCustomerFromWpCustomer($wpCustomer);
 
         $response = new CustomerResource($customer);
         LogRequestService::addResponse($request, $response);
