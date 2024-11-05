@@ -18,13 +18,16 @@ use Illuminate\Support\Facades\Storage;
 
 class OrdersService
 {
-    public CustomersService $customersService;
-    public OrderQueuesService $orderQueuesService;
+    private CustomersService $customersService;
+    private OrderQueuesService $orderQueuesService;
+    private WoocommerceApiService $woocommerceApiService;
+
 
     public function __construct()
     {
         $this->customersService = new CustomersService();
         $this->orderQueuesService = new OrderQueuesService();
+        $this->woocommerceApiService = new WoocommerceApiService();
     }
 
     public function storeOrderFromWpOrder($wpOrder)
@@ -407,10 +410,10 @@ class OrdersService
             $order->save();
         }
 
-        $refundOrder = (new WoocommerceApiService())->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
+        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
 
         if ($cancelOrder) {
-            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, 'canceled');
+            $this->woocommerceApiService->updateOrderStatus($order->wp_id, 'canceled');
         }
 
         return $refundOrder;

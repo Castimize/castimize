@@ -76,7 +76,7 @@ class OrderQueuesService
             'refund_total' => $total,
         ];
         if (count($refundTax) > 0) {
-            $refundLineItem['refund_tax'] = $refundTax;
+            //$refundLineItem['refund_tax'] = $refundTax;
         }
         return $refundLineItem;
     }
@@ -96,7 +96,7 @@ class OrderQueuesService
                     if ($taxId) {
                         $refundTax = [
                             [
-                                'id' => $taxId,
+                                'id' => (string)$taxId,
                                 'amount' => (float)$orderQueue->upload->total_tax,
                             ]
                         ];
