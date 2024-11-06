@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
+use App\Services\Admin\OrdersService;
 use App\Services\Admin\UploadsService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,12 +20,14 @@ class SetOrderPaid implements ShouldQueue
     public $tries = 5;
     public $timeout = 120;
 
+    private OrdersService $ordersService;
+
     /**
      * Create a new job instance.
      */
     public function __construct(public PaymentIntent $paymentIntent, public ?int $logRequestId = null)
     {
-        //
+        $this->ordersService = new OrdersService();
     }
 
     /**
@@ -32,16 +35,19 @@ class SetOrderPaid implements ShouldQueue
      */
     public function handle(): void
     {
-        $order = Order::with(['uploads'])
-            ->where('order_number', $this->paymentIntent->metadata->order_id)
-            ->first();
-
-        if ($order === null) {
-            $this->release($this->timeout);
-            return;
-        }
-
         try {
+            $order = Order::with(['uploads'])
+                ->where('wp_id', $this->paymentIntent->metadata->order_id)
+                ->first();
+
+            if ($order === null) {
+                $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($this->paymentIntent->metadata->order_id);
+                if ($wpOrder === null) {
+                    return;
+                }
+                $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+            }
+
             $order->status = 'processing';
             $order->is_paid = true;
             $order->paid_at = Carbon::createFromTimestamp($this->paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'))->format('Y-m-d H:i:s');
