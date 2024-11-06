@@ -110,12 +110,18 @@ class OrdersApiController extends ApiController
     {
         $order = Order::where('wp_id', $request->id)->first();
         if ($order === null) {
-            $order = (new OrdersService())->storeOrderFromWpApi($request);
+            $logRequestId = null;
+            if ($request->has('log_request_id')) {
+                $logRequestId = $request->log_request_id;
+            }
+            CreateOrderFromWp::dispatch($request->id, $logRequestId);
         }
 
-        $response = new OrderResource($order);
-        LogRequestService::addResponse($request, $response);
-        return $response->response()
+        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
+        $response = $wpOrder;
+        LogRequestService::addResponse($request, $response->toArray());
+        return response()
+            ->json($response)
             ->setStatusCode(Response::HTTP_CREATED);
     }
 }
