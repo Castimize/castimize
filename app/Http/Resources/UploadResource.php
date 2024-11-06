@@ -17,10 +17,11 @@ class UploadResource extends JsonResource
     {
         $thumb = sprintf('%s.thumb.png', str_replace('_resized', '', $this->file_name));
         $metaData = $this->meta_data;
+
         if ($metaData) {
             for ($i = 0, $iMax = count($metaData); $i < $iMax; $i++) {
-                if ($metaData[$i]['key'] === 'pa_p3d_scale') {
-                    [$value, $n] = explode(' (', str_replace('&times;', '', $metaData[$i]['value']));
+                if ($metaData[$i]['key'] === 'pa_p3d_scale' && array_key_exists('vakue', $metaData[$i])) {
+                    [$value, $n] = explode(' (', str_replace(['&times;', ')'], ['x', ''], $metaData[$i]['value']));
                     $metaData[$i]['value'] = $value;
                 }
             }
