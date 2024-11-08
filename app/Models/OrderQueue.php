@@ -366,7 +366,7 @@ class OrderQueue extends Model
     {
         return match ($statusSlug) {
             'in-queue' => Carbon::parse($this->created_at)->addBusinessDays(1),
-            'rejection-request' => Carbon::parse($this->rejection->created_at)->addBusinessDays(1),
+            'rejection-request' => Carbon::parse($this->rejection?->created_at ?? now()->format('Y-m-d H:i:s'))->addBusinessDays(1),
             'in-production' => $this->contract_date,
             'available-for-shipping' => $this->getAvailableForShippingDate($this->final_arrival_date),
             'in-transit-to-dc' => $this->getInTransitToDcDate($this->final_arrival_date),
