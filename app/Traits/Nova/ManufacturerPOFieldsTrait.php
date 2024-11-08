@@ -16,13 +16,13 @@ trait ManufacturerPOFieldsTrait
     public function manufacturerPOFields(): array
     {
         return [
-            ID::make()->sortable(),
+            ID::make(__('PO'), 'id')->sortable(),
 
             Text::make(__('Customer ID'), function () {
                 return $this->upload->customer_id;
             }),
 
-            Text::make(__('Order'), function() {
+            Text::make(__('Order ID'), function() {
                 return $this->order->order_number;
             })
                 ->hideOnExport()
