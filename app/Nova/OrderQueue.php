@@ -23,6 +23,7 @@ use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ResourceIndexRequest;
+use Laravel\Nova\Panel;
 use Rpj\Daterangepicker\DateHelper;
 use Titasgailius\SearchRelations\SearchesRelations;
 
@@ -229,6 +230,8 @@ class OrderQueue extends Resource
             InlineTextEdit::make(__('Remarks'), 'remarks')
                 ->help(__('Max 500 characters'))
                 ->modelClass(\App\Models\OrderQueue::class),
+
+            new Panel(__('History'), $this->commonMetaData(false, false, false, false)),
         ];
     }
 
