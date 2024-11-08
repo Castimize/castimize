@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Currency;
 use App\Models\ManufacturerShipment;
 use App\Models\OrderQueue;
+use App\Services\Admin\OrderQueuesService;
 use App\Services\Admin\ShippingService;
 
 class ManufacturerShipmentObserver
@@ -97,10 +98,12 @@ class ManufacturerShipmentObserver
      */
     public function created(ManufacturerShipment $manufacturerShipment): void
     {
+        $orderQueuesService = new OrderQueuesService();
         if ($manufacturerShipment->selectedPOs) {
             foreach ($manufacturerShipment->selectedPOs as $selectedPO) {
                 $selectedPO->manufacturer_shipment_id = $manufacturerShipment->id;
                 $selectedPO->save();
+                $orderQueuesService->setStatus($selectedPO, 'in-transit-to-dc');
             }
 
             if (!$manufacturerShipment->handles_own_shipping) {
