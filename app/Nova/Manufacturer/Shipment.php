@@ -251,6 +251,7 @@ class Shipment extends Resource
 
         return [
             SelectManufacturerWithOverview::make('PO\'s', 'selectedPOs')
+                ->required()
                 ->placeholder(__('Select PO\'s'))
                 ->options(\App\Models\OrderQueue::getAvailableForShippingOrderQueueOptions())
                 ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders()),
@@ -277,10 +278,6 @@ class Shipment extends Resource
                 Text::make(__('Tracking number'), 'tracking_number'),
 
                 Text::make(__('Tracking url'), 'tracking_url'),
-
-                Text::make(__('Label url'), 'label_url'),
-
-                Text::make(__('Commercial invoice url'), 'commercial_invoice_url'),
             ])->dependsOn('handles_own_shipping', true),
 
             DependencyContainer::make([

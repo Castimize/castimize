@@ -46,7 +46,7 @@ class CustomerShipment extends Resource
      */
     public static function label()
     {
-        return __('Shipments');
+        return __('Customer shipments');
     }
 
     /**
