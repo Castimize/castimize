@@ -66,7 +66,7 @@ class SelectManufacturerWithOverview extends Field
         $saveAsJson = $this->shouldSaveAsJson($model, $attribute);
 
         $value = is_null($value) ? ($this->nullable ? $value : $value = []) : $value;
-        $value = explode(',', $value);
+        $value = is_array($value) ? $value : explode(',', $value);
         $model->{$attribute} = ($saveAsJson || is_null($value)) ? $value : json_encode($value);
     }
 
