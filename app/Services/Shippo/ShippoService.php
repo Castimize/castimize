@@ -412,7 +412,7 @@ class ShippoService
 //            'b13a_filing_option' => 'NOT_REQUIRED',
             'currency' => $params['currency'],
             'exporter_identification' => [
-                'eori_number' => $params['eori_number'],
+                //'eori_number' => $params['eori_number'],
                 'tax_id' => [
                     'number' => $this->generalSettings->taxNumber,
                     'type' => $this->generalSettings->taxType,
