@@ -183,51 +183,51 @@ class CustomersService
 
         $billingAddress = null;
         $shippingAddress = null;
-        if ($wpCustomer['billing']->postcode !== null) {
-            $billingAddress = $customer->addresses->where('postal_code', $wpCustomer['billing']->postcode)->where('address_line1', $wpCustomer['billing']->address_1 ?? '-')->first();
-        }
-        if ($wpCustomer['shipping']->postcode !== null) {
-            $shippingAddress = $customer->addresses->where('postal_code', $wpCustomer['shipping']->postcode)->where('address_line1', $wpCustomer['shipping']->address_1 ?? '-')->first();
-        }
-        if ($billingAddress === null) {
-            $billingAddress = $this->createAddressFromWpCustomer($wpCustomer['billing']);
-            if ($billingAddress !== null) {
-                $customer->addresses()->wherePivot('default_billing', 1)->update(['default_billing' => 0]);
-                $pivotData = [
-                    'default_billing' => 1,
-                    'default_shipping' => 0,
-                    'contact_name' => sprintf('%s %s', $wpCustomer['billing']->first_name, $wpCustomer['billing']->last_name),
-                    'phone' => $wpCustomer['billing']->phone ?? null,
-                    'email' => $wpCustomer['billing']->email ?? null,
-                ];
-                $customer->addresses()->attach($billingAddress, $pivotData);
-            }
-        }
-
-        if ($shippingAddress === null || $shippingAddress->address_line1 !== $billingAddress->address_line1) {
-            if ($shippingAddress === null) {
-                $shippingAddress = $this->createAddressFromWpCustomer($wpCustomer['shipping']);
-                if ($shippingAddress !== null) {
-                    $customer->addresses()->wherePivot('default_shipping', 1)->update(['default_shipping' => 0]);
-                    $pivotData = [
-                        'default_billing' => 0,
-                        'default_shipping' => 1,
-                        'contact_name' => sprintf('%s %s', $wpCustomer['shipping']->first_name, $wpCustomer['shipping']->last_name),
-                        'phone' => $wpCustomer['shipping']->phone ?? null,
-                    ];
-                    $customer->addresses()->attach($shippingAddress, $pivotData);
-                }
-            }
-        } else if ($billingAddress !== null) {
-            $pivotData = [
-                'default_billing' => 1,
-                'default_shipping' => 1,
-                'contact_name' => sprintf('%s %s', $wpCustomer['billing']->first_name, $wpCustomer['billing']->last_name),
-                'phone' => $wpCustomer['billing']->phone ?? null,
-                'email' => $wpCustomer['billing']->email ?? null,
-            ];
-            $customer->addresses()->attach($billingAddress, $pivotData);
-        }
+//        if ($wpCustomer['billing']->postcode !== null) {
+//            $billingAddress = $customer->addresses->where('postal_code', $wpCustomer['billing']->postcode)->where('address_line1', $wpCustomer['billing']->address_1 ?? '-')->first();
+//        }
+//        if ($wpCustomer['shipping']->postcode !== null) {
+//            $shippingAddress = $customer->addresses->where('postal_code', $wpCustomer['shipping']->postcode)->where('address_line1', $wpCustomer['shipping']->address_1 ?? '-')->first();
+//        }
+//        if ($billingAddress === null) {
+//            $billingAddress = $this->createAddressFromWpCustomer($wpCustomer['billing']);
+//            if ($billingAddress !== null) {
+//                $customer->addresses()->wherePivot('default_billing', 1)->update(['default_billing' => 0]);
+//                $pivotData = [
+//                    'default_billing' => 1,
+//                    'default_shipping' => 0,
+//                    'contact_name' => sprintf('%s %s', $wpCustomer['billing']->first_name, $wpCustomer['billing']->last_name),
+//                    'phone' => $wpCustomer['billing']->phone ?? null,
+//                    'email' => $wpCustomer['billing']->email ?? null,
+//                ];
+//                $customer->addresses()->attach($billingAddress, $pivotData);
+//            }
+//        }
+//
+//        if ($shippingAddress === null || $shippingAddress->address_line1 !== $billingAddress->address_line1) {
+//            if ($shippingAddress === null) {
+//                $shippingAddress = $this->createAddressFromWpCustomer($wpCustomer['shipping']);
+//                if ($shippingAddress !== null) {
+//                    $customer->addresses()->wherePivot('default_shipping', 1)->update(['default_shipping' => 0]);
+//                    $pivotData = [
+//                        'default_billing' => 0,
+//                        'default_shipping' => 1,
+//                        'contact_name' => sprintf('%s %s', $wpCustomer['shipping']->first_name, $wpCustomer['shipping']->last_name),
+//                        'phone' => $wpCustomer['shipping']->phone ?? null,
+//                    ];
+//                    $customer->addresses()->attach($shippingAddress, $pivotData);
+//                }
+//            }
+//        } else if ($billingAddress !== null) {
+//            $pivotData = [
+//                'default_billing' => 1,
+//                'default_shipping' => 1,
+//                'contact_name' => sprintf('%s %s', $wpCustomer['billing']->first_name, $wpCustomer['billing']->last_name),
+//                'phone' => $wpCustomer['billing']->phone ?? null,
+//                'email' => $wpCustomer['billing']->email ?? null,
+//            ];
+//            $customer->addresses()->attach($billingAddress, $pivotData);
+//        }
 
         return $customer;
     }
