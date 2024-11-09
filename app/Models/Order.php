@@ -408,6 +408,19 @@ class Order extends Model
         return $this->hasMany(Reprint::class);
     }
 
+    public function scopeRemoveTestEmailAddresses($query, string $column)
+    {
+        return $query->whereNotIn($column, [
+            'matthbon@hotmail.com',
+            'oknoeff@gmail.com',
+            'robinkoonen@gmail.com',
+            'oscar@castimize.com',
+            'robin@castimize.com',
+            'koen@castimize.com',
+            'info@castimize.com',
+        ]);
+    }
+
     /**
      * Get the days overdue
      * @return float|null

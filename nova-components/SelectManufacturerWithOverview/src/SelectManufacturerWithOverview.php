@@ -3,6 +3,7 @@
 namespace Castimize\SelectManufacturerWithOverview;
 
 use Illuminate\Support\Collection;
+use Illuminate\Validation\Validator;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -25,7 +26,9 @@ class SelectManufacturerWithOverview extends Field
      */
     public function options(array $options)
     {
-        if (is_callable($options)) $options = call_user_func($options);
+        if (is_callable($options)) {
+            $options = call_user_func($options);
+        }
         $options = collect($options ?: []);
 
         return $this->withMeta([
@@ -55,8 +58,12 @@ class SelectManufacturerWithOverview extends Field
         $value = data_get($resource, str_replace('->', '.', $attribute));
         $saveAsJson = $this->shouldSaveAsJson($resource, $attribute);
 
-        if ($value instanceof Collection) return $value;
-        if ($saveAsJson) return $value;
+        if ($value instanceof Collection) {
+            return $value;
+        }
+        if ($saveAsJson) {
+            return $value;
+        }
         return is_array($value) || is_object($value) ? (array) $value : json_decode($value);
     }
 
@@ -67,6 +74,9 @@ class SelectManufacturerWithOverview extends Field
 
         $value = is_null($value) ? ($this->nullable ? $value : $value = []) : $value;
         $value = is_array($value) ? $value : explode(',', $value);
+//        if (count($value) === 0) {
+//            throw new \Exception(__('Please select PO\'s'));
+//        }
         $model->{$attribute} = ($saveAsJson || is_null($value)) ? $value : json_encode($value);
     }
 

@@ -7,6 +7,7 @@ use App\Models\ManufacturerShipment;
 use App\Models\OrderQueue;
 use App\Services\Admin\OrderQueuesService;
 use App\Services\Admin\ShippingService;
+use Exception;
 
 class ManufacturerShipmentObserver
 {
@@ -76,20 +77,23 @@ class ManufacturerShipmentObserver
             $manufacturerShipment->parcel_weight
         );
         $selectedPOs = json_decode($manufacturerShipment->selectedPOs, true, 512, JSON_THROW_ON_ERROR);
-        if (count($selectedPOs) > 0) {
-            $orderQueues = OrderQueue::with(['order', 'upload'])->whereIn('id', $selectedPOs)->get();
-            $manufacturerShipment->selectedPOs = $orderQueues;
-            $manufacturerShipment->currency_id = $orderQueues->first()->order->currency_id;
-            $manufacturerShipment->currency_code = $orderQueues->first()->order->currency_code;
-            $totalParts = 0;
-            $totalCosts = 0;
-            foreach ($orderQueues as $orderQueue) {
-                $totalParts += $orderQueue->upload->model_parts;
-                $totalCosts += $orderQueue->manufacturer_costs;
-            }
-            $manufacturerShipment->total_parts = $totalParts;
-            $manufacturerShipment->total_costs = $totalCosts;
+        if (count($selectedPOs) === 0) {
+            throw new Exception('Please select PO\'s');
         }
+
+        $orderQueues = OrderQueue::with(['order', 'upload'])->whereIn('id', $selectedPOs)->get();
+        $manufacturerShipment->selectedPOs = $orderQueues;
+        $manufacturerShipment->currency_id = $orderQueues->first()->order->currency_id;
+        $manufacturerShipment->currency_code = $orderQueues->first()->order->currency_code;
+        $totalParts = 0;
+        $totalCosts = 0;
+        foreach ($orderQueues as $orderQueue) {
+            $totalParts += $orderQueue->upload->model_parts;
+            $totalCosts += $orderQueue->manufacturer_costs;
+        }
+        $manufacturerShipment->total_parts = $totalParts;
+        $manufacturerShipment->total_costs = $totalCosts;
+
     }
 
     /**

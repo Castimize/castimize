@@ -18,6 +18,7 @@
                          track-by="value"
                          :preselect-first="false"
                          :show-labels="true"
+                         :has-error="hasError"
                          @select="handleChange"
                          @remove="handleRemove"
             >

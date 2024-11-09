@@ -244,6 +244,7 @@ class ManufacturerShipment extends Resource
                 ->sortable(),
 
             SelectManufacturerWithOverview::make('PO\'s', 'selectedPOs')
+                ->rules('required')
                 ->required()
                 ->placeholder(__('Select PO\'s'))
                 ->options(\App\Models\OrderQueue::getAvailableForShippingOrderQueueOptions())
