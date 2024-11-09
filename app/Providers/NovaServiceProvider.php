@@ -15,6 +15,7 @@ use App\Nova\Language;
 use App\Nova\LogisticsZone;
 use App\Nova\LogRequest;
 use App\Nova\Manufacturer;
+use App\Nova\ManufacturerShipment;
 use App\Nova\Material;
 use App\Nova\MaterialGroup;
 use App\Nova\Model;
@@ -118,7 +119,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make(__('Logistics'), [
                     MenuItem::resource(CustomerShipment::class),
-//                    MenuItem::make(__('Manufacturer shipments'), '/resources/shipments'),
+                    MenuItem::resource(ManufacturerShipment::class),
                     MenuItem::resource(LogisticsZone::class),
                     MenuItem::resource(ShippingFee::class),
                     MenuItem::resource(Country::class),
