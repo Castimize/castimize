@@ -14,6 +14,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use JsonException;
+use RuntimeException;
 use Shippo_ApiError;
 use Shippo_Object;
 
@@ -100,21 +101,7 @@ class ShippingService
         $getAddressMethod = 'get' . $type . 'Address';
         $shippoAddress = $this->createShippoAddress($type);
         $address = $this->$getAddressMethod();
-        $valid = 1;
-        if (app()->environment('production') && is_array($shippoAddress['validation_results'])) {
-            $valid = $shippoAddress['validation_results']['is_valid'] ? 1 : 0;
-        }
-        $errorMessages = [];
-        if (is_array($shippoAddress['validation_results']) && array_key_exists('messages', $shippoAddress['validation_results'])) {
-            foreach ($shippoAddress['validation_results']['messages'] as $message) {
-                $errorMessages[] = [
-                    'source' => $message['source'],
-                    'code' => $message['code'],
-                    'type' => $message['type'],
-                    'text' => $message['text'],
-                ];
-            }
-        }
+        [$valid, $errorMessages] = $this->checkAddressValid($shippoAddress['validation_results']);
         $addressChanged = false;
         $address['object_id'] = $shippoAddress['object_id'];
 
@@ -149,6 +136,14 @@ class ShippingService
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
+        [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results']);
+        if (!$valid) {
+            $message = __('The shipping to address is invalid with the following messages') . PHP_EOL;
+            foreach ($errorMessages as $errorMessage) {
+                $message .= $errorMessage['text'] . PHP_EOL;
+            }
+            throw new RuntimeException($message);
+        }
 
         $this->_shippoService
             ->setShipmentFromAddress($shippoFromAddress)
@@ -169,6 +164,14 @@ class ShippingService
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
+        [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results']);
+        if (!$valid) {
+            $message = __('The shipping to address is invalid with the following messages') . PHP_EOL;
+            foreach ($errorMessages as $errorMessage) {
+                $message .= $errorMessage['text'] . PHP_EOL;
+            }
+            throw new RuntimeException($message);
+        }
 
         $this->_shippoService
             ->setShipmentFromAddress($shippoFromAddress)
@@ -255,6 +258,14 @@ class ShippingService
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
+        [$valid, $errorMessages] = $this->checkAddressValid($shippoFromAddress['validation_results']);
+        if (!$valid) {
+            $message = __('The shipping from address is invalid with the following messages') . PHP_EOL;
+            foreach ($errorMessages as $errorMessage) {
+                $message .= $errorMessage['text'] . PHP_EOL;
+            }
+            throw new RuntimeException($message);
+        }
 
         $this->_shippoService
             ->setShipmentFromAddress($shippoFromAddress)
@@ -419,5 +430,29 @@ class ShippingService
     {
         $country = Country::with('logisticsZone')->where('alpha2', $shippingCountry)->first();
         return $country->logisticsZone->shipping_servicelevel_token;
+    }
+
+    /**
+     * @param $validation_results
+     * @return array
+     */
+    private function checkAddressValid($validation_results): array
+    {
+        $valid = 1;
+        if (app()->environment('production') && is_array($validation_results)) {
+            $valid = $validation_results['is_valid'] ? 1 : 0;
+        }
+        $errorMessages = [];
+        if (is_array($validation_results) && array_key_exists('messages', $validation_results)) {
+            foreach ($validation_results['messages'] as $message) {
+                $errorMessages[] = [
+                    'source' => $message['source'],
+                    'code' => $message['code'],
+                    'type' => $message['type'],
+                    'text' => $message['text'],
+                ];
+            }
+        }
+        return [$valid, $errorMessages];
     }
 }
