@@ -16,6 +16,7 @@ use DigitalCreative\NovaDashboard\Card\NovaDashboard;
 use DigitalCreative\NovaDashboard\Card\View;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Dashboards\Main as Dashboard;
+use Rpj\Daterangepicker\DateHelper;
 
 class CastimizeDashboard extends Dashboard
 {
@@ -69,7 +70,7 @@ class CastimizeDashboard extends Dashboard
                                     ->position(x: 8, y: 6),
                             ])
                             ->addFilters([
-                                OrderDateDaterangepickerFilter::make(),
+                                (new OrderDateDaterangepickerFilter(DateHelper::LAST_30_DAYS)),
                             ]);
                     }),
             ];
