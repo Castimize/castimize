@@ -26,7 +26,7 @@ class OrderStatus extends Resource
      *
      * @var string
      */
-    public static $title = 'name';
+    public static $title = 'status';
 
     /**
      * The columns that should be searched.
@@ -35,7 +35,7 @@ class OrderStatus extends Resource
      */
     public static $search = [
         'id',
-        'name',
+        'status',
     ];
 
     /**
