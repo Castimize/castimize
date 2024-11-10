@@ -2,10 +2,18 @@
 
 namespace App\Nova\Dashboards;
 
-use App\Nova\Metrics\NewOrders;
-use App\Nova\Metrics\NewOrdersProfit;
-use App\Nova\Metrics\NewOrdersRevenue;
+use App\Nova\Filters\OrderDateDaterangepickerFilter;
+use App\Nova\Metrics\BiggestCustomersRevenueTableWidget;
+use App\Nova\Metrics\BiggestManufacturersRevenueTableWidget;
+use App\Nova\Metrics\BiggestMaterialsRevenueTableWidget;
+use App\Nova\Metrics\NewOrdersLineChartWidget;
+use App\Nova\Metrics\NewOrdersProfitValueWidget;
+use App\Nova\Metrics\NewOrdersRevenueValueWidget;
+use App\Nova\Metrics\NewOrdersValueWidget;
+use App\Nova\Metrics\RevenueCostsProfitLineChartWidget;
 use App\Traits\Nova\Metrics\CustomMetricsCharts;
+use DigitalCreative\NovaDashboard\Card\NovaDashboard;
+use DigitalCreative\NovaDashboard\Card\View;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Dashboards\Main as Dashboard;
 
@@ -20,18 +28,55 @@ class CastimizeDashboard extends Dashboard
      */
     public function cards()
     {
-        if (auth()->user()->isSuperAdmin()) {
+//        if (auth()->user()->isSuperAdmin()) {
             return [
-                NewOrders::make()->defaultRange('30'),
-                NewOrdersRevenue::make()->defaultRange('30'),
-                NewOrdersProfit::make()->defaultRange('30'),
-                $this->getRevenueCostsProfitPerDayMetric(),
-                $this->getOrdersPerDayMetric(),
+                NovaDashboard::make()
+                    ->addView(__('Dashboard'), function (View $view) {
+                        return $view
+                            ->icon('window')
+                            ->addWidgets([
+                                NewOrdersValueWidget::make()
+                                    ->width(2)
+                                    ->position(x: 0, y: 0),
+                                NewOrdersRevenueValueWidget::make()
+                                    ->width(2)
+                                    ->position(x: 2, y: 0),
+                                NewOrdersProfitValueWidget::make()
+                                    ->width(2)
+                                    ->position(x: 4, y: 0),
+                                RevenueCostsProfitLineChartWidget::make()
+                                    ->width(12)
+                                    ->height(2)
+                                    ->position(x: 0, y: 1),
+                                NewOrdersLineChartWidget::make()
+                                    ->width(12)
+                                    ->height(2)
+                                    ->position(x: 0, y: 4),
+                                BiggestMaterialsRevenueTableWidget::make()
+                                    ->title(__('Biggest materials revenue'))
+                                    ->width(4)
+                                    ->height(3)
+                                    ->position(x: 0, y: 6),
+                                BiggestCustomersRevenueTableWidget::make()
+                                    ->title(__('Biggest customers revenue'))
+                                    ->width(4)
+                                    ->height(3)
+                                    ->position(x: 4, y: 6),
+                                BiggestManufacturersRevenueTableWidget::make()
+                                    ->title(__('Biggest manufacturers revenue'))
+                                    ->width(4)
+                                    ->height(3)
+                                    ->position(x: 8, y: 6),
+                            ])
+                            ->addFilters([
+                                OrderDateDaterangepickerFilter::make(),
+                            ]);
+                    }),
             ];
-        }
-        return [
-            Help::make(),
-        ];
+//        }
+//        return [
+//            Help::make(),
+//        ];
     }
 
     /**
