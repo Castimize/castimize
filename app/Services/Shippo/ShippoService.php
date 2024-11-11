@@ -462,7 +462,7 @@ class ShippoService
     {
         $data = [
             'rate' => $rateId,
-            'label_file_type' => 'PDF',
+            'label_file_type' => 'ZPLII',
             'metadata' => sprintf('customer_shipment:%s', $customerShipmentId),
             'async' => false,
         ];
