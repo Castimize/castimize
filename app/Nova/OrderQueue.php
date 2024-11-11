@@ -196,9 +196,21 @@ class OrderQueue extends Resource
                 ->hideOnExport()
                 ->sortable(),
 
-            Text::make(__('Order parts'), function ($model) {
-                    return $model->order->order_parts;
+            Text::make(__('Quantity'), function ($model) {
+                    return $model->upload->quantity;
                 })
+                ->hideFromIndex()
+                ->sortable(),
+
+            Text::make(__('Order parts'), function ($model) {
+                    return $model->upload->model_parts;
+                })
+                ->hideFromIndex()
+                ->sortable(),
+
+            Text::make(__('Total parts'), function ($model) {
+                return $model->upload->model_parts * $this->upload->quantity;
+            })
                 ->hideOnExport()
                 ->sortable(),
 
