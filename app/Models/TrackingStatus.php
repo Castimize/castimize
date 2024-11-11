@@ -54,7 +54,7 @@ class TrackingStatus extends Model
     /**
      * @return MorphTo
      */
-    public function modelShipment(): MorphTo
+    public function shipment(): MorphTo
     {
         return $this->morphTo();
     }

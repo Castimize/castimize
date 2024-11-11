@@ -4,6 +4,7 @@ namespace App\Nova;
 
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphTo;
@@ -101,6 +102,18 @@ class TrackingStatus extends Resource
                 ->hideFromIndex(function (ResourceIndexRequest $request) {
                     return $request->viaRelationship();
                 }),
+
+            Code::make(__('Location'), 'location')
+                ->canSee(function (NovaRequest $request) {
+                    return $request->user()->isSuperAdmin();
+                })
+                ->json(),
+
+            Code::make(__('Meta data'), 'meta_data')
+                ->canSee(function (NovaRequest $request) {
+                    return $request->user()->isSuperAdmin();
+                })
+                ->json(),
 
             new Panel(__('History'), $this->commonMetaData()),
         ];

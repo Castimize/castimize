@@ -228,7 +228,8 @@ class CustomerShipment extends Resource
             Code::make(__('Shipment meta data'), 'shippo_transaction_meta_data')
                 ->canSee(function (NovaRequest $request) {
                     return $request->user()->isSuperAdmin();
-                }),
+                })
+                ->json(),
 
             MorphMany::make(__('Tracking history'), 'trackingStatuses', TrackingStatus::class),
 
