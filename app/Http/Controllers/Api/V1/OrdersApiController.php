@@ -87,41 +87,43 @@ class OrdersApiController extends ApiController
         return response()->json($response);
     }
 
-    public function storeOrderWp(Request $request): OrderResource
+    public function storeOrderWp(Request $request): JsonResponse
     {
-        $order = Order::where('wp_id', $request->id)->first();
-        if ($order === null) {
-            try {
-                $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
-                $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
-            } catch (Throwable $e) {
-                Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
-            }
+        $logRequestId = null;
+        if ($request->has('log_request_id')) {
+            $logRequestId = $request->log_request_id;
         }
 
-        $response = new OrderResource($order);
-        LogRequestService::addResponse($request, $response);
-        return $response;
+        CreateOrderFromWp::dispatch($request->id, $logRequestId);
+
+        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
+        $response = $wpOrder;
+        LogRequestService::addResponse($request, $response->toArray());
+        return response()
+            ->json($response)
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**
      * @param Request $request
-     * @return OrderResource
+     * @return JsonResponse
      */
-    public function updateOrderWp(Request $request): OrderResource
+    public function updateOrderWp(Request $request): JsonResponse
     {
         $order = Order::where('wp_id', $request->id)->first();
         if ($order === null) {
-            try {
-                $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
-                $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
-            } catch (Throwable $e) {
-                Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            $logRequestId = null;
+            if ($request->has('log_request_id')) {
+                $logRequestId = $request->log_request_id;
             }
+            CreateOrderFromWp::dispatch($request->id, $logRequestId);
         }
 
-        $response = new OrderResource($order);
-        LogRequestService::addResponse($request, $response);
-        return $response;
+        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
+        $response = $wpOrder;
+        LogRequestService::addResponse($request, $response->toArray());
+        return response()
+            ->json($response)
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 }

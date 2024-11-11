@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
 class OrdersService
 {
     private CustomersService $customersService;
+    private UploadsService $uploadsService;
     private OrderQueuesService $orderQueuesService;
     private WoocommerceApiService $woocommerceApiService;
 
@@ -26,6 +27,7 @@ class OrdersService
     public function __construct()
     {
         $this->customersService = new CustomersService();
+        $this->uploadsService = new UploadsService();
         $this->orderQueuesService = new OrderQueuesService();
         $this->woocommerceApiService = new WoocommerceApiService();
     }
@@ -146,6 +148,13 @@ class OrdersService
         $order->order_customer_lead_time = $biggestCustomerLeadTime;
         $order->due_date = Carbon::parse($order->created_at)->addBusinessDays($biggestCustomerLeadTime);
         $order->save();
+
+        if ($isPaid) {
+            foreach ($order->uploads()->get() as $upload) {
+                // Set upload to order queue
+                $this->uploadsService->setUploadToOrderQueue($upload);
+            }
+        }
 
         return $order;
     }
@@ -363,7 +372,7 @@ class OrdersService
 
             if ($isPaid) {
                 // Set upload to order queue
-                UploadToOrderQueue::dispatch($upload);
+                $this->uploadsService->setUploadToOrderQueue($upload);
             }
         }
         $order->order_customer_lead_time = $biggestCustomerLeadTime;
@@ -548,7 +557,7 @@ class OrdersService
                 $model->save();
             }
 
-            $upload = $order->uploads()->create([
+            $order->uploads()->create([
                 'wp_id' => $lineItem->id ?? null,
                 'material_id' => $material->id,
                 'customer_id' => $customer->id,
@@ -574,11 +583,6 @@ class OrdersService
                 'created_by' => $systemUser->id,
                 'updated_by' => $systemUser->id,
             ]);
-
-            if ($isPaid) {
-                // Set upload to order queue
-                UploadToOrderQueue::dispatch($upload);
-            }
         }
 
         return $biggestCustomerLeadTime;
