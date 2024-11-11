@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Currency;
 use App\Models\ManufacturerShipment;
 use App\Models\OrderQueue;
+use App\Nova\Settings\Shipping\DcSettings;
 use App\Services\Admin\OrderQueuesService;
 use App\Services\Admin\ShippingService;
 use Exception;
@@ -16,6 +17,7 @@ class ManufacturerShipmentObserver
      */
     public function creating(ManufacturerShipment $manufacturerShipment): void
     {
+        $dcSettings = (new DcSettings());
         $manufacturerShipment->fromAddress = [
             'name' => $manufacturerShipment->from_address_name ?? '',
             'company' => $manufacturerShipment->from_address_company ?? '',
@@ -29,16 +31,16 @@ class ManufacturerShipmentObserver
             'email' => $manufacturerShipment->from_address_email ?? '',
         ];
         $manufacturerShipment->toAddress = [
-            'name' => $manufacturerShipment->to_address_name ?? '',
-            'company' => $manufacturerShipment->to_address_company ?? '',
-            'address_line1' => $manufacturerShipment->to_address_address_line1 ?? '',
-            'address_line2' => $manufacturerShipment->to_address_address_line2 ?? '',
-            'postal_code' => $manufacturerShipment->to_address_postal_code ?? '',
-            'city' => $manufacturerShipment->to_address_city ?? '',
-            'state' => $manufacturerShipment->to_address_state ?? '',
-            'country' => $manufacturerShipment->to_address_country ?? '',
-            'phone' => $manufacturerShipment->to_address_phone ?? '',
-            'email' => $manufacturerShipment->to_address_email ?? '',
+            'name' => $dcSettings->name,
+            'company' => $dcSettings->company,
+            'address_line1' => $dcSettings->addressLine1,
+            'address_line2' => $dcSettings->addressLine2,
+            'postal_code' => $dcSettings->postalCode,
+            'city' => $dcSettings->city,
+            'state' => $dcSettings->state,
+            'country' => $dcSettings->country,
+            'phone' => $dcSettings->phone,
+            'email' => $dcSettings->email,
         ];
         $manufacturerShipment->parcel = [
             'distance_unit' => $manufacturerShipment->parcel_distance_unit ?? '',
