@@ -290,7 +290,7 @@ class ShippingService
             'country' => 'NL',
             'type' => 'THIRD_PARTY',
             'zip' => $toAddress['zip'],
-            ];
+        ];
 
         $this->_shippoService
             ->createCustomsDeclaration([
