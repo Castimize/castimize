@@ -50,6 +50,7 @@ class ShippoService
 
     public const SERVICES = [
         'ups_standard' => 'UPS Standard℠',
+        'ups_saver' => 'UPS Express Saver',
         'ups_express_saver_worldwide_ca' => 'UPS Worldwide Express Saver®',
     ];
 
