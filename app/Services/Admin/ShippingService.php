@@ -284,6 +284,14 @@ class ShippingService
             $this->_shippoService->createCustomsItem($selectedPO->upload);
         }
 
+        // To bill us in UPS for a manufacturer shipment
+        $extras = [
+            'account' => 'G2240C',
+            'country' => 'NL',
+            'type' => 'THIRD_PARTY',
+            'zip' => $toAddress['zip'],
+            ];
+
         $this->_shippoService
             ->createCustomsDeclaration([
                 'exporter_reference' => $manufacturerShipment->id,
@@ -291,7 +299,7 @@ class ShippingService
                 'currency' => $currency,
                 //'eori_number' => $this->generalSettings->eoriNumber,
             ])
-            ->createShipment();
+            ->createShipment($extras);
         $shippoShipment = $this->_shippoService->getShipment();
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 

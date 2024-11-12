@@ -423,10 +423,7 @@ class ShippoService
         return $this;
     }
 
-    /**
-     * @return static
-     */
-    public function createShipment(): static
+    public function createShipment(?array $extras = null): static
     {
         $data = [
             'object_purpose' => 'PURCHASE',
@@ -439,6 +436,11 @@ class ShippoService
             ],
             'async' => false,
         ];
+
+        if ($extras) {
+            $data['extras'] = $extras;
+        }
+
         $this->_shipment = Shippo_Shipment::create($data);
         $this->logShippoCall(
             pathInfo: 'shipments',
