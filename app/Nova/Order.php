@@ -392,7 +392,7 @@ class Order extends Resource
             })->exceptOnForms(),
 
             Text::make(__('Billing company'), function () {
-                return $this->billing_name;
+                return $this->billing_company;
             })->exceptOnForms(),
 
             Text::make(__('Billing address line 1'), 'billing_address_line1')
@@ -457,6 +457,10 @@ class Order extends Resource
             // Detail fields
             Text::make(__('Shipping name'), function () {
                 return $this->shipping_name;
+            })->exceptOnForms(),
+
+            Text::make(__('Shipping company'), function () {
+                return $this->shipping_company;
             })->exceptOnForms(),
 
             Text::make(__('Shipping address line 1'), 'shipping_address_line1')
