@@ -103,6 +103,11 @@ class ShippoWebhookController extends WebhookController
             }
         }
 
+        if ($data['tracking_status']['status'] === 'TRANSIT' && $shipment->sent_at === null) {
+            $shipment->sent_at = Carbon::parse($data['tracking_status']['status_date']);
+            $shipment->save();
+        }
+
         if ($shipment) {
             $shipment->trackingStatuses()->create([
                 'object_id' => $data['tracking_status']['object_id'],
