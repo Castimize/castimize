@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Storage;
 class OrderQueuesService
 {
     /**
-     * Store a order queue from upload
+     * Store order queue from upload
      * @param Upload $upload
      * @param array $manufacturers
      * @return array<OrderQueue>
@@ -28,23 +28,26 @@ class OrderQueuesService
     {
         $orderQueues = [];
         foreach ($manufacturers as $manufacturer) {
-            $manufacturerCost = $manufacturer->costs->where('active', true)->where('material_id', $upload->material_id)->first();
-            $shippingFee = $upload->order->country->logisticsZone->shippingFee;
-            if ($manufacturerCost) {
-                $orderQueues[] = $upload->orderQueue()->create([
-                    'order_id' => $upload->order_id,
-                    'shipping_fee_id' => $shippingFee?->id,
-                    'manufacturer_id' => $manufacturer->id,
-                    'manufacturer_cost_id' => $manufacturerCost->id,
-                    'manufacturer_costs' => (new CalculatePricesService())->calculateCostsOfModel(
-                        $manufacturerCost,
-                        $upload->model_volume_cc,
-                        $upload->model_surface_area_cm2,
-                        $upload->quantity
-                    ),
-                    'due_date' => $upload->order->due_date,
-                    'final_arrival_date' => Carbon::parse($upload->order->created_at)->addBusinessDays($upload->customer_lead_time),
-                ]);
+            $orderQueue = $upload->orderQueues()->where('manufacturer_id', $manufacturer->id)->first();
+            if ($orderQueue === null) {
+                $manufacturerCost = $manufacturer->costs->where('active', true)->where('material_id', $upload->material_id)->first();
+                $shippingFee = $upload->order->country->logisticsZone->shippingFee;
+                if ($manufacturerCost) {
+                    $orderQueues[] = $upload->orderQueues()->create([
+                        'order_id' => $upload->order_id,
+                        'shipping_fee_id' => $shippingFee?->id,
+                        'manufacturer_id' => $manufacturer->id,
+                        'manufacturer_cost_id' => $manufacturerCost->id,
+                        'manufacturer_costs' => (new CalculatePricesService())->calculateCostsOfModel(
+                            $manufacturerCost,
+                            $upload->model_volume_cc,
+                            $upload->model_surface_area_cm2,
+                            $upload->quantity
+                        ),
+                        'due_date' => $upload->order->due_date,
+                        'final_arrival_date' => Carbon::parse($upload->order->created_at)->addBusinessDays($upload->customer_lead_time),
+                    ]);
+                }
             }
         }
 

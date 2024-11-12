@@ -56,7 +56,9 @@ class SetOrderPaid implements ShouldQueue
             $uploadsService = new UploadsService();
             foreach ($order->uploads as $upload) {
                 // Set upload to order queue
-                $uploadsService->setUploadToOrderQueue($upload);
+                if ($upload->orderQueue === null) {
+                    $uploadsService->setUploadToOrderQueue($upload);
+                }
             }
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());

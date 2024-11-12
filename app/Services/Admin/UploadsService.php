@@ -15,6 +15,7 @@ class UploadsService
     {
         $orderQueuesService = new OrderQueuesService();
         $manufacturer = Manufacturer::with(['costs'])->orderBy('id')->first();
+
         $orderQueues = $orderQueuesService->storeFromUpload($upload, [$manufacturer]);
 
         // Create a order queue status in-queue for all order queues
