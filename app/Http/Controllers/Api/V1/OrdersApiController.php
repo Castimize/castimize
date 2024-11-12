@@ -110,6 +110,8 @@ class OrdersApiController extends ApiController
      */
     public function updateOrderWp(Request $request): JsonResponse
     {
+        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
+        dd($wpOrder);
         $order = Order::where('wp_id', $request->id)->first();
         if ($order === null) {
             $logRequestId = null;
