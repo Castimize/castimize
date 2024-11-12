@@ -224,6 +224,19 @@ class ManufacturerShipment extends Resource
                 ->exceptOnForms()
                 ->sortable(),
 
+            Text::make(__('Order ID\'s'), function ($model) {
+                $links = [];
+                foreach ($model->orderQueues as $orderQueue) {
+                    if (!array_key_exists($orderQueue->order_id, $links)) {
+                        $links[$orderQueue->order_id] = '<a class="link-default" href="/admin/resources/orders/' . $orderQueue->order_id . '" target="_blank">' . $orderQueue->order->order_number . '</a>';
+                    }
+                }
+                return implode(', ', $links);
+            })
+                ->asHtml()
+                ->exceptOnForms()
+                ->sortable(),
+
             MorphMany::make(__('Tracking history'), 'trackingStatuses', TrackingStatus::class),
         ];
     }
