@@ -148,6 +148,19 @@ class CustomerShipment extends Resource
         return [
             ID::make()->sortable(),
 
+            Text::make(__('Order ID\'s'), function ($model) {
+                $links = [];
+                foreach ($model->orderQueues as $orderQueue) {
+                    if (!array_key_exists($orderQueue->order_id, $links)) {
+                        $links[$orderQueue->order_id] = '<a class="link-default" href="/admin/resources/orders/' . $orderQueue->order_id . '" target="_blank">' . $orderQueue->order->order_number . '</a>';
+                    }
+                }
+                return implode(', ', $links);
+            })
+                ->asHtml()
+                ->exceptOnForms()
+                ->sortable(),
+
             Text::make(__('Tracking number'), function () {
                 if (empty($this->tracking_url)) {
                     return $this->tracking_number;
@@ -217,19 +230,6 @@ class CustomerShipment extends Resource
             Text::make(__('Total costs'), function () {
                 return $this->total_costs ? currencyFormatter((float)$this->total_costs, $this->currency_code) : '';
             })
-                ->exceptOnForms()
-                ->sortable(),
-
-            Text::make(__('Order ID\'s'), function ($model) {
-                $links = [];
-                foreach ($model->orderQueues as $orderQueue) {
-                    if (!array_key_exists($orderQueue->order_id, $links)) {
-                        $links[$orderQueue->order_id] = '<a class="link-default" href="/admin/resources/orders/' . $orderQueue->order_id . '" target="_blank">' . $orderQueue->order->order_number . '</a>';
-                    }
-                }
-                return implode(', ', $links);
-            })
-                ->asHtml()
                 ->exceptOnForms()
                 ->sortable(),
 
