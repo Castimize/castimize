@@ -285,7 +285,7 @@ class ShippingService
         }
 
         // To bill us in UPS for a manufacturer shipment
-        $extras = [
+        $extra['billing'] = [
             'account' => 'G2240C',
             'country' => 'NL',
             'type' => 'THIRD_PARTY',
@@ -299,7 +299,7 @@ class ShippingService
                 'currency' => $currency,
                 //'eori_number' => $this->generalSettings->eoriNumber,
             ])
-            ->createShipment($extras);
+            ->createShipment($extra);
         $shippoShipment = $this->_shippoService->getShipment();
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 

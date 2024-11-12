@@ -438,7 +438,7 @@ class ShippoService
         ];
 
         if ($extras) {
-            $data['extras'] = $extras;
+            $data['extra'] = $extras;
         }
 
         $this->_shipment = Shippo_Shipment::create($data);
