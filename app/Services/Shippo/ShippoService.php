@@ -269,7 +269,7 @@ class ShippoService
             requestUri: 'addresses',
             method: 'POST',
             request: $this->_fromAddress,
-            response: (array)$this->_shipmentFromAddress
+            response: json_decode($this->_shipmentFromAddress, true, 512, JSON_THROW_ON_ERROR),
         );
         return $this;
     }
@@ -289,7 +289,7 @@ class ShippoService
             requestUri: 'addresses',
             method: 'POST',
             request: $this->_toAddress,
-            response: (array)$this->_shipmentToAddress
+            response: json_decode($this->_shipmentToAddress, true, 512, JSON_THROW_ON_ERROR),
         );
         return $this;
     }
@@ -445,7 +445,7 @@ class ShippoService
             requestUri: 'shipments',
             method: 'POST',
             request: $data,
-            response: (array)$this->_shipment
+            response: json_decode($this->_shipment, true, 512, JSON_THROW_ON_ERROR),
         );
 
         return $this;
@@ -472,7 +472,7 @@ class ShippoService
             requestUri: 'transactions',
             method: 'POST',
             request: $data,
-            response: (array)$this->_transaction
+            response: json_decode($this->_transaction, true, 512, JSON_THROW_ON_ERROR),
         );
 
         return $this;
