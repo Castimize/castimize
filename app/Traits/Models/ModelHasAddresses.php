@@ -19,6 +19,7 @@ trait ModelHasAddresses
         )->withPivot([
             'default_billing',
             'default_shipping',
+            'company',
             'contact_name',
             'phone',
             'email',

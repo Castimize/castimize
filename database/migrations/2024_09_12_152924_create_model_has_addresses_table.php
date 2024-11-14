@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('model_id');
             $table->boolean('default_billing')->default(0);
             $table->boolean('default_shipping')->default(0);
+            $table->string('company', 500)->nullable();
             $table->string('contact_name')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();

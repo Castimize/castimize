@@ -23,6 +23,7 @@ class ModelHasAddress extends Pivot
         'model_id',
         'default_billing',
         'default_shipping',
+        'company',
         'contact_name',
         'phone',
         'email',
