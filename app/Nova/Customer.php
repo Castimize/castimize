@@ -159,6 +159,8 @@ class Customer extends Resource
                         Boolean::make(__('Default shipping'), 'default_shipping')
                             ->sortable(),
 
+                        Text::make(__('Company'), 'company'),
+
                         Text::make(__('Contact name'), 'contact_name'),
 
                         TelInput::make(__('Phone'), 'phone'),
