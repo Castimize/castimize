@@ -59,8 +59,8 @@ class BiggestCustomersRevenueTableWidget extends TableWidget
         $data = [];
 
         foreach ($rows as $row) {
-            $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), $row->revenue);
-            $cost = $currencyService->convertCurrency($row->currency_code, config('app.currency'), $row->costs);
+            $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float)$row->revenue);
+            $cost = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float)$row->costs);
             $prof = $rev - $cost;
             if (!array_key_exists($row->customer_id, $data)) {
                 $data[$row->customer_id] = [
