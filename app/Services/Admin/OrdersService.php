@@ -2,7 +2,6 @@
 
 namespace App\Services\Admin;
 
-use App\Jobs\UploadToOrderQueue;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Customer;

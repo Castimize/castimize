@@ -54,6 +54,10 @@ class Customer extends Resource
      */
     public static $search = [
         'id',
+        'first_name',
+        'last_name',
+        'company',
+        'email',
     ];
 
     /**
