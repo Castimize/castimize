@@ -112,9 +112,6 @@ class CustomersService
     private function createCustomerFromWpCustomer($wpCustomer): mixed
     {
         $country = Country::where('alpha2', strtolower($wpCustomer['billing']->country))->first();
-        if ($country === null) {
-            $country = Country::where('alpha2', 'nl')->first();
-        }
 
         $vatNumber = null;
         foreach ($wpCustomer['meta_data'] as $metaData) {
@@ -124,7 +121,7 @@ class CustomersService
         }
 
         $customer = Customer::create([
-            'country_id' => $country->id,
+            'country_id' => $country->id ?? null,
             'wp_id' => $wpCustomer['id'],
             'first_name' => $wpCustomer['first_name'] ?? $wpCustomer['billing']->first_name,
             'last_name' => $wpCustomer['last_name'] ?? $wpCustomer['billing']->last_name,
@@ -143,10 +140,15 @@ class CustomersService
 
     private function updateCustomerFromWpCustomer(Customer $customer, $wpCustomer): mixed
     {
+        $country = Country::where('alpha2', strtolower($wpCustomer['billing']->country))->first();
+
         $customer->wp_id = $wpCustomer['id'];
+        $customer->country_id = $country->id ?? null;
         $customer->first_name = $wpCustomer['first_name'] ?? $wpCustomer['billing']->first_name;
         $customer->last_name = $wpCustomer['last_name'] ?? $wpCustomer['billing']->last_name;
+        $customer->company = $wpCustomer['billing']->company ?? null;
         $customer->email = $wpCustomer['email'] ?? $wpCustomer['billing']->email ?? null;
+        $customer->phone = $wpCustomer['billing']->phone ?? null;
         $customer->save();
 
         $this->attachAddressesFromWpCustomer($wpCustomer, $customer);
