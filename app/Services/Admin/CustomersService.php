@@ -230,8 +230,8 @@ class CustomersService
         $billingAddress = $this->createAddressFromWpCustomer($wpCustomer['billing']);
         $shippingAddress = $this->createAddressFromWpCustomer($wpCustomer['shipping']);
 
+        $customer->addresses()->detach();
         if ($billingAddress !== null && $shippingAddress !== null) {
-            $customer->addresses()->detach();
 
             $pivotDataBilling = [
                 'default_billing' => 1,
