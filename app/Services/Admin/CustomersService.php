@@ -259,7 +259,7 @@ class CustomersService
 
     private function createAddressFromWpCustomer($input)
     {
-        if ($input->postcode !== null) {
+        if (!empty($input->postcode) && @!empty($input->address_1)) {
             $country = Country::where('alpha2', strtolower($input->country))->first();
             if ($country === null) {
                 $country = Country::where('alpha2', 'nl')->first();
