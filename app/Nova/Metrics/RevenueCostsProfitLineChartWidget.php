@@ -3,6 +3,7 @@
 namespace App\Nova\Metrics;
 
 use App\Models\Order;
+use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\RangesFilter;
 use App\Services\Admin\CurrencyService;
 use App\Traits\Nova\Metrics\CustomMetricsQueries;
@@ -36,12 +37,7 @@ class RevenueCostsProfitLineChartWidget extends LineChartWidget
 
     public function value(Filters $filters): mixed
     {
-        $dateRanges = [];
-        $period = CarbonPeriod::create(now()->subDays(30)->format('Y-m-d'), now()->format('Y-m-d'));
-
-        foreach ($period as $date) {
-            $dateRanges[] = $date->format('Y-m-d');
-        }
+        $dateRanges = $this->getDateRanges($filters);
 
         $currencyService = new CurrencyService();
         $labels = [];
@@ -49,12 +45,18 @@ class RevenueCostsProfitLineChartWidget extends LineChartWidget
         $costs = [];
         $profit = [];
         $query = DB::table('orders')
-            ->join('uploads', 'orders.id', '=', 'uploads.order_id')
-            ->join('order_queue', 'orders.id', '=', 'order_queue.order_id')
             ->selectRaw("DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
                                    orders.currency_code,
-                                   (SUM(uploads.total) / 100) as revenue,
-                                   (SUM(order_queue.manufacturer_costs) / 100) as costs"
+                                   (
+                                      select SUM(total) / 100
+                                      from uploads
+                                      where uploads.order_id = orders.id
+                                   ) as revenue,
+                                   (
+                                      select SUM(manufacturer_costs) / 100
+                                      from order_queue
+                                      where order_queue.order_id = orders.id
+                                   ) as costs"
             )
             ->whereNotNull('orders.paid_at')
             ->whereNull('orders.deleted_at')
@@ -88,9 +90,9 @@ class RevenueCostsProfitLineChartWidget extends LineChartWidget
         foreach ($dateRanges as $date) {
             $labels[] = $date;
             if (array_key_exists($date, $converted)) {
-                $revenue[] = $converted[$date]['revenue'];
-                $costs[] = $converted[$date]['costs'];
-                $profit[] = $converted[$date]['profit'];
+                $revenue[] = round($converted[$date]['revenue'], 2);
+                $costs[] = round($converted[$date]['costs'], 2);
+                $profit[] = round($converted[$date]['profit'], 2);
             } else {
                 $revenue[] = 0;
                 $costs[] = 0;

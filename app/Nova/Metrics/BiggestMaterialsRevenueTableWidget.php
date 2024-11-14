@@ -31,12 +31,19 @@ class BiggestMaterialsRevenueTableWidget extends TableWidget
 
         $query = DB::table('orders')
             ->join('uploads', 'orders.id', '=', 'uploads.order_id')
-            ->join('order_queue', 'orders.id', '=', 'order_queue.order_id')
             ->selectRaw("uploads.material_name as material,
                                    COUNT(DISTINCT orders.order_number) as orders,
                                    orders.currency_code,
-                                   (SUM(uploads.total) / 100) as revenue,
-                                   (SUM(order_queue.manufacturer_costs) / 100) as costs"
+                                   (
+                                      select SUM(total) / 100
+                                      from uploads
+                                      where uploads.order_id = orders.id
+                                   ) as revenue,
+                                   (
+                                      select SUM(manufacturer_costs) / 100
+                                      from order_queue
+                                      where order_queue.order_id = orders.id
+                                   ) as costs"
             )
             ->whereNotNull('orders.paid_at')
             ->whereNull('orders.deleted_at')

@@ -3,6 +3,7 @@
 namespace App\Nova\Metrics;
 
 use App\Models\Order;
+use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\RangesFilter;
 use App\Services\Admin\CurrencyService;
 use App\Traits\Nova\Metrics\CustomMetricsQueries;
@@ -36,12 +37,7 @@ class NewOrdersLineChartWidget extends LineChartWidget
 
     public function value(Filters $filters): mixed
     {
-        $dateRanges = [];
-        $period = CarbonPeriod::create(now()->subDays(30)->format('Y-m-d'), now()->format('Y-m-d'));
-
-        foreach ($period as $date) {
-            $dateRanges[] = $date->format('Y-m-d');
-        }
+        $dateRanges = $this->getDateRanges($filters);
 
         $labels = [];
         $totals = [];

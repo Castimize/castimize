@@ -4,6 +4,7 @@ namespace App\Traits\Nova\Metrics;
 
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\RangesFilter;
+use Carbon\CarbonPeriod;
 use DigitalCreative\NovaDashboard\Filters;
 use Laravel\Nova\Nova;
 
@@ -79,6 +80,23 @@ trait CustomMetricsQueries
         ]);
     }
 
+    public function getDateRanges(Filters $filters): array
+    {
+        $dateRanges = [];
+        $orderDateFilter = $filters->getFilterValue(OrderDateDaterangepickerFilter::class);
+        $dateFrom = now()->subDays(30)->format('Y-m-d');
+        $dateTo = now()->format('Y-m-d');
+        if ($orderDateFilter) {
+            [$dateFrom, $dateTo] = explode(' to ', $orderDateFilter);
+        }
+        $period = CarbonPeriod::create($dateFrom, $dateTo);
+
+        foreach ($period as $date) {
+            $dateRanges[] = $date->format('Y-m-d');
+        }
+        return $dateRanges;
+    }
+
     public function applyFilters($query, Filters $filters)
     {
         $orderDateFilter = $filters->getFilterValue(OrderDateDaterangepickerFilter::class);
@@ -88,7 +106,7 @@ trait CustomMetricsQueries
         }
         if ($orderDateFilter) {
             [$dateFrom, $dateTo] = explode(' to ', $orderDateFilter);
-            $query = $this->addOrderDateToQuery($dateFrom, $dateTo, $query);
+            $query = $this->addOrderDateToQuery($dateFrom, $dateTo . ' 23:59:59', $query);
         }
 
         return $query;
