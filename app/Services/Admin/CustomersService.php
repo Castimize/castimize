@@ -229,28 +229,31 @@ class CustomersService
 
         $billingAddress = $this->createAddressFromWpCustomer($wpCustomer['billing']);
         $shippingAddress = $this->createAddressFromWpCustomer($wpCustomer['shipping']);
-        $customer->addresses()->detach();
 
-        $pivotDataBilling = [
-            'default_billing' => 1,
-            'company' => !empty($wpCustomer['billing']->company) ? $wpCustomer['billing']->company : null,
-            'contact_name' => sprintf('%s %s', $wpCustomer['billing']->first_name, $wpCustomer['billing']->last_name),
-            'phone' => $wpCustomer['billing']->phone ?? null,
-            'email' => $wpCustomer['billing']->email ?? null,
-        ];
-        $pivotDataShipping = [
-            'default_shipping' => 1,
-            'company' => !empty($wpCustomer['shipping']->company) ? $wpCustomer['shipping']->company : null,
-            'contact_name' => sprintf('%s %s', $wpCustomer['shipping']->first_name, $wpCustomer['shipping']->last_name),
-            'phone' => $wpCustomer['shipping']->phone ?? null,
-            'email' => $shippingEmail ?? null,
-        ];
-        if ($billingAddress->id === $shippingAddress->id) {
-            $pivotDataBilling['default_shipping'] = 1;
-            $customer->addresses()->attach($billingAddress, $pivotDataBilling);
-        } else {
-            $customer->addresses()->attach($billingAddress, $pivotDataBilling);
-            $customer->addresses()->attach($shippingAddress, $pivotDataShipping);
+        if ($billingAddress !== null && $shippingAddress !== null) {
+            $customer->addresses()->detach();
+
+            $pivotDataBilling = [
+                'default_billing' => 1,
+                'company' => !empty($wpCustomer['billing']->company) ? $wpCustomer['billing']->company : null,
+                'contact_name' => sprintf('%s %s', $wpCustomer['billing']->first_name, $wpCustomer['billing']->last_name),
+                'phone' => $wpCustomer['billing']->phone ?? null,
+                'email' => $wpCustomer['billing']->email ?? null,
+            ];
+            $pivotDataShipping = [
+                'default_shipping' => 1,
+                'company' => !empty($wpCustomer['shipping']->company) ? $wpCustomer['shipping']->company : null,
+                'contact_name' => sprintf('%s %s', $wpCustomer['shipping']->first_name, $wpCustomer['shipping']->last_name),
+                'phone' => $wpCustomer['shipping']->phone ?? null,
+                'email' => $shippingEmail ?? null,
+            ];
+            if ($billingAddress->id === $shippingAddress->id) {
+                $pivotDataBilling['default_shipping'] = 1;
+                $customer->addresses()->attach($billingAddress, $pivotDataBilling);
+            } else {
+                $customer->addresses()->attach($billingAddress, $pivotDataBilling);
+                $customer->addresses()->attach($shippingAddress, $pivotDataShipping);
+            }
         }
     }
 
