@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\CustomerShipment;
 use App\Models\OrderQueue;
 use App\Services\Admin\ShippingService;
+use http\Exception\RuntimeException;
 use JsonException;
 
 class CustomerShipmentObserver
@@ -122,5 +123,25 @@ class CustomerShipmentObserver
                 $customerShipment->save();
             }
         }
+    }
+
+//    public function deleting(CustomerShipment $customerShipment): void
+//    {
+//        foreach ($customerShipment->orderQueues as $orderQueue) {
+//            $hasEndStatus = [];
+//            /** @var $orderQueue OrderQueue */
+//            if ($orderQueue->getLastStatus()->end_status) {
+//                $hasEndStatus[] = $orderQueue->id;
+//            }
+//
+//            if (count($hasEndStatus) > 0) {
+//                throw new RuntimeException(__('You cannot delete this customer shipment, because it contains PO\'s which have an end status.'));
+//            }
+//        }
+//    }
+
+    public function deleted(CustomerShipment $customerShipment): void
+    {
+       $customerShipment->orderQueues()->update(['customer_shipment_id' => null]);
     }
 }
