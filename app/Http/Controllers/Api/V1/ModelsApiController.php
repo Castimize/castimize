@@ -47,12 +47,15 @@ class ModelsApiController extends ApiController
 
         $models = [];
         foreach ($customer->models as $model) {
-            $key = sprintf('%s-%s-%s-%s-%s',
+            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s',
                 $model->name,
                 $model->material_id,
                 $model->model_volume_cc,
                 $model->model_surface_area_cm2,
-                $model->model_box_volume
+                $model->model_box_volume,
+                $model->model_x_length,
+                $model->model_y_length,
+                $model->model_z_length
             );
             if (!array_key_exists($key, $models)) {
                 $models[$key] = $model;
