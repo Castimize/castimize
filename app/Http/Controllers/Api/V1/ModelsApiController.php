@@ -45,7 +45,22 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $response = ModelResource::collection($customer->models->keyBy->id);
+        $models = [];
+        foreach ($customer->models as $model) {
+            $key = sprintf('%s-%s-%s-%s-%s',
+                $model->name,
+                $model->material_id,
+                $model->model_volume_cc,
+                $model->model_surface_area_cm2,
+                $model->model_box_volume
+            );
+            if (!array_key_exists($key, $models)) {
+                $models[$key] = $model;
+            }
+        }
+        $models = collect($models);
+
+        $response = ModelResource::collection($models->keyBy->id);
         LogRequestService::addResponse(request(), $response);
         return $response;
     }
