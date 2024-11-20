@@ -8,13 +8,11 @@ use DateTimeZone;
 use Gldrenthe89\NovaStringGeneratorField\NovaGeneratePassword;
 use Gldrenthe89\NovaStringGeneratorField\NovaGenerateString;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\Rules;
 use Jeffbeltran\SanctumTokens\SanctumTokens;
 use Laravel\Nova\Fields\Avatar;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphToMany;
 use Laravel\Nova\Fields\Number;
-use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -150,8 +148,14 @@ class User extends Resource
 
             SanctumTokens::make(),
 
-            MorphToMany::make(__('Roles'), 'roles', Role::class),
-            MorphToMany::make(__('Permissions'), 'permissions', Permission::class),
+            MorphToMany::make(__('Roles'), 'roles', Role::class)
+                ->canSee(function ($request) {
+                    return $request->user()->isSuperAdmin();
+                }),
+            MorphToMany::make(__('Permissions'), 'permissions', Permission::class)
+                ->canSee(function ($request) {
+                    return $request->user()->isSuperAdmin();
+                }),
 
             new Panel(__('History'), $this->commonMetaData()),
         ];
