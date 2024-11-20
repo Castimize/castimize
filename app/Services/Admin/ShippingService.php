@@ -84,11 +84,11 @@ class ShippingService
         $createAddressMethod = 'create' . $type . 'Address';
         $cacheKey = $this->_shippoService->getCacheKey($this->$getAddressMethod());
 
-        return Cache::remember($cacheKey . '_v3', 31556926, function() use ($getAddressMethod, $setAddressMethod, $createAddressMethod, $getShipmentAddressMethod) {
+        //return Cache::remember($cacheKey . '_v3', 31556926, function() use ($getAddressMethod, $setAddressMethod, $createAddressMethod, $getShipmentAddressMethod) {
             return $this->_shippoService->$setAddressMethod($this->$getAddressMethod())
                 ->$createAddressMethod(true)
                 ->$getShipmentAddressMethod();
-        });
+        //});
     }
 
     /**
@@ -448,8 +448,11 @@ class ShippingService
             $valid = $validation_results['is_valid'] ? 1 : 0;
         }
         $errorMessages = [];
-        if (is_array($validation_results) && array_key_exists('messages', $validation_results)) {
+        if ($validation_results['messages']) {
             foreach ($validation_results['messages'] as $message) {
+                if ($message['type'] === 'address_error') {
+                    $valid = 0;
+                }
                 $errorMessages[] = [
                     'source' => $message['source'],
                     'code' => $message['code'],
