@@ -171,7 +171,7 @@ class Upload extends Model
     protected function statusSlug(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->getLastStatus()->slug,
+            get: fn () => $this->getLastStatus()?->slug,
         );
     }
 
@@ -181,7 +181,7 @@ class Upload extends Model
     protected function statusCreatedAt(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->getLastStatus()->created_at,
+            get: fn () => $this->getLastStatus()?->created_at ?? $this->created_at,
         );
     }
 
