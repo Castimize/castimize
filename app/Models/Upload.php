@@ -76,7 +76,7 @@ class Upload extends Model
      */
     public function getLastStatus(): mixed
     {
-        return $this->orderQueue->getLastStatus();
+        return $this->orderQueue?->getLastStatus();
     }
 
     /**
