@@ -430,9 +430,9 @@ class OrdersService
     public function handleManualRefund(Order $order, float $refundAmount)
     {
         $order->has_manual_refund = true;
-        $order->total_refund += ($refundAmount * 100);
+        $order->total_refund += $refundAmount;
         if ($order->total_tax > 0.00) {
-            $order->total_refund_tax = ($order->tax_percentage / 100) * ($refundAmount * 100);
+            $order->total_refund_tax = ($order->tax_percentage / 100) * $refundAmount;
         }
         $order->save();
 
