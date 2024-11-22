@@ -61,6 +61,10 @@ class InQueue extends Lens
             $query->with(['orderQueueStatuses', 'manufacturerCost', 'upload'])
                 ->whereHasLastOrderQueueStatus('in-queue')
                 ->where('manufacturer_id', auth()->user()->manufacturer->id)
+                ->whereHas('order', function (Builder $query) {
+                    $query->removeTestEmailAddresses('email')
+                        ->removeTestCustomerIds('customer_id');
+                })
         ));
     }
 

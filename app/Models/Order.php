@@ -423,6 +423,19 @@ class Order extends Model
         ]);
     }
 
+    public function scopeRemoveTestCustomerIds($query, string $column)
+    {
+        return $query->whereNotIn($column, [
+            8,
+            9,
+            10,
+            11,
+            12,
+            15,
+            19,
+        ]);
+    }
+
     /**
      * Get the days overdue
      * @return float|null

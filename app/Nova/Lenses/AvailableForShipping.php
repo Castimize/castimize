@@ -60,6 +60,10 @@ class AvailableForShipping extends Lens
         return $request->withOrdering($request->withFilters(
             $query->whereHasLastOrderQueueStatus('available-for-shipping')
                 ->where('manufacturer_id', auth()->user()->manufacturer?->id)
+                ->whereHas('order', function (Builder $query) {
+                    $query->removeTestEmailAddresses('email')
+                        ->removeTestCustomerIds('customer_id');
+                })
         ));
     }
 

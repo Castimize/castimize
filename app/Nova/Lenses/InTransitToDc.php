@@ -62,6 +62,10 @@ class InTransitToDc extends Lens
         return $request->withOrdering($request->withFilters(
             $query->whereHasLastOrderQueueStatus('in-transit-to-dc')
                 ->where('manufacturer_id', auth()->user()->manufacturer?->id)
+                ->whereHas('order', function (Builder $query) {
+                    $query->removeTestEmailAddresses('email')
+                        ->removeTestCustomerIds('customer_id');
+                })
         ));
     }
 

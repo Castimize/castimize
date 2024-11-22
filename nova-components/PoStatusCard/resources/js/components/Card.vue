@@ -1,12 +1,12 @@
 <template>
     <div
         id="po-status-card"
-        class="grid gap-4 mb-4 lg:mb-0 items-center justify-between min-h-8"
-        :class="`grid-cols-${this.card.statusesCount}`"
+        class="grid gap-4 mb-4 lg:mb-0 min-h-8 grid-cols-4"
+        :class="`md:grid-cols-${this.card.statusesCount}`"
     >
         <Card
             v-for="(status, slug) in this.card.statuses"
-            class="px-6 py-3"
+            class="px-3 py-3"
             :class="{ 'dark:active-dark active-light': this.activeSlug(slug)}"
         >
             <a class="flex items-center justify-center" :href="`/admin/resources/pos/lens/${slug}`">
@@ -57,7 +57,6 @@ export default {
     },
 
   mounted() {
-        console.log(this.card.activeSlug);
       this.statuses = this.card.statuses;
       this.refreshInterval = this.card.refreshIntervalSeconds;
       this.getTotals();

@@ -64,6 +64,10 @@ class AtDc extends Lens
         return $request->withOrdering($request->withFilters(
             $query->whereHasLastOrderQueueStatus('at-dc')
                 ->where('manufacturer_id', auth()->user()->manufacturer?->id)
+                ->whereHas('order', function (Builder $query) {
+                    $query->removeTestEmailAddresses('email')
+                        ->removeTestCustomerIds('customer_id');
+                })
         ));
     }
 

@@ -111,7 +111,11 @@ class Po extends Resource
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        $query->where('manufacturer_id', auth()->user()->manufacturer->id);
+        $query->where('manufacturer_id', auth()->user()->manufacturer->id)
+        ->whereHas('order', function (Builder $query) {
+            $query->removeTestEmailAddresses('email')
+                ->removeTestCustomerIds('customer_id');
+        });
         if (empty($request->get('orderBy'))) {
             $query->getQuery()->orders = [];
 
