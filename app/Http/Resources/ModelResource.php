@@ -32,6 +32,7 @@ class ModelResource extends JsonResource
             'material_name' => $this->material->name,
             'material_id' => $this->material->id,
             'material_wp_id' => $this->material->wp_id,
+            'model_name' => $this->model_name,
             'name' => $this->name,
             'file_name' => $this->file_name,
             'raw_file_name' => str_replace('wp-content/uploads/p3d/', '', $this->file_name),
@@ -44,6 +45,7 @@ class ModelResource extends JsonResource
             'model_surface_area_cm2' => $this->model_surface_area_cm2,
             'model_parts' => $this->model_parts,
             'model_box_volume' => $this->model_box_volume,
+            'categories' => $this->categories,
             'meta_data' => $metaData,
         ];
     }

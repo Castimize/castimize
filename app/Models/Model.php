@@ -25,6 +25,7 @@ class Model extends EloquentModel
     protected $fillable = [
         'customer_id',
         'material_id',
+        'model_name',
         'name',
         'file_name',
         'model_volume_cc',
@@ -34,6 +35,7 @@ class Model extends EloquentModel
         'model_surface_area_cm2',
         'model_parts',
         'model_box_volume',
+        'categories',
         'meta_data',
     ];
 
@@ -48,6 +50,7 @@ class Model extends EloquentModel
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'categories' => 'json',
             'meta_data' => AsArrayObject::class,
         ];
     }

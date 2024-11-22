@@ -6,6 +6,7 @@ namespace App\Nova;
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\File;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
@@ -63,6 +64,9 @@ class Model extends Resource
         return [
             ID::make()->sortable(),
 
+            Text::make(__('Model name'), 'model_name')
+                ->onlyOnDetail(),
+
             Text::make(__('Name'), 'name')
                 ->sortable(),
 
@@ -103,6 +107,9 @@ class Model extends Resource
                     return $request->viaRelationship();
                 })
                 ->step(1),
+
+            Code::make(__('Categories'), 'categories')
+                ->json(),
 
             new Panel(__('History'), $this->commonMetaData(showCreatedAtOnIndex: true, showUpdatedAtOnIndex: false, showEditorOnIndex: false)),
         ];

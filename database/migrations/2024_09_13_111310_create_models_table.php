@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('customer_id')->nullable()->index();
             $table->unsignedBigInteger('material_id')->nullable()->index();
+            $table->string('model_name')->nullable();
             $table->string('name');
             $table->string('file_name')->index();
             $table->float('model_volume_cc');
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->float('model_surface_area_cm2');
             $table->integer('model_parts');
             $table->float('model_box_volume');
+            $table->json('categories')->nullable();
             $table->json('meta_data')->nullable();
             $table->timestamps();
             $table->softDeletes();
