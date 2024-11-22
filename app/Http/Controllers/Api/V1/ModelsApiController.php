@@ -23,7 +23,7 @@ class ModelsApiController extends ApiController
     public function show(int $customerId, Model $model): ModelResource
     {
         abort_if(Gate::denies('viewModel'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if (!$model || (int)$model->customer_id !== $customerId) {
+        if (!$model || (int)$model->customer->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
