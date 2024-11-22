@@ -20,13 +20,12 @@ class ModelsApiController extends ApiController
     {
     }
 
-    /**
-     * @param Model $model
-     * @return ModelResource
-     */
-    public function show(Model $model): ModelResource
+    public function show(int $customerId, Model $model): ModelResource
     {
         abort_if(Gate::denies('viewModel'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (!$model || (int)$model->customer_id !== $customerId) {
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
 
         $response = new ModelResource($model);
         LogRequestService::addResponse(request(), $response);

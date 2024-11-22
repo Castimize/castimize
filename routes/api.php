@@ -35,7 +35,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::post('prices/calculate/shipping', 'PricesApiController@calculateShipping')->name('api.prices.calculate.shipping');
 
             // Models
-            Route::get('models/{model}', 'ModelsApiController@show')->name('api.models.show');
+            Route::get('models/wp/{customerId}/{model}', 'ModelsApiController@show')->name('api.models.show');
             Route::get('models/wp/{customerId}', 'ModelsApiController@showModelsWpCustomer')->name('api.models.show-customer-wp-models');
             Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
 
