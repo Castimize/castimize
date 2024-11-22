@@ -265,8 +265,8 @@ class ShippingService
         }
 
         $this->_shippoService
-            ->setShipmentFromAddress($shippoFromAddress)
-            ->setShipmentToAddress($shippoToAddress)
+            ->setShipmentFromAddress($shippoToAddress)
+            ->setShipmentToAddress($shippoFromAddress)
             ->createParcel($manufacturerShipment->parcel);
 
         $orderNumber = null;
@@ -284,12 +284,12 @@ class ShippingService
         // Make as return and bill to us
         $extra = [
             'is_return' => true,
-            'billing' => [
-                'account' => 'G2240C',
-                'country' => 'NL',
-                'type' => 'THIRD_PARTY',
-                'zip' => $toAddress['zip'],
-            ],
+//            'billing' => [
+//                'account' => 'G2240C',
+//                'country' => 'NL',
+//                'type' => 'THIRD_PARTY',
+//                'zip' => $toAddress['zip'],
+//            ],
         ];
 
         $this->_shippoService
@@ -301,6 +301,7 @@ class ShippingService
             ])
             ->createShipment($extra);
         $shippoShipment = $this->_shippoService->getShipment();
+//        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 
         if ($rate === null) {
@@ -324,7 +325,7 @@ class ShippingService
         $this->_shippoService = $this->_shippoService
             ->createLabel($manufacturerShipment->id, $rate['object_id']);
         $transaction = $this->_shippoService->getTransaction();
-//        dd($transaction);
+        dd($transaction);
         Log::info(print_r($transaction, true));
         if ($transaction && $transaction['status'] === 'SUCCESS') {
             return $this->_shippoService->toArray();
