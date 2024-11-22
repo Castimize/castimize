@@ -164,7 +164,7 @@ class ShippingService
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
-        [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results']);
+        [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results'], false);
         if (!$valid) {
             $message = __('The shipping to address is invalid with the following messages') . PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
@@ -255,7 +255,7 @@ class ShippingService
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
-        [$valid, $errorMessages] = $this->checkAddressValid($shippoFromAddress['validation_results']);
+        [$valid, $errorMessages] = $this->checkAddressValid($shippoFromAddress['validation_results'], false);
         if (!$valid) {
             $message = __('The shipping from address is invalid with the following messages') . PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
@@ -281,12 +281,15 @@ class ShippingService
             $this->_shippoService->createCustomsItem($selectedPO->upload);
         }
 
-        // To bill us in UPS for a manufacturer shipment
-        $extra['billing'] = [
-            'account' => 'G2240C',
-            'country' => 'NL',
-            'type' => 'THIRD_PARTY',
-            'zip' => $toAddress['zip'],
+        // Make as return and bill to us
+        $extra = [
+            'is_return' => true,
+            'billing' => [
+                'account' => 'G2240C',
+                'country' => 'NL',
+                'type' => 'THIRD_PARTY',
+                'zip' => $toAddress['zip'],
+            ],
         ];
 
         $this->_shippoService
@@ -321,6 +324,7 @@ class ShippingService
         $this->_shippoService = $this->_shippoService
             ->createLabel($manufacturerShipment->id, $rate['object_id']);
         $transaction = $this->_shippoService->getTransaction();
+//        dd($transaction);
         Log::info(print_r($transaction, true));
         if ($transaction && $transaction['status'] === 'SUCCESS') {
             return $this->_shippoService->toArray();
@@ -437,11 +441,7 @@ class ShippingService
         return $country->logisticsZone->shipping_servicelevel_token;
     }
 
-    /**
-     * @param $validation_results
-     * @return array
-     */
-    private function checkAddressValid($validation_results): array
+    private function checkAddressValid($validation_results, bool $frontend = true): array
     {
         $valid = 1;
         if (app()->environment('production') && is_array($validation_results)) {
@@ -450,7 +450,7 @@ class ShippingService
         $errorMessages = [];
         if ($validation_results['messages']) {
             foreach ($validation_results['messages'] as $message) {
-                if ($message['type'] === 'address_error') {
+                if ($message['type'] === 'address_error' && $frontend) {
                     $valid = 0;
                 }
                 $errorMessages[] = [
