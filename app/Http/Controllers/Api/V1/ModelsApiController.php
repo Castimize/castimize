@@ -84,7 +84,7 @@ class ModelsApiController extends ApiController
         }
         $model->model_name = $request->model_name;
         $categories = [];
-        foreach ($request->categories as $category) {
+        foreach (explode(',', $request->categories) as $category) {
             $categories[] = [
                 'category' => $category,
             ];
