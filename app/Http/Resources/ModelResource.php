@@ -26,6 +26,10 @@ class ModelResource extends JsonResource
                 }
             }
         }
+        $categoriesRaw = [];
+        foreach ($this->categories as $category) {
+            $categoriesRaw[] = $category['category'];
+        }
         return [
             'id' => $this->id,
             'customer_id' => $this->customer_id,
@@ -45,7 +49,8 @@ class ModelResource extends JsonResource
             'model_surface_area_cm2' => $this->model_surface_area_cm2,
             'model_parts' => $this->model_parts,
             'model_box_volume' => $this->model_box_volume,
-            'categories' => $this->categories,
+            'categories_json' => $this->categories,
+            'categories' => implode(',', $categoriesRaw),
             'meta_data' => $metaData,
         ];
     }
