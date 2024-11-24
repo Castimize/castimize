@@ -77,6 +77,29 @@ class ModelsApiController extends ApiController
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
+    public function update(Request $request, int $customerId, Model $model): JsonResponse
+    {
+        if (!$model || (int)$model->customer->wp_id !== $customerId) {
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+        $model->update($request->all());
+
+        $response = new ModelResource($model);
+        LogRequestService::addResponse($request, $response);
+        return $response->response()
+            ->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    public function destroy(int $customerId, Model $model): Response
+    {
+        if (!$model || (int)$model->customer->wp_id !== $customerId) {
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+        $model->delete();
+
+        return response(null, Response::HTTP_NO_CONTENT);
+    }
+
     /**
      * @param Request $request
      * @return JsonResponse
