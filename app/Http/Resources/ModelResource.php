@@ -27,8 +27,10 @@ class ModelResource extends JsonResource
             }
         }
         $categoriesRaw = [];
-        foreach ($this->categories as $category) {
-            $categoriesRaw[] = $category['category'];
+        if ($this->categories !== null) {
+            foreach ($this->categories as $category) {
+                $categoriesRaw[] = $category['category'];
+            }
         }
         return [
             'id' => $this->id,
