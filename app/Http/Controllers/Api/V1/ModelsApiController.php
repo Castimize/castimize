@@ -82,7 +82,16 @@ class ModelsApiController extends ApiController
         if (!$model || (int)$model->customer->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
-        $model->update($request->all());
+        $model->model_name = $request->model_name;
+        $categories = [];
+        foreach ($request->categories as $category) {
+            $categories[] = [
+                'category' => $category,
+            ];
+        }
+        $model->categories = $categories;
+
+        $model->save();
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
