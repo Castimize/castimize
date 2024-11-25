@@ -271,12 +271,11 @@ class ShippingService
 
         $orderNumber = null;
         $currency = null;
-        $shippingCountry = null;
+        $shippingCountry = $manufacturerShipment->fromAddress['country'];
         foreach ($manufacturerShipment->selectedPOs as $selectedPO) {
             if ($orderNumber === null) {
                 $orderNumber = $selectedPO->upload->order->order_number;
                 $currency = $selectedPO->upload->order->currency_code;
-                $shippingCountry = $selectedPO->upload->order->shipping_country;
             }
             $this->_shippoService->createCustomsItem($selectedPO->upload);
         }
@@ -325,7 +324,7 @@ class ShippingService
         $this->_shippoService = $this->_shippoService
             ->createLabel($manufacturerShipment->id, $rate['object_id']);
         $transaction = $this->_shippoService->getTransaction();
-        dd($transaction);
+
         Log::info(print_r($transaction, true));
         if ($transaction && $transaction['status'] === 'SUCCESS') {
             return $this->_shippoService->toArray();
