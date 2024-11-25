@@ -10,6 +10,7 @@ use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Http\Requests\ResourceIndexRequest;
 
 trait ManufacturerPOFieldsTrait
 {
@@ -90,7 +91,10 @@ trait ManufacturerPOFieldsTrait
                 ->help(__('Max 500 characters'))
                 ->modelClass(\App\Models\OrderQueue::class),
 
-            HasOne::make(__('Manufacturer shipment'), 'manufacturerShipment', ManufacturerShipment::class),
+            HasOne::make(__('Manufacturer shipment'), 'manufacturerShipment', ManufacturerShipment::class)
+                ->hideFromIndex(function (ResourceIndexRequest $request) {
+                    return $request->viaRelationship();
+                }),
         ];
     }
 }

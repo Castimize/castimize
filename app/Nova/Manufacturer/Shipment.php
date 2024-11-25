@@ -209,7 +209,7 @@ class Shipment extends Resource
                 ->exceptOnForms()
                 ->sortable(),
 
-            HasMany::make(__('PO\'s'), 'orderQueues', OrderQueue::class)
+            HasMany::make(__('PO\'s'), 'orderQueues', Po::class)
                 ->onlyOnDetail(),
 
             DateTime::make(__('Sent at'), 'sent_at')
