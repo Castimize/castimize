@@ -49,7 +49,7 @@ class LogRequest extends Model
             'server' => AsArrayObject::class,
             'headers' => AsArrayObject::class,
             'request' => AsArrayObject::class,
-            'response' => AsArrayObject::class,
+            'response' => 'json',
         ];
     }
 }
