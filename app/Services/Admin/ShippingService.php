@@ -304,7 +304,7 @@ class ShippingService
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 
         if ($rate === null) {
-            Log::info(print_r($shippoShipment, true));
+//            Log::info(print_r($shippoShipment, true));
             $errorMessages = [];
             foreach ($shippoShipment['messages'] as $message) {
                 $errorMessages[] = $message['text'];
@@ -325,7 +325,7 @@ class ShippingService
             ->createLabel($manufacturerShipment->id, $rate['object_id']);
         $transaction = $this->_shippoService->getTransaction();
 
-        Log::info(print_r($transaction, true));
+        //Log::info(print_r($transaction, true));
         if ($transaction && $transaction['status'] === 'SUCCESS') {
             return $this->_shippoService->toArray();
         }
