@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -288,6 +289,10 @@ class OrderQueue extends Model
         $options = [];
         $orderQueues = self::with(['upload.material.materialGroup', 'order.orderQueues', 'orderQueueStatuses'])
             ->whereHasLastOrderQueueStatus('available-for-shipping')
+            ->whereHas('order', function (Builder $query) {
+                $query->removeTestEmailAddresses('email')
+                    ->removeTestCustomerIds('customer_id');
+            })
             ->whereNull('customer_shipment_id')
             ->get()
             ->sortBy('order.order_number')
