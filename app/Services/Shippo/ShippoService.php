@@ -454,19 +454,13 @@ class ShippoService
         return $this;
     }
 
-    /**
-     * Create the shipping label transaction
-     *
-     * @param int $customerShipmentId
-     * @param $rateId -- object_id from rates_list
-     * @return static
-     */
-    public function createLabel(int $customerShipmentId, $rateId): static
+    public function createLabel(int $shipmentId, $rateId, $isCustomerShipment = true): static
     {
+        $typeShipment = $isCustomerShipment ? 'customer_shipment' : 'manufacturer_shipment';
         $data = [
             'rate' => $rateId,
             'label_file_type' => 'ZPLII',
-            'metadata' => sprintf('customer_shipment:%s', $customerShipmentId),
+            'metadata' => sprintf('%s:%s', $typeShipment, $shipmentId),
             'async' => false,
         ];
         $this->_transaction = Shippo_Transaction::create($data);
