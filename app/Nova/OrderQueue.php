@@ -133,7 +133,18 @@ class OrderQueue extends Resource
             ID::make()->sortable(),
 
             BelongsTo::make(__('Order'), 'order')
+                ->canSee(function ($request) {
+                    return $request->user()->isBackendUser();
+                })
                 ->hideOnExport()
+                ->sortable(),
+
+            Text::make(__('Order'), function ($model) {
+                return $model->order->order_number;
+            })
+                ->canSee(function ($request) {
+                    return $request->user()->isManufacturer();
+                })
                 ->sortable(),
 
             Text::make(__('Customer'), function ($model) {
@@ -141,8 +152,19 @@ class OrderQueue extends Resource
                         ? '<span><a class="link-default" href="/admin/resources/customers/' . $model->order->customer_id . '">' . $model->order->billing_name . '</a></span>'
                         : '';
                 })
+                ->canSee(function ($request) {
+                    return $request->user()->isBackendUser();
+                })
                 ->asHtml()
                 ->hideOnExport()
+                ->sortable(),
+
+            Text::make(__('Customer'), function ($model) {
+                    return $model->order->customer_id;
+                })
+                ->canSee(function ($request) {
+                    return $request->user()->isManufacturer();
+                })
                 ->sortable(),
 
             Text::make(__('Country'), function ($model) {
