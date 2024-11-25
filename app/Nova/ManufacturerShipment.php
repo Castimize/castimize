@@ -17,6 +17,7 @@ use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Heading;
+use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphMany;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
@@ -154,6 +155,8 @@ class ManufacturerShipment extends Resource
     public function fields(NovaRequest $request)
     {
         return [
+            ID::make()->sortable(),
+
             BelongsTo::make(__('Manufacturer'), 'manufacturer', Manufacturer::class)
                 ->sortable(),
 
