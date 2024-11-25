@@ -17,6 +17,7 @@ use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Heading;
 use Laravel\Nova\Fields\Hidden;
+use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphMany;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
@@ -162,6 +163,8 @@ class Shipment extends Resource
     public function fields(NovaRequest $request)
     {
         return [
+            Id::make()->sortable(),
+
             Text::make(__('Tracking number'), function () {
                 if (empty($this->tracking_url)) {
                     return $this->tracking_number;
@@ -225,6 +228,11 @@ class Shipment extends Resource
                 ->sortable(),
 
             Number::make('Total parts', 'total_parts')
+                ->exceptOnForms()
+                ->sortable(),
+
+            DateTime::make(__('Created at'), 'created_at')
+                ->displayUsing(fn ($value) => $value ? $value->format('d-m-Y H:i:s') : '')
                 ->exceptOnForms()
                 ->sortable(),
 
