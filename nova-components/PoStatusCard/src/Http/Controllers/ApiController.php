@@ -3,6 +3,7 @@
 namespace Castimize\PoStatusCard\Http\Controllers;
 
 use App\Models\OrderQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -27,8 +28,12 @@ class ApiController extends Controller
         $totals = [];
 
         foreach ($request->statuses as $slug => $status) {
-            $query = OrderQueue::with(['orderQueueStatuses'])
-                ->whereHasLastOrderQueueStatus($slug);
+            $query = OrderQueue::with(['order', 'orderQueueStatuses'])
+                ->whereHasLastOrderQueueStatus($slug)
+                ->whereHas('order', function (Builder $query) {
+                    $query->removeTestEmailAddresses('email')
+                        ->removeTestCustomerIds('customer_id');
+                });
 
             if (auth()->user()->hasRole('manufacturer')) {
                 $query->where('manufacturer_id', auth()->user()->manufacturer->id);
