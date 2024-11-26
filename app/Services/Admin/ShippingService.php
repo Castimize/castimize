@@ -304,7 +304,7 @@ class ShippingService
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 
         if ($rate === null) {
-//            Log::info(print_r($shippoShipment, true));
+            Log::info(print_r($shippoShipment, true));
             $errorMessages = [];
             foreach ($shippoShipment['messages'] as $message) {
                 $errorMessages[] = $message['text'];

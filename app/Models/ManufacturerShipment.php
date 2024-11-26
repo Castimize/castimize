@@ -73,8 +73,8 @@ class ManufacturerShipment extends Model
             'arrived_at' => 'datetime',
             'time_in_transit' => 'integer',
             'expected_delivery_date' => 'datetime',
-            'shippo_shipment_meta_data' => AsArrayObject::class,
-            'shippo_transaction_meta_data' => AsArrayObject::class,
+            'shippo_shipment_meta_data' => 'json',
+            'shippo_transaction_meta_data' => 'json',
         ];
     }
 
