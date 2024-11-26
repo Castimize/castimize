@@ -119,7 +119,7 @@ class ManufacturerShipmentObserver
                 if ($response['transaction'] && $response['transaction']['status'] === 'SUCCESS') {
                     $manufacturerShipment->shippo_shipment_id = $response['shipment']['object_id'];
                     $manufacturerShipment->shippo_shipment_meta_data = $response['shipment'];
-                    $manufacturerShipment->expected_delivery_date = $response['shipment']['eta'];
+                    $manufacturerShipment->expected_delivery_date = $response['transaction']['eta'] ?? null;
                     $manufacturerShipment->tracking_number = $response['transaction']['tracking_number'];
                     $manufacturerShipment->tracking_url = $response['transaction']['tracking_url_provider'];
                     $manufacturerShipment->shippo_transaction_id = $response['transaction']['object_id'];

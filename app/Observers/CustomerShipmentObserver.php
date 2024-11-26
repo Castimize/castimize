@@ -111,7 +111,7 @@ class CustomerShipmentObserver
             if ($response['transaction'] && $response['transaction']['status'] === 'SUCCESS') {
                 $customerShipment->shippo_shipment_id = $response['shipment']['object_id'];
                 $customerShipment->shippo_shipment_meta_data = $response['shipment'];
-                $customerShipment->expected_delivery_date = $response['shipment']['eta'];
+                $customerShipment->expected_delivery_date = $response['transaction']['eta'] ?? null;
                 $customerShipment->tracking_number = $response['transaction']['tracking_number'];
                 $customerShipment->tracking_url = $response['transaction']['tracking_url_provider'];
                 $customerShipment->shippo_transaction_id = $response['transaction']['object_id'];
