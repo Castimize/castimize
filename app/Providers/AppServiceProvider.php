@@ -70,7 +70,7 @@ class AppServiceProvider extends ServiceProvider
     private function setBusinessDays()
     {
         // You can select one of our official list
-        $baseList = 'us-national'; // or region such as 'us-il'
+        $baseList = 'nl-national'; // or region such as 'us-il'
 
 // You can add/remove days (optional):
         $additionalHolidays = [
