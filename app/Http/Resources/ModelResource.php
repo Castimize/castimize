@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Material;
+use App\Services\Admin\CalculatePricesService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -32,6 +34,13 @@ class ModelResource extends JsonResource
                 $categoriesRaw[] = $category['category'];
             }
         }
+
+        $calculatedTotal = null;
+        $price = $this->material->prices->first();
+        if ($price) {
+            $calculatedTotal = (new CalculatePricesService())->calculatePriceOfModel($price, $this->model_volume_cc, $this->model_surface_area_cm2);
+        }
+
         return [
             'id' => $this->id,
             'customer_id' => $this->customer_id,
@@ -51,6 +60,7 @@ class ModelResource extends JsonResource
             'model_surface_area_cm2' => $this->model_surface_area_cm2,
             'model_parts' => $this->model_parts,
             'model_box_volume' => $this->model_box_volume,
+            'price' => $calculatedTotal,
             'categories_json' => $this->categories,
             'categories' => implode(',', $categoriesRaw),
             'meta_data' => $metaData,
