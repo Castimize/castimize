@@ -421,7 +421,7 @@ class OrdersService
         $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
 
         if ($cancelOrder) {
-            $this->woocommerceApiService->updateOrderStatus($order->wp_id, 'canceled');
+            $this->woocommerceApiService->updateOrderStatus($order->wp_id, 'cancelled');
         }
 
         return $refundOrder;
@@ -436,7 +436,7 @@ class OrdersService
         }
         $order->save();
 
-        return (new WoocommerceApiService())->refundOrder($order->wp_id, (string)$refundAmount);
+        return $this->woocommerceApiService->refundOrder($order->wp_id, (string)$refundAmount);
     }
 
     public function handleRefund(Order $order, $orderQueues)
@@ -474,7 +474,7 @@ class OrdersService
         $refundOrder = (new WoocommerceApiService())->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
 
         if ($cancelOrder) {
-            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, 'canceled');
+            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, 'cancelled');
         }
 
         return $refundOrder;
