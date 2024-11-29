@@ -133,4 +133,14 @@ class ManufacturerShipmentObserver
             }
         }
     }
+
+    public function deleted(ManufacturerShipment $manufacturerShipment): void
+    {
+        $orderQueuesService = new OrderQueuesService();
+        foreach ($manufacturerShipment->orderQueues as $orderQueue) {
+            $orderQueuesService->setStatus($orderQueue, 'available-for-shipping');
+            $orderQueue->manufacturer_shipment_id = null;
+            $orderQueue->save();
+        }
+    }
 }
