@@ -38,9 +38,9 @@ class PricesApiController extends ApiController
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        if ($request->has('file_name', 'original_file_name') && $request->get('file_name') !== null && $request->get('original_file_name') !== null) {
-            $this->modelsService->storeModelFromApi($request);
-        }
+//        if ($request->has('file_name', 'original_file_name') && $request->get('file_name') !== null && $request->get('original_file_name') !== null) {
+//            $this->modelsService->storeModelFromApi($request);
+//        }
 
         $response = new CalculatedPriceResource($price);
         LogRequestService::addResponse($request, $response);
