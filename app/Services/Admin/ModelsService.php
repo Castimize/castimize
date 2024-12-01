@@ -8,12 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ModelsService
 {
-    /**
-     * Store a customer completely from API request
-     * @param $request
-     * @return Model|null
-     */
-    public function storeModelFromApi($request): Model|null
+    public function storeModelFromApi($request, ?int $customerId = null): Model|null
     {
         $material = Material::where('wp_id', $request->wp_id)->first();
         $fileName = env('APP_SITE_STL_UPLOAD_DIR') . $request->file_name;
@@ -28,7 +23,7 @@ class ModelsService
         }
 
         return Model::create([
-            'customer_id' => $request->customer_id ?? null,
+            'customer_id' => $customerId,
             'material_id' => $material->id,
             'model_name' => $request->model_name ?? null,
             'name' => $request->original_file_name,
