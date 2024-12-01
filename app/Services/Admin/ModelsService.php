@@ -38,4 +38,23 @@ class ModelsService
             'categories' => $categories,
         ]);
     }
+
+    public function updateModelFromApi($request, Model $model, ?int $customerId = null): Model
+    {
+        $model->model_name = $request->model_name;
+        $categories = null;
+        if ($request->has('categories')) {
+            $categories = [];
+            foreach (explode(',', $request->categories) as $category) {
+                $categories[] = [
+                    'category' => $category,
+                ];
+            }
+        }
+        $model->categories = $categories;
+
+        $model->save();
+
+        return $model;
+    }
 }

@@ -86,7 +86,7 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $model = $this->modelsService->storeModelFromApi($request);
+        $model = $this->modelsService->storeModelFromApi($request, $customerId);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
@@ -99,16 +99,7 @@ class ModelsApiController extends ApiController
         if (!$model || (int)$model->customer->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
-        $model->model_name = $request->model_name;
-        $categories = [];
-        foreach (explode(',', $request->categories) as $category) {
-            $categories[] = [
-                'category' => $category,
-            ];
-        }
-        $model->categories = $categories;
-
-        $model->save();
+        $model = $this->modelsService->updateModelFromApi($request, $model, $customerId);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
