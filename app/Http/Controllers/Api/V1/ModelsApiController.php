@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Js;
 use Symfony\Component\HttpFoundation\Response;
 
 class ModelsApiController extends ApiController
@@ -69,6 +70,22 @@ class ModelsApiController extends ApiController
 
     public function storeModelWp(Request $request): JsonResponse
     {
+        $model = $this->modelsService->storeModelFromApi($request);
+
+        $response = new ModelResource($model);
+        LogRequestService::addResponse($request, $response);
+        return $response->response()
+            ->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    public function store(int $customerId, Request $request): JsonResponse
+    {
+        $customer = Customer::where('wp_id', $customerId)->first();
+        if ($customer === null) {
+            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+
         $model = $this->modelsService->storeModelFromApi($request);
 
         $response = new ModelResource($model);

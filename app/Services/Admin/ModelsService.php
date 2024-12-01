@@ -17,9 +17,20 @@ class ModelsService
     {
         $material = Material::where('wp_id', $request->wp_id)->first();
         $fileName = env('APP_SITE_STL_UPLOAD_DIR') . $request->file_name;
+        $categories = null;
+        if ($request->has('categories')) {
+            $categories = [];
+            foreach (explode(',', $request->categories) as $category) {
+                $categories[] = [
+                    'category' => $category,
+                ];
+            }
+        }
 
         return Model::create([
+            'customer_id' => $request->customer_id ?? null,
             'material_id' => $material->id,
+            'model_name' => $request->model_name ?? null,
             'name' => $request->original_file_name,
             'file_name' => $fileName,
             'model_volume_cc' => $request->material_volume,
@@ -29,6 +40,7 @@ class ModelsService
             'model_surface_area_cm2' => $request->surface_area,
             'model_parts' => $request->model_parts ?? 1,
             'model_box_volume' => $request->box_volume,
+            'categories' => $categories,
         ]);
     }
 }

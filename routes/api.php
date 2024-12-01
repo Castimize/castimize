@@ -38,6 +38,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::get('models/wp/{customerId}/{model}', 'ModelsApiController@show')->name('api.models.show');
             Route::get('models/wp/{customerId}', 'ModelsApiController@showModelsWpCustomer')->name('api.models.show-customer-wp-models');
             Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
+            Route::post('models/wp/{customerId}', 'ModelsApiController@store')->name('api.models.store');
             Route::post('models/wp/{customerId}/{model}', 'ModelsApiController@update')->name('api.models.update');
             Route::post('models/wp/{customerId}/{model}/delete', 'ModelsApiController@destroy')->name('api.models.delete');
 
