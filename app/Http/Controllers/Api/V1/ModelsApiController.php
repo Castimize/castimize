@@ -47,7 +47,8 @@ class ModelsApiController extends ApiController
 
         $models = [];
         foreach ($customer->models as $model) {
-            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s',
+            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s-%s',
+                $model->model_namename,
                 $model->name,
                 $model->material_id,
                 $model->model_volume_cc,
