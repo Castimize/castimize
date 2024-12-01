@@ -86,7 +86,7 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $model = $this->modelsService->storeModelFromApi($request, $customerId);
+        $model = $this->modelsService->storeModelFromApi($request, $customer->id);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
@@ -99,7 +99,7 @@ class ModelsApiController extends ApiController
         if (!$model || (int)$model->customer->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
-        $model = $this->modelsService->updateModelFromApi($request, $model, $customerId);
+        $model = $this->modelsService->updateModelFromApi($request, $model, $model->customer_id);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
