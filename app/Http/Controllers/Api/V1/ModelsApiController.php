@@ -100,7 +100,9 @@ class ModelsApiController extends ApiController
                 ->first();
 
             $newUploads[$itemKey] = $upload;
-            $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name;
+            if ($model) {
+                $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name;
+            }
         }
 
         return response()->json($newUploads);
