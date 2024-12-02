@@ -86,7 +86,7 @@ class ModelsApiController extends ApiController
         }
 
         $newUploads = [];
-        foreach ($request->uploads as $itemKey => $upload) {
+        foreach (json_decode($request->uploads) as $itemKey => $upload) {
             [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
             $model = Model::where('name', $upload['3dp_options']['filename'])
                 ->where('file_name', $upload['3dp_options']['model_name'])
