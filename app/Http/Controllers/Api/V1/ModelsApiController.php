@@ -77,6 +77,33 @@ class ModelsApiController extends ApiController
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
+    public function getCustomModelName(int $customerId, Request $request): JsonResponse
+    {
+        $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
+        if ($customer === null) {
+            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+
+        $upload = $request->upload;
+        [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
+
+        $model = $customer->models->where('name', $upload['3dp_options']['filename'])
+            ->where('file_name', $upload['3dp_options']['model_name'])
+            ->where('material_id', $materialId)
+            ->where('model_volume_cc', $upload['3dp_options']['model_stats_raw']['model']['material_volume'])
+            ->where('model_surface_area_cm2', $upload['3dp_options']['model_stats_raw']['model']['surface_area'])
+            ->where('model_box_volume', $upload['3dp_options']['model_stats_raw']['model']['box_volume'])
+            ->where('model_x_length', $upload['3dp_options']['model_stats_raw']['model']['x_dim'])
+            ->where('model_y_length', $upload['3dp_options']['model_stats_raw']['model']['y_dim'])
+            ->where('model_z_length', $upload['3dp_options']['model_stats_raw']['model']['z_dim'])
+            ->first();
+
+        $modelName = $model ? $model->model_name : null;
+
+        return response()->json(['model_name' => $modelName]);
+    }
+
     public function getCustomModelNames(int $customerId, Request $request): JsonResponse
     {
         $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
