@@ -11,8 +11,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Js;
 use Symfony\Component\HttpFoundation\Response;
 
 class ModelsApiController extends ApiController
@@ -48,7 +46,7 @@ class ModelsApiController extends ApiController
         $models = [];
         foreach ($customer->models as $model) {
             $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s-%s',
-                $model->model_namename,
+                $model->model_name,
                 $model->name,
                 $model->material_id,
                 $model->model_volume_cc,
@@ -77,6 +75,35 @@ class ModelsApiController extends ApiController
         LogRequestService::addResponse($request, $response);
         return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    public function getCustomModelNames(int $customerId, Request $request): JsonResponse
+    {
+        $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
+        if ($customer === null) {
+            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+
+        $newUploads = [];
+        foreach ($request->uploads as $itemKey => $upload) {
+            [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
+            $model = Model::where('name', $upload['3dp_options']['filename'])
+                ->where('file_name', $upload['3dp_options']['model_name'])
+                ->where('material_id', $materialId)
+                ->where('model_volume_cc', $upload['3dp_options']['model']['material_volume'])
+                ->where('model_surface_area_cm2', $upload['3dp_options']['model']['surface_area'])
+                ->where('box_volume', $upload['3dp_options']['model']['box_volume'])
+                ->where('model_x_length', $upload['3dp_options']['model']['x_dim'])
+                ->where('model_y_length', $upload['3dp_options']['model']['y_dim'])
+                ->where('model_z_length', $upload['3dp_options']['model']['z_dim'])
+                ->first();
+
+            $newUploads[$itemKey] = $upload;
+            $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name;
+        }
+
+        return response()->json($newUploads);
     }
 
     public function store(int $customerId, Request $request): JsonResponse
