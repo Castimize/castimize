@@ -93,7 +93,7 @@ class ModelsApiController extends ApiController
                 ->where('material_id', $materialId)
                 ->where('model_volume_cc', $upload['3dp_options']['model_stats_raw']['model']['material_volume'])
                 ->where('model_surface_area_cm2', $upload['3dp_options']['model_stats_raw']['model']['surface_area'])
-                ->where('box_volume', $upload['3dp_options']['model_stats_raw']['model']['box_volume'])
+                ->where('model_box_volume', $upload['3dp_options']['model_stats_raw']['model']['box_volume'])
                 ->where('model_x_length', $upload['3dp_options']['model_stats_raw']['model']['x_dim'])
                 ->where('model_y_length', $upload['3dp_options']['model_stats_raw']['model']['y_dim'])
                 ->where('model_z_length', $upload['3dp_options']['model_stats_raw']['model']['z_dim'])
