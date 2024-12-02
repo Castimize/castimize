@@ -79,7 +79,6 @@ class ModelsApiController extends ApiController
 
     public function getCustomModelNames(int $customerId, Request $request): JsonResponse
     {
-        dd(json_decode($request->uploads));
         $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
@@ -87,7 +86,7 @@ class ModelsApiController extends ApiController
         }
 
         $newUploads = [];
-        foreach (json_decode($request->uploads) as $itemKey => $upload) {
+        foreach (json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR) as $itemKey => $upload) {
             [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
             $model = Model::where('name', $upload['3dp_options']['filename'])
                 ->where('file_name', $upload['3dp_options']['model_name'])
