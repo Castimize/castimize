@@ -85,7 +85,7 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $upload = $request->upload;
+        $upload = json_decode($request->upload, true, 512, JSON_THROW_ON_ERROR);
         [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
 
         $model = $customer->models->where('name', $upload['3dp_options']['filename'])
