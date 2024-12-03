@@ -35,6 +35,7 @@ class ModelsService
             'model_surface_area_cm2' => $request->surface_area,
             'model_parts' => $request->model_parts ?? 1,
             'model_box_volume' => $request->box_volume,
+            'meta_data' => $request->meta_data ?? null,
             'categories' => $categories,
         ]);
     }

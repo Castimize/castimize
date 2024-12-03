@@ -106,17 +106,18 @@ class ModelsApiController extends ApiController
 
     public function getCustomModelNames(int $customerId, Request $request): JsonResponse
     {
+        ini_set('precision', 17);
         $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
+//        dd($customer->models);
         $newUploads = [];
         foreach (json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR) as $itemKey => $upload) {
             [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
-            $model = Model::where('name', $upload['3dp_options']['filename'])
-                ->where('file_name', $upload['3dp_options']['model_name'])
+            $model = $customer->models->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
                 ->where('material_id', $materialId)
                 ->where('model_volume_cc', $upload['3dp_options']['model_stats_raw']['model']['material_volume'])
                 ->where('model_surface_area_cm2', $upload['3dp_options']['model_stats_raw']['model']['surface_area'])
@@ -124,11 +125,13 @@ class ModelsApiController extends ApiController
                 ->where('model_x_length', $upload['3dp_options']['model_stats_raw']['model']['x_dim'])
                 ->where('model_y_length', $upload['3dp_options']['model_stats_raw']['model']['y_dim'])
                 ->where('model_z_length', $upload['3dp_options']['model_stats_raw']['model']['z_dim'])
+//                ->whereNotNull('model_name')
                 ->first();
 
             $newUploads[$itemKey] = $upload;
             if ($model) {
-                $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name;
+//                dd($model);
+                $newUploads[$itemKey]['3dp_options']['model_name_original'] = !empty($model->model_name) ? $model->model_name : $upload['3dp_options']['model_name_original'];
             }
         }
 
@@ -138,6 +141,7 @@ class ModelsApiController extends ApiController
 
     public function store(int $customerId, Request $request): JsonResponse
     {
+        ini_set('precision', 17);
         $customer = Customer::where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
@@ -154,6 +158,7 @@ class ModelsApiController extends ApiController
 
     public function update(Request $request, int $customerId, Model $model): JsonResponse
     {
+        ini_set('precision', 17);
         if (!$model || (int)$model->customer->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
