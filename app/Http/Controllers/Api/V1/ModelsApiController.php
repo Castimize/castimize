@@ -132,6 +132,7 @@ class ModelsApiController extends ApiController
             }
         }
 
+        LogRequestService::addResponse($request, $newUploads);
         return response()->json($newUploads);
     }
 
