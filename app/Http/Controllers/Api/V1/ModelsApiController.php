@@ -89,14 +89,9 @@ class ModelsApiController extends ApiController
         [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
 
         $model = $customer->models->where('name', $upload['3dp_options']['filename'])
-            ->where('file_name', $upload['3dp_options']['model_name'])
+            ->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
             ->where('material_id', $materialId)
             ->where('model_volume_cc', $upload['3dp_options']['model_stats_raw']['model']['material_volume'])
-            ->where('model_surface_area_cm2', $upload['3dp_options']['model_stats_raw']['model']['surface_area'])
-            ->where('model_box_volume', $upload['3dp_options']['model_stats_raw']['model']['box_volume'])
-            ->where('model_x_length', $upload['3dp_options']['model_stats_raw']['model']['x_dim'])
-            ->where('model_y_length', $upload['3dp_options']['model_stats_raw']['model']['y_dim'])
-            ->where('model_z_length', $upload['3dp_options']['model_stats_raw']['model']['z_dim'])
             ->first();
 
         $modelName = $model ? $model->model_name : null;
@@ -118,27 +113,21 @@ class ModelsApiController extends ApiController
         foreach (json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR) as $itemKey => $upload) {
             [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
             $model = $customer->models->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
-                ->where('material_id', $materialId)
+                ->where('material_id', $upload['3dp_options']['material_id'] ?? $materialId)
                 ->where('model_volume_cc', $upload['3dp_options']['model_stats_raw']['model']['material_volume'])
-                ->where('model_surface_area_cm2', $upload['3dp_options']['model_stats_raw']['model']['surface_area'])
-                ->where('model_box_volume', $upload['3dp_options']['model_stats_raw']['model']['box_volume'])
-                ->where('model_x_length', $upload['3dp_options']['model_stats_raw']['model']['x_dim'])
-                ->where('model_y_length', $upload['3dp_options']['model_stats_raw']['model']['y_dim'])
-                ->where('model_z_length', $upload['3dp_options']['model_stats_raw']['model']['z_dim'])
 //                ->whereNotNull('model_name')
                 ->first();
 
             $newUploads[$itemKey] = $upload;
             if ($model) {
 //                dd($model);
-                $newUploads[$itemKey]['3dp_options']['model_name_original'] = !empty($model->model_name) ? $model->model_name : $upload['3dp_options']['model_name_original'];
+                $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
             }
         }
 
         LogRequestService::addResponse($request, $newUploads);
         return response()->json($newUploads);
     }
-
     public function store(int $customerId, Request $request): JsonResponse
     {
         ini_set('precision', 17);
