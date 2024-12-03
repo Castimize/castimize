@@ -106,7 +106,7 @@ class ModelsApiController extends ApiController
 
     public function getCustomModelNames(int $customerId, Request $request): JsonResponse
     {
-        ini_set('precision', 17);
+        ini_set('precision', 53);
         $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
