@@ -5,6 +5,7 @@ namespace App\Services\Payment\Stripe;
 use Stripe\Balance;
 use Stripe\Charge;
 use Stripe\Exception\ApiErrorException;
+use Stripe\PaymentIntent;
 use Stripe\Stripe;
 
 class StripeService
@@ -13,7 +14,7 @@ class StripeService
 
     public function __construct()
     {
-        Stripe::setApiKey(config('services.stripe.key'));
+        Stripe::setApiKey(config('services.stripe.secret'));
     }
 
     /**
@@ -34,5 +35,10 @@ class StripeService
             'source' => $sourceId,
             'description' => $description,
         ]);
+    }
+
+    public function getPaymentIntent(string $paymentIntentId): PaymentIntent
+    {
+        return PaymentIntent::retrieve($paymentIntentId);
     }
 }
