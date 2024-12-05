@@ -24,6 +24,16 @@ class ModelsService
             }
         }
 
+        $model = Model::where('name', $request->original_file_name)
+            ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
+            ->where('material_id', $material->id)
+            ->where('model_volume_cc', $request->material_volume)
+            ->first();
+
+        if ($model) {
+            return $model;
+        }
+
         $fileNameThumb = sprintf('%s%s.thumb.png', env('APP_SITE_STL_UPLOAD_DIR'), str_replace('_resized', '', $fileName));
         $fileName = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $fileName);
         $fileUrl = sprintf('%s/%s', env('APP_SITE_URL'), $fileName);
