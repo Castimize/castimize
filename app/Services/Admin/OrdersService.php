@@ -563,9 +563,9 @@ class OrdersService
                 }
             }
 
-            $modelXLength = $model->model_x_length;
-            $modelYLength = $model->model_y_length;
-            $modelZLength = $model->model_z_length;
+            $modelXLength = $model->model_x_length ?? null;
+            $modelYLength = $model->model_y_length ?? null;
+            $modelZLength = $model->model_z_length ?? null;
 
             $order->uploads()->create([
                 'wp_id' => $lineItem->id ?? null,
