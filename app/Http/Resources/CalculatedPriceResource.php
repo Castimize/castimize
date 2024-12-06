@@ -41,7 +41,7 @@ class CalculatedPriceResource extends JsonResource
             'polygons' => $request->polygons ?? null,
             'quantity' => $request->quantity,
             'original_file_name' => $request->original_file_name,
-            'file_name' => $request->filename,
+            'file_name' => $request->file_name,
             'thumb' => $request->thumb ?? null,
             'total' => $this->calculated_total,
 //            'total' => $currencyService->convertCurrency(config('app.currency'), $request->currency, $this->calculated_total),
