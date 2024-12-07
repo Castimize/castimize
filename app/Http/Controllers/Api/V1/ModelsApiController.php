@@ -134,7 +134,7 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $model = $this->modelsService->storeModelFromApi($request, $customer->id);
+        $model = $this->modelsService->storeModelFromApi($request, $customer);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
