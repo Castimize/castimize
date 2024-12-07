@@ -35,6 +35,7 @@ class Model extends EloquentModel
         'model_surface_area_cm2',
         'model_parts',
         'model_box_volume',
+        'model_scale',
         'categories',
         'meta_data',
     ];

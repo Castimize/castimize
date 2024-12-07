@@ -60,6 +60,7 @@ class ModelResource extends JsonResource
             'model_surface_area_cm2' => $this->model_surface_area_cm2,
             'model_parts' => $this->model_parts,
             'model_box_volume' => $this->model_box_volume,
+            'model_scale' => $this->model_scale,
             'price' => $calculatedTotal,
             'categories_json' => $this->categories,
             'categories' => implode(',', $categoriesRaw),

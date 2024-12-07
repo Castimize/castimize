@@ -25,6 +25,7 @@ return new class extends Migration
             $table->float('model_surface_area_cm2');
             $table->integer('model_parts');
             $table->float('model_box_volume');
+            $table->float('model_scale')->default(1);
             $table->json('categories')->nullable();
             $table->json('meta_data')->nullable();
             $table->timestamps();
