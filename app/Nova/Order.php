@@ -159,10 +159,11 @@ class Order extends Resource
 
             Text::make(__('Paid at'), function () {
                 if ($this->paid_at === null) {
-                    return __('Not paid');
+                    return '<span class="text-red-500">' . __('Not paid') . '</span>';
                 }
-                return Carbon::parse($this->paid_at)->format('d-m-Y H:i:s');
+                return '<span>' . Carbon::parse($this->paid_at)->format('d-m-Y H:i:s') . '</span>';
             })
+                ->asHtml()
                 ->sortable(),
 
             Text::make(__('Payment method'), 'payment_method')

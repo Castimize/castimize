@@ -521,7 +521,7 @@ class OrdersService
                 }
             }
 
-            $model = Model::where('customer_id', $customer->id)
+            $model = $customer->models
                 ->where('name', $name)
                 ->where('material_id', $material->id)
                 ->where('model_volume_cc', $modelVolumeCc)
