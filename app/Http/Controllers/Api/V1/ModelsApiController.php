@@ -113,7 +113,7 @@ class ModelsApiController extends ApiController
             [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
             $model = $customer->models->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
                 ->where('material_id', $upload['3dp_options']['material_id'] ?? $materialId)
-                ->where('model_volume_cc', $upload['3dp_options']['model_stats_raw']['model']['material_volume'])
+                ->where('model_scale', $upload['3dp_options']['model_stats_raw']['model']['scale'])
                 ->first();
 
             $newUploads[$itemKey] = $upload;
