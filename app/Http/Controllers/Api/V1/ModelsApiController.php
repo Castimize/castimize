@@ -108,19 +108,16 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-//        dd($customer->models);
         $newUploads = [];
         foreach (json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR) as $itemKey => $upload) {
             [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
             $model = $customer->models->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
                 ->where('material_id', $upload['3dp_options']['material_id'] ?? $materialId)
                 ->where('model_volume_cc', $upload['3dp_options']['model_stats_raw']['model']['material_volume'])
-//                ->whereNotNull('model_name')
                 ->first();
 
             $newUploads[$itemKey] = $upload;
             if ($model) {
-//                dd($model);
                 $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
             }
         }
@@ -147,7 +144,7 @@ class ModelsApiController extends ApiController
 
     public function update(Request $request, int $customerId, Model $model): JsonResponse
     {
-        ini_set('precision', 17);
+        ini_set('precision', 53);
         if (!$model || (int)$model->customer->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }

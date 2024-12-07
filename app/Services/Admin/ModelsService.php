@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Model;
 use Exception;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ModelsService
 {
-    public function storeModelFromApi($request, ?int $customerId = null): Model|null
+    public function storeModelFromApi($request, ?Customer $customer = null): Model|null
     {
         $material = Material::where('wp_id', $request->wp_id)->first();
         $fileName = $request->file_name;
@@ -24,11 +25,23 @@ class ModelsService
             }
         }
 
-        $model = Model::where('name', $request->original_file_name)
-            ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
-            ->where('material_id', $material->id)
-            ->where('model_volume_cc', $request->material_volume)
-            ->first();
+        if ($customer) {
+            $model = $customer->models->where('name', $request->original_file_name)
+                ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
+                ->where('material_id', $material->id)
+                ->where('model_volume_cc', $request->material_volume)
+                ->first();
+
+            if ($model && $model->model_name === $request->model_name) {
+                return $model;
+            }
+        } else {
+            $model = Model::where('name', $request->original_file_name)
+                ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
+                ->where('material_id', $material->id)
+                ->where('model_volume_cc', $request->material_volume)
+                ->first();
+        }
 
         if ($model) {
             return $model;
@@ -59,7 +72,7 @@ class ModelsService
         }
 
         return Model::create([
-            'customer_id' => $customerId,
+            'customer_id' => $customer?->id,
             'material_id' => $material->id,
             'model_name' => $request->model_name ?? null,
             'name' => $request->original_file_name,
