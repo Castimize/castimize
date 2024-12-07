@@ -34,6 +34,7 @@ class CalculatedPriceResource extends JsonResource
             'print_time' => $request->print_time ?? null,
             'box_volume' => $request->box_volume,
             'surface_area' => $request->surface_area,
+            'scale' => $request->scale,
             'weight' => $request->weight,
             'x_dim' => $request->x_dim,
             'y_dim' => $request->y_dim,
