@@ -125,7 +125,18 @@ class Rejection extends Resource
             })
                 ->sortable(),
 
-            BelongsTo::make(__('Upload'), 'upload')
+            Text::make(__('PO number'), function ($model) {
+                return '<span><a class="link-default" href="/admin/resources/order-queues/' . $model->order_queue_id . '">' . $model->order_queue_id . '</a></span>';
+            })
+                ->asHtml()
+                ->sortable(),
+
+            Text::make(__('Customer'), function ($model) {
+                return $model->order
+                    ? '<span><a class="link-default" href="/admin/resources/customers/' . $model->order->customer_id . '">' . $model->order->billing_name . '</a></span>'
+                    : '';
+            })
+                ->asHtml()
                 ->sortable(),
 
             BelongsTo::make(__('Manufacturer'), 'manufacturer')
