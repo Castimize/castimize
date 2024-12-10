@@ -78,8 +78,9 @@ export default {
         },
 
         handleChange(option, id) {
-            this.currentField.options = this.allOptions;
-            this.currentField.options = this.currentField.options.filter((o) => o.group === option.group);
+            // Comment check on group for now
+            // this.currentField.options = this.allOptions;
+            // this.currentField.options = this.currentField.options.filter((o) => o.group === option.group);
             this.selectedItems.push(option.value);
             this.getItem(option.value);
             this.getFooter();
