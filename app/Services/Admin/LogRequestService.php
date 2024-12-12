@@ -14,9 +14,9 @@ class LogRequestService
             $requestToLog = $request;
             $requestToLog->headers->remove('authorization');
 
-//            if ($requestToLog->path() === 'api/v1/prices/calculate/shipping') {
-//                return null;
-//            }
+            if ($requestToLog->path() === 'api/v1/prices/calculate/shipping') {
+                return null;
+            }
 
             return LogRequest::create([
                 'path_info' => $requestToLog->path(),
