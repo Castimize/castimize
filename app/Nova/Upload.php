@@ -225,7 +225,10 @@ class Upload extends Resource
                 ->confirmText(__('Are you sure you want to cancel and refund the selected uploads?'))
                 ->confirmButtonText(__('Confirm'))
                 ->cancelButtonText(__('Cancel')),
-            //UploadToOrderQueueAction::make(),
+            UploadToOrderQueueAction::make()
+                ->confirmText(__('Are you sure you want to set these uploads to the order queue?'))
+                ->confirmButtonText(__('Confirm'))
+                ->cancelButtonText(__('Cancel')),
         ];
     }
 }
