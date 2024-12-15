@@ -58,8 +58,8 @@ class BiggestMaterialsRevenueTableWidget extends TableWidget
         $data = [];
 
         foreach ($rows as $row) {
-            $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), $row->revenue);
-            $cost = $currencyService->convertCurrency($row->currency_code, config('app.currency'), $row->costs);
+            $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float)$row->revenue);
+            $cost = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float)$row->costs);
             $prof = $rev - $cost;
             if (!array_key_exists($row->material, $data)) {
                 $data[$row->material] = [
@@ -78,8 +78,8 @@ class BiggestMaterialsRevenueTableWidget extends TableWidget
             return $a['revenue'] < $b['revenue'];
         });
         for ($i = 0, $iMax = count($data); $iMax > $i; $i++) {
-            $data[$i]['revenue'] = currencyFormatter($data[$i]['revenue']);
-            $data[$i]['bruto_margin'] = currencyFormatter($data[$i]['bruto_margin']);
+            $data[$i]['revenue'] = currencyFormatter((float)$data[$i]['revenue']);
+            $data[$i]['bruto_margin'] = currencyFormatter((float)$data[$i]['bruto_margin']);
         }
 
         if (count($data) === 0) {
