@@ -79,8 +79,8 @@ class BiggestCustomersRevenueTableWidget extends TableWidget
             return $a['revenue'] < $b['revenue'];
         });
         for ($i = 0, $iMax = count($data); $iMax > $i; $i++) {
-            $data[$i]['revenue'] = currencyFormatter($data[$i]['revenue']);
-            $data[$i]['bruto_margin'] = currencyFormatter($data[$i]['bruto_margin']);
+            $data[$i]['revenue'] = currencyFormatter((float)$data[$i]['revenue']);
+            $data[$i]['bruto_margin'] = currencyFormatter((float)$data[$i]['bruto_margin']);
         }
 
         if (count($data) === 0) {
