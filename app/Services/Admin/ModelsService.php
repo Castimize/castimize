@@ -43,10 +43,6 @@ class ModelsService
                 ->first();
         }
 
-        if ($model) {
-            return $model;
-        }
-
         $fileNameThumb = sprintf('%s%s.thumb.png', env('APP_SITE_STL_UPLOAD_DIR'), str_replace('_resized', '', $fileName));
         $fileName = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $fileName);
         $fileUrl = sprintf('%s/%s', env('APP_SITE_URL'), $fileName);
@@ -69,6 +65,10 @@ class ModelsService
             }
         } catch (Exception $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+        }
+
+        if ($model) {
+            return $model;
         }
 
         return Model::create([
