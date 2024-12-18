@@ -11,7 +11,10 @@ use App\Http\Middleware\VerifyStripeWebhookSignature;
 use App\Services\Exact\ExactOnlineService;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'exact'], function () {
+Route::group([
+    'prefix' => 'exact',
+    'namespace' => 'App\Http\Controllers',
+], function () {
     Route::get('connect', ['as' => 'exact.connect', 'uses' => 'ExactOnlineController@appConnect']);
     Route::post('authorize', ['as' => 'exact.authorize', 'uses' => 'ExactOnlineController@appAuthorize']);
     Route::get('oauth', ['as' => 'exact.callback', 'uses' => 'ExactOnlineController@appCallback']);
