@@ -58,7 +58,7 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
                     $connection->setTokenExpires($config->exact_tokenExpires);
                 }
 
-                $connection->setTokenUpdateCallback('\Offerte\Services\Exact\LaravelExactOnline::tokenUpdateCallback');
+                $connection->setTokenUpdateCallback('\App\Services\Exact\LaravelExactOnline::tokenUpdateCallback');
 
                 try {
                     if (isset($config->exact_authorisationCode)) {
