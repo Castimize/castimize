@@ -75,8 +75,8 @@ class LaravelExactOnline
     {
         $config = '{}';
 
-        if (Storage::disk('s3_private')->exists('exact/credentials.json')) {
-            $config = Storage::disk('s3_private')->get('exact/credentials.json');
+        if (Storage::disk('r2_private')->exists('exact/credentials.json')) {
+            $config = Storage::disk('r2_private')->get('exact/credentials.json');
         }
 
         return (object)json_decode($config, false, 512, JSON_THROW_ON_ERROR);
@@ -89,7 +89,7 @@ class LaravelExactOnline
      */
     public static function storeConfig($config): void
     {
-        Storage::disk('s3_private')->put('exact/credentials.json', json_encode($config, JSON_THROW_ON_ERROR));
+        Storage::disk('r2_private')->put('exact/credentials.json', json_encode($config, JSON_THROW_ON_ERROR));
     }
 
 }
