@@ -56,7 +56,7 @@ class OrdersService
             if ($orderMetaData->key === '_billing_eu_vat_number') {
                 $billingVatNumber = $orderMetaData->value;
             }
-            if ($orderMetaData->key === '_stripe_intent_id') {
+            if ($orderMetaData->key === '_payment_intent_id') {
                 $stripePaymentId = $orderMetaData->value;
             }
             if ($orderMetaData->key === '_shipping_email') {
@@ -563,6 +563,7 @@ class OrdersService
                 }
             }
 
+            $name = $model->modle_name ?? $name;
             $modelXLength = $model->model_x_length ?? null;
             $modelYLength = $model->model_y_length ?? null;
             $modelZLength = $model->model_z_length ?? null;
