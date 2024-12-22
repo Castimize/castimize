@@ -19,6 +19,8 @@ class Customer extends Model
 {
     use HasFactory, ModelHasAddresses, RevisionableTrait, Userstamps, SoftDeletes;
 
+    public $wpCustomer = null;
+
     protected $revisionForceDeleteEnabled = true;
     protected $revisionCreationsEnabled = true;
 
@@ -31,6 +33,7 @@ class Customer extends Model
         'user_id',
         'country_id',
         'wp_id',
+        'exact_online_guid',
         'first_name',
         'last_name',
         'company',

@@ -17,19 +17,22 @@ return new class extends Migration
             $table->unsignedBigInteger('currency_id')->nullable()->index();
             $table->string('invoice_number')->index();
             $table->dateTime('invoice_date');
+            $table->string('exact_online_guid')->nullable();
             $table->boolean('debit')->default(true);
-            $table->float('total_amount');
+            $table->float('total');
+            $table->float('total_tax')->nullable();
             $table->string('currency_code')->default('USD');
             $table->text('description');
             $table->string('email');
             $table->string('email_cc')->nullable();
             $table->string('contact_person');
+            $table->string('company_name')->nullable();
             $table->string('address_line1');
             $table->string('address_line2')->nullable();
             $table->string('postal_code');
             $table->string('city');
             $table->string('country');
-            $table->string('vat')->default(21);
+            $table->float('tax_percentage')->nullable();
             $table->string('iban')->nullable();
             $table->string('bic')->nullable();
             $table->string('vat_number')->nullable();
@@ -37,7 +40,7 @@ return new class extends Migration
             $table->dateTime('sent_at')->nullable();
             $table->boolean('paid')->default(false)->index();
             $table->dateTime('paid_at')->nullable();
-            $table->string('exact_online_guid')->nullable();
+            $table->json('meta_data')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

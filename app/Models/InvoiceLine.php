@@ -23,14 +23,18 @@ class InvoiceLine extends Model
      */
     protected $fillable = [
         'invoice_id',
+        'order_id',
+        'upload_id',
         'customer_id',
         'currency_id',
         'upload_name',
         'material_name',
         'description',
         'quantity',
-        'amount',
+        'total',
+        'total_tax',
         'currency_code',
+        'meta_data',
     ];
 
     /**
@@ -53,6 +57,22 @@ class InvoiceLine extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function upload(): BelongsTo
+    {
+        return $this->belongsTo(Upload::class);
     }
 
     /**

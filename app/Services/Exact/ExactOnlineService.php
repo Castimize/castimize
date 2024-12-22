@@ -2,6 +2,9 @@
 
 namespace App\Services\Exact;
 
+use App\Models\CurrencyHistoryRate;
+use App\Models\Customer;
+use App\Models\Invoice;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Cache;
@@ -13,6 +16,7 @@ use Picqer\Financials\Exact\ApiException;
 use Picqer\Financials\Exact\BankAccount;
 use Picqer\Financials\Exact\Connection;
 use Picqer\Financials\Exact\DirectDebitMandate;
+use Picqer\Financials\Exact\ExchangeRate;
 use Picqer\Financials\Exact\GLAccount;
 use Picqer\Financials\Exact\Me;
 use Picqer\Financials\Exact\Receivable;
@@ -24,24 +28,31 @@ use Picqer\Financials\Exact\WebhookSubscription;
 
 class ExactOnlineService
 {
-    public const LEADS_REVENUE = 'leads_revenue';
 
-    public const STORNO = 'storno';
-
-    public const SERVICE_FEE = 'service_fee';
-
-    protected $glAccounts = [
-        'nl' => [
-            self::LEADS_REVENUE => '008f399d-309b-463d-9d40-94e3b9ab57d2',
-            self::STORNO => '76b29f5b-7022-45d7-9b9f-21f37d9d2e5c',
-            self::SERVICE_FEE => '75251c76-6ebf-4065-b44a-614359d9aa83'
-        ],
-        'default' => [
-            self::LEADS_REVENUE => 'ab56daba-8e55-4392-ae93-ab669a79e950', # Omzet binnen EU
-            self::STORNO => 'c4d95665-3e6f-4b9f-8e17-6ce163648b0d', # Omzet storneringsboetes binnen EU
-            self::SERVICE_FEE => '44d08572-f3e8-4c07-ba74-e65f44a30e16', # Omzet service fee binnen EU
-        ],
-    ];
+    // Omzet binnenland hoog tarief, Klant komt uit NL
+    protected const GL_8000 = '4de43a20-6c86-4af6-bcf5-3adec36677c9';
+    //O mzet buitenland intracommunautair, Klant komt uit EU, maar is zakelijke klant (maw met btw nummer)
+    protected const GL_8100 = 'fd7f828e-f006-4c98-ad71-5d2aaf64c474';
+    // Omzet buiten EU, Klant komt van buiten EU
+    protected const GL_8110 = '744f4532-6874-4d64-86a7-1d08a305174b';
+    // Omzet binnen EU Particulier, Klant komt uit EU, maar particulier (dus BTW belaste omzet)
+    protected const GL_8120 = '07f9774b-2a55-442c-ac02-f972f7f5149f';
+    // Debiteuren
+    protected const GL_1300 = 'b807f1a9-43ef-4b68-8556-ca3db36e6507';
+    protected const GL_1103 = '9a56362f-2186-4d69-955a-39ee46fceb20';
+    protected const GL_1500 = 'f25efed8-ea2c-4bf1-8fdc-3a75602d7205';
+//    protected $glAccounts = [
+//        'nl' => [
+//            self::LEADS_REVENUE => '008f399d-309b-463d-9d40-94e3b9ab57d2',
+//            self::STORNO => '76b29f5b-7022-45d7-9b9f-21f37d9d2e5c',
+//            self::SERVICE_FEE => '75251c76-6ebf-4065-b44a-614359d9aa83'
+//        ],
+//        'default' => [
+//            self::LEADS_REVENUE => 'ab56daba-8e55-4392-ae93-ab669a79e950', # Omzet binnen EU
+//            self::STORNO => 'c4d95665-3e6f-4b9f-8e17-6ce163648b0d', # Omzet storneringsboetes binnen EU
+//            self::SERVICE_FEE => '44d08572-f3e8-4c07-ba74-e65f44a30e16', # Omzet service fee binnen EU
+//        ],
+//    ];
 
     protected $diaries = [
         'EUR' => 3,
@@ -172,166 +183,77 @@ class ExactOnlineService
         Storage::disk('r2_private')->put('exact/credentials.json', json_encode($storage, JSON_THROW_ON_ERROR));
     }
 
-//    /**
-//     * @param Bill $bill
-//     *
-//     * @return bool
-//     */
-//    public static function add(Bill $bill): bool
-//    {
-//        if (!$bill->exact_online_guid) {
-//            return (new static)->processBill($bill);
-//        }
-//
-//        return false;
-//    }
-//
-//    public static function syncCompany(Company $company)
-//    {
-//        return (new static)->addOrUpdateCompany($company);
-//    }
-//
-//    public static function syncCompanyMandates(Company $company)
-//    {
-//        return (new static)->addOrUpdateMandate($company);
-//    }
-//
-//    public static function syncMandateDate(Company $company)
-//    {
-//        return (new static)->updateMandateDate($company);
-//    }
-//
-//    public static function syncBankDetails(Company $company)
-//    {
-//        return (new static)->checkBankAccountsForCompany($company);
-//    }
-//
-//    public static function billIsPaid(Bill $bill): bool
-//    {
-//        if (!$bill->exact_online_guid) {
-//            return false;
-//        }
-//
-//        return (bool)(new static)->getBillPaymentStatus($bill);
-//    }
-//
-//    public function getAllUnPaidBills()
-//    {
-//        $receivablesList = $this->getReceivablesList();
-//        $unpaidBills = [];
-//
-//        foreach ($receivablesList as $receivable) {
-//            if (is_null($receivable->YourRef) && $receivable->Amount > 0 && $receivable->Description == 'Ontvangen offerteaanvragen') {
-//                $unpaidBills[] = $receivable;
-//            }
-//        }
-//
-//        dd($unpaidBills);
-//    }
-//
-//    public function getBillPaymentStatus(Bill $bill)
-//    {
-//        $receivablesList = $this->getReceivablesList();
-//
-//        foreach ($receivablesList as $receivable) {
-//            if ($receivable->YourRef == $bill->billnumber) {
-//                return false;
-//            }
-//
-//            if ($receivable->InvoiceNumber == $bill->billnumber) {
-//                return false;
-//            }
-//        }
-//
-//        return true;
-//    }
-//
-//    public function getReceivablesList()
-//    {
-//        return (new ReceivablesList($this->connection))->get();
-//    }
-//
-//    /**
-//     * @param string $exactOnlineGuid
-//     * @return Receivable
-//     */
-//    public function getReceivable(string $exactOnlineGuid): Receivable
-//    {
-//        return (new Receivable($this->connection))->find($exactOnlineGuid);
-//    }
-//
-//    /**
-//     * @param string $exactOnlineGuid
-//     * @return SalesInvoice
-//     */
-//    public function getSalesInvoice(string $exactOnlineGuid): SalesInvoice
-//    {
-//        return (new SalesInvoice($this->connection))->find($exactOnlineGuid);
-//    }
-//
-//    /**
-//     * @param string $exactOnlineGuid
-//     * @return Transaction
-//     */
-//    public function getTransaction(string $exactOnlineGuid): Transaction
-//    {
-//        return (new Transaction($this->connection))->find($exactOnlineGuid);
-//    }
-//
-//    /**
-//     * @param string $exactOnlineGuid
-//     * @return array
-//     */
-//    public function getTransactionLines(string $exactOnlineGuid): array
-//    {
-//        return (new Transaction($this->connection))->find($exactOnlineGuid)->TransactionLines;
-//    }
-//
-//    private function processBill(Bill $bill)
-//    {
-//        return rescue(function () use ($bill) {
-//            $this->addBill($bill);
-//
-//            return true;
-//        }, false);
-//    }
-//
-//    /**
-//     * @param Company $company
-//     *
-//     * @return Account
-//     * @throws Exception
-//     */
-//    private function addOrUpdateCompany(Company $company): Account
-//    {
-//        $account = new Account($this->connection);
-//
-//        if ($company->exact_online_guid) {
-//            $account = $account->filter("ID eq guid'{$company->exact_online_guid}'");
-//
-//            if (count($account) > 0 && $account[0] instanceof Account) {
-//                // now update account
-//                $account = $account[0];
-//                $account = $this->updateAccount($account, $company);
-//                $account->save();
-//
-//                return $account;
-//            }
-//
-//            throw new Exception(vsprintf('Exact GUID for company [%s]%s not found in Exact', [
-//                $company->id,
-//                $company->companyname,
-//            ]));
-//        }
-//
-//        $account = $this->updateAccount($account, $company);
-//        $account->save();
-//
-//        $company->exact_online_guid = $account->ID;
-//        $company->save();
-//
-//        return $account;
-//    }
+    public function syncExchangeRate(CurrencyHistoryRate $currencyHistoryRate): ExchangeRate
+    {
+        $exchangeRate = new ExchangeRate($this->connection);
+        $exchangeRate->Created = $currencyHistoryRate->historical_date;
+        $exchangeRate->Rate = $currencyHistoryRate->rate;
+        $exchangeRate->SourceCurrency = $currencyHistoryRate->base_currency;
+        $exchangeRate->StartDate = $currencyHistoryRate->historical_date;
+        $exchangeRate->TargetCurrency = $currencyHistoryRate->convert_currency;
+        $exchangeRate->save();
+
+        return $exchangeRate;
+    }
+
+    public function syncCustomer(Customer $customer): Account
+    {
+        if ($customer->wpCustomer === null) {
+            throw new Exception(vsprintf('Exact customer has no wpCustomer attached [%s]%s', [
+                $customer->id,
+                $customer->name,
+            ]));
+        }
+        $account = new Account($this->connection);
+
+        if ($customer->exact_online_guid) {
+            $account = $account->filter("ID eq guid'{$customer->exact_online_guid}'");
+
+            if (count($account) > 0 && $account[0] instanceof Account) {
+                // now update account
+                $account = $account[0];
+                $account = $this->updateAccount($account, $customer);
+                $account->save();
+
+                $customer->exact_online_guid = $account->ID;
+                $customer->save();
+
+                return $account;
+            }
+
+            throw new Exception(vsprintf('Exact GUID for customer [%s]%s not found in Exact', [
+                $customer->id,
+                $customer->name,
+            ]));
+        }
+
+        $account = $this->updateAccount($account, $customer);
+        $account->save();
+
+        $customer->exact_online_guid = $account->ID;
+        $customer->save();
+
+        return $account;
+    }
+
+    public function syncInvoice(Invoice $invoice)
+    {
+
+        $salesEntry = new SalesEntry($this->connection);
+        $salesEntry->Customer = $invoice->customer->exact_online_guid;
+        $salesEntry->Currency = $bill->company->currency->code;
+        $salesEntry->Journal = $this->diaries[$bill->company->currency->code ?? 'EUR'];
+        $salesEntry->YourRef = $bill->billnumber;
+        $salesEntry->OrderNumber = $bill->billnumber;
+        $salesEntry->Description = $bill->is_storno == 1 ? $bill->charges->first()->description : $description;
+        $salesEntry->EntryNumber = $bill->billnumber;
+        $salesEntry->EntryDate = $bill->created_at->format('Y-m-d');
+        $salesEntry->PaymentCondition = $this->getPaymentConditionsForDays($bill->company->getBillExpiryDate());
+        $salesEntry->Type = $bill->charges->sum('amount') > 0 ? 20 : 21;
+        $salesEntry->SalesEntryLines = $salesEntryLines;
+        $salesEntry->save();
+        $invoice->exact_online_guid = $salesEntry->EntryID;
+    }
 //
 //    private function addBill(Bill $bill)
 //    {
@@ -388,25 +310,32 @@ class ExactOnlineService
 //        return $bill->save();
 //    }
 //
-//    private function updateAccount(Account $account, Company $company)
-//    {
-//        $account->Code = $company->id;
-//        $account->AddressLine1 = $company->street . ' ' . $company->housenumber;
-//        $account->AddressLine2 = '';
-//        $account->ChamberOfCommerce = $company->coc_number;
-//        $account->City = $company->city;
-//        $account->Country = mb_strtoupper($company->country->code);
-//        $account->IsSales = 'true';
-//        $account->Name = $company->companyname;
-//        $account->Postcode = $company->postcode;
-//        $account->Status = 'C';
-//        $account->Email = $company->billEmail();
-//        $account->Phone = $company->phone;
-//        $account->SecurityLevel = 100;
-//        $account->VATNumber = $company->vat_number;
-//
-//        return $account;
-//    }
+    private function updateAccount(Account $account, Customer $customer): Account
+    {
+        $wpCustomer = $customer->wpCustomer;
+        $billingVatNumber = null;
+        foreach ($wpCustomer['meta_data'] as $metaData) {
+            if ($metaData->key === 'billing_eu_vat_number') {
+                $billingVatNumber = $metaData->value;
+            }
+        }
+        $account->Code = $wpCustomer['id'];
+        $account->AddressLine1 = $wpCustomer['billing']->address_1;
+        $account->AddressLine2 = $wpCustomer['billing']->address_2;
+        $account->ChamberOfCommerce = null;
+        $account->City = $wpCustomer['billing']->city;
+        $account->Country = mb_strtoupper($wpCustomer['billing']->country);
+        $account->IsSales = 'true';
+        $account->Name = $wpCustomer['first_name'] . ' ' . $wpCustomer['last_name'];
+        $account->Postcode = $wpCustomer['billing']->postcode;
+        $account->Status = 'C';
+        $account->Email = $wpCustomer['email'];
+        $account->Phone = $wpCustomer['billing']->phone;
+        $account->SecurityLevel = 100;
+        $account->VATNumber = $billingVatNumber;
+
+        return $account;
+    }
 //
 //    /**
 //     * @param int $days

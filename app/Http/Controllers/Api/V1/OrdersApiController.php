@@ -30,6 +30,8 @@ class OrdersApiController extends ApiController
      */
     public function show(int $orderNumber): OrderResource
     {
+        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($orderNumber);
+        dd($wpOrder);
         abort_if(Gate::denies('viewOrder'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $order = Order::where('order_number', $orderNumber)->first();

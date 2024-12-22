@@ -21,6 +21,8 @@ class Order extends Model
 {
     use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
 
+    public $wpOrder;
+
     protected $revisionForceDeleteEnabled = true;
     protected $revisionCreationsEnabled = true;
 

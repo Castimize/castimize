@@ -13,19 +13,25 @@ return new class extends Migration
     {
         Schema::create('invoice_lines', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('invoice_id')->nullable()->index();
+            $table->unsignedBigInteger('invoice_id')->index();
+            $table->unsignedBigInteger('order_id')->nullable()->index();
+            $table->unsignedBigInteger('upload_id')->nullable()->index();
             $table->unsignedBigInteger('customer_id')->nullable()->index();
             $table->unsignedBigInteger('currency_id')->nullable()->index();
             $table->string('upload_name', 500);
             $table->string('material_name', 500);
             $table->string('description', 500);
             $table->integer('quantity')->default(1);
-            $table->float('amount');
+            $table->float('total');
+            $table->float('total_tax')->nullable();
             $table->string('currency_code')->default('USD');
+            $table->json('meta_data')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('set null');
+            $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('CASCADE');
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('set null');
+            $table->foreign('upload_id')->references('id')->on('uploads')->onDelete('set null');
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('set null');
             $table->foreign('currency_id')->references('id')->on('currencies')->onDelete('set null');
         });

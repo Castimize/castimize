@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\SyncExchangeRateToExact;
 use App\Models\CurrencyHistoryRate;
 use AshAllenDesign\LaravelExchangeRates\Classes\ExchangeRate;
 use Exception;
@@ -37,12 +38,15 @@ class GetCurrencyHistoricalRates extends Command
             $result = $exchangeRates->exchangeRate($baseCurrency, $supportedCurrencies);
 
             foreach ($result as $convertCurrency => $rate) {
-                CurrencyHistoryRate::create([
+                $currencyHistoryRate = CurrencyHistoryRate::create([
                     'base_currency' => $baseCurrency,
                     'convert_currency' => $convertCurrency,
                     'rate' => $rate,
                     'historical_date' => now()->format('Y-m-d'),
                 ]);
+                if ($currencyHistoryRate->convert_currency === 'EUR') {
+                    SyncExchangeRateToExact::dispatch($currencyHistoryRate)->onQueue('exact');
+                }
             }
         } catch (Exception $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
