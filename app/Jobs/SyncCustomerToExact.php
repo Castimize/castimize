@@ -17,20 +17,17 @@ class SyncCustomerToExact implements ShouldQueue
     public $tries = 5;
     public $timeout = 120;
 
-    private ExactOnlineService $exactOnlineService;
-
     /**
      * Create a new job instance.
      */
     public function __construct(public int $wpCustomerId, public ?int $logRequestId = null)
     {
-        $this->exactOnlineService = new ExactOnlineService();
     }
 
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(ExactOnlineService $exactOnlineService): void
     {
         $customer = Customer::where('wp_id', $this->wpCustomerId)->first();
 
@@ -44,7 +41,7 @@ class SyncCustomerToExact implements ShouldQueue
                 return;
             }
             $customer->wpCustomer = $wpCustomer;
-            $this->exactOnlineService->syncCustomer($customer);
+            $exactOnlineService->syncCustomer($customer);
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }

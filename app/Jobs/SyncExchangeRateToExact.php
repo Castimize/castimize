@@ -17,20 +17,17 @@ class SyncExchangeRateToExact implements ShouldQueue
     public $tries = 5;
     public $timeout = 120;
 
-    private ExactOnlineService $exactOnlineService;
-
     /**
      * Create a new job instance.
      */
     public function __construct(public int $currencyHistoryRateId, public ?int $logRequestId = null)
     {
-        $this->exactOnlineService = new ExactOnlineService();
     }
 
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(ExactOnlineService $exactOnlineService): void
     {
         $currencyHistoryRate = CurrencyHistoryRate::find($this->currencyHistoryRateId);
         $exchangeRate = null;
@@ -40,7 +37,7 @@ class SyncExchangeRateToExact implements ShouldQueue
         }
 
         try {
-            $exchangeRate = $this->exactOnlineService->syncExchangeRate($currencyHistoryRate);
+            $exchangeRate = $exactOnlineService->syncExchangeRate($currencyHistoryRate);
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
