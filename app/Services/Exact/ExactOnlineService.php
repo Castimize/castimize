@@ -39,7 +39,11 @@ class ExactOnlineService
     protected const GL_8120 = '07f9774b-2a55-442c-ac02-f972f7f5149f';
     // Debiteuren
     protected const GL_1300 = 'b807f1a9-43ef-4b68-8556-ca3db36e6507';
+    // Stripe pending
     protected const GL_1103 = '9a56362f-2186-4d69-955a-39ee46fceb20';
+    // Paypal pending
+    protected const GL_1104 = '9a56362f-2186-4d69-955a-39ee46fceb20';
+    // Af te dragen BTW hoog
     protected const GL_1500 = 'f25efed8-ea2c-4bf1-8fdc-3a75602d7205';
 //    protected $glAccounts = [
 //        'nl' => [
@@ -55,14 +59,9 @@ class ExactOnlineService
 //    ];
 
     protected $diaries = [
-        'EUR' => 3,
+        'SALES' => 70,
+        'MEMORIAL' => 90,
     ];
-
-    /** @var Bill */
-    protected $bill;
-
-    /** @var Company */
-    protected $company;
 
     protected $connection;
 
@@ -238,26 +237,9 @@ class ExactOnlineService
 
     public function syncInvoice(Invoice $invoice)
     {
+        $salesEntryLines = [];
 
-        $salesEntry = new SalesEntry($this->connection);
-        $salesEntry->Customer = $invoice->customer->exact_online_guid;
-        $salesEntry->Currency = $bill->company->currency->code;
-        $salesEntry->Journal = $this->diaries[$bill->company->currency->code ?? 'EUR'];
-        $salesEntry->YourRef = $bill->billnumber;
-        $salesEntry->OrderNumber = $bill->billnumber;
-        $salesEntry->Description = $bill->is_storno == 1 ? $bill->charges->first()->description : $description;
-        $salesEntry->EntryNumber = $bill->billnumber;
-        $salesEntry->EntryDate = $bill->created_at->format('Y-m-d');
-        $salesEntry->PaymentCondition = $this->getPaymentConditionsForDays($bill->company->getBillExpiryDate());
-        $salesEntry->Type = $bill->charges->sum('amount') > 0 ? 20 : 21;
-        $salesEntry->SalesEntryLines = $salesEntryLines;
-        $salesEntry->save();
-        $invoice->exact_online_guid = $salesEntry->EntryID;
-    }
-//
-//    private function addBill(Bill $bill)
-//    {
-//        $countryCode = $bill->company->country->code;
+        //        $countryCode = $bill->company->country->code;
 //        $salesEntryLines = [];
 //
 //        $salesEntryLines[] = [
@@ -277,39 +259,24 @@ class ExactOnlineService
 //                ];
 //            }
 //        }
-//
-//        $description = 'Ontvangen offerteaanvragen';
-//        if ($bill->charges()->where('is_service_fee', 1)->exists()) {
-//            $description .= ' & Service Fee';
-//        }
-//        if ($bill->charges()->where('is_service_fee', 1)->exists() && !$bill->charges()->where('is_service_fee', 0)->exists()) {
-//            $description = 'Service Fee';
-//        }
-//
-//        if (!$bill->company->exact_online_guid) { # if company doesn't exist in Exact Online -> create
-//            $this->addOrUpdateCompany($bill->company);
-//            $bill->company->refresh();
-//        }
-//
-//        $salesEntry = new SalesEntry($this->connection);
-//        $salesEntry->Customer = $bill->company->exact_online_guid;
-//        $salesEntry->Currency = $bill->company->currency->code;
-//        $salesEntry->Journal = $this->diaries[$bill->company->currency->code ?? 'EUR'];
-//        $salesEntry->YourRef = $bill->billnumber;
-//        $salesEntry->OrderNumber = $bill->billnumber;
-//        $salesEntry->Description = $bill->is_storno == 1 ? $bill->charges->first()->description : $description;
-//        $salesEntry->EntryNumber = $bill->billnumber;
-//        $salesEntry->EntryDate = $bill->created_at->format('Y-m-d');
-//        $salesEntry->PaymentCondition = $this->getPaymentConditionsForDays($bill->company->getBillExpiryDate());
-//        $salesEntry->Type = $bill->charges->sum('amount') > 0 ? 20 : 21;
-//        $salesEntry->SalesEntryLines = $salesEntryLines;
-//        $salesEntry->save();
-//
-//        $bill->exact_online_guid = $salesEntry->EntryID;
-//
-//        return $bill->save();
-//    }
-//
+
+
+        $salesEntry = new SalesEntry($this->connection);
+        $salesEntry->Customer = $invoice->customer->exact_online_guid;
+        $salesEntry->Currency = $bill->company->currency->code;
+        $salesEntry->Journal = $this->diaries[$bill->company->currency->code ?? 'EUR'];
+        $salesEntry->YourRef = $bill->billnumber;
+        $salesEntry->OrderNumber = $bill->billnumber;
+        $salesEntry->Description = $bill->is_storno == 1 ? $bill->charges->first()->description : $description;
+        $salesEntry->EntryNumber = $bill->billnumber;
+        $salesEntry->EntryDate = $bill->created_at->format('Y-m-d');
+        $salesEntry->PaymentCondition = $this->getPaymentConditionsForDays($bill->company->getBillExpiryDate());
+        $salesEntry->Type = $bill->charges->sum('amount') > 0 ? 20 : 21;
+        $salesEntry->SalesEntryLines = $salesEntryLines;
+        $salesEntry->save();
+        $invoice->exact_online_guid = $salesEntry->EntryID;
+    }
+
     private function updateAccount(Account $account, Customer $customer): Account
     {
         $wpCustomer = $customer->wpCustomer;
@@ -336,56 +303,7 @@ class ExactOnlineService
 
         return $account;
     }
-//
-//    /**
-//     * @param int $days
-//     * @return string
-//     */
-//    public function getPaymentConditionsForDays($days = 7)
-//    {
-//        if ($days == 0) {
-//            return '00';
-//            //return '4431bc26-54f0-4081-9c29-963ba39f7932';
-//        }
-//
-//        if ($days == 7) {
-//            return '7';
-//            //return 'e5354c0b-2694-413a-bbef-07d4c9de8e13';
-//        }
-//
-//        if ($days == 8) {
-//            return '8';
-//            //return 'f359893e-4a35-46f5-94f4-50dbecdf2f25';
-//        }
-//
-//        if ($days == 10) {
-//            return '10';
-//            //return '953f9a61-0f28-414b-a13c-e0a0f2b55ffe';
-//        }
-//
-//        if ($days == 14) {
-//            return '14';
-//            //return '2df736f2-844a-4aa0-a029-f1d17eac8b3d';
-//        }
-//
-//        if ($days == 30) {
-//            return '30';
-//            //return 'c6ef9b22-8c71-4106-8a3e-bcab6e23311e';
-//        }
-//
-//        if ($days == 90) {
-//            return '90';
-//            //return '779f2478-76fc-486b-ba09-3585da54379c';
-//        }
-//
-//        return $this->getPaymentConditionsForDays(Bill::EXPIRES_IN_DAYS);
-//    }
-//
-//    public function getMe()
-//    {
-//        return (new Me($this->connection))->find();
-//    }
-//
+
     public function getGlAccounts()
     {
         $glAccounts = new GLAccount($this->connection);
@@ -400,132 +318,17 @@ class ExactOnlineService
 
         return $return;
     }
-//
-//    private function addOrUpdateMandate($company)
-//    {
-//        if ($company->exact_online_guid && $company->sepa === 1) {
-//            // Let's check if there's a bank account associated with this account.
-//            $bankAccount = null;
-//            $bankAccounts = new BankAccount($this->connection);
-//            $bankAccounts = $bankAccounts->filter("Account eq guid'{$company->exact_online_guid}'", '', '', ['$top' => 10]);
-//            $iban = strtoupper(preg_replace('/\s/', '', $company->iban));
-//
-//            foreach ($bankAccounts as $bank) {
-//                if ($bank->BankAccount === $iban) {
-//                    $bankAccount = $bank;
-//                }
-//            }
-//            if ($bankAccount === null) {
-//                $bankAccount = $this->checkBankAccountsForCompany($company);
-//            }
-//
-//            if ($bankAccount instanceof BankAccount) {
-//                $reference = "OFFERTE-NL-{$company->id}";
-//                $signatureDate = date('Y-m-d', strtotime($company->latestContract()->signed_at));
-//                switch ($company->type_sepa) {
-//                    case 'b2b':
-//                        $reference .= '-B2B';
-//                        $signatureDate = $company->mandate_date !== null ? Carbon::parse($company->mandate_date)->format('Y-m-d') : now()->format('Y-m-d');
-//                        break;
-//                    case 'b2c':
-//                        $reference .= '-B2C';
-//                        $signatureDate = $company->mandate_date !== null ? Carbon::parse($company->mandate_date)->format('Y-m-d') : now()->format('Y-m-d');
-//                        break;
-//                }
-//
-//                if ($company->mandate_version === null) {
-//                    $company->mandate_version = 1;
-//                } else {
-//                    $company->mandate_version++;
-//                }
-//                $company->save();
-//
-//                $reference .= '-' . $company->mandate_version;
-//
-//                $mandate = new DirectDebitMandate($this->connection);
-//                $mandate->Account = $company->exact_online_guid;
-//                $mandate->BankAccount = $bankAccount->ID;
-//                $mandate->Reference = $reference;
-//                $mandate->Description = "{$company->id} - {$company->companyname}";
-//                $mandate->FirstSend = 0;
-//                $mandate->SignatureDate = $signatureDate;
-//                $mandate->Type = $company->type_sepa === 'b2b' ? 1 : 0; // Depending on the type, a different bank file will be generated. 0 = Core, 1 = B2B and 2 = bottomline (UK only)
-//                $mandate->PaymentType = 1; // Depending on the payment type, a different bank file will be generated. 0 = One-off payment, 1 = Recurrent payment, 2 = AdHoc (UK only)
-//                $mandate->Main = 1; // Depending on the payment type, a different bank file will be generated. 0 = One-off payment, 1 = Recurrent payment, 2 = AdHoc (UK only)
-//                $mandate->save();
-//            } else {
-//                Log::error('Empty bank account');
-//            }
-//        }
-//    }
-//
-//    private function updateMandateDate($company): void
-//    {
-//        if ($company->exact_online_guid && $company->sepa === 1) {
-//            $reference = "OFFERTE-NL-{$company->id}";
-//            switch ($company->type_sepa) {
-//                case 'b2b':
-//                    $reference .= '-B2B';
-//                    break;
-//                case 'b2c':
-//                    $reference .= '-B2C';
-//                    break;
-//            }
-//            $reference .= '-' . $company->mandate_version;
-//
-//            $mandates = new DirectDebitMandate($this->connection);
-//            $mandates = $mandates->filter("Account eq guid'{$company->exact_online_guid}' and Reference eq '{$reference}'", '', '', ['$top' => 1]);
-//
-//            foreach ($mandates as $mandate) {
-//                if ($mandate->Main) {
-//                    $mandate->SignatureDate = Carbon::parse($company->mandate_date)->format('Y-m-d');
-//                    $mandate->update();
-//                }
-//            }
-//        }
-//    }
-//
-//    private function checkBankAccountsForCompany($company): ?BankAccount
-//    {
-//        if ($company->exact_online_guid && $company->iban) {
-//            $bankAccounts = new BankAccount($this->connection);
-//            $bankAccounts = $bankAccounts->filter("Account eq guid'{$company->exact_online_guid}'", '', '', ['$top' => 10]);
-//            $iban = strtoupper(preg_replace('/\s/', '', $company->iban));
-//            $bic = $this->getBicFromIban($iban);
-//
-//            foreach ($bankAccounts as $bankAccount) {
-//                if ($bankAccount->BankAccount === $iban) {
-//                    $bankAccount->Main = true;
-//                    $bankAccount->save();
-//
-//                    return $bankAccount;
-//                }
-//            }
-//
-//            // no bank account... Let's create one!
-//            $bankAccount = new BankAccount($this->connection);
-//            $bankAccount->Account = $company->exact_online_guid;
-//            $bankAccount->BankAccount = $iban;
-//            $bankAccount->BICCode = $bic;
-//            $bankAccount->Main = true;
-//            $bankAccount->save();
-//
-//            return $bankAccount;
-//        }
-//
-//        return null;
-//    }
-//
-//    public function test(): void
-//    {
-//        $glAccount = new GLAccount($this->connection);
-//        $glAccount = $glAccount->filter("Code eq '8000'", '', '', ['$top' => 1]);
-//
-//        dd($glAccount);
-//    }
-//
-//    public function getGlAccountForBill($country = Country::NL_CODE, $accountType = self::LEADS_REVENUE)
-//    {
+
+    public function test(): void
+    {
+        $glAccount = new GLAccount($this->connection);
+        $glAccount = $glAccount->filter("Code eq '8000'", '', '', ['$top' => 1]);
+
+        dd($glAccount);
+    }
+
+    public function getGlAccountForInvoice()
+    {
 //        if (!in_array($accountType, [self::LEADS_REVENUE, self::STORNO, self::SERVICE_FEE], true)) {
 //            throw new Exception('GLAccount "' . $accountType . '" does not exist');
 //        }
@@ -536,32 +339,7 @@ class ExactOnlineService
 //        }
 //
 //        return $this->glAccounts['default'][$accountType];
-//    }
-//
-//    /**
-//     * @param string $topic
-//     * @return WebhookSubscription
-//     * @throws ApiException
-//     */
-//    public function subscribeWebhook(string $topic): WebhookSubscription
-//    {
-//        $webhookSubscription = (new WebhookSubscription($this->connection));
-//        $webhookSubscription->CallbackURL = sprintf('https://%s.%s/exact/callback-webhook', env('APP_ADMIN_SUBDOMAIN'), env('APP_DOMAIN'));
-//        $webhookSubscription->Topic = $topic;
-//        return $webhookSubscription->save();
-//    }
-//
-//    /**
-//     * @param string $topic
-//     * @return array
-//     */
-//    public function getSubscribeWebhook(string $topic): array
-//    {
-//        $webhookSubscription = (new WebhookSubscription($this->connection));
-//        $webhookSubscription->CallbackURL = sprintf('https://%s.%s/exact/callback-webhook', env('APP_ADMIN_SUBDOMAIN'), env('APP_DOMAIN'));
-//        $webhookSubscription->Topic = $topic;
-//        return $webhookSubscription->get();
-//    }
+    }
 
     /**
      * @param string $iban
