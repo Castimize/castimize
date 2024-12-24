@@ -2,6 +2,7 @@
 
 namespace App\Services\Exact;
 
+use App\Models\Country;
 use App\Models\CurrencyHistoryRate;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -24,11 +25,11 @@ use Picqer\Financials\Exact\ReceivablesList;
 use Picqer\Financials\Exact\SalesEntry;
 use Picqer\Financials\Exact\SalesInvoice;
 use Picqer\Financials\Exact\Transaction;
+use Picqer\Financials\Exact\VatCode;
 use Picqer\Financials\Exact\WebhookSubscription;
 
 class ExactOnlineService
 {
-
     // Omzet binnenland hoog tarief, Klant komt uit NL
     protected const GL_8000 = '4de43a20-6c86-4af6-bcf5-3adec36677c9';
     //O mzet buitenland intracommunautair, Klant komt uit EU, maar is zakelijke klant (maw met btw nummer)
@@ -45,11 +46,15 @@ class ExactOnlineService
     protected const GL_1104 = '9a56362f-2186-4d69-955a-39ee46fceb20';
     // Af te dragen BTW hoog
     protected const GL_1500 = 'f25efed8-ea2c-4bf1-8fdc-3a75602d7205';
+
+    // Diaries
+    protected const DIARY_SALES = 70;
+    protected const DIARY_MEMORIAL = 90;
+
 //    protected $glAccounts = [
-//        'nl' => [
-//            self::LEADS_REVENUE => '008f399d-309b-463d-9d40-94e3b9ab57d2',
-//            self::STORNO => '76b29f5b-7022-45d7-9b9f-21f37d9d2e5c',
-//            self::SERVICE_FEE => '75251c76-6ebf-4065-b44a-614359d9aa83'
+//        '8000' => [
+//            'gl' => self::GL_8000,
+//            'diary' => self
 //        ],
 //        'default' => [
 //            self::LEADS_REVENUE => 'ab56daba-8e55-4392-ae93-ab669a79e950', # Omzet binnen EU
@@ -182,6 +187,14 @@ class ExactOnlineService
         Storage::disk('r2_private')->put('exact/credentials.json', json_encode($storage, JSON_THROW_ON_ERROR));
     }
 
+    public function test(): void
+    {
+        $glAccount = new GLAccount($this->connection);
+        $glAccount = $glAccount->filter("Code eq '8000'", '', '', ['$top' => 1]);
+
+        dd($glAccount);
+    }
+
     public function syncExchangeRate(CurrencyHistoryRate $currencyHistoryRate): ExchangeRate
     {
         $exchangeRate = new ExchangeRate($this->connection);
@@ -239,16 +252,15 @@ class ExactOnlineService
     {
         $salesEntryLines = [];
 
-        //        $countryCode = $bill->company->country->code;
-//        $salesEntryLines = [];
-//
-//        $salesEntryLines[] = [
-//            'AmountFC' => number_format($bill->charges()->where('is_service_fee', 0)->sum('currency_amount'), 2, '.', ''),
-//            'Description' => $bill->is_storno == 1 ? $bill->charges->first()->description : 'Ontvangen offerteaanvragen',
-//            'GLAccount' => $bill->is_storno == 1 ? $this->getGlAccountForBill($countryCode, self::STORNO) : $this->getGlAccountForBill($countryCode, self::LEADS_REVENUE),
-//            'Quantity' => $bill->charges()->where('is_service_fee', 0)->sum('amount') > 0 ? 1 : -1,
-//        ];
-//
+
+        $salesEntryLines[] = [
+            'AmountFC' => number_format($invoice->total, 2, '.', ''),
+            'Description' => __('Order #:orderNumber', ['orderNUmber' => $invoice->lines->first()->order->order_number]),
+            'GLAccount' => $this->getGlAccountForInvoice($invoice, 'revenue'),
+            'Quantity' => $invoice->debit ? 1 : -1,
+        ];
+
+
 //        if ($bill->charges()->where('is_service_fee', 1)->exists()) {
 //            foreach ($bill->charges()->where('is_service_fee', 1)->get() as $billCharge) {
 //                $salesEntryLines[] = [
@@ -319,26 +331,35 @@ class ExactOnlineService
         return $return;
     }
 
-    public function test(): void
-    {
-        $glAccount = new GLAccount($this->connection);
-        $glAccount = $glAccount->filter("Code eq '8000'", '', '', ['$top' => 1]);
-
-        dd($glAccount);
-    }
-
-    public function getGlAccountForInvoice()
+    public function getGlAccountForInvoice(Invoice $invoice, string $type)
     {
 //        if (!in_array($accountType, [self::LEADS_REVENUE, self::STORNO, self::SERVICE_FEE], true)) {
 //            throw new Exception('GLAccount "' . $accountType . '" does not exist');
 //        }
-//
-//        $country = mb_strtolower($country);
-//        if ($country === Country::NL_CODE) {
-//            return $this->glAccounts[$country][$accountType];
-//        }
-//
-//        return $this->glAccounts['default'][$accountType];
+        return match ($type) {
+            'revenue' => $this->findGlAccountForRevenue($invoice),
+        };
+    }
+
+    private function findGlAccountForRevenue(Invoice $invoice): string
+    {
+        $country = strtoupper($invoice->country);
+        if ($country === 'NL') {
+            return self::GL_8000;
+        }
+        if (in_array($country, Country::EU_COUNTRIES, true)) {
+            if ($invoice->vat_number !== null) {
+                return self::GL_8100;
+            }
+            return self::GL_8120;
+        }
+        return self::GL_8110;
+    }
+
+    public function findVatCode()
+    {
+        $vatCodes = (new VatCode($this->connection))->get();
+        dd($vatCodes);
     }
 
     /**

@@ -33,6 +33,7 @@ class SyncExchangeRateToExact implements ShouldQueue
 
         try {
             $exchangeRate = $exactOnlineService->syncExchangeRate($this->currencyHistoryRate);
+            Log::info(print_r($exchangeRate, true));
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }

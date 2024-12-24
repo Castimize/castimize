@@ -29,7 +29,7 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
         $this->app->alias(LaravelExactOnline::class, 'laravel-exact-online');
 
         $this->app->singleton('Exact\Connection', function () {
-            if (app()->environment() === 'production') {
+            //if (app()->environment() === 'production') {
                 $config = LaravelExactOnline::loadConfig();
 
                 $connection = new Connection();
@@ -79,9 +79,9 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
                 LaravelExactOnline::storeConfig($config);
 
                 return $connection;
-            }
+            //}
 
-            return null;
+            //return null;
         });
     }
 }
