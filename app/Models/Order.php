@@ -412,6 +412,11 @@ class Order extends Model
         return $this->hasMany(Reprint::class);
     }
 
+    public function invoiceLines(): HasMany
+    {
+        return $this->hasMany(InvoiceLine::class);
+    }
+
     public function scopeRemoveTestEmailAddresses($query, string $column)
     {
         return $query->whereNotIn($column, [

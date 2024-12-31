@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Order;
 use App\Services\Admin\InvoicesService;
 use App\Services\Admin\LogRequestService;
@@ -11,7 +11,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class CreateInvoiceFromOrder implements ShouldQueue
+class CreateInvoicesFromOrder implements ShouldQueue
 {
     use Queueable;
 
@@ -21,7 +21,7 @@ class CreateInvoiceFromOrder implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public int $wpCustomerId, public int $wpOrderId, public ?int $logRequestId = null)
+    public function __construct(public int $wpOrderId, public ?int $logRequestId = null)
     {
     }
 
@@ -30,8 +30,8 @@ class CreateInvoiceFromOrder implements ShouldQueue
      */
     public function handle(InvoicesService $invoicesService): void
     {
-        $order = Order::where('wp_id', $this->wpOrderId)->first();
-        $customer = Customer::where('wp_id', $this->wpCustomerId)->first();
+        $order = Order::with('customer')->where('wp_id', $this->wpOrderId)->first();
+        $customer = $order->customer;
 
         if ($order === null) {
             return;
@@ -43,7 +43,16 @@ class CreateInvoiceFromOrder implements ShouldQueue
                 return;
             }
             $order->wpOrder = $wpOrder;
-            $invoicesService->storeInvoiceFromWpOrder($customer, $order);
+
+            $invoiceDocument = Invoice::WOOCOMMERCE_DOCUMENT_INVOICE;
+            if (isset($wpOrder['documents']->$invoiceDocument)) {
+                $invoicesService->storeInvoiceFromWpOrder($customer, $order);
+            }
+            $creditNoteDocument = Invoice::WOOCOMMERCE_DOCUMENT_CREDIT_NOTE;
+            if (isset($wpOrder['documents']->$creditNoteDocument)) {
+                $invoicesService->storeInvoiceFromWpOrder($customer, $order, false);
+            }
+
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }

@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Jobs\CreateInvoicesFromOrder;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Customer;
@@ -154,6 +155,8 @@ class OrdersService
                 $this->uploadsService->setUploadToOrderQueue($upload);
             }
         }
+
+//        CreateInvoicesFromOrder::dispatch($order->wp_id);
 
         return $order;
     }

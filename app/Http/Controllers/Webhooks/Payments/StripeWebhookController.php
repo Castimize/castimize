@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Webhooks\Payments;
 
 use App\Http\Controllers\Webhooks\WebhookController;
+use App\Jobs\CreateInvoicesFromOrder;
 use App\Jobs\SetOrderCanceled;
 use App\Jobs\SetOrderPaid;
 use App\Jobs\UploadToOrderQueue;
@@ -10,6 +11,7 @@ use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use Stripe\Charge;
@@ -60,6 +62,7 @@ class StripeWebhookController extends WebhookController
                 break;
             case 'charge.refunded':
                 $charge = $event->data->object; // contains a \Stripe\Charge
+                $this->handleChargeRefunded($charge);
                 break;
             default:
                 echo 'Received unknown event type ' . $event->type;
@@ -80,7 +83,11 @@ class StripeWebhookController extends WebhookController
         }
 
         SetOrderPaid::dispatch($paymentIntent, $logRequestId)
-            ->onQueue('stripe')->delay(now()->addMinute());
+            ->onQueue('stripe')
+            ->delay(now()->addMinute());
+
+//        CreateInvoicesFromOrder::dispatch($paymentIntent->metadata->order_id)
+//            ->onQueue('exact');
 
         return $this->successMethod();
     }
@@ -114,6 +121,8 @@ class StripeWebhookController extends WebhookController
                 $order->total_refund_tax = $order->total_tax;
             }
             $order->save();
+
+            CreateInvoicesFromOrder::dispatch($order->wp_id);
 
             try {
                 LogRequestService::addResponse(request(), $order);

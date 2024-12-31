@@ -4,9 +4,9 @@ namespace App\Jobs;
 
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use App\Services\Exact\ExactOnlineService;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +22,7 @@ class SyncInvoiceToExact implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public int $wpCustomerId, public int $wpOrderId, public ?int $logRequestId = null)
+    public function __construct(public Invoice $invoice, public int $wpCustomerId, public ?int $logRequestId = null)
     {
     }
 
@@ -32,39 +32,26 @@ class SyncInvoiceToExact implements ShouldQueue
     public function handle(ExactOnlineService $exactOnlineService): void
     {
         $customer = Customer::where('wp_id', $this->wpCustomerId)->first();
-        $order = Order::where('wp_id', $this->wpOrderId)->first();
-        $invoice = null;
 
-        if ($customer === null || $order === null) {
+        if ($customer === null) {
             return;
         }
 
         try {
-            $invoiceNumber = null;
-            foreach ($order->meta_data as $metaData) {
-                if ($metaData->key === '_wcpdf_invoice_number') {
-                    $invoiceNumber = $metaData->value;
-                }
+            if ($customer->exact_online_guid === null) {
+                throw new Exception('Customer exact_online_guid is null');
             }
 
-            if ($invoiceNumber === null) {
-                return;
+            $exactOnlineService->syncInvoice($this->invoice);
+            if ($this->invoice->paid) {
+                $exactOnlineService->syncInvoicePaid($this->invoice);
             }
-
-            $invoice = Invoice::with('lines')
-                ->where('customer_id', $customer->id)
-                ->where('invoice_number', $invoiceNumber)
-                ->first();
-            if ($invoice === null) {
-                return;
-            }
-            $exactOnlineService->syncInvoice($invoice);
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
 
         try {
-            LogRequestService::addResponseById($this->logRequestId, $invoice);
+            LogRequestService::addResponseById($this->logRequestId, $this->invoice);
         } catch (Throwable $exception) {
             Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
         }

@@ -6,11 +6,13 @@ use App\Models\Country;
 use App\Models\CurrencyHistoryRate;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Services\Admin\CurrencyService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use JsonException;
 use Picqer\Financials\Exact\Account;
 use Picqer\Financials\Exact\ApiException;
@@ -23,10 +25,9 @@ use Picqer\Financials\Exact\Me;
 use Picqer\Financials\Exact\Receivable;
 use Picqer\Financials\Exact\ReceivablesList;
 use Picqer\Financials\Exact\SalesEntry;
-use Picqer\Financials\Exact\SalesInvoice;
-use Picqer\Financials\Exact\Transaction;
 use Picqer\Financials\Exact\VatCode;
 use Picqer\Financials\Exact\WebhookSubscription;
+use RuntimeException;
 
 class ExactOnlineService
 {
@@ -46,6 +47,8 @@ class ExactOnlineService
     protected const GL_1104 = '9a56362f-2186-4d69-955a-39ee46fceb20';
     // Af te dragen BTW hoog
     protected const GL_1500 = 'f25efed8-ea2c-4bf1-8fdc-3a75602d7205';
+
+    protected const NO_VAT_CODE = '0  ';
 
     // Diaries
     protected const DIARY_SALES = 70;
@@ -195,6 +198,21 @@ class ExactOnlineService
         dd($glAccount);
     }
 
+    public function getGlAccounts(): array
+    {
+        $glAccounts = new GLAccount($this->connection);
+
+        $return = [];
+        foreach ($glAccounts->get() as $glAccount) {
+            $return[] = [
+                'id' => $glAccount->ID,
+                'Description' => $glAccount->Description,
+            ];
+        }
+
+        return $return;
+    }
+
     public function syncExchangeRate(CurrencyHistoryRate $currencyHistoryRate): ExchangeRate
     {
         $exchangeRate = new ExchangeRate($this->connection);
@@ -227,9 +245,6 @@ class ExactOnlineService
                 $account = $this->updateAccount($account, $customer);
                 $account->save();
 
-                $customer->exact_online_guid = $account->ID;
-                $customer->save();
-
                 return $account;
             }
 
@@ -248,45 +263,100 @@ class ExactOnlineService
         return $account;
     }
 
-    public function syncInvoice(Invoice $invoice)
+    public function syncInvoice(Invoice $invoice): void
     {
         $salesEntryLines = [];
 
+        $orderIds = $invoice->lines->pluck('order_id', 'order_id');
 
-        $salesEntryLines[] = [
-            'AmountFC' => number_format($invoice->total, 2, '.', ''),
-            'Description' => __('Order #:orderNumber', ['orderNUmber' => $invoice->lines->first()->order->order_number]),
-            'GLAccount' => $this->getGlAccountForInvoice($invoice, 'revenue'),
-            'Quantity' => $invoice->debit ? 1 : -1,
-        ];
+        foreach ($orderIds as $orderId) {
+            $orderIdLines = $invoice->lines->where('order_id', $orderId);
+            $minAmount = $invoice->debit ? '' : '-';
 
+            // Revenue
+            $revenueLine = [
+                'AmountFC' => $minAmount . number_format($this->getTotalInEuro($invoice, $invoice->total, Carbon::parse($invoice->invoice_date)), 2, '.', ''),
+                'Description' => __('Order #:orderNumber', ['orderNumber' => $orderIdLines->first()->order->order_number]),
+                'GLAccount' => $this->findGlAccountForRevenue($invoice),
+                'VATCode' => self::NO_VAT_CODE,
+                'Quantity' => $invoice->debit ? -1 : 1,
+            ];
+            if ($invoice->total_tax !== null && $invoice->total_tax > 0.00) {
+                $revenueLine['VATCode'] = $this->findVatCode(strtoupper($invoice->country));
+            }
+            $salesEntryLines[] = $revenueLine;
+        }
 
-//        if ($bill->charges()->where('is_service_fee', 1)->exists()) {
-//            foreach ($bill->charges()->where('is_service_fee', 1)->get() as $billCharge) {
-//                $salesEntryLines[] = [
-//                    'AmountFC' => number_format($billCharge->currency_amount, 2, '.', ''),
-//                    'Description' => $billCharge->description,
-//                    'GLAccount' => $this->getGlAccountForBill($countryCode, self::SERVICE_FEE), // Omzet service fee
-//                    'Quantity' => $billCharge->amount > 0 ? 1 : -1,
-//                ];
-//            }
-//        }
+        $this->createSalesEntryFromInvoice(
+            invoice: $invoice,
+            salesEntryLines: $salesEntryLines,
+            diary: self::DIARY_SALES,
+            type: ($invoice->debit ? 20 : 21),
+            entryDate: Carbon::parse($invoice->invoice_date)->format('Y-m-d'),
+        );
+    }
 
+    public function syncInvoicePaid(Invoice $invoice): void
+    {
+        $salesEntryLines = [];
 
+        $orderIds = $invoice->lines->pluck('order_id', 'order_id');
+
+        foreach ($orderIds as $orderId) {
+            $orderIdLines = $invoice->lines->where('order_id', $orderId);
+
+            $minAmount = $invoice->debit ? '-' : '';
+            // Payment method pending, credit
+            $salesEntryLines[] = [
+                'AmountFC' => $minAmount . number_format((float)$this->getTotalInEuro($invoice, $invoice->total, Carbon::parse($invoice->paid_at)), 2, '.', ''),
+                'Description' => __('Order #:orderNumber', ['orderNumber' => $orderIdLines->first()->order->order_number]),
+                'GLAccount' => $this->findGlAccountForPaymentMethod($orderIdLines->first()->order->payment_issuer),
+                'Type' => $invoice->debit ? 20 : 21,
+                'Quantity' => $invoice->debit ? -1 : 1,
+            ];
+        }
+
+        $this->createSalesEntryFromInvoice(
+            invoice: $invoice,
+            salesEntryLines: $salesEntryLines,
+            diary: self::DIARY_MEMORIAL,
+            type: ($invoice->debit ? 20 : 21),
+            entryDate: Carbon::parse($invoice->paid_at)->format('Y-m-d'),
+        );
+    }
+
+    private function createSalesEntryFromInvoice(Invoice $invoice, array $salesEntryLines, int $diary, int $type, string $entryDate): void
+    {
         $salesEntry = new SalesEntry($this->connection);
         $salesEntry->Customer = $invoice->customer->exact_online_guid;
-        $salesEntry->Currency = $bill->company->currency->code;
-        $salesEntry->Journal = $this->diaries[$bill->company->currency->code ?? 'EUR'];
-        $salesEntry->YourRef = $bill->billnumber;
-        $salesEntry->OrderNumber = $bill->billnumber;
-        $salesEntry->Description = $bill->is_storno == 1 ? $bill->charges->first()->description : $description;
-        $salesEntry->EntryNumber = $bill->billnumber;
-        $salesEntry->EntryDate = $bill->created_at->format('Y-m-d');
-        $salesEntry->PaymentCondition = $this->getPaymentConditionsForDays($bill->company->getBillExpiryDate());
-        $salesEntry->Type = $bill->charges->sum('amount') > 0 ? 20 : 21;
+        $salesEntry->Currency = 'EUR';
+        $salesEntry->Journal = $diary;
+        $salesEntry->YourRef = $invoice->invoice_number;
+        $salesEntry->OrderNumber = $invoice->invoice_nuber;
+        $salesEntry->Description = $invoice->description;
+//        $salesEntry->EntryNumber = $invoice->invoice_number;
+        $salesEntry->EntryDate = $entryDate;
+        $salesEntry->PaymentCondition = '00';
+//        $salesEntry->PaymentCondition = $this->getPaymentConditionsForDays($bill->company->getBillExpiryDate());
+        $salesEntry->Type = $type;
         $salesEntry->SalesEntryLines = $salesEntryLines;
-        $salesEntry->save();
-        $invoice->exact_online_guid = $salesEntry->EntryID;
+//        dd($salesEntry);
+        try {
+            $salesEntry->save();
+        } catch (\Exception $e) {
+            dd($e);
+        }
+
+        $invoice->exactSalesEntries()->create([
+            'exact_online_guid' => $salesEntry->EntryID,
+            'diary' => $diary,
+            'exact_data' => $salesEntry->attributes(),
+        ]);
+    }
+
+    private function updateSalesEntryFromInvoice(Invoice $invoice, array $salesEntryLines, int $diary): void
+    {
+        $salesEntry = new SalesEntry($this->connection);
     }
 
     private function updateAccount(Account $account, Customer $customer): Account
@@ -316,31 +386,6 @@ class ExactOnlineService
         return $account;
     }
 
-    public function getGlAccounts()
-    {
-        $glAccounts = new GLAccount($this->connection);
-
-        $return = [];
-        foreach ($glAccounts->get() as $glAccount) {
-            $return[] = [
-                'id' => $glAccount->ID,
-                'Description' => $glAccount->Description,
-            ];
-        }
-
-        return $return;
-    }
-
-    public function getGlAccountForInvoice(Invoice $invoice, string $type)
-    {
-//        if (!in_array($accountType, [self::LEADS_REVENUE, self::STORNO, self::SERVICE_FEE], true)) {
-//            throw new Exception('GLAccount "' . $accountType . '" does not exist');
-//        }
-        return match ($type) {
-            'revenue' => $this->findGlAccountForRevenue($invoice),
-        };
-    }
-
     private function findGlAccountForRevenue(Invoice $invoice): string
     {
         $country = strtoupper($invoice->country);
@@ -356,10 +401,38 @@ class ExactOnlineService
         return self::GL_8110;
     }
 
-    public function findVatCode()
+    private function findGlAccountForPaymentMethod(string $paymentIssuer): ?string
     {
+        if ($paymentIssuer === 'ppcp') {
+            return self::GL_1104;
+        }
+        if (Str::startsWith($paymentIssuer, 'stripe')) {
+            return self::GL_1103;
+        }
+        return null;
+    }
+
+    private function getTotalInEuro(Invoice $invoice, int $total, Carbon $historyDate)
+    {
+        if ($invoice->currency_code === 'EUR') {
+            return $total;
+        }
+        return (new CurrencyService())->convertCurrency($invoice->currency_code, 'EUR', $total, $historyDate);
+    }
+
+    public function findVatCode(string $countryCode): string
+    {
+        if ($countryCode === 'NL') {
+            return '4  ';
+        }
         $vatCodes = (new VatCode($this->connection))->get();
-        dd($vatCodes);
+        /** @var VatCode $vatCode */
+        foreach ($vatCodes as $vatCode) {
+            if (trim($vatCode->OssCountry) === $countryCode) {
+                return $vatCode->Code;
+            }
+        }
+        throw new RuntimeException(__('VAT Code not found for :countryCode', ['countryCode' => $countryCode]));
     }
 
     /**
