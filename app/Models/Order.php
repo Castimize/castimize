@@ -312,6 +312,12 @@ class Order extends Model
      */
     protected function shippingAddress(): Attribute
     {
+        $email = $this->email;
+        if (!empty($this->shipping_email)) {
+            $email = $this->shipping_email;
+        } else if (!empty($this->billing_email)) {
+            $email = $this->billing_email;
+        }
         return Attribute::make(
             get: fn () => [
                 'first_name' => $this->shipping_first_name,
@@ -325,7 +331,7 @@ class Order extends Model
                 'state' => $this->shipping_state,
                 'country' => $this->shipping_country,
                 'phone' => $this->shipping_phone_number ?? $this->billing_phone_number,
-                'email' => $this->shipping_email ?? $this->billing_email ?? $this->email,
+                'email' => $email,
             ],
         );
     }
