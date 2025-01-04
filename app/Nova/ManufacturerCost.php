@@ -68,6 +68,9 @@ class ManufacturerCost extends Resource
         return [
             ID::make()->sortable(),
 
+            BelongsTo::make(__('Manufacturer'), 'manufacturer', Manufacturer::class)
+                ->sortable(),
+
             BelongsTo::make(__('Material'), 'material', Material::class)
                 ->sortable(),
 
