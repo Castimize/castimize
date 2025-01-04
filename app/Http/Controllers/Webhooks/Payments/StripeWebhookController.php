@@ -86,8 +86,9 @@ class StripeWebhookController extends WebhookController
             ->onQueue('stripe')
             ->delay(now()->addMinute());
 
-//        CreateInvoicesFromOrder::dispatch($paymentIntent->metadata->order_id)
-//            ->onQueue('exact');
+        CreateInvoicesFromOrder::dispatch($paymentIntent->metadata->order_id)
+            ->onQueue('exact')
+            ->delay(now()->addMinute());
 
         return $this->successMethod();
     }

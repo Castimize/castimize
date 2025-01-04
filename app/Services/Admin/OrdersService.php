@@ -156,7 +156,7 @@ class OrdersService
             }
         }
 
-//        CreateInvoicesFromOrder::dispatch($order->wp_id);
+        CreateInvoicesFromOrder::dispatch($order->wp_id);
 
         return $order;
     }

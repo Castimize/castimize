@@ -40,6 +40,12 @@ class SyncInvoicesToExact extends Command
             ->doesntHave('exactSalesEntries')
             ->get();
 
+        $count = $invoices->count();
+        dd($count);
+        $progressBar = $this->output->createProgressBar($count);
+        $this->info("Syncing $count invoices to Exact");
+        $progressBar->start();
+
         foreach ($invoices as $invoice) {
             Bus::chain([
                 new SyncCustomerToExact($invoice->customer->wp_id),
@@ -47,6 +53,12 @@ class SyncInvoicesToExact extends Command
             ])
                 ->onQueue('exact')
                 ->dispatch();
+
+            sleep(1);
+
+            $progressBar->advance();
         }
+
+        $progressBar->finish();
     }
 }
