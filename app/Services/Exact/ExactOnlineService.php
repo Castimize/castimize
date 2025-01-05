@@ -216,12 +216,28 @@ class ExactOnlineService
     public function syncExchangeRate(CurrencyHistoryRate $currencyHistoryRate): ExchangeRate
     {
         $exchangeRate = new ExchangeRate($this->connection);
+//        $exRate = $exchangeRate->filter("StartDate eq '{$currencyHistoryRate->historical_date}'");
+//
+//        if (count($exRate) > 0 && $exRate[0] instanceof ExchangeRate) {
+//            $exchangeRate = $exRate[0];
+//            $exchangeRate->Rate = $currencyHistoryRate->rate;
+//            $exchangeRate->save();
+//
+//            $currencyHistoryRate->exact_online_guid = $exchangeRate->ID;
+//            $currencyHistoryRate->save();
+//
+//            return $exchangeRate;
+//        }
+
         $exchangeRate->Created = $currencyHistoryRate->historical_date;
         $exchangeRate->Rate = $currencyHistoryRate->rate;
         $exchangeRate->SourceCurrency = $currencyHistoryRate->base_currency;
         $exchangeRate->StartDate = $currencyHistoryRate->historical_date;
         $exchangeRate->TargetCurrency = $currencyHistoryRate->convert_currency;
         $exchangeRate->save();
+
+        $currencyHistoryRate->exact_online_guid = $exchangeRate->ID;
+        $currencyHistoryRate->save();
 
         return $exchangeRate;
     }
@@ -254,8 +270,15 @@ class ExactOnlineService
             ]));
         }
 
-        $account = $this->updateAccount($account, $customer);
-        $account->save();
+        //$acc = $account->filter("ID eq guid'{$customer->exact_online_guid}'");
+
+
+        try {
+            $account = $this->updateAccount($account, $customer);
+            $account->save();
+        } catch (Exception $exception) {
+            dd($customer->wp_id, $account, $exception->getMessage());
+        }
 
         $customer->exact_online_guid = $account->ID;
         $customer->save();
@@ -341,11 +364,7 @@ class ExactOnlineService
         $salesEntry->Type = $type;
         $salesEntry->SalesEntryLines = $salesEntryLines;
 //        dd($salesEntry);
-        try {
-            $salesEntry->save();
-        } catch (\Exception $e) {
-            dd($e);
-        }
+        $salesEntry->save();
 
         $invoice->exactSalesEntries()->create([
             'exact_online_guid' => $salesEntry->EntryID,
@@ -424,6 +443,9 @@ class ExactOnlineService
     {
         if ($countryCode === 'NL') {
             return '4  ';
+        }
+        if ($countryCode === 'GB') {
+            $countryCode = 'UK';
         }
         $vatCodes = (new VatCode($this->connection))->get();
         /** @var VatCode $vatCode */

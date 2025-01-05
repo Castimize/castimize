@@ -28,6 +28,7 @@ class CreateInvoicesFromOldOrdersAndSyncToExact extends Command
     public function handle()
     {
         $orders = Order::with(['uploads'])
+            ->has('uploads')
             ->doesntHave('invoiceLines')
             ->orderByDesc('created_at')
             ->get();
