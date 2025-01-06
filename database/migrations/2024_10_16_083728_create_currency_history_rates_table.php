@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('convert_currency', 3);
             $table->float('rate');
             $table->date('historical_date');
+            $table->string('exact_online_guid')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

@@ -25,6 +25,7 @@ class CurrencyHistoryRate extends Model
         'convert_currency',
         'rate',
         'historical_date',
+        'exact_online_guid',
     ];
 
     /**

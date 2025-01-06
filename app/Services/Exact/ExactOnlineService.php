@@ -216,7 +216,8 @@ class ExactOnlineService
     public function syncExchangeRate(CurrencyHistoryRate $currencyHistoryRate): ExchangeRate
     {
         $exchangeRate = new ExchangeRate($this->connection);
-//        $exRate = $exchangeRate->filter("StartDate eq '{$currencyHistoryRate->historical_date}'");
+//        $historicalDate = Carbon::parse($currencyHistoryRate->historical_date)->format('Y-m-d');
+//        $exRate = $exchangeRate->filter("StartDate eq datetime'{$historicalDate}'");
 //
 //        if (count($exRate) > 0 && $exRate[0] instanceof ExchangeRate) {
 //            $exchangeRate = $exRate[0];
