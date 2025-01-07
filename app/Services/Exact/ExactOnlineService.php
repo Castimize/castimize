@@ -356,7 +356,7 @@ class ExactOnlineService
             $salesEntry = $salesEntry->filter("EntryID eq guid'{$exactSalesEntry->exact_online_guid}'");
             if (count($salesEntry) > 0 && $salesEntry[0] instanceof SalesEntry) {
                 $salesEntry[0]->delete();
-                $exactSalesEntry->delete();
+                $exactSalesEntry->forceDelete();
             }
         }
     }

@@ -42,6 +42,7 @@ class SyncInvoicesToExact extends Command
     {
         $invoices = Invoice::with(['customer', 'lines'])
 //            ->doesntHave('exactSalesEntries')
+//                ->where('id', 69)
             ->get();
 
         $count = $invoices->count();
@@ -50,6 +51,13 @@ class SyncInvoicesToExact extends Command
         $progressBar->start();
 
         foreach ($invoices as $invoice) {
+            //(new ExactOnlineService())->deleteSyncedInvoice($invoice);
+
+
+//            (new ExactOnlineService())->syncInvoice($invoice);
+//            if ($invoice->paid) {
+//                (new ExactOnlineService())->syncInvoicePaid($invoice);
+//            }
             Bus::chain([
 //                new SyncCustomerToExact($invoice->customer->wp_id),
                 new SyncInvoiceToExact($invoice, $invoice->customer->wp_id, true),
