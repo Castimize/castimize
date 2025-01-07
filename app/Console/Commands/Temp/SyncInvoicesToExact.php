@@ -41,7 +41,8 @@ class SyncInvoicesToExact extends Command
     public function handle()
     {
         $invoices = Invoice::with(['customer', 'lines'])
-            ->doesntHave('exactSalesEntries')
+//            ->doesntHave('exactSalesEntries')
+                ->where('id', 37)
             ->get();
 
         $count = $invoices->count();
@@ -51,13 +52,13 @@ class SyncInvoicesToExact extends Command
 
         foreach ($invoices as $invoice) {
             Bus::chain([
-                new SyncCustomerToExact($invoice->customer->wp_id),
-                new SyncInvoiceToExact($invoice, $invoice->customer->wp_id),
+//                new SyncCustomerToExact($invoice->customer->wp_id),
+                new SyncInvoiceToExact($invoice, $invoice->customer->wp_id, true),
             ])
                 ->onQueue('exact')
                 ->dispatch();
 
-            sleep(1);
+            sleep(5);
 
             $progressBar->advance();
         }

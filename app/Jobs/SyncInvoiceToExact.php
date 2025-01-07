@@ -22,7 +22,7 @@ class SyncInvoiceToExact implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Invoice $invoice, public int $wpCustomerId, public ?int $logRequestId = null)
+    public function __construct(public Invoice $invoice, public int $wpCustomerId, protected $removeOld = false, public ?int $logRequestId = null)
     {
     }
 
@@ -40,6 +40,10 @@ class SyncInvoiceToExact implements ShouldQueue
         try {
             if ($customer->exact_online_guid === null) {
                 throw new Exception('Customer exact_online_guid is null');
+            }
+
+            if ($this->removeOld) {
+                $exactOnlineService->deleteSyncedInvoice($this->invoice);
             }
 
             $exactOnlineService->syncInvoice($this->invoice);

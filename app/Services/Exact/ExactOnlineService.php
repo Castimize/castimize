@@ -349,6 +349,18 @@ class ExactOnlineService
         );
     }
 
+    public function deleteSyncedInvoice(Invoice $invoice): void
+    {
+        foreach ($invoice->exactSalesEntries as $exactSalesEntry) {
+            $salesEntry = new SalesEntry($this->connection);
+            $salesEntry = $salesEntry->filter("ID eq guid'{$exactSalesEntry->exact_online_guid}'");
+            if (count($salesEntry) > 0 && $salesEntry[0] instanceof SalesEntry) {
+                $salesEntry[0]->delete();
+                $exactSalesEntry->delete();
+            }
+        }
+    }
+
     private function createSalesEntryFromInvoice(Invoice $invoice, array $salesEntryLines, int $diary, int $type, string $entryDate): void
     {
         $salesEntry = new SalesEntry($this->connection);
@@ -432,7 +444,7 @@ class ExactOnlineService
         return null;
     }
 
-    private function getTotalInEuro(Invoice $invoice, int $total, Carbon $historyDate)
+    private function getTotalInEuro(Invoice $invoice, $total, Carbon $historyDate)
     {
         if ($invoice->currency_code === 'EUR') {
             return $total;
