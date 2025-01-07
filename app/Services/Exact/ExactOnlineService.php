@@ -353,7 +353,7 @@ class ExactOnlineService
     {
         foreach ($invoice->exactSalesEntries as $exactSalesEntry) {
             $salesEntry = new SalesEntry($this->connection);
-            $salesEntry = $salesEntry->filter("ID eq guid'{$exactSalesEntry->exact_online_guid}'");
+            $salesEntry = $salesEntry->filter("EntryID eq guid'{$exactSalesEntry->exact_online_guid}'");
             if (count($salesEntry) > 0 && $salesEntry[0] instanceof SalesEntry) {
                 $salesEntry[0]->delete();
                 $exactSalesEntry->delete();

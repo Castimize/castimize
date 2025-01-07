@@ -42,7 +42,6 @@ class SyncInvoicesToExact extends Command
     {
         $invoices = Invoice::with(['customer', 'lines'])
 //            ->doesntHave('exactSalesEntries')
-                ->where('id', 37)
             ->get();
 
         $count = $invoices->count();
