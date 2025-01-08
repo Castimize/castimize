@@ -41,7 +41,10 @@ class SyncInvoicesToExact extends Command
     public function handle()
     {
         $invoices = Invoice::with(['customer', 'lines'])
-//            ->doesntHave('exactSalesEntries')
+//            ->whereHas('exactSalesEntries', function ($query) {
+//                $query->where('created_at', '<', '2025-01-07 08:28:21');
+//            })
+            ->doesntHave('exactSalesEntries')
 //                ->where('id', 69)
             ->get();
 
@@ -59,7 +62,7 @@ class SyncInvoicesToExact extends Command
 //                (new ExactOnlineService())->syncInvoicePaid($invoice);
 //            }
             Bus::chain([
-//                new SyncCustomerToExact($invoice->customer->wp_id),
+                new SyncCustomerToExact($invoice->customer->wp_id),
                 new SyncInvoiceToExact($invoice, $invoice->customer->wp_id, true),
             ])
                 ->onQueue('exact')
