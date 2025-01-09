@@ -11,6 +11,7 @@ use App\Nova\Customer;
 use App\Nova\CustomerShipment;
 use App\Nova\Dashboards\CastimizeDashboard;
 use App\Nova\Dashboards\ManufacturerDashboard;
+use App\Nova\Invoice;
 use App\Nova\Language;
 use App\Nova\LogisticsZone;
 use App\Nova\LogRequest;
@@ -138,7 +139,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     }),
 
                 MenuSection::make(__('Invoices'), [
-//                    MenuItem::resource(Invoice::class),
+                    MenuItem::resource(Invoice::class),
                 ])->icon('document-text')
                     ->collapsable()
                     ->canSee(function (NovaRequest $request) {
