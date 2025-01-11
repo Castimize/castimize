@@ -44,7 +44,7 @@ class PoReprintByDcAction extends Action
         foreach ($models as $model) {
             $hasEndStatus = [];
             /** @var $model OrderQueue */
-            if ($model->getLastStatus()->end_status) {
+            if ($model->getLastStatus()->end_status && $model->getLastStatus()->slug !== 'completed') {
                 $hasEndStatus[] = $model->id;
             }
 

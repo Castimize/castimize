@@ -306,7 +306,7 @@ class ExactOnlineService
                 'Quantity' => $invoice->debit ? -1 : 1,
             ];
             if ($invoice->total_tax !== null && $invoice->total_tax > 0.00) {
-                $revenueLine['VATCode'] = $this->findVatCode(strtoupper($invoice->country));
+                $revenueLine['VATCode'] = $this->findVatCode(strtoupper($orderIdLines->first()->order->shipping_country ?? $invoice->country));
             }
             $salesEntryLines[] = $revenueLine;
         }
@@ -457,9 +457,7 @@ class ExactOnlineService
         if ($countryCode === 'NL') {
             return '4  ';
         }
-        if ($countryCode === 'GB') {
-            $countryCode = 'UK';
-        }
+
         $vatCodes = (new VatCode($this->connection))->get();
         /** @var VatCode $vatCode */
         foreach ($vatCodes as $vatCode) {
