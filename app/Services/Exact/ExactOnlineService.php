@@ -435,11 +435,12 @@ class ExactOnlineService
 
     private function findGlAccountForPaymentMethod(string $paymentIssuer): ?string
     {
+        Log::info($paymentIssuer);
+        if (Str::startsWith($paymentIssuer, 'stripe_')) {
+            return self::GL_1103;
+        }
         if ($paymentIssuer === 'ppcp') {
             return self::GL_1104;
-        }
-        if (Str::startsWith($paymentIssuer, 'stripe')) {
-            return self::GL_1103;
         }
         return null;
     }
