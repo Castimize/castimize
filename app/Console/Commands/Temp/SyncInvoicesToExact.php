@@ -45,8 +45,8 @@ class SyncInvoicesToExact extends Command
 //            ->whereHas('exactSalesEntries', function ($query) {
 //                $query->where('created_at', '<', '2025-01-07 08:28:21');
 //            })
-            ->doesntHave('exactSalesEntries')
-//                ->where('id', 69)
+//            ->doesntHave('exactSalesEntries')
+                ->whereIn('id', [3, 8])
             ->get();
 
         $count = $invoices->count();
