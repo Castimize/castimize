@@ -69,7 +69,7 @@ class SyncInvoicesToExact extends Command
                 ->onQueue('exact')
                 ->dispatch();
 
-            sleep(5);
+            sleep(20);
 
             $progressBar->advance();
         }
