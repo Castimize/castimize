@@ -63,7 +63,7 @@ class SyncInvoicesToExact extends Command
 //                (new ExactOnlineService())->syncInvoicePaid($invoice);
 //            }
             Bus::chain([
-                new SyncCustomerToExact($invoice->customer->wp_id),
+                //new SyncCustomerToExact($invoice->customer->wp_id),
                 new SyncInvoiceToExact($invoice, $invoice->customer->wp_id, true),
             ])
                 ->onQueue('exact')
