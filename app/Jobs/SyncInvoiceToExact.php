@@ -47,9 +47,9 @@ class SyncInvoiceToExact implements ShouldQueue
 //                //sleep(5);
 //            }
 
-            $exactOnlineService->syncInvoice($this->invoice);
+//            $exactOnlineService->syncInvoice($this->invoice);
             if ($this->invoice->paid) {
-                sleep(2);
+//                sleep(2);
                 $exactOnlineService->syncInvoicePaid($this->invoice);
             }
         } catch (Throwable $e) {

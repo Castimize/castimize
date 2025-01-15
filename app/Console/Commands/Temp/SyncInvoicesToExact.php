@@ -42,7 +42,7 @@ class SyncInvoicesToExact extends Command
     {
         $invoices = Invoice::with(['customer', 'lines'])
 //            ->where('id', 22)
-//            ->whereHas('exactSalesEntries', operator: '=', count: 1)
+            ->whereHas('exactSalesEntries', operator: '=', count: 1)
 //            ->whereHas('exactSalesEntries', function ($query) {
 //                $query->where('created_at', '<', '2025-01-07 08:28:21');
 //            })
