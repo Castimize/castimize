@@ -44,13 +44,13 @@ class SyncInvoiceToExact implements ShouldQueue
 
             if ($this->removeOld) {
                 $exactOnlineService->deleteSyncedInvoice($this->invoice);
-                sleep(5);
+                //sleep(5);
             }
 
-            $exactOnlineService->syncInvoice($this->invoice);
-            if ($this->invoice->paid) {
-                $exactOnlineService->syncInvoicePaid($this->invoice);
-            }
+//            $exactOnlineService->syncInvoice($this->invoice);
+//            if ($this->invoice->paid) {
+//                $exactOnlineService->syncInvoicePaid($this->invoice);
+//            }
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
