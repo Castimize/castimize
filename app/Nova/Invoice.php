@@ -120,7 +120,7 @@ class Invoice extends Resource
             }),
 
             Text::make(__('Exact entries'), function () {
-                return $this->exactSalesEntries ? $this->exactSalesEntries->sum() : '';
+                return $this->exactSalesEntries ? $this->exactSalesEntries->count() : '';
             })
             ->canSee(function ($request) {
                 return $request->user()->isSuperAdmin();
