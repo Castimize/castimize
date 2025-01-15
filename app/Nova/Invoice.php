@@ -58,6 +58,7 @@ class Invoice extends Resource
      */
     public static $with = [
         'customer',
+        'exactSalesEntries',
     ];
 
     public static function authorizedToCreate(Request $request)
@@ -116,6 +117,13 @@ class Invoice extends Resource
 
             Text::make(__('Total'), function () {
                 return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
+            }),
+
+            Text::make(__('Exact entries'), function () {
+                return $this->exactSalesEntries ? $this->exactSalesEntries->sum() : '';
+            })
+            ->canSee(function ($request) {
+                return $request->user()->isSuperAdmin();
             }),
         ];
     }
