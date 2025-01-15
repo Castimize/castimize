@@ -41,13 +41,14 @@ class SyncInvoicesToExact extends Command
     public function handle()
     {
         $invoices = Invoice::with(['customer', 'lines'])
-            ->where('id', 22)
+//            ->where('id', 22)
 //            ->whereHas('exactSalesEntries', operator: '=', count: 1)
 //            ->whereHas('exactSalesEntries', function ($query) {
 //                $query->where('created_at', '<', '2025-01-07 08:28:21');
 //            })
 //            ->doesntHave('exactSalesEntries')
 //                ->whereIn('id', [3, 8])
+                ->orderBy('invoice_number')
             ->get();
 
         $count = $invoices->count();

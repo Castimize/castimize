@@ -40,13 +40,13 @@ class ExactOnlineService
     // Omzet binnen EU Particulier, Klant komt uit EU, maar particulier (dus BTW belaste omzet)
     protected const GL_8120 = '07f9774b-2a55-442c-ac02-f972f7f5149f';
     // Debiteuren
-    protected const GL_1300 = 'b807f1a9-43ef-4b68-8556-ca3db36e6507';
+//    protected const GL_1300 = 'b807f1a9-43ef-4b68-8556-ca3db36e6507';
     // Stripe pending
     protected const GL_1103 = 'b25c4786-24aa-4db2-8c18-57bb672ccc3b';
     // Paypal pending
     protected const GL_1104 = '9a56362f-2186-4d69-955a-39ee46fceb20';
     // Af te dragen BTW hoog
-    protected const GL_1500 = 'f25efed8-ea2c-4bf1-8fdc-3a75602d7205';
+//    protected const GL_1500 = 'f25efed8-ea2c-4bf1-8fdc-3a75602d7205';
 
     protected const NO_VAT_CODE = '0  ';
 
