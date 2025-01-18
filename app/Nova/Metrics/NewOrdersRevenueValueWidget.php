@@ -32,7 +32,7 @@ class NewOrdersRevenueValueWidget extends ValueWidget
         foreach ($orders as $order) {
             $uploadTotal = 0;
             foreach ($order->uploads as $upload) {
-                $uploadTotal += $currencyService->convertCurrency($upload->currency_code, config('app.currency'), $upload->total);
+                $uploadTotal += $currencyService->convertCurrency($upload->currency_code, config('app.currency'), $upload->total, $upload->created_at);
             }
             $total += $uploadTotal;
         }
