@@ -29,7 +29,7 @@ class CastimizeDashboard extends Dashboard
      */
     public function cards()
     {
-        if (auth()->user()->isSuperAdmin()) {
+//        if (auth()->user()->isSuperAdmin()) {
             return [
                 NovaDashboard::make()
                     ->addView(__('Dashboard'), function (View $view) {
@@ -74,10 +74,10 @@ class CastimizeDashboard extends Dashboard
                             ]);
                     }),
             ];
-        }
-        return [
-            Help::make(),
-        ];
+//        }
+//        return [
+//            Help::make(),
+//        ];
     }
 
     /**
