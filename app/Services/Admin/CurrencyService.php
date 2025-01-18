@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Models\CurrencyHistoryRate;
 use AshAllenDesign\LaravelExchangeRates\Classes\ExchangeRate;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class CurrencyService
 {
@@ -35,6 +36,8 @@ class CurrencyService
             }
             return $amount * $currencyHistoricalRate->rate;
         }
+
+        Log::info(sprintf('From: %s, To: %s, Amount: %s, Date: %s', $from, $to, $amount, $date->format('Y-m-d')));
 
         return $this->exchangeRate->convert($amount, $from, $to, $date);
     }
