@@ -36,6 +36,6 @@ class CurrencyService
             return $amount * $currencyHistoricalRate->rate;
         }
 
-        return $this->exchangeRate->convert($amount, $from, $to, now());
+        return $this->exchangeRate->convert($amount, $from, $to, $date);
     }
 }

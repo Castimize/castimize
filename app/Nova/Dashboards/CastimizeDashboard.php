@@ -29,55 +29,55 @@ class CastimizeDashboard extends Dashboard
      */
     public function cards()
     {
-//        if (auth()->user()->isSuperAdmin()) {
+        if (auth()->user()->isSuperAdmin()) {
             return [
                 NovaDashboard::make()
                     ->addView(__('Dashboard'), function (View $view) {
                         return $view
                             ->icon('window')
                             ->addWidgets([
-//                                NewOrdersValueWidget::make()
-//                                    ->width(2)
-//                                    ->position(x: 0, y: 0),
-//                                NewOrdersRevenueValueWidget::make()
-//                                    ->width(2)
-//                                    ->position(x: 2, y: 0),
-//                                NewOrdersProfitValueWidget::make()
-//                                    ->width(2)
-//                                    ->position(x: 4, y: 0),
-//                                RevenueCostsProfitLineChartWidget::make()
-//                                    ->width(12)
-//                                    ->height(2)
-//                                    ->position(x: 0, y: 1),
-//                                NewOrdersLineChartWidget::make()
-//                                    ->width(12)
-//                                    ->height(2)
-//                                    ->position(x: 0, y: 4),
-//                                BiggestMaterialsRevenueTableWidget::make()
-//                                    ->title(__('Biggest materials revenue'))
-//                                    ->width(4)
-//                                    ->height(3)
-//                                    ->position(x: 0, y: 6),
-//                                BiggestCustomersRevenueTableWidget::make()
-//                                    ->title(__('Biggest customers revenue'))
-//                                    ->width(4)
-//                                    ->height(3)
-//                                    ->position(x: 4, y: 6),
-//                                BiggestManufacturersRevenueTableWidget::make()
-//                                    ->title(__('Biggest manufacturers revenue'))
-//                                    ->width(4)
-//                                    ->height(3)
-//                                    ->position(x: 8, y: 6),
+                                NewOrdersValueWidget::make()
+                                    ->width(2)
+                                    ->position(x: 0, y: 0),
+                                NewOrdersRevenueValueWidget::make()
+                                    ->width(2)
+                                    ->position(x: 2, y: 0),
+                                NewOrdersProfitValueWidget::make()
+                                    ->width(2)
+                                    ->position(x: 4, y: 0),
+                                RevenueCostsProfitLineChartWidget::make()
+                                    ->width(12)
+                                    ->height(2)
+                                    ->position(x: 0, y: 1),
+                                NewOrdersLineChartWidget::make()
+                                    ->width(12)
+                                    ->height(2)
+                                    ->position(x: 0, y: 4),
+                                BiggestMaterialsRevenueTableWidget::make()
+                                    ->title(__('Biggest materials revenue'))
+                                    ->width(4)
+                                    ->height(3)
+                                    ->position(x: 0, y: 6),
+                                BiggestCustomersRevenueTableWidget::make()
+                                    ->title(__('Biggest customers revenue'))
+                                    ->width(4)
+                                    ->height(3)
+                                    ->position(x: 4, y: 6),
+                                BiggestManufacturersRevenueTableWidget::make()
+                                    ->title(__('Biggest manufacturers revenue'))
+                                    ->width(4)
+                                    ->height(3)
+                                    ->position(x: 8, y: 6),
                             ])
                             ->addFilters([
                                 (new OrderDateDaterangepickerFilter(DateHelper::LAST_30_DAYS)),
                             ]);
                     }),
             ];
-//        }
-//        return [
-//            Help::make(),
-//        ];
+        }
+        return [
+            Help::make(),
+        ];
     }
 
     /**
