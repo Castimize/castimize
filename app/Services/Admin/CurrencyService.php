@@ -24,9 +24,15 @@ class CurrencyService
         if ($date === null) {
             $date = now();
         }
+        $baseCurrency = $from;
+        $convertCurrency = $to;
+        if ($to === config('app.currency')) {
+            $baseCurrency = $to;
+            $convertCurrency = $from;
+        }
 
-        $currencyHistoricalRate = CurrencyHistoryRate::where('base_currency', $from)
-            ->where('convert_currency', $to)
+        $currencyHistoricalRate = CurrencyHistoryRate::where('base_currency', $baseCurrency)
+            ->where('convert_currency', $convertCurrency)
             ->where('historical_date', $date->format('Y-m-d'))
             ->first();
 
