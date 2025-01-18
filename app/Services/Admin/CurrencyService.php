@@ -15,12 +15,6 @@ class CurrencyService
         $this->exchangeRate = app(ExchangeRate::class);
     }
 
-    /**
-     * @param string $from
-     * @param string $to
-     * @param float $amount
-     * @return float
-     */
     public function convertCurrency(string $from, string $to, float $amount, ?Carbon $date = null): float
     {
         if ($from === $to) {
