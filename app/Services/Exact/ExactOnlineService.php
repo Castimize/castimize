@@ -332,7 +332,7 @@ class ExactOnlineService
             $minAmount = $invoice->debit ? '-' : '';
             // Payment method pending, credit
             $salesEntryLines[] = [
-                'AmountFC' => $minAmount . number_format((float)$this->getTotalInEuro($invoice, $invoice->total, Carbon::parse($invoice->paid_at)), 2, '.', ''),
+                'AmountFC' => $minAmount . number_format((float)$this->getTotalInEuro($invoice, $invoice->total, Carbon::parse($invoice->invoice_date)), 2, '.', ''),
                 'Description' => __('Order #:orderNumber', ['orderNumber' => $orderIdLines->first()->order->order_number]),
                 'GLAccount' => $this->findGlAccountForPaymentMethod($orderIdLines->first()->order->payment_issuer),
                 'Type' => $invoice->debit ? 20 : 21,
