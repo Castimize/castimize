@@ -39,7 +39,10 @@ class InvoicesService
             $creditNoteDocument = Invoice::WOOCOMMERCE_DOCUMENT_CREDIT_NOTE;
             $invoiceNumber = $wpOrder['documents']->$creditNoteDocument->number;
             $invoiceDate = Carbon::createFromTimestamp($wpOrder['documents']->$creditNoteDocument->date_timestamp);
-            $total = abs($wpOrder['refunds'][0]->total);
+            $total = 0.00;
+            foreach ($wpOrder['refunds'] as $refund) {
+                $total += abs($refund->total);
+            }
             $totalTax = ($order->tax_percentage / 100) * $total;
         }
 
@@ -97,19 +100,25 @@ class InvoicesService
                 ]);
             }
         } else {
-            $invoice->lines()->create([
-                'order_id' => $order->id,
-                'upload_id' => null,
-                'customer_id' => $customer->id,
-                'currency_id' => $order->currency_id,
-                'upload_name' => '-',
-                'material_name' => '-',
-                'quantity' => 1,
-                'total' => $total,
-                'total_tax' => $totalTax,
-                'currency_code' => $order->currency_code,
-                'meta_data' => null,
-            ]);
+            foreach ($wpOrder['refunds'] as $refund) {
+                $refundTotal = 0.00;
+                $refundTotal += abs($refund->total);
+                $refundTotalTax = ($order->tax_percentage / 100) * $refundTotal;
+
+                $invoice->lines()->create([
+                    'order_id' => $order->id,
+                    'upload_id' => null,
+                    'customer_id' => $customer->id,
+                    'currency_id' => $order->currency_id,
+                    'upload_name' => '-',
+                    'material_name' => '-',
+                    'quantity' => 1,
+                    'total' => $refundTotal,
+                    'total_tax' => $refundTotalTax,
+                    'currency_code' => $order->currency_code,
+                    'meta_data' => null,
+                ]);
+            }
         }
 
         Bus::chain([

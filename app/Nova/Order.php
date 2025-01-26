@@ -121,6 +121,9 @@ class Order extends Resource
         return [
             ID::make()->sortable(),
 
+            Text::make(__('Source'), 'source')
+                ->onlyOnDetail(),
+
             Text::make(__('Order number'), 'order_number')
                 ->sortable(),
 
