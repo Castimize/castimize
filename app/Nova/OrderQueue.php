@@ -8,6 +8,7 @@ use App\Nova\Actions\ExportLineItemsV1Action;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueCountryFilter;
+use App\Nova\Filters\OrderQueueMaterialFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Traits\Nova\CommonMetaDataTrait;
 use App\Traits\Nova\OrderQueueStatusFieldTrait;
@@ -134,8 +135,7 @@ class OrderQueue extends Resource
 
             Text::make(__('Material'), function ($model) {
                     return $model->upload->material_name;
-                })
-                ->onlyOnDetail(),
+                }),
 
             BelongsTo::make(__('Order'), 'order')
                 ->canSee(function ($request) {
@@ -296,6 +296,7 @@ class OrderQueue extends Resource
     {
         return [
             (new OrderQueueCountryFilter()),
+            (new OrderQueueMaterialFilter()),
             (new OrderDateDaterangepickerFilter( DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
             (new DueDateDaterangepickerFilter( DateHelper::ALL)),
