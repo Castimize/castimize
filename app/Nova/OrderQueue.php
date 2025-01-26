@@ -133,16 +133,16 @@ class OrderQueue extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make(__('Material'), function ($model) {
-                    return $model->upload->material_name;
-                }),
-
             BelongsTo::make(__('Order'), 'order')
                 ->canSee(function ($request) {
                     return $request->user()->isBackendUser();
                 })
                 ->hideOnExport()
                 ->sortable(),
+
+            Text::make(__('Material'), function ($model) {
+                return $model->upload->material_name;
+            }),
 
             Text::make(__('Order'), function ($model) {
                     return $model->order->order_number;
