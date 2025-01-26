@@ -40,7 +40,7 @@ class OrderQueueMaterialFilter extends Filter
     public function apply(NovaRequest $request, $query, $value)
     {
         return $query->whereHas('upload', function ($q) use ($value) {
-                $q->where('name', $value);
+                $q->where('material_name', $value);
             });
     }
 
