@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Dtos\Order\OrderDto;
 use App\Http\Requests\ShowOrderWpRequest;
 use App\Http\Resources\OrderResource;
 use App\Jobs\CreateOrderFromWp;
@@ -11,14 +12,11 @@ use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrdersService;
 use App\Services\Exact\ExactOnlineService;
-use Codexshaper\WooCommerce\Facades\Query;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use JsonException;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 class OrdersApiController extends ApiController
 {
@@ -35,10 +33,10 @@ class OrdersApiController extends ApiController
 //        $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($orderNumber);
 //        dd($wpCustomer);
 //        $order = Order::where('order_number', $orderNumber)->first();
-//        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($orderNumber);
+        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($orderNumber);
+        dd($wpOrder);
 //        $isPaid = $wpOrder['date_paid'] !== null;
 //        (new OrdersService())->storeOrderLineItems($wpOrder, $order, $order->customer, $order->country, $order->currency, $isPaid);
-//        dd($wpOrder);
         abort_if(Gate::denies('viewOrder'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $order = Order::where('order_number', $orderNumber)->first();
@@ -103,7 +101,7 @@ class OrdersApiController extends ApiController
             $logRequestId = $request->log_request_id;
         }
 
-        CreateOrderFromWp::dispatch($request->id, $logRequestId);
+        CreateOrderFromWp::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
         $response = $wpOrder;
@@ -125,7 +123,7 @@ class OrdersApiController extends ApiController
             if ($request->has('log_request_id')) {
                 $logRequestId = $request->log_request_id;
             }
-            CreateOrderFromWp::dispatch($request->id, $logRequestId);
+            CreateOrderFromWp::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
         }
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);

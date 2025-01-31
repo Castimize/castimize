@@ -35,6 +35,7 @@ use App\Nova\Settings\Shipping\GeneralSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Nova\Settings\Shipping\PickupSettings;
 use App\Nova\ShippingFee;
+use App\Nova\ShopOwner;
 use App\Nova\State;
 use App\Nova\User;
 //use CodencoDev\NovaGridSystem\NovaGridSystem;
@@ -91,6 +92,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Order::class),
                     MenuItem::resource(OrderQueue::class),
                     MenuItem::resource(Customer::class),
+                    MenuItem::resource(ShopOwner::class),
                     MenuItem::resource(Reprint::class),
                     MenuItem::resource(Rejection::class),
                 ])->icon('clipboard-list')
