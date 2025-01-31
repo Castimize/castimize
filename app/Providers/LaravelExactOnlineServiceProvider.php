@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Exception;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use App\Services\Exact\LaravelExactOnline;
 use Picqer\Financials\Exact\Connection;
@@ -29,7 +30,7 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
         $this->app->alias(LaravelExactOnline::class, 'laravel-exact-online');
 
         $this->app->singleton('Exact\Connection', function () {
-            //if (app()->environment() === 'production') {
+            if (app()->environment() === 'production') {
                 $config = LaravelExactOnline::loadConfig();
 
                 $connection = new Connection();
@@ -70,7 +71,8 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
                     $connection->setRefreshToken(null);
                     $connection->connect();
                 } catch (Exception $e) {
-                    throw new Exception('Could not connect to Exact: ' . $e->getMessage());
+                    Log::error('Could not connect to Exact: ' . $e->getMessage());
+                    return null;
                 }
 
                 $config->exact_accessToken = serialize($connection->getAccessToken());
@@ -79,9 +81,9 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
                 LaravelExactOnline::storeConfig($config);
 
                 return $connection;
-            //}
+            }
 
-            //return null;
+            return null;
         });
     }
 }
