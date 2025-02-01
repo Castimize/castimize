@@ -79,9 +79,9 @@ class SyncHistoryExchangeRatesToExact extends Command
                         }
                     }
                     if ($currencyHistoryRate && $currencyHistoryRate->convert_currency === 'EUR' && $currencyHistoryRate->exact_online_guid === null) {
-                        $exchangeRate = (new ExactOnlineService())->syncExchangeRate($currencyHistoryRate);
+//                        $exchangeRate = (new ExactOnlineService())->syncExchangeRate($currencyHistoryRate);
                         //dd($exchangeRate);
-//                        SyncExchangeRateToExact::dispatch($currencyHistoryRate);
+                        SyncExchangeRateToExact::dispatch($currencyHistoryRate);
                     }
                 //}
                 sleep(1);
