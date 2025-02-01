@@ -33,8 +33,8 @@ class OrdersApiController extends ApiController
 //        $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($orderNumber);
 //        dd($wpCustomer);
 //        $order = Order::where('order_number', $orderNumber)->first();
-        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($orderNumber);
-        dd($wpOrder);
+//        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($orderNumber);
+//        dd($wpOrder);
 //        $isPaid = $wpOrder['date_paid'] !== null;
 //        (new OrdersService())->storeOrderLineItems($wpOrder, $order, $order->customer, $order->country, $order->currency, $isPaid);
         abort_if(Gate::denies('viewOrder'), Response::HTTP_FORBIDDEN, '403 Forbidden');
