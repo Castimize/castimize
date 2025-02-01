@@ -33,7 +33,7 @@ class SyncHistoryExchangeRatesToExact extends Command
      */
     public function handle()
     {
-        $dateFrom = Carbon::parse('2024-09-01');
+        $dateFrom = Carbon::parse('2025-01-18');
         $dateTo = now();
         $period = CarbonPeriod::create($dateFrom, $dateTo);
 
