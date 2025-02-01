@@ -43,10 +43,10 @@ class CurrencyService
 
         Log::info(sprintf('From: %s, To: %s, Amount: %s, Date: %s', $from, $to, $amount, $date->format('Y-m-d')));
 
-        try {
-            return $this->exchangeRate->convert($amount, $from, $to, $date);
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
+//        try {
+//            return $this->exchangeRate->convert($amount, $from, $to, $date);
+//        } catch (Exception $e) {
+//            Log::error($e->getMessage());
 
             $currencyHistoricalRate = CurrencyHistoryRate::where('base_currency', $baseCurrency)
                 ->where('convert_currency', $convertCurrency)
@@ -56,7 +56,7 @@ class CurrencyService
                 return $this->calculateRate($currencyHistoricalRate, $from, $amount);
             }
             return $amount;
-        }
+//        }
     }
 
     private function calculateRate($currencyHistoricalRate, string $from, float $amount): float

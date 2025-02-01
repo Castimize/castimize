@@ -34,7 +34,7 @@ class ReprintCulprit extends Resource
      */
     public static $search = [
         'id',
-        'reason',
+        'culprit',
     ];
 
     /**
