@@ -94,7 +94,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Reprint::class),
                     MenuItem::resource(Rejection::class),
                 ])->icon('clipboard-list')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isBackendUser();
                     }),
@@ -102,7 +102,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('Manufacturers'), [
                     MenuItem::resource(Manufacturer::class),
                 ])->icon('office-building')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isBackendUser();
                     }),
@@ -113,7 +113,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Model::class),
 //                    MenuItem::resource(PreferredManufacturer::class),
                 ])->icon('collection')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isBackendUser();
                     }),
@@ -125,7 +125,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(ShippingFee::class),
                     MenuItem::resource(Country::class),
                 ])->icon('truck')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isBackendUser();
                     }),
@@ -133,7 +133,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('Complaints'), [
                     MenuItem::resource(Complaint::class),
                 ])->icon('exclamation-circle')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isBackendUser();
                     }),
@@ -141,7 +141,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('Invoices'), [
                     MenuItem::resource(Invoice::class),
                 ])->icon('document-text')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isBackendUser();
                     }),
@@ -149,7 +149,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('Users'), [
                     MenuItem::resource(User::class),
                 ])->icon('user')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isSuperAdmin() || $request->user()->isAdmin();
                     }),
@@ -161,7 +161,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(State::class),
                     MenuItem::resource(City::class),
                 ])->icon('globe')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isSuperAdmin() || $request->user()->isAdmin();
                     }),
@@ -174,7 +174,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(RejectionReason::class),
                     MenuItem::resource(ComplaintReason::class),
                 ])->icon('cog')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isSuperAdmin() || $request->user()->isAdmin();
                     }),
@@ -189,7 +189,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                             return $request->user()->isSuperAdmin();
                         }),
                 ])->icon('shield-check')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isSuperAdmin();
                     }),
@@ -199,7 +199,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(FailedJob::class)->withBadge(fn() => \Kaiserkiwi\NovaQueueManagement\Models\FailedJob::count()),
                     MenuItem::resource(LogRequest::class),
                 ])->icon('collection')
-                    ->collapsable()
+//                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
                         return $request->user()->isSuperAdmin();
                     }),

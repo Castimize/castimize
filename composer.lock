@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2b52b4123cbc878450230af9896e7dcd",
+    "content-hash": "d3daa912d4e2c46d33b09919ed43a18c",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -1405,66 +1405,6 @@
                 }
             ],
             "time": "2023-10-28T11:44:46+00:00"
-        },
-        {
-            "name": "digital-creative/collapsible-resource-manager",
-            "version": "v2.2.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/dcasia/collapsible-resource-manager.git",
-                "reference": "85c031da5e25a95fe56b240405d094926cde6f89"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/dcasia/collapsible-resource-manager/zipball/85c031da5e25a95fe56b240405d094926cde6f89",
-                "reference": "85c031da5e25a95fe56b240405d094926cde6f89",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/nova": "^4.28.0",
-                "php": ">=8.1"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "DigitalCreative\\CollapsibleResourceManager\\CollapsibleResourceManagerServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "DigitalCreative\\CollapsibleResourceManager\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Rafael Milewski"
-                }
-            ],
-            "description": "A custom sidebar menu with collapsible groups",
-            "keywords": [
-                "collapse",
-                "collapsible",
-                "laravel",
-                "nova",
-                "sidebar"
-            ],
-            "support": {
-                "issues": "https://github.com/dcasia/collapsible-resource-manager/issues",
-                "source": "https://github.com/dcasia/collapsible-resource-manager/tree/v2.2.1"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/milewski",
-                    "type": "github"
-                }
-            ],
-            "time": "2024-07-24T09:01:56+00:00"
         },
         {
             "name": "digital-creative/column-toggler",
