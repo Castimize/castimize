@@ -60,7 +60,7 @@ class ShopOwner extends Resource
             ID::make()
                 ->sortable(),
 
-            BelongsTo::make(__('Customer'), 'customer', Customer::class)
+            BelongsTo::make(__('Customer'), 'customer')
                 ->sortable(),
 
             HasMany::make(__('Shops'), 'shopOwnerAuth', ShopOwnerAuth::class),

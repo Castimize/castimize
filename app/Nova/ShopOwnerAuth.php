@@ -37,6 +37,16 @@ class ShopOwnerAuth extends Resource
      */
     public static $search = [
         'id',
+        'shop',
+    ];
+
+    /**
+     * Default ordering for index query.
+     *
+     * @var array
+     */
+    public static $sort = [
+        'id' => 'desc',
     ];
 
     /**

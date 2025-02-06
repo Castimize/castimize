@@ -14,8 +14,6 @@ class ShopOwnerAuthObserver
      */
     public function creating(ShopOwnerAuth $shopOwnerAuth): void
     {
-        dd($shopOwnerAuth);
-
         $etsyService = new EtsyService($shopOwnerAuth->shopOwner);
         $etsyService->auth($shopOwnerAuth->oathKey, $shopOwnerAuth->oathSecret);
     }

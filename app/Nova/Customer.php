@@ -3,27 +3,22 @@
 namespace App\Nova;
 
 
+use App\Nova\Filters\CustomerHasOrdersFilter;
 use App\Traits\Nova\CommonMetaDataTrait;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Email;
-use Laravel\Nova\Fields\File;
-use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphToMany;
 use Laravel\Nova\Fields\Number;
-use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
-use Saumini\Count\RelationshipCount;
-use Tomodo531\FilterableFilters\FilterableFilters;
 use Wame\TelInput\TelInput;
 
 class Customer extends Resource
@@ -44,7 +39,7 @@ class Customer extends Resource
      */
     public function title()
     {
-        return $this->name;
+        return sprintf('%s (%s)', $this->name, $this->wp_id);
     }
 
     /**
@@ -77,7 +72,17 @@ class Customer extends Resource
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        $query->withCount('orders as orders');
+        $query->where(function (Builder $query) {
+            $query->where(function (Builder $query) {
+                $query->whereNotNull('first_name')
+                    ->where('first_name', '!=', '');
+            })
+                ->where(function (Builder $query) {
+                    $query->whereNotNull('last_name')
+                        ->where('last_name', '!=', '');
+                });
+        })->withCount('orders');
+
         if (empty($request->get('orderBy'))) {
             $query->getQuery()->orders = [];
 
@@ -128,7 +133,7 @@ class Customer extends Resource
             TelInput::make(__('Vat number'), 'vat_number')
                 ->hideFromIndex(),
 
-            RelationshipCount::make(__('# Orders'), 'orders')
+            Number::make(__('# Orders'), 'orders_count')
                 ->onlyOnIndex()
                 ->sortable(),
 
@@ -211,14 +216,15 @@ class Customer extends Resource
     public function filters(NovaRequest $request)
     {
         return [
-            FilterableFilters::make(\App\Models\Customer::class)
-                ->fields([
-                    'country' => [
-                        'title' => 'name',
-                        'primarykey' => 'id',
-                        'foreignkey' => 'country_id',
-                    ],
-                ]),
+            CustomerHasOrdersFilter::make(),
+//            FilterableFilters::make(\App\Models\Customer::class)
+//                ->fields([
+//                    'country' => [
+//                        'title' => 'name',
+//                        'primarykey' => 'id',
+//                        'foreignkey' => 'country_id',
+//                    ],
+//                ]),
 
         ];
     }
