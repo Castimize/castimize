@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "08f04634c62bc94bbdb665f41c8e0002",
+    "content-hash": "bee8863a843fa1afabecfc45821d1b2a",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -600,7 +600,7 @@
         },
         {
             "name": "castimize/custom-styles",
-            "version": "dev-main",
+            "version": "dev-feature/etsy_implementation",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/CustomStyles",
@@ -636,7 +636,7 @@
         },
         {
             "name": "castimize/inline-text-edit",
-            "version": "dev-main",
+            "version": "dev-feature/etsy_implementation",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/InlineTextEdit",
@@ -672,7 +672,7 @@
         },
         {
             "name": "castimize/po-status-card",
-            "version": "dev-main",
+            "version": "dev-feature/etsy_implementation",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/PoStatusCard",
@@ -708,7 +708,7 @@
         },
         {
             "name": "castimize/select-manufacturer-with-overview",
-            "version": "dev-main",
+            "version": "dev-feature/etsy_implementation",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/SelectManufacturerWithOverview",
@@ -744,7 +744,7 @@
         },
         {
             "name": "castimize/select-with-overview",
-            "version": "dev-main",
+            "version": "dev-feature/etsy_implementation",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/SelectWithOverview",
@@ -1405,66 +1405,6 @@
                 }
             ],
             "time": "2023-10-28T11:44:46+00:00"
-        },
-        {
-            "name": "digital-creative/collapsible-resource-manager",
-            "version": "v2.2.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/dcasia/collapsible-resource-manager.git",
-                "reference": "85c031da5e25a95fe56b240405d094926cde6f89"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/dcasia/collapsible-resource-manager/zipball/85c031da5e25a95fe56b240405d094926cde6f89",
-                "reference": "85c031da5e25a95fe56b240405d094926cde6f89",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/nova": "^4.28.0",
-                "php": ">=8.1"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "DigitalCreative\\CollapsibleResourceManager\\CollapsibleResourceManagerServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "DigitalCreative\\CollapsibleResourceManager\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Rafael Milewski"
-                }
-            ],
-            "description": "A custom sidebar menu with collapsible groups",
-            "keywords": [
-                "collapse",
-                "collapsible",
-                "laravel",
-                "nova",
-                "sidebar"
-            ],
-            "support": {
-                "issues": "https://github.com/dcasia/collapsible-resource-manager/issues",
-                "source": "https://github.com/dcasia/collapsible-resource-manager/tree/v2.2.1"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/milewski",
-                    "type": "github"
-                }
-            ],
-            "time": "2024-07-24T09:01:56+00:00"
         },
         {
             "name": "digital-creative/column-toggler",
