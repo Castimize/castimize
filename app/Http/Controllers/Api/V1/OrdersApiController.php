@@ -101,7 +101,8 @@ class OrdersApiController extends ApiController
             $logRequestId = $request->log_request_id;
         }
 
-        CreateOrderFromWp::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
+        CreateOrderFromWp::dispatch($request->id, $logRequestId);
+//        CreateOrderFromWp::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
         $response = $wpOrder;
@@ -123,7 +124,8 @@ class OrdersApiController extends ApiController
             if ($request->has('log_request_id')) {
                 $logRequestId = $request->log_request_id;
             }
-            CreateOrderFromWp::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
+            CreateOrderFromWp::dispatch($request->id, $logRequestId);
+//            CreateOrderFromWp::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
         }
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
