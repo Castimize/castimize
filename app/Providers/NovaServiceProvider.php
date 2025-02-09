@@ -92,7 +92,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Order::class),
                     MenuItem::resource(OrderQueue::class),
                     MenuItem::resource(Customer::class),
-                    MenuItem::resource(ShopOwner::class),
+                    MenuItem::resource(ShopOwner::class)
+                        ->canSee(function (NovaRequest $request) {
+                            return $request->user()->isSuperAdmin();
+                        }),
                     MenuItem::resource(Reprint::class),
                     MenuItem::resource(Rejection::class),
                 ])->icon('clipboard-list')
