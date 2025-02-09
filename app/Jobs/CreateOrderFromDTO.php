@@ -11,7 +11,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class CreateOrderFromWp implements ShouldQueue
+class CreateOrderFromDTO implements ShouldQueue
 {
     use Queueable;
 

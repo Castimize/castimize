@@ -3,18 +3,23 @@
 namespace App\Observers;
 
 use App\Models\ShopOwnerAuth;
-use App\Services\Etsy\EtsyService;
-use JsonException;
+use Illuminate\Support\Facades\Crypt;
 
 class ShopOwnerAuthObserver
 {
     /**
      * Handle the ShopOwnerAuth "creating" event.
-     * @throws JsonException
      */
     public function creating(ShopOwnerAuth $shopOwnerAuth): void
     {
-        $etsyService = new EtsyService($shopOwnerAuth->shopOwner);
-        $etsyService->auth($shopOwnerAuth->oathKey, $shopOwnerAuth->oathSecret);
+//        if ($shopOwnerAuth->shop === 'etsy') {
+//            $shopOwnerAuth->shop_oauth = [
+//                'client_id' => $shopOwnerAuth->oathKey,
+//                'client_secret' => Crypt::encryptString($shopOwnerAuth->oathSecret),
+//            ];
+//        }
+//        $shopOwnerAuth->('oathKey');
+//        $shopOwnerAuth->unset('oathSecret');
+//        dd($shopOwnerAuth);
     }
 }

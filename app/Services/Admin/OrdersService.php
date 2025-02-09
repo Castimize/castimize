@@ -2,8 +2,8 @@
 
 namespace App\Services\Admin;
 
-use App\Dtos\Order\OrderDto;
-use App\Dtos\Order\UploadDto;
+use App\DTO\Order\OrderDto;
+use App\DTO\Order\UploadDto;
 use App\Jobs\CreateInvoicesFromOrder;
 use App\Models\Country;
 use App\Models\Currency;

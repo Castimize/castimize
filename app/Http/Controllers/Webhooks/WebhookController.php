@@ -16,7 +16,7 @@ use UnexpectedValueException;
 class WebhookController extends Controller
 {
     /**
-     * StripeWebhookController constructor.
+     * WebhookController constructor.
      */
     public function __construct()
     {

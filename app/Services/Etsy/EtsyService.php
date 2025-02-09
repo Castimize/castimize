@@ -1,58 +1,62 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Etsy;
 
-use App\Models\ShopOwner;
-use Etsy\EtsyClient;
-use Etsy\OAuthHelper;
-use Exception;
-use Illuminate\Support\Facades\Log;
+use App\Models\ShopOwnerAuth;
+use Etsy\OAuth\Client;
+use Illuminate\Support\Facades\URL;
 
 class EtsyService
 {
-    public function __construct(private ShopOwner $shopOwner)
+    public function getAuthorizationUrl(ShopOwnerAuth $shopOwnerAuth): string
     {
+        $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
+        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
 
+        [$verifier, $code_challenge] = $client->generateChallengeCode();
+
+        $shopOauth = $shopOwnerAuth->shop_oauth;
+        $shopOauth['verifier'] = $verifier;
+
+        $shopOwnerAuth->shop_oauth = $shopOauth;
+        $shopOwnerAuth->save();
+
+        $nonce = $client->createNonce();
+
+        $redirectUrl = URL::temporarySignedRoute(
+            name: 'providers.etsy.oauth',
+            expiration: now()->addMinutes(30),
+            parameters: [
+                'shop_owner_auth_id' => encrypt($shopOwnerAuth->id),
+            ],
+        );
+
+        return $client->getAuthorizationUrl(
+            redirect_uri: $redirectUrl,
+            scope: $scopes,
+            code_challenge: $code_challenge,
+            nonce: $nonce,
+        );
     }
 
-    public function auth(string $consumerKey, string $consumerSecret)
+    public function requestAccessToken(array $data, string $redirectUri)
     {
-        $client = new EtsyClient($consumerKey, $consumerSecret);
-        $helper = new OAuthHelper($client);
+        $shopOwnerAuthId = decrypt($data['shop_owner_auth_id']);
+        $code = $data['code'];
+        $shopOwnerAuth = ShopOwnerAuth::find($shopOwnerAuthId);
 
-        try {
-            // In case you want to setup specific permissions pass a space separated) list of permissions
-            // Example: $helper->requestPermissionUrl('email_r profile_w recommend_rw')
-            // List of all allowed permissions: https://www.etsy.com/developers/documentation/getting_started/oauth#section_permission_scopes
-            $url = $helper->requestPermissionUrl();
+        $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
 
-            // read user input for verifier
-            var_dump("Please sign in to this url and paste the verifier below: $url \n");
+        [$accessToken, $refreshToken] = $client->requestAccessToken(
+            redirect_uri: $redirectUri,
+            code: $code,
+            verifier: $shopOwnerAuth->shop_oauth['verifier'],
+        );
 
-            // on Mac OSX
-            if (PHP_OS === 'Darwin')
-            {
-                exec("open '" . $url . "'");
-            }
-
-            //print '$ ';
-            $verifier = trim(fgets(STDIN));
-
-            $helper->getAccessToken($verifier);
-            dd($helper);
-
-            $this->shopOwner->shopOwnerAuth()->create([
-                'shop' => 'etsy',
-                'shop_oauth' => var_export($helper->getAuth(), true),
-                'active' => true,
-            ]);
-            //var_export($helper->getAuth(), true)
-
-            //file_put_contents($destination_file, "<?php\n return " . var_export($helper->getAuth(), true) . ";");
-
-           // echo "Success! auth file '{$destination_file}' created.\n";
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
-        }
+        $shopOwnerAuth->shop_oauth['access_token'] = $accessToken;
+        $shopOwnerAuth->shop_oauth['refresh_token'] = $refreshToken;
+        $shopOwnerAuth->save();
     }
 }

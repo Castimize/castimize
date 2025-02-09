@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\EtsyAuthorizationUrlAction;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
@@ -67,11 +68,6 @@ class ShopOwnerAuth extends Resource
             Select::make(__('Shop'), 'shop')
                 ->options(['etsy' => 'Etsy']),
 
-            Text::make(__('Oath key'), 'oauthKey')
-                ->onlyOnForms(),
-
-            Text::make(__('Oath secret'), 'oauthSecret')
-                ->onlyOnForms(),
 
             Code::make(__('Oauth'), 'shop_oauth')->json()
                 ->onlyOnDetail()
@@ -124,6 +120,8 @@ class ShopOwnerAuth extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            EtsyAuthorizationUrlAction::make(),
+        ];
     }
 }

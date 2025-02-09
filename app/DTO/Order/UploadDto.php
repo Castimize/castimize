@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dtos\Order;
+namespace App\DTO\Order;
 
 use App\Models\Material;
 

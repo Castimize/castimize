@@ -16,8 +16,8 @@ class ShopOwnerAuth extends Model
 {
     use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
 
-    public $oathKey = '';
-    public $oathSecret = '';
+    public $oathKey;
+    public $oathSecret;
 
     protected $revisionForceDeleteEnabled = true;
     protected $revisionCreationsEnabled = true;

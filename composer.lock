@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bee8863a843fa1afabecfc45821d1b2a",
+    "content-hash": "ed306dc9534f683c4558cfd64377eb2c",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -7206,6 +7206,54 @@
                 "source": "https://github.com/tylernathanreed/nova-text-filter/tree/v2.0.0"
             },
             "time": "2023-04-01T17:56:10+00:00"
+        },
+        {
+            "name": "rhysnhall/etsy-php-sdk",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rhysnhall/etsy-php-sdk.git",
+                "reference": "c56bbda8bda048e64444e35f7c42798e1f3e5506"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rhysnhall/etsy-php-sdk/zipball/c56bbda8bda048e64444e35f7c42798e1f3e5506",
+                "reference": "c56bbda8bda048e64444e35f7c42798e1f3e5506",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.3",
+                "php": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Etsy\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rhys Hall",
+                    "email": "hello@rhyshall.com",
+                    "homepage": "https://github.com/rhysnhall"
+                }
+            ],
+            "description": "PHP SDK for Etsy API v3.",
+            "keywords": [
+                "api",
+                "etsy",
+                "php",
+                "sdk"
+            ],
+            "support": {
+                "issues": "https://github.com/rhysnhall/etsy-php-sdk/issues",
+                "source": "https://github.com/rhysnhall/etsy-php-sdk/tree/v1.0.1"
+            },
+            "time": "2024-07-17T22:47:26+00:00"
         },
         {
             "name": "rpj/daterangepicker",
