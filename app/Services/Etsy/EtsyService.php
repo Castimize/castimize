@@ -39,18 +39,17 @@ class EtsyService
         $nonce = $request->state;
         $code = $request->code;
         $shopOwnerAuth = ShopOwnerAuth::whereJsonContains('shop_oauth->nonce', $nonce)->first();
-        var_dump($shopOwnerAuth->shop_oauth);
 
         $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
 
-        [$accessToken, $refreshToken] = $client->requestAccessToken(
+        [$access_token, $refresh_token] = $client->requestAccessToken(
             redirect_uri: $this->getRedirectUri(),
             code: $code,
             verifier: $shopOwnerAuth->shop_oauth['verifier'],
         );
 
-        $shopOwnerAuth->shop_oauth['access_token'] = $accessToken;
-        $shopOwnerAuth->shop_oauth['refresh_token'] = $refreshToken;
+        $shopOwnerAuth->shop_oauth['access_token'] = $access_token;
+        $shopOwnerAuth->shop_oauth['refresh_token'] = $refresh_token;
         $shopOwnerAuth->save();
     }
 
