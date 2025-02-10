@@ -16,14 +16,14 @@ class EtsyService
         $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
 
         [$verifier, $code_challenge] = $client->generateChallengeCode();
+        $nonce = $client->createNonce();
 
         $shopOauth = $shopOwnerAuth->shop_oauth;
         $shopOauth['verifier'] = $verifier;
+        $shopOauth['nonce'] = $nonce;
 
         $shopOwnerAuth->shop_oauth = $shopOauth;
         $shopOwnerAuth->save();
-
-        $nonce = $client->createNonce();
 
         $redirectUrl = URL::route(
             name: 'providers.etsy.oauth',
