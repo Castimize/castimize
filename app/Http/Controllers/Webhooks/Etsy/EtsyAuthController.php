@@ -17,23 +17,11 @@ class EtsyAuthController
 
     public function __invoke(Request $request, EtsyService $etsyService)
     {
-//        if (! $request->hasValidSignature()) {
-//            abort(401);
-//        }
-//
-//        $data = $this->validate($request, [
-//            'shop_owner_auth_id' => 'required',
-//        ]);
-        Log::info(print_r($request->all(), true));
-
-//        try {
-//            $redirectUri = $request->fullUrlWithQuery([
-//                'shop_owner_auth_id' => $data['shop_owner_auth_id'],
-//            ]);
-//            $etsyService->requestAccessToken($data, $redirectUri);
-//        } catch (Exception $e) {
-//            return new Response($e->getMessage(), Response::HTTP_BAD_REQUEST);
-//        }
+        try {
+            $etsyService->requestAccessToken($request);
+        } catch (Exception $e) {
+            return new Response($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
 
         return new Response('Success', 200);
 
