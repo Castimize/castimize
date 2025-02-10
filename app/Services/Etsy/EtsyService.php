@@ -42,15 +42,15 @@ class EtsyService
 
         $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
 
-        [$access_token, $refresh_token] = $client->requestAccessToken(
+        $response = $client->requestAccessToken(
             redirect_uri: $this->getRedirectUri(),
             code: $code,
             verifier: $shopOwnerAuth->shop_oauth['verifier'],
         );
 
         $shopOauth = $shopOwnerAuth->shop_oauth;
-        $shopOauth['access_token'] = $access_token;
-        $shopOauth['refresh_token'] = $refresh_token;
+        $shopOauth['access_token'] = $response['access_token'];
+        $shopOauth['refresh_token'] = $response['refresh_token'];
 
         $shopOwnerAuth->shop_oauth = $shopOauth;
         $shopOwnerAuth->save();
