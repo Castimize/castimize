@@ -25,12 +25,8 @@ class EtsyService
 
         $nonce = $client->createNonce();
 
-        $redirectUrl = URL::temporarySignedRoute(
+        $redirectUrl = URL::route(
             name: 'providers.etsy.oauth',
-            expiration: now()->addMinutes(30),
-            parameters: [
-                'shop_owner_auth_id' => encrypt($shopOwnerAuth->id),
-            ],
         );
 
         return $client->getAuthorizationUrl(
