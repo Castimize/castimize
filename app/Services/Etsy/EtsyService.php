@@ -38,7 +38,7 @@ class EtsyService
     {
         $nonce = $request->state;
         $code = $request->code;
-        $shopOwnerAuth = ShopOwnerAuth::whereJsonContains('nonce', $nonce)->first();
+        $shopOwnerAuth = ShopOwnerAuth::whereJsonContains('shop_oauth->nonce', $nonce)->first();
 
         $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
 
