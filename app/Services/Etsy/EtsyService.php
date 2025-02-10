@@ -48,8 +48,11 @@ class EtsyService
             verifier: $shopOwnerAuth->shop_oauth['verifier'],
         );
 
-        $shopOwnerAuth->shop_oauth['access_token'] = $access_token;
-        $shopOwnerAuth->shop_oauth['refresh_token'] = $refresh_token;
+        $shopOauth = $shopOwnerAuth->shop_oauth;
+        $shopOauth['access_token'] = $access_token;
+        $shopOauth['refresh_token'] = $refresh_token;
+
+        $shopOwnerAuth->shop_oauth = $shopOauth;
         $shopOwnerAuth->save();
     }
 
