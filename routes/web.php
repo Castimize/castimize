@@ -30,7 +30,7 @@ Route::group([
     'prefix' => 'providers',
     'namespace' => 'App\Http\Controllers',
 ], function () {
-    Route::post('etsy/oauth', EtsyAuthController::class)
+    Route::get('etsy/oauth', EtsyAuthController::class)
         ->name('providers.etsy.oauth');
 
 });
