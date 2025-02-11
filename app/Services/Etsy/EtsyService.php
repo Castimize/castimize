@@ -9,6 +9,7 @@ use Etsy\Etsy;
 use Etsy\OAuth\Client;
 use Etsy\Resources\Listing;
 use Etsy\Resources\User;
+use Etsy\Utils\PermissionScopes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
@@ -18,7 +19,8 @@ class EtsyService
     public function getAuthorizationUrl(ShopOwnerAuth $shopOwnerAuth): string
     {
         $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
-        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
+        $scopes = PermissionScopes::ALL_SCOPES;
+//        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
 
         [$verifier, $code_challenge] = $client->generateChallengeCode();
         $nonce = $client->createNonce();
