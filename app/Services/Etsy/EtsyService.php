@@ -7,6 +7,7 @@ namespace App\Services\Etsy;
 use App\Models\ShopOwnerAuth;
 use Etsy\Etsy;
 use Etsy\OAuth\Client;
+use Etsy\Resources\Listing;
 use Etsy\Resources\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -70,6 +71,15 @@ class EtsyService
         dd($shop);
 
 //        $shop = $user->shop();
+    }
+
+    public function getListing(ShopOwnerAuth $shopOwnerAuth)
+    {
+        $this->refreshAccessToken($shopOwnerAuth);
+        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+
+        $listings = Listing::all();
+        dd($listings);
     }
 
     public function getRedirectUri(): string

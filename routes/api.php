@@ -49,6 +49,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
 
             // Etsy
             Route::get('etsy/get-shop', 'EtsyApiController@getShop')->name('api.etsy.get-shop');
+            Route::get('etsy/get-listing', 'EtsyApiController@getShop')->name('api.etsy.get-listing');
         });
 
         // Woocommerce endpoints
