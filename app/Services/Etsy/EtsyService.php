@@ -10,6 +10,7 @@ use Etsy\OAuth\Client;
 use Etsy\Resources\Listing;
 use Etsy\Resources\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 
 class EtsyService
@@ -58,6 +59,7 @@ class EtsyService
     {
         $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
         $response = $client->refreshAccessToken($shopOwnerAuth->shop_oauth['refresh_token']);
+        Log::info(print_r($response, true));
 
         $this->storeAccessToken($shopOwnerAuth, $response);
     }
