@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Etsy;
 
 use App\Models\ShopOwnerAuth;
+use Etsy\Etsy;
 use Etsy\OAuth\Client;
+use Etsy\Resources\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
@@ -48,12 +50,26 @@ class EtsyService
             verifier: $shopOwnerAuth->shop_oauth['verifier'],
         );
 
-        $shopOauth = $shopOwnerAuth->shop_oauth;
-        $shopOauth['access_token'] = $response['access_token'];
-        $shopOauth['refresh_token'] = $response['refresh_token'];
+        $this->storeAccessToken($shopOwnerAuth, $response);
+    }
 
-        $shopOwnerAuth->shop_oauth = $shopOauth;
-        $shopOwnerAuth->save();
+    public function refreshAccessToken(ShopOwnerAuth $shopOwnerAuth): void
+    {
+        $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
+        $response = $client->refreshAccessToken($shopOwnerAuth->shop_oauth['refresh_token']);
+
+        $this->storeAccessToken($shopOwnerAuth, $response);
+    }
+
+    public function getShop(ShopOwnerAuth $shopOwnerAuth)
+    {
+        $this->refreshAccessToken($shopOwnerAuth);
+        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+
+        $shop = User::getShop();
+        dd($shop);
+
+//        $shop = $user->shop();
     }
 
     public function getRedirectUri(): string
@@ -62,4 +78,16 @@ class EtsyService
             name: 'providers.etsy.oauth',
         );
     }
+
+    private function storeAccessToken(ShopOwnerAuth $shopOwnerAuth, array $response): void
+    {
+        $shopOauth = $shopOwnerAuth->shop_oauth;
+        $shopOauth['access_token'] = $response['access_token'];
+        $shopOauth['refresh_token'] = $response['refresh_token'];
+
+        $shopOwnerAuth->shop_oauth = $shopOauth;
+        $shopOwnerAuth->active = true;
+        $shopOwnerAuth->save();
+    }
+
 }

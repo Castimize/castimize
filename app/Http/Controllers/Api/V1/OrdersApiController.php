@@ -7,6 +7,7 @@ use App\Http\Requests\ShowOrderWpRequest;
 use App\Http\Resources\OrderResource;
 use App\Jobs\CreateOrderFromWp;
 use App\Models\Country;
+use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
@@ -20,8 +21,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OrdersApiController extends ApiController
 {
-    public function __construct(protected OrdersService $ordersService, protected ExactOnlineService $exactOnlineService)
-    {
+    public function __construct(
+        protected OrdersService $ordersService,
+        protected ExactOnlineService $exactOnlineService,
+    ) {
     }
 
     /**

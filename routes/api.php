@@ -46,6 +46,9 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
 
             // Shippo
             Route::post('address/validate', 'AddressApiController@validate')->name('api.address.validate');
+
+            // Etsy
+            Route::get('etsy/get-shop', 'EtsyApiController@getShop')->name('api.etsy.get-shop');
         });
 
         // Woocommerce endpoints
