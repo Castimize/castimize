@@ -11,3 +11,6 @@ use Illuminate\Support\Facades\Schedule;
 Schedule::command('castimize:get-currency-historical-rates')
     ->timezone('Europe/Amsterdam')
     ->at('0:01');
+Schedule::command('castimize:sync-invoices-to-exact')
+    ->timezone('Europe/Amsterdam')
+    ->everyThreeHours();
