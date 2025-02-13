@@ -8,6 +8,7 @@ use App\Models\ShopOwnerAuth;
 use Etsy\Etsy;
 use Etsy\OAuth\Client;
 use Etsy\Resources\Listing;
+use Etsy\Resources\Shop;
 use Etsy\Resources\User;
 use Etsy\Utils\PermissionScopes;
 use Illuminate\Http\Request;
@@ -66,15 +67,22 @@ class EtsyService
         $this->storeAccessToken($shopOwnerAuth, $response);
     }
 
-    public function getShop(ShopOwnerAuth $shopOwnerAuth)
+    public function getShop(ShopOwnerAuth $shopOwnerAuth): Shop|null
     {
         $this->refreshAccessToken($shopOwnerAuth);
         $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
 
         $shop = User::getShop();
-        dd($shop);
 
-//        $shop = $user->shop();
+        if (! array_key_exists('shop_id', $shopOwnerAuth->shop_oauth)) {
+            $shopOauth = $shopOwnerAuth->shop_oauth;
+            $shopOauth['shop_id'] = $shop->shop_id;
+
+            $shopOwnerAuth->shop_oauth = $shopOauth;
+            $shopOwnerAuth->save();
+        }
+
+        return $shop;
     }
 
     public function getListing(ShopOwnerAuth $shopOwnerAuth)
