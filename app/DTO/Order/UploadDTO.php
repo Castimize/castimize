@@ -4,7 +4,7 @@ namespace App\DTO\Order;
 
 use App\Models\Material;
 
-readonly class  UploadDto
+readonly class  UploadDTO
 {
     public function __construct(
         public ?string $wpId,

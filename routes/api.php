@@ -48,8 +48,9 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::post('address/validate', 'AddressApiController@validate')->name('api.address.validate');
 
             // Etsy
-            Route::get('etsy/get-shop', 'EtsyApiController@getShop')->name('api.etsy.get-shop');
-            Route::get('etsy/get-listing', 'EtsyApiController@getListing')->name('api.etsy.get-listing');
+            Route::get('etsy/{customerId}/taxonomy', 'EtsyApiController@getTaxonomy')->name('api.etsy.get-taxonomy');
+            Route::get('etsy/{customerId}/shop', 'EtsyApiController@getShop')->name('api.etsy.get-shop');
+            Route::get('etsy/{customerId}/listings', 'EtsyApiController@getListings')->name('api.etsy.get-listings');
         });
 
         // Woocommerce endpoints

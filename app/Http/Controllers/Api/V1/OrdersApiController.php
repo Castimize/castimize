@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\DTO\Order\OrderDto;
+use App\DTO\Order\OrderDTO;
 use App\Http\Requests\ShowOrderWpRequest;
 use App\Http\Resources\OrderResource;
 use App\Jobs\CreateOrderFromWp;

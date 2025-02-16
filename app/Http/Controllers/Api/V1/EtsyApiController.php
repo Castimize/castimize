@@ -6,25 +6,39 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Customer;
 use App\Services\Etsy\EtsyService;
+use Illuminate\Http\JsonResponse;
 
 class EtsyApiController extends ApiController
 {
     public function __construct(
-        private EtsyService $etsyService
+        private EtsyService $etsyService,
     ) {
     }
 
-    public function getShop()
+    public function getTaxonomy(int $customerId): JsonResponse
     {
-        $customer = Customer::find(8);
+        $customer = Customer::find($customerId);
         $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $this->etsyService->getShop($shopOwnerAuth);
+        $taxonomy = $this->etsyService->getSellerTaxonomy($shopOwnerAuth);
+
+        return response()->json($taxonomy);
     }
 
-    public function getListing()
+    public function getShop(int $customerId): JsonResponse
     {
-        $customer = Customer::find(8);
+        $customer = Customer::find($customerId);
         $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $this->etsyService->getListing($shopOwnerAuth);
+        $shop = $this->etsyService->getShop($shopOwnerAuth);
+
+        return response()->json($shop);
+    }
+
+    public function getListings(int $customerId): JsonResponse
+    {
+        $customer = Customer::find($customerId);
+        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
+        $listings = $this->etsyService->getListings($shopOwnerAuth);
+
+        return response()->json($listings);
     }
 }

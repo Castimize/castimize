@@ -5,7 +5,7 @@ namespace App\DTO\Order;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
-readonly class  OrderDto
+readonly class  OrderDTO
 {
     public function __construct(
         public int $customerId,
@@ -71,7 +71,7 @@ readonly class  OrderDto
 
     }
 
-    public static function fromWpRequest($request)
+    public static function fromWpRequest($request): self
     {
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
 
@@ -154,7 +154,7 @@ readonly class  OrderDto
             paidAt: $wpOrder['date_paid'] ? Carbon::parse($wpOrder['date_paid']) : null,
             createdAt: $createdAt,
             updatedAt: $updatedAt,
-            uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDto::fromWpRequest($lineItem)),
+            uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDTO::fromWpRequest($lineItem)),
         );
     }
 }

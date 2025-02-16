@@ -2,8 +2,8 @@
 
 namespace App\Services\Admin;
 
-use App\DTO\Order\OrderDto;
-use App\DTO\Order\UploadDto;
+use App\DTO\Order\OrderDTO;
+use App\DTO\Order\UploadDTO;
 use App\Jobs\CreateInvoicesFromOrder;
 use App\Models\Country;
 use App\Models\Currency;
@@ -163,7 +163,7 @@ class OrdersService
         return $order;
     }
 
-    public function storeOrderFromDto(OrderDto $orderDto): Order
+    public function storeOrderFromDto(OrderDTO $orderDto): Order
     {
         $systemUser = User::find(1);
         $country = Country::where('alpha2', strtolower($orderDto->billingCountry))->first();
@@ -369,7 +369,7 @@ class OrdersService
     {
         $systemUser = User::find(1);
         $biggestCustomerLeadTime = null;
-        /** @var UploadDto $uploadDto */
+        /** @var UploadDTO $uploadDto */
         foreach ($uploads as $uploadDto) {
             if ($biggestCustomerLeadTime === null || $uploadDto->customerLeadTime > $biggestCustomerLeadTime) {
                 $biggestCustomerLeadTime = $uploadDto->customerLeadTime;

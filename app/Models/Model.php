@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
@@ -70,5 +73,10 @@ class Model extends EloquentModel
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
+    }
+
+    public function shopListingModel(): HasOne
+    {
+        return $this->hasOne(ShopListingModel::class);
     }
 }

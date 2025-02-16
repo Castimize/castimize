@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\DTO\Order\OrderDto;
+use App\DTO\Order\OrderDTO;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrdersService;
@@ -23,7 +23,7 @@ class CreateOrderFromDTO implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public OrderDto $orderDto, public ?int $logRequestId = null)
+    public function __construct(public OrderDTO $orderDto, public ?int $logRequestId = null)
     {
         $this->ordersService = new OrdersService();
     }
