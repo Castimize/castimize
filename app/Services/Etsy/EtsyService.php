@@ -64,6 +64,8 @@ class EtsyService
         );
 
         $this->storeAccessToken($shopOwnerAuth, $response);
+
+        $this->addShopToShopOwnerAuth($shopOwnerAuth);
     }
 
     public function refreshAccessToken(ShopOwnerAuth $shopOwnerAuth): void
@@ -80,17 +82,7 @@ class EtsyService
         $this->refreshAccessToken($shopOwnerAuth);
         $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
 
-        $shop = User::getShop();
-
-        if (! array_key_exists('shop_id', $shopOwnerAuth->shop_oauth)) {
-            $shopOauth = $shopOwnerAuth->shop_oauth;
-            $shopOauth['shop_id'] = $shop->shop_id;
-
-            $shopOwnerAuth->shop_oauth = $shopOauth;
-            $shopOwnerAuth->save();
-        }
-
-        return $shop;
+        return $this->addShopToShopOwnerAuth($shopOwnerAuth);
     }
 
     public function getSellerTaxonomy(ShopOwnerAuth $shopOwnerAuth): Collection
@@ -129,6 +121,21 @@ class EtsyService
         $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
 
         return $this->createListing($shopOwnerAuth, $model);
+    }
+
+    private function addShopToShopOwnerAuth(ShopOwnerAuth $shopOwnerAuth): Shop|null
+    {
+        $shop = User::getShop();
+
+        if (! array_key_exists('shop_id', $shopOwnerAuth->shop_oauth)) {
+            $shopOauth = $shopOwnerAuth->shop_oauth;
+            $shopOauth['shop_id'] = $shop->shop_id;
+
+            $shopOwnerAuth->shop_oauth = $shopOauth;
+            $shopOwnerAuth->save();
+        }
+
+        return $shop;
     }
 
     private function createListing(ShopOwnerAuth $shopOwnerAuth, Model $model): ListingDTO

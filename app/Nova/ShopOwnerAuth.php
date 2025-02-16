@@ -69,6 +69,9 @@ class ShopOwnerAuth extends Resource
             Select::make(__('Shop'), 'shop')
                 ->options(['etsy' => 'Etsy']),
 
+            Text::make(__('Etsy Shop ID'), function () {
+                return $this->shop_oauth['shop_id'] ?? '';
+            }),
 
             Code::make(__('Oauth'), 'shop_oauth')->json()
                 ->onlyOnDetail()
