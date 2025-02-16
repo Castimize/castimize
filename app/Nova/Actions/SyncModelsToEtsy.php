@@ -2,26 +2,23 @@
 
 namespace App\Nova\Actions;
 
-use App\Services\Etsy\EtsyService;
-use Etsy\OAuth\Client;
+use App\Jobs\Etsy\SyncListings;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Crypt;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class EtsyAuthorizationUrlAction extends Action
+class SyncModelsToEtsy extends Action
 {
     use InteractsWithQueue, Queueable;
 
     public function name()
     {
-        return __('Authorize with Etsy');
+        return __('Sync models to Etsy');
     }
 
     /**
@@ -33,15 +30,14 @@ class EtsyAuthorizationUrlAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $shopOwnerAuth = $models->first();
-        $shopOwnerAuth->shop_oauth = [
-                'client_id' => $fields->oauthKey,
-                'client_secret' => Crypt::encryptString($fields->oathSecret),
-            ];
+        foreach ($models as $shopOwnerAuth) {
+            if ($shopOwnerAuth->shop !== 'etsy' || ! $shopOwnerAuth->active) {
+                continue;
+            }
+            SyncListings::dispatch($shopOwnerAuth);
+        }
 
-        $url = (new EtsyService())->getAuthorizationUrl($shopOwnerAuth);
-
-        return ActionResponse::openInNewTab($url);
+        return ActionResponse::message(__('For selected shop listings are being synced'));
     }
 
     /**
@@ -52,10 +48,6 @@ class EtsyAuthorizationUrlAction extends Action
      */
     public function fields(NovaRequest $request)
     {
-        return [
-            Text::make(__('Oath key'), 'oauthKey'),
-
-            Text::make(__('Oath secret'), 'oauthSecret'),
-        ];
+        return [];
     }
 }

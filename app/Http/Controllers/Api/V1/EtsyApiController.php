@@ -20,14 +20,8 @@ class EtsyApiController extends ApiController
         $customer = Customer::find($customerId);
         $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
         $taxonomy = $this->etsyService->getSellerTaxonomy($shopOwnerAuth);
-        foreach ($taxonomy->data as $item) {
-            var_dump($item);
-            if ($item->name === 'Prints') {
-                dd($item->children);
-            }
-        }
 
-        return response()->json($taxonomy);
+        return response()->json($taxonomy->toJson());
     }
 
     public function getShop(int $customerId): JsonResponse

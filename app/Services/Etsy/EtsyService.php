@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace App\Services\Etsy;
 
 use App\DTO\Shops\Etsy\ListingDTO;
+use App\DTO\Shops\Etsy\ListingImageDTO;
 use App\Models\Model;
 use App\Models\ShopOwnerAuth;
+use App\Services\Admin\ShopListingModelService;
 use Etsy\Collection;
 use Etsy\Etsy;
 use Etsy\OAuth\Client;
 use Etsy\Resources\Listing;
+use Etsy\Resources\ListingImage;
 use Etsy\Resources\SellerTaxonomy;
 use Etsy\Resources\Shop;
 use Etsy\Resources\User;
 use Etsy\Utils\PermissionScopes;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
@@ -97,7 +101,7 @@ class EtsyService
         return SellerTaxonomy::all();
     }
 
-    public function getListings(ShopOwnerAuth $shopOwnerAuth)
+    public function getListings(ShopOwnerAuth $shopOwnerAuth): Collection
     {
         $this->refreshAccessToken($shopOwnerAuth);
         $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
@@ -105,33 +109,65 @@ class EtsyService
         return Listing::all();
     }
 
-    public function createListings(ShopOwnerAuth $shopOwnerAuth, $models)
+    public function syncListings(ShopOwnerAuth $shopOwnerAuth, $models): \Illuminate\Support\Collection
     {
+        $listingDTOs = collect();
         $this->refreshAccessToken($shopOwnerAuth);
         $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
 
         foreach ($models as $model) {
-            $this->createDraftListing($shopOwnerAuth, ListingDTO::fromModel($model));
+            $listingDTO = $this->createListing($shopOwnerAuth, $model);
+            $listingDTOs->push($listingDTO);
         }
+
+        return $listingDTOs;
     }
 
-    public function createListing(ShopOwnerAuth $shopOwnerAuth, Model $model): void
+    public function syncListing(ShopOwnerAuth $shopOwnerAuth, Model $model): ListingDTO
     {
         $this->refreshAccessToken($shopOwnerAuth);
         $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
 
-        $this->createDraftListing($shopOwnerAuth, ListingDTO::fromModel($model));
+        return $this->createListing($shopOwnerAuth, $model);
     }
 
-    private function createDraftListing(ShopOwnerAuth $shopOwnerAuth, ListingDTO $listingDTO): void
+    private function createListing(ShopOwnerAuth $shopOwnerAuth, Model $model): ListingDTO
     {
-        Listing::create($shopOwnerAuth->shop_oauth['shop_id'], [
+        $listingDTO = ListingDTO::fromModel($shopOwnerAuth, $model);
+        $listing = $this->createDraftListing($shopOwnerAuth, $listingDTO);
+
+        if ($listing) {
+            $listingDTO->listingId = $listing->listing_id;
+            $listingDTO->state = $listing->state;
+            $shopListingModel = (new ShopListingModelService())->createShopListingModel($shopOwnerAuth, $model, $listingDTO);
+
+            $listingImageDTO = ListingImageDTO::fromModel($shopOwnerAuth->shop_oauth['shop_id'], $model);
+            $listingImage = $this->uploadListingImage($shopOwnerAuth, $listingImageDTO);
+
+            if ($listingImage) {
+                $shopListingModel->shop_listing_image_id = $listingImage->listing_image_id;
+                $shopListingModel->save();
+
+                $listingImageDTO->listingImageId = $listingImage->listing_image_id;
+                $listingDTO->listingImages = collect([$listingImage]);
+            }
+        } else {
+            throw new Exception('Listing not created: ' . print_r($listing, true));
+        }
+
+        return $listingDTO;
+    }
+
+    private function createDraftListing(ShopOwnerAuth $shopOwnerAuth, ListingDTO $listingDTO): ?Listing
+    {
+        return Listing::create(
+            $shopOwnerAuth->shop_oauth['shop_id'], [
             'quantity' => $listingDTO->quantity,
             'title' => $listingDTO->title,
             'description' => $listingDTO->description,
             'price' => $listingDTO->price,
-            'who_made' => 'i_did',
-            'when_made' => 'made_to_order',
+            'who_made' => $listingDTO->whoMade,
+            'when_made' => $listingDTO->whenMade,
             'taxonomy_id' => $listingDTO->taxonomyId,
             'materials' => $listingDTO->materials,
             'item_weight' => $listingDTO->itemWeight,
@@ -140,6 +176,29 @@ class EtsyService
             'item_height' => $listingDTO->itemHeight,
             'image_ids' => null,
         ]);
+    }
+
+    private function updateListing(ShopOwnerAuth $shopOwnerAuth, ListingDTO $listingDTO, array $data): ?Listing
+    {
+        return Listing::update(
+            $shopOwnerAuth->shop_oauth['shop_id'],
+            $listingDTO->listingId,
+            $data
+        );
+    }
+
+    private function uploadListingImage(ShopOwnerAuth $shopOwnerAuth, ListingImageDTO $listingImageDTO): ?ListingImage
+    {
+        return ListingImage::create(
+            $shopOwnerAuth->shop_oauth['shop_id'],
+            $listingImageDTO->listingId, [
+                'image' => $listingImageDTO->image,
+                'rank' => $listingImageDTO->rank,
+                'overwrite' => $listingImageDTO->overwrite,
+                'is_watermarked' => $listingImageDTO->isWatermarked,
+                'alt_text' => $listingImageDTO->altText,
+            ]
+        );
     }
 
     public function getRedirectUri(): string
@@ -159,5 +218,4 @@ class EtsyService
         $shopOwnerAuth->active = true;
         $shopOwnerAuth->save();
     }
-
 }

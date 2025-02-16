@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use App\Nova\Actions\EtsyAuthorizationUrlAction;
+use App\Nova\Actions\SyncModelsToEtsy;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
@@ -122,6 +123,7 @@ class ShopOwnerAuth extends Resource
     {
         return [
             EtsyAuthorizationUrlAction::make(),
+            SyncModelsToEtsy::make(),
         ];
     }
 }

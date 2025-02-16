@@ -9,7 +9,6 @@ use App\Models\ShopOwnerAuth;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Services\Admin\CalculatePricesService;
-use App\Services\Etsy\EtsyService;
 use Illuminate\Support\Collection;
 
 class ListingDTO
@@ -17,6 +16,7 @@ class ListingDTO
     public function __construct(
         public int $shopId,
         public ?int $listingId,
+        public ?string $state,
         public int $quantity,
         public string $title,
         public string $description,
@@ -42,10 +42,11 @@ class ListingDTO
     {
         $customsItemSettings = new CustomsItemSettings();
         $parcelSettings = new ParcelSettings();
-        $taxanomies = (new EtsyService())->getSellerTaxonomy($shopOwnerAuth);
+
         return new self(
             shopId: $shopOwnerAuth->shop_oauth['shop_id'],
             listingId: null,
+            state: null,
             quantity: 1,
             title: $model->model_name ?? $model->name,
             description: '',
@@ -56,7 +57,7 @@ class ListingDTO
             ),
             whoMade: 'i_did',
             whenMade: 'made_to_order',
-            taxonomyId: null,
+            taxonomyId: 12380, // 3D Printer Files
             materials: [$model->material->name],
             itemWeight: $model->model_box_volume * $model->material->density + $customsItemSettings->bag,
             itemLength: $model->model_x_length,

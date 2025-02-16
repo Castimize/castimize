@@ -7,7 +7,7 @@ namespace App\Jobs\Etsy;
 use App\Models\Customer;
 use App\Models\ShopOwnerAuth;
 use App\Services\Etsy\EtsyService;
-use Illuminate\Bus\Queueable;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class SyncListings implements ShouldQueue
@@ -24,9 +24,8 @@ class SyncListings implements ShouldQueue
         $etsyService = (new EtsyService());
         /** @var Customer $customer */
         $customer = $this->shopOwnerAuth->shopOwner->customer;
+        $models = $customer->models()->doesntHave('shopListingModel')->get();
 
-        foreach ($customer->models as $model) {
-            $etsyService->createListing($this->shopOwnerAuth, $model);
-        }
+        $etsyService->syncListings($this->shopOwnerAuth, $models);
     }
 }
