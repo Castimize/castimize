@@ -48,6 +48,8 @@ class EtsyApiController extends ApiController
         $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
         $shippingCarriers = $this->etsyService->getShippingCarriers($shopOwnerAuth);
 
+        dd($shippingCarriers);
+
         return response()->json($shippingCarriers->toJson());
     }
 }
