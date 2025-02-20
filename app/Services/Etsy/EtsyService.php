@@ -15,6 +15,7 @@ use Etsy\OAuth\Client;
 use Etsy\Resources\Listing;
 use Etsy\Resources\ListingImage;
 use Etsy\Resources\SellerTaxonomy;
+use Etsy\Resources\ShippingCarrier;
 use Etsy\Resources\Shop;
 use Etsy\Resources\User;
 use Etsy\Utils\PermissionScopes;
@@ -121,6 +122,14 @@ class EtsyService
         $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
 
         return $this->createListing($shopOwnerAuth, $model);
+    }
+
+    public function getShippingCarriers(ShopOwnerAuth $shopOwnerAuth): Collection
+    {
+        $this->refreshAccessToken($shopOwnerAuth);
+        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+
+        return ShippingCarrier::all('NL');
     }
 
     private function addShopToShopOwnerAuth(ShopOwnerAuth $shopOwnerAuth): Shop|null

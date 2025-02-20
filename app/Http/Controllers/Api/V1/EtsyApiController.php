@@ -41,4 +41,13 @@ class EtsyApiController extends ApiController
 
         return response()->json($listings);
     }
+
+    public function getShippingCarriers(int $customerId): JsonResponse
+    {
+        $customer = Customer::find($customerId);
+        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
+        $shippingCarriers = $this->etsyService->getShippingCarriers($shopOwnerAuth);
+
+        return response()->json($shippingCarriers->toJson());
+    }
 }

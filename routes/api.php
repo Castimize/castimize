@@ -51,6 +51,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::get('etsy/{customerId}/taxonomy', 'EtsyApiController@getTaxonomy')->name('api.etsy.get-taxonomy');
             Route::get('etsy/{customerId}/shop', 'EtsyApiController@getShop')->name('api.etsy.get-shop');
             Route::get('etsy/{customerId}/listings', 'EtsyApiController@getListings')->name('api.etsy.get-listings');
+            Route::get('etsy/{customerId}/shipping-carriers', 'EtsyApiController@getShippingCarriers')->name('api.etsy.get-shipping-carriers');
         });
 
         // Woocommerce endpoints
