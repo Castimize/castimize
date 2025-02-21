@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTO\Shops\Etsy\ShippingProfileDestinationDTO;
+use App\DTO\Shops\Etsy\ShippingProfileDTO;
+use App\Models\Country;
 use App\Models\Customer;
 use App\Services\Etsy\EtsyService;
 use Illuminate\Http\JsonResponse;
@@ -48,8 +51,36 @@ class EtsyApiController extends ApiController
         $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
         $shippingCarriers = $this->etsyService->getShippingCarriers($shopOwnerAuth);
 
-        dd($shippingCarriers);
 
         return response()->json($shippingCarriers->toJson());
+    }
+
+    public function createShippingProfile(int $customerId): JsonResponse
+    {
+        $countries = Country::with(['logisticsZone.shippingFee'])->get();
+        $customer = Customer::find($customerId);
+        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
+        $shopId = $shopOwnerAuth->shop_oauth['shop_id'];
+
+        $shippingProfileDTO = $this->etsyService->createShippingProfile(
+            shopOwnerAuth: $shopOwnerAuth,
+            shippingProfileDTO: ShippingProfileDTO::fromShop($shopId)
+        );
+
+        foreach ($countries as $country) {
+            if ($country->has('logisticsZone')) {
+                $shippingProfileDestinationDTO = $this->etsyService->createShippingProfileDestination(
+                    shopOwnerAuth: $shopOwnerAuth,
+                    shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
+                        shopId: $shopId,
+                        country: $country,
+                        shippingProfileId: $shippingProfileDTO->shippingProfileId),
+                );
+
+                $shippingProfileDTO->shippingProfileDestinations->push($shippingProfileDestinationDTO);
+            }
+        }
+
+        return response()->json($shippingProfileDTO);
     }
 }
