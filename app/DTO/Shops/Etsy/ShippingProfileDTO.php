@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTO\Shops\Etsy;
 
+use App\Nova\Settings\Shipping\DcSettings;
 use Illuminate\Support\Collection;
 
 class ShippingProfileDTO
@@ -29,6 +30,8 @@ class ShippingProfileDTO
 
     public static function fromShop(int $shopId): self
     {
+        $dcSettings = (new DcSettings());
+
         return new self(
             shopId: $shopId,
             shippingProfileId: null,
@@ -37,7 +40,7 @@ class ShippingProfileDTO
             primaryCost: 7.75,
             secondaryCost: 0.00,
             destinationCountryIso: 'NL',
-            originPostalCode: null,
+            originPostalCode: $dcSettings->postalCode,
             minProcessingTime: 1,
             maxProcessingTime: 3,
             processingTimeUnit: 'weeks',

@@ -155,6 +155,8 @@ class EtsyService
                 'primary_cost' => $shippingProfileDestinationDTO->primaryCost,
                 'secondary_cost' => $shippingProfileDestinationDTO->secondaryCost,
                 'destination_country_iso' => $shippingProfileDestinationDTO->destinationCountryIso,
+                'min_delivery_days' => $shippingProfileDestinationDTO->minDeliveryDays,
+                'max_delivery_days' => $shippingProfileDestinationDTO->maxDeliveryDays,
             ]
         );
 

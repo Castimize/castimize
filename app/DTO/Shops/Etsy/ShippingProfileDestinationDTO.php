@@ -15,6 +15,8 @@ class ShippingProfileDestinationDTO
         public float $primaryCost,
         public float $secondaryCost,
         public string $destinationCountryIso,
+        public int $minDeliveryDays,
+        public int $maxDeliveryDays,
     ) {
     }
 
@@ -27,6 +29,8 @@ class ShippingProfileDestinationDTO
             primaryCost: $country->logisticsZone->shippingFee->default_rate,
             secondaryCost: 0.00,
             destinationCountryIso: $country->alpha2,
+            minDeliveryDays: 2,
+            maxDeliveryDays: 6,
         );
     }
 }
