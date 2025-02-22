@@ -116,6 +116,16 @@ class EtsyService
         );
     }
 
+    public function getShippingProfiles(ShopOwnerAuth $shopOwnerAuth): Collection
+    {
+        $this->refreshAccessToken($shopOwnerAuth);
+        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+
+        return ShippingProfile::all(
+            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+        );
+    }
+
     public function createShippingProfile(ShopOwnerAuth $shopOwnerAuth, ShippingProfileDTO $shippingProfileDTO): ShippingProfileDTO
     {
         $this->refreshAccessToken($shopOwnerAuth);

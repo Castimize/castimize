@@ -55,6 +55,16 @@ class EtsyApiController extends ApiController
         return response()->json($shippingCarriers->toJson());
     }
 
+    public function getShippingProfile(int $customerId): JsonResponse
+    {
+        $customer = Customer::find($customerId);
+        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
+        $shippingProfiles = $this->etsyService->getShippingProfiles($shopOwnerAuth);
+
+
+        return response()->json($shippingProfiles->toJson());
+    }
+
     public function createShippingProfile(int $customerId): JsonResponse
     {
         $countries = Country::with(['logisticsZone.shippingFee'])->get();
