@@ -101,7 +101,7 @@ class OrdersService
             'shipping_first_name' => $wpOrder['shipping']->first_name,
             'shipping_last_name' => $wpOrder['shipping']->last_name,
             'shipping_company' => $wpOrder['shipping']->company,
-            'shipping_phone_number' => $wpOrder['shipping']->phone ?? $wpOrder['billing']->phone,
+            'shipping_phone_number' => ! empty($wpOrder['shipping']->phone) ? $wpOrder['shipping']->phone : $wpOrder['billing']->phone,
             'shipping_email' => $shippingEmail ?? $wpOrder['billing']->email,
             'shipping_address_line1' => $wpOrder['shipping']->address_1,
             'shipping_address_line2' => $wpOrder['shipping']->address_2,
