@@ -24,6 +24,7 @@ class ListingDTO
         public ?string $whoMade,
         public ?string $whenMade,
         public int $taxonomyId,
+        public int $shippingProfileId,
         public ?array $materials,
         public ?float $itemWeight,
         public ?float $itemLength,
@@ -58,6 +59,7 @@ class ListingDTO
             whoMade: 'i_did',
             whenMade: 'made_to_order',
             taxonomyId: 12380, // 3D Printer Files
+            shippingProfileId: 262651954760,
             materials: [$model->material->name],
             itemWeight: $model->model_box_volume * $model->material->density + $customsItemSettings->bag,
             itemLength: $model->model_x_length,

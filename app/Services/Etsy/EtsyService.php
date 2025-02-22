@@ -268,6 +268,7 @@ class EtsyService
                 'who_made' => $listingDTO->whoMade,
                 'when_made' => $listingDTO->whenMade,
                 'taxonomy_id' => $listingDTO->taxonomyId,
+                'shipping_profile_id' => $listingDTO->shippingProfileId,
                 'materials' => $listingDTO->materials,
                 'item_weight' => $listingDTO->itemWeight,
                 'item_length' => $listingDTO->itemLength,
