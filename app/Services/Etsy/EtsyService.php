@@ -129,6 +129,7 @@ class EtsyService
                 'primary_cost' => $shippingProfileDTO->primaryCost,
                 'secondary_cost' => $shippingProfileDTO->secondaryCost,
                 'destination_country_iso' => $shippingProfileDTO->destinationCountryIso,
+                'origin_postal_code' => $shippingProfileDTO->originPostalCode,
                 'min_processing_time' => $shippingProfileDTO->minProcessingTime,
                 'max_processing_time' => $shippingProfileDTO->maxProcessingTime,
                 'processing_time_unit' => $shippingProfileDTO->processingTimeUnit,
