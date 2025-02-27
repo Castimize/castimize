@@ -6,6 +6,7 @@ use Alexwenzel\DependencyContainer\DependencyContainer;
 use App\Nova\Filters\ManufacturerFilter;
 use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
+use App\Services\Admin\CurrencyService;
 use App\Services\Shippo\ShippoService;
 use Castimize\SelectManufacturerWithOverview\SelectManufacturerWithOverview;
 use Illuminate\Database\Eloquent\Builder;
@@ -219,6 +220,18 @@ class ManufacturerShipment extends Resource
 
             HasMany::make(__('PO\'s'), 'orderQueues', OrderQueue::class)
                 ->onlyOnDetail(),
+
+            Text::make(__('Costs'), function ($model) {
+                return $model->total_costs ? currencyFormatter(
+                    app(CurrencyService::class)->convertCurrency($model->currency_code, config('app.currency'), $model->total_costs)
+                ) : '';
+            })
+                ->sortable(),
+
+            DateTime::make(__('Created at'), 'created_at')
+                ->displayUsing(fn ($value) => $value ? $value->format('d-m-Y H:i:s') : '')
+                ->exceptOnForms()
+                ->sortable(),
 
             DateTime::make(__('Sent at'), 'sent_at')
                 ->displayUsing(fn ($value) => $value ? $value->format('d-m-Y H:i:s') : '')
