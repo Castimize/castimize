@@ -47,6 +47,16 @@ class Reprint extends Resource
         'id' => 'desc',
     ];
 
+    public static function authorizedToCreate(Request $request)
+    {
+        return false;
+    }
+
+    public function authorizedToReplicate(Request $request)
+    {
+        return false;
+    }
+
     /**
      * Get the fields displayed by the resource.
      *
