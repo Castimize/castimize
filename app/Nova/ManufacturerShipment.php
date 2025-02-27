@@ -220,6 +220,16 @@ class ManufacturerShipment extends Resource
             HasMany::make(__('PO\'s'), 'orderQueues', OrderQueue::class)
                 ->onlyOnDetail(),
 
+            Text::make(__('Costs'), function ($model) {
+                return $model->costs ? currencyFormatter((float)$model->costs, $model->currency_code) : '';
+            })
+                ->sortable(),
+
+            DateTime::make(__('Created at'), 'created_at')
+                ->displayUsing(fn ($value) => $value ? $value->format('d-m-Y H:i:s') : '')
+                ->exceptOnForms()
+                ->sortable(),
+
             DateTime::make(__('Sent at'), 'sent_at')
                 ->displayUsing(fn ($value) => $value ? $value->format('d-m-Y H:i:s') : '')
                 ->exceptOnForms()
