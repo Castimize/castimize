@@ -223,7 +223,7 @@ class ManufacturerShipment extends Resource
 
             Text::make(__('Costs'), function ($model) {
                 return $model->total_costs ? currencyFormatter(
-                    app(CurrencyService::class)->convertCurrency($model->currency_code, config('app.currency'), $model->total_costs), $model->currency_code
+                    app(CurrencyService::class)->convertCurrency($model->currency_code, config('app.currency'), $model->total_costs)
                 ) : '';
             })
                 ->sortable(),
