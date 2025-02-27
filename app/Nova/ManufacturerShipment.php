@@ -221,7 +221,7 @@ class ManufacturerShipment extends Resource
                 ->onlyOnDetail(),
 
             Text::make(__('Costs'), function ($model) {
-                return $model->costs ? currencyFormatter((float)$model->costs, $model->currency_code) : '';
+                return $model->total_costs ? currencyFormatter((float)$model->total_costs, $model->currency_code) : '';
             })
                 ->sortable(),
 
