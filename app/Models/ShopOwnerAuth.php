@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
@@ -53,5 +54,10 @@ class ShopOwnerAuth extends Model
     public function shopOwner(): BelongsTo
     {
         return $this->belongsTo(ShopOwner::class);
+    }
+
+    public function shopListingModels(): HasMany
+    {
+        return $this->hasMany(ShopListingModel::class);
     }
 }
