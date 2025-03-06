@@ -28,6 +28,7 @@ class ListingImageDTO
             shopId: $shopId,
             listingId: $model->shopListingModel?->shop_listing_id,
             image: Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $thumb) : '',
+//            image: Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? Storage::disk(env('FILESYSTEM_DISK'))->get($thumb) : '',
             listingImageId: $listingImageId,
             altText: $model->model_name ?? $model->name,
         );

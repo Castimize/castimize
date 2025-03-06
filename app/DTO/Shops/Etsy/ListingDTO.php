@@ -25,6 +25,7 @@ class ListingDTO
         public ?string $whenMade,
         public int $taxonomyId,
         public int $shippingProfileId,
+        public int $returnPolicyId,
         public ?array $materials,
         public ?float $itemWeight,
         public ?float $itemLength,
@@ -44,22 +45,27 @@ class ListingDTO
         $customsItemSettings = new CustomsItemSettings();
         $parcelSettings = new ParcelSettings();
 
+        $price = app()->environment() !== 'production' ?
+            0.18 :
+            (new CalculatePricesService())->calculatePriceOfModel(
+                price: $model->material->prices->first(),
+                materialVolume: $model->model_volume_cc,
+                surfaceArea: $model->model_surface_area_cm2,
+            );
+
         return new self(
             shopId: $shopOwnerAuth->shop_oauth['shop_id'],
             listingId: null,
             state: null,
             quantity: 1,
             title: $model->model_name ?? $model->name,
-            description: '',
-            price: (new CalculatePricesService())->calculatePriceOfModel(
-                price: $model->material->prices->first(),
-                materialVolume: $model->model_volume_cc,
-                surfaceArea: $model->model_surface_area_cm2,
-            ),
+            description: '3D print model: ' . ($model->model_name ?? $model->name),
+            price: $price,
             whoMade: 'i_did',
             whenMade: 'made_to_order',
             taxonomyId: 12380, // 3D Printer Files
             shippingProfileId: 262651954760,
+            returnPolicyId: 1356324035838,
             materials: [$model->material->name],
             itemWeight: $model->model_box_volume * $model->material->density + $customsItemSettings->bag,
             itemLength: $model->model_x_length,

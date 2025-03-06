@@ -2,29 +2,25 @@
 
 namespace App\Nova;
 
-use App\Nova\Actions\EtsyAuthorizationUrlAction;
-use App\Nova\Actions\SyncModelsToEtsy;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
-use Laravel\Nova\Fields\Code;
-use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 
-class ShopOwnerAuth extends Resource
+class ShopListingModel extends Resource
 {
     use CommonMetaDataTrait;
+
 
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\ShopOwnerAuth>
+     * @var class-string<\App\Models\ShopListingModel>
      */
-    public static $model = \App\Models\ShopOwnerAuth::class;
+    public static $model = \App\Models\ShopListingModel::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -40,7 +36,6 @@ class ShopOwnerAuth extends Resource
      */
     public static $search = [
         'id',
-        'shop',
     ];
 
     /**
@@ -55,32 +50,24 @@ class ShopOwnerAuth extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
      * @return array
      */
     public function fields(NovaRequest $request)
     {
         return [
-            ID::make()
+            ID::make()->sortable(),
+
+            BelongsTo::make(__('Model'), 'model', Model::class),
+
+            Text::make(__('Shop listing ID'), 'shop_listing_id')
                 ->sortable(),
 
-            BelongsTo::make(__('Shop owner'), 'shopOwner', ShopOwner::class)
-                ->onlyOnForms(),
+            Text::make(__('Shop listing image ID'), 'shop_listing_image_id')
+                ->sortable(),
 
-            Select::make(__('Shop'), 'shop')
-                ->options(['etsy' => 'Etsy']),
-
-            Text::make(__('Etsy Shop ID'), function () {
-                return $this->shop_oauth['shop_id'] ?? '';
-            }),
-
-            Code::make(__('Oauth'), 'shop_oauth')->json()
-                ->onlyOnDetail()
-                ->canSee(function ($request) {
-                    return $request->user()->isSuperAdmin();
-                }),
-
-            HasMany::make(__('Listings'), 'shopListingModels', ShopListingModel::class),
+            Text::make(__('State'), 'state')
+                ->sortable(),
 
             new Panel(__('History'), $this->commonMetaData()),
         ];
@@ -89,7 +76,7 @@ class ShopOwnerAuth extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -100,7 +87,7 @@ class ShopOwnerAuth extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -111,7 +98,7 @@ class ShopOwnerAuth extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -122,14 +109,11 @@ class ShopOwnerAuth extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
      * @return array
      */
     public function actions(NovaRequest $request)
     {
-        return [
-            EtsyAuthorizationUrlAction::make(),
-            SyncModelsToEtsy::make(),
-        ];
+        return [];
     }
 }

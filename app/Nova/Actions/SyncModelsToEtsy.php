@@ -37,7 +37,7 @@ class SyncModelsToEtsy extends Action
             SyncListings::dispatch($shopOwnerAuth);
         }
 
-        return ActionResponse::message(__('For selected shop listings are being synced'));
+        return ActionResponse::message(__('Selected shop listings are being synced'));
     }
 
     /**
