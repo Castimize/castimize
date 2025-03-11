@@ -36,7 +36,7 @@ class EtsyApiController extends ApiController
         $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
         $shop = $this->etsyService->getShop($shopOwnerAuth);
 
-        return response()->json($shop);
+        return response()->json($shop->toArray());
     }
 
     public function getShopReturnPolicy(int $customerId, int $returnPolicyId): JsonResponse

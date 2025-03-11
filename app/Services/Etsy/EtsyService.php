@@ -272,8 +272,8 @@ class EtsyService
     {
         $shop = User::getShop();
 
-        if ($shop && ! array_key_exists('shop_id', $shopOwnerAuth->shop_oauth)) {
-            $shopOauth = $shopOwnerAuth->shop_oauth;
+        $shopOauth = $shopOwnerAuth->shop_oauth;
+        if ($shop && ! array_key_exists('shop_id', $shopOauth)) {
             $shopOauth['shop_id'] = $shop->shop_id;
             $shopOauth['shop_currency'] = $shop->currency_code;
 
@@ -286,8 +286,8 @@ class EtsyService
 
     private function addReturnPolicyToShopOwnerAuth(ShopOwnerAuth $shopOwnerAuth, ReturnPolicy $returnPolicy)
     {
-        if (! array_key_exists('shop_return_policy_id', $shopOwnerAuth->shop_oauth)) {
-            $shopOauth = $shopOwnerAuth->shop_oauth;
+        $shopOauth = $shopOwnerAuth->shop_oauth;
+        if (! array_key_exists('shop_return_policy_id', $shopOauth)) {
             $shopOauth['shop_return_policy_id'] = $returnPolicy->return_policy_id;
 
             $shopOwnerAuth->shop_oauth = $shopOauth;
