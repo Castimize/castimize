@@ -63,7 +63,7 @@ class ShopOwner extends Resource
             BelongsTo::make(__('Customer'), 'customer')
                 ->sortable(),
 
-            HasMany::make(__('Shops'), 'shopOwnerAuth', ShopOwnerAuth::class),
+            HasMany::make(__('Shops'), 'shopOwnerAuths', ShopOwnerAuth::class),
 
             new Panel(__('History'), $this->commonMetaData()),
         ];
