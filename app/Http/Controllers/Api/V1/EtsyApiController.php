@@ -158,4 +158,14 @@ class EtsyApiController extends ApiController
 
         return response()->json($shippingProfileDTO);
     }
+
+    public function getShopPaymentLedgerEntries(int $customerId): JsonResponse
+    {
+        $customer = Customer::find($customerId);
+        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
+        $shopPaymentLedgerEntries = $this->etsyService->getShopPaymentAccountLedgerEntries($shopOwnerAuth);
+
+
+        return response()->json($shopPaymentLedgerEntries->toJson());
+    }
 }

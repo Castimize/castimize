@@ -16,7 +16,10 @@ use App\Services\Etsy\Resources\Listing;
 use Etsy\Collection;
 use Etsy\Etsy;
 use Etsy\OAuth\Client;
+use Etsy\Resources\LedgerEntry;
 use Etsy\Resources\ListingImage;
+use Etsy\Resources\Payment;
+use Etsy\Resources\Receipt;
 use Etsy\Resources\ReturnPolicy;
 use Etsy\Resources\SellerTaxonomy;
 use Etsy\Resources\ShippingCarrier;
@@ -77,7 +80,7 @@ class EtsyService
             verifier: $shopOwnerAuth->shop_oauth['verifier'],
         );
 
-        $this->storeAccessToken($shopOwnerAuth, $response);
+        $shopOwnerAuth = $this->storeAccessToken($shopOwnerAuth, $response);
 
         $this->addShopToShopOwnerAuth($shopOwnerAuth);
     }
@@ -86,7 +89,7 @@ class EtsyService
     {
         $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
         $response = $client->refreshAccessToken($shopOwnerAuth->shop_oauth['refresh_token']);
-        Log::info(print_r($response, true));
+        //Log::info(print_r($response, true));
 
         $this->storeAccessToken($shopOwnerAuth, $response);
     }
@@ -391,7 +394,17 @@ class EtsyService
         );
     }
 
-    private function storeAccessToken(ShopOwnerAuth $shopOwnerAuth, array $response): void
+    public function getShopPaymentAccountLedgerEntries(ShopOwnerAuth $shopOwnerAuth)
+    {
+        $this->refreshAccessToken($shopOwnerAuth);
+        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+
+        return LedgerEntry::all(
+            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+        );
+    }
+
+    private function storeAccessToken(ShopOwnerAuth $shopOwnerAuth, array $response): ShopOwnerAuth
     {
         $shopOauth = $shopOwnerAuth->shop_oauth;
         $shopOauth['access_token'] = $response['access_token'];
@@ -400,5 +413,7 @@ class EtsyService
         $shopOwnerAuth->shop_oauth = $shopOauth;
         $shopOwnerAuth->active = true;
         $shopOwnerAuth->save();
+
+        return $shopOwnerAuth;
     }
 }

@@ -7,6 +7,7 @@ use App\Nova\Actions\SyncModelsToEtsy;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
@@ -69,6 +70,9 @@ class ShopOwnerAuth extends Resource
 
             Select::make(__('Shop'), 'shop')
                 ->options(['etsy' => 'Etsy']),
+
+            Boolean::make(__('Active'), 'active')
+                ->sortable(),
 
             Text::make(__('Etsy Shop ID'), function () {
                 return $this->shop_oauth['shop_id'] ?? '';

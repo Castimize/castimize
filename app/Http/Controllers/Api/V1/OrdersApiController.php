@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\DTO\Order\OrderDTO;
 use App\Http\Requests\ShowOrderWpRequest;
 use App\Http\Resources\OrderResource;
+use App\Jobs\CreateOrderFromDTO;
 use App\Jobs\CreateOrderFromWp;
 use App\Models\Country;
 use App\Models\Customer;
@@ -104,8 +105,8 @@ class OrdersApiController extends ApiController
             $logRequestId = $request->log_request_id;
         }
 
-        CreateOrderFromWp::dispatch($request->id, $logRequestId);
-//        CreateOrderFromWp::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
+//        CreateOrderFromWp::dispatch($request->id, $logRequestId);
+        CreateOrderFromDTO::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
         $response = $wpOrder;
@@ -127,8 +128,8 @@ class OrdersApiController extends ApiController
             if ($request->has('log_request_id')) {
                 $logRequestId = $request->log_request_id;
             }
-            CreateOrderFromWp::dispatch($request->id, $logRequestId);
-//            CreateOrderFromWp::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
+//            CreateOrderFromWp::dispatch($request->id, $logRequestId);
+            CreateOrderFromDTO::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
         }
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
