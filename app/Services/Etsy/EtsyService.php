@@ -82,6 +82,8 @@ class EtsyService
 
         $shopOwnerAuth = $this->storeAccessToken($shopOwnerAuth, $response);
 
+        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+
         $this->addShopToShopOwnerAuth($shopOwnerAuth);
     }
 
