@@ -4,6 +4,9 @@ namespace App\Services\Exact;
 
 use Exception;
 use File;
+use Illuminate\Contracts\Cache\Lock;
+use Illuminate\Contracts\Cache\LockProvider;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Storage;
 use JsonException;
 use Picqer\Financials\Exact\Connection;
@@ -11,14 +14,24 @@ use RuntimeException;
 
 class LaravelExactOnline
 {
+    /** @var null|Lock */
+    public static $lock = null;
+
+    /** @var Connection */
     private $connection;
 
+    /** @var string */
+    private static $lockKey = 'exactonline.refreshLock';
+
     /**
-     * LaravelExactOnline constructor.
+     * Return connection instance.
      */
-    public function __construct()
+    public function connection(): Connection
     {
-        $this->connection = app()->make('Exact\Connection');
+        if (! $this->connection) {
+            $this->connection = app()->make('Exact\Connection');
+        }
+        return $this->connection;
     }
 
     /**
@@ -65,6 +78,53 @@ class LaravelExactOnline
         $config->exact_tokenExpires = $connection->getTokenExpires();
 
         self::storeConfig($config);
+    }
+
+    /**
+     * Function to handle the token refresh call from picqer.
+     *
+     * @param Connection $connection Connection instance.
+     */
+    public static function tokenRefreshCallback(Connection $connection): void
+    {
+        $config = self::loadConfig();
+
+        if (isset($config->exact_accessToken)) {
+            $connection->setAccessToken(unserialize($config->exact_accessToken));
+        }
+        if (isset($config->exact_refreshToken)) {
+            $connection->setRefreshToken($config->exact_refreshToken);
+        }
+        if (isset($config->exact_tokenExpires)) {
+            $connection->setTokenExpires($config->exact_tokenExpires);
+        }
+    }
+
+    /**
+     * Acquire refresh lock to avoid duplicate calls to exact.
+     */
+    public static function acquireLock(): bool
+    {
+        /** @var Repository $cache */
+        $cache = app()->make(Repository::class);
+        $store = $cache->getStore();
+
+        if (! $store instanceof LockProvider) {
+            return false;
+        }
+
+        self::$lock = $store->lock(self::$lockKey, 60);
+        return self::$lock->block(30);
+    }
+
+    /**
+     * Release lock that was set.
+     *
+     * @return bool
+     */
+    public static function releaseLock()
+    {
+        return optional(self::$lock)->release();
     }
 
     /**
