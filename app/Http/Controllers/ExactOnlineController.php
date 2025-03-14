@@ -47,12 +47,19 @@ class ExactOnlineController extends Controller
      */
     public function appCallback(Request $request)
     {
-        // When getting the access token and refresh token for the first time, you need to refresh the token instead of using the access token. Else the refresh token does not work!
         $config = LaravelExactOnline::loadConfig();
         $config->exact_authorisationCode = request()->get('code');
+
+        // Store first to avoid another redirect to exact online
         LaravelExactOnline::storeConfig($config);
 
-        app()->make('Exact\Connection');
+        $connection = app()->make('Exact\Connection');
+
+        $config->exact_accessToken = serialize($connection->getAccessToken());
+        $config->exact_refreshToken = $connection->getRefreshToken();
+        $config->exact_tokenExpires = $connection->getTokenExpires() - 60;
+
+        LaravelExactOnline::storeConfig($config);
 
         dd('Exact Online connected.');
     }

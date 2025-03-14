@@ -9,24 +9,13 @@ use App\Models\Invoice;
 use App\Services\Admin\CurrencyService;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use JsonException;
 use Picqer\Financials\Exact\Account;
-use Picqer\Financials\Exact\ApiException;
-use Picqer\Financials\Exact\BankAccount;
-use Picqer\Financials\Exact\Connection;
-use Picqer\Financials\Exact\DirectDebitMandate;
 use Picqer\Financials\Exact\ExchangeRate;
 use Picqer\Financials\Exact\GLAccount;
-use Picqer\Financials\Exact\Me;
-use Picqer\Financials\Exact\Receivable;
-use Picqer\Financials\Exact\ReceivablesList;
 use Picqer\Financials\Exact\SalesEntry;
 use Picqer\Financials\Exact\VatCode;
-use Picqer\Financials\Exact\WebhookSubscription;
 use RuntimeException;
 
 class ExactOnlineService
@@ -54,18 +43,6 @@ class ExactOnlineService
     protected const DIARY_SALES = 70;
     protected const DIARY_MEMORIAL = 90;
 
-//    protected $glAccounts = [
-//        '8000' => [
-//            'gl' => self::GL_8000,
-//            'diary' => self
-//        ],
-//        'default' => [
-//            self::LEADS_REVENUE => 'ab56daba-8e55-4392-ae93-ab669a79e950', # Omzet binnen EU
-//            self::STORNO => 'c4d95665-3e6f-4b9f-8e17-6ce163648b0d', # Omzet storneringsboetes binnen EU
-//            self::SERVICE_FEE => '44d08572-f3e8-4c07-ba74-e65f44a30e16', # Omzet service fee binnen EU
-//        ],
-//    ];
-
     protected $diaries = [
         'SALES' => 70,
         'MEMORIAL' => 90,
@@ -81,113 +58,6 @@ class ExactOnlineService
     public function __construct()
     {
         $this->connection = app()->make('Exact\Connection');
-    }
-
-    private function connect()
-    {
-        $connection = new Connection();
-        $connection->setRedirectUrl(Config('exactonline.callback_url'));
-        $connection->setExactClientId(Config('exactonline.exact_client_id'));
-        $connection->setExactClientSecret(Config('exactonline.exact_client_secret'));
-
-        $authorizationCode = self::getValue('authorizationcode');
-        if ($authorizationCode) {
-            $connection->setAuthorizationCode($authorizationCode);
-        }
-
-        $accessToken = self::getValue('accesstoken');
-        if ($accessToken) {
-            $connection->setAccessToken(unserialize($accessToken));
-        }
-
-        $refreshToken = self::getValue('refreshtoken');
-        if ($refreshToken) {
-            $connection->setRefreshToken($refreshToken);
-        }
-
-        $expiresIn = self::getValue('expires_in');
-        if ($expiresIn) {
-            $connection->setTokenExpires($expiresIn);
-        }
-
-        $connection->setAcquireAccessTokenLockCallback('App\Services\Exact\ExactOnlineService::acquireLock');
-        $connection->setAcquireAccessTokenUnlockCallback('App\Services\Exact\ExactOnlineService::releaseLock');
-        $connection->setTokenUpdateCallback('App\Services\Exact\ExactOnlineService::updateTokens');
-
-        // Make the client connect and exchange tokens
-        try {
-            $connection->connect();
-        } catch (Exception $exception) {
-            throw new Exception('Could not connect to Exact: ' . $exception->getMessage());
-        }
-
-        $connection->setDivision(Config('exactonline.exact_division'));
-
-        return $connection;
-    }
-
-    public static function updateTokens(Connection $connection): bool
-    {
-        // Save the new tokens for next connections
-        self::setValue('accesstoken', serialize($connection->getAccessToken()));
-        self::setValue('refreshtoken', $connection->getRefreshToken());
-
-        // Optionally, save the expiry-timestamp. This prevents exchanging valid tokens (ie. saves you some requests)
-        self::setValue('expires_in', $connection->getTokenExpires());
-
-        return true;
-    }
-
-    public static function acquireLock(): bool
-    {
-        Log::info('Acquire exact-lock');
-        if (!Cache::has('exact-lock')) {
-            return false;
-        }
-        Log::info('Set exact-lock');
-
-        return Cache::put('exact-lock', time());
-    }
-
-    public static function releaseLock()
-    {
-        Log::info('Release exact-lock');
-
-        return Cache::forget('exact-lock');
-    }
-
-    /**
-     * Function to retrieve persisted data for the example
-     *
-     * @param string $key
-     *
-     * @return null|string
-     * @throws JsonException
-     */
-    public static function getValue(string $key): ?string
-    {
-//        $storage = (array)json_decode(Redis::get('exact:api:json'), true);
-        $storage = (array)json_decode(Storage::disk('r2_private')->get('exact/credentials.json'), true, 512, JSON_THROW_ON_ERROR);
-
-        return $storage[$key] ?? null;
-    }
-
-    /**
-     * Function to persist some data for the example
-     *
-     * @param string $key
-     * @param string $value
-     * @throws JsonException
-     */
-    public static function setValue(string $key, string $value)
-    {
-        $storage = [];
-        if (Storage::disk('r2_private')->exists('exact/credentials.json')) {
-            $storage = json_decode(Storage::disk('s3')->get('exact/credentials.json'), true, 512, JSON_THROW_ON_ERROR);
-        }
-        $storage[$key] = $value;
-
-        Storage::disk('r2_private')->put('exact/credentials.json', json_encode($storage, JSON_THROW_ON_ERROR));
     }
 
     public function test(): void

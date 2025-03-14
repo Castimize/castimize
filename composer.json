@@ -110,7 +110,10 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [],
+            "aliases": {
+                "ExactOnline": "App\\Services\\Exact\\LaravelExactOnlineFacade"
+            }
         }
     },
     "config": {
