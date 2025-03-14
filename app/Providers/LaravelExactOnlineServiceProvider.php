@@ -35,12 +35,12 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
 
                 $connection = new Connection();
                 $connection->setRedirectUrl(route('exact.callback'));
-                $connection->setExactClientId(config('laravel-exact-online.exact_client_id'));
-                $connection->setExactClientSecret(config('laravel-exact-online.exact_client_secret'));
-                $connection->setBaseUrl('https://start.exactonline.' . config('laravel-exact-online.exact_country_code'));
+                $connection->setExactClientId(config('exactonline.exact_client_id'));
+                $connection->setExactClientSecret(config('exactonline.exact_client_secret'));
+                $connection->setBaseUrl('https://start.exactonline.' . config('exactonline.exact_country_code'));
 
-                if (config('laravel-exact-online.exact_division') !== '') {
-                    $connection->setDivision(config('laravel-exact-online.exact_division'));
+                if (config('exactonline.exact_division') !== '') {
+                    $connection->setDivision(config('exactonline.exact_division'));
                 }
 
                 if (isset($config->exact_authorisationCode)) {
@@ -59,7 +59,7 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
 
                 return $connection;
             }
-            
+
             return null;
         });
     }
