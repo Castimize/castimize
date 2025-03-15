@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Observers\ModelObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
@@ -11,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+#[ObservedBy(ModelObserver::class)]
 class Model extends EloquentModel
 {
     use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;

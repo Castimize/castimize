@@ -238,9 +238,12 @@ class EtsyService
 
         try {
             foreach ($models as $model) {
-                $listingDTO = $this->createListing($shopOwnerAuth, $model);
+                if ($model->has('shopListingModel')) {
+                    $listingDTO =  $this->updateListing($shopOwnerAuth, $model);
+                } else {
+                    $listingDTO = $this->createListing($shopOwnerAuth, $model);
+                }
                 $listingDTOs->push($listingDTO);
-//                dd($listingDTO);
             }
         } catch (Exception $exception) {
             Log::error($exception->getMessage() . PHP_EOL . $exception->getFile() . PHP_EOL . $exception->getTraceAsString());
@@ -253,6 +256,10 @@ class EtsyService
     {
         $this->refreshAccessToken($shopOwnerAuth);
         $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+
+        if ($model->has('shopListingModel')) {
+            return $this->updateListing($shopOwnerAuth, $model);
+        }
 
         return $this->createListing($shopOwnerAuth, $model);
     }
@@ -300,7 +307,7 @@ class EtsyService
     private function createListing(ShopOwnerAuth $shopOwnerAuth, Model $model): ListingDTO
     {
         $listingDTO = ListingDTO::fromModel($shopOwnerAuth, $model);
-        $listing = $this->createDraftListing($shopOwnerAuth, $listingDTO);
+        $listing = $this->handleCreateDraftListing($shopOwnerAuth, $listingDTO);
 
         if ($listing) {
             $listingDTO->listingId = $listing->listing_id;
@@ -322,7 +329,7 @@ class EtsyService
                     throw new Exception('Listing image not created: ' . print_r($listingImageDTO, true));
                 }
 
-                $this->updateListing(
+                $this->handleUpdateListing(
                     shopOwnerAuth: $shopOwnerAuth,
                     listingDTO: $listingDTO,
                     data: [
@@ -342,7 +349,30 @@ class EtsyService
         return $listingDTO;
     }
 
-    private function createDraftListing(ShopOwnerAuth $shopOwnerAuth, ListingDTO $listingDTO)
+    private function updateListing(ShopOwnerAuth $shopOwnerAuth, Model $model): ListingDTO
+    {
+        $listingDTO = ListingDTO::fromModel($shopOwnerAuth, $model);
+
+        $data = [
+            'title' => $listingDTO->title,
+            'description' => $listingDTO->description,
+            'price' => $listingDTO->price,
+            'taxonomy_id' => $listingDTO->taxonomyId,
+            'shipping_profile_id' => $listingDTO->shippingProfileId,
+            'return_policy_id' => $listingDTO->returnPolicyId,
+            'materials' => $listingDTO->materials,
+            'item_weight' => $listingDTO->itemWeight,
+            'item_length' => $listingDTO->itemLength,
+            'item_width' => $listingDTO->itemWidth,
+            'item_height' => $listingDTO->itemHeight,
+        ];
+
+        $listing = $this->handleUpdateListing($shopOwnerAuth, $listingDTO, $data);
+
+        return $listingDTO;
+    }
+
+    private function handleCreateDraftListing(ShopOwnerAuth $shopOwnerAuth, ListingDTO $listingDTO)
     {
         return Listing::create(
             shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
@@ -372,7 +402,7 @@ class EtsyService
         return $listing->save($data);
     }
 
-    private function updateListing(ShopOwnerAuth $shopOwnerAuth, ListingDTO $listingDTO, array $data)
+    private function handleUpdateListing(ShopOwnerAuth $shopOwnerAuth, ListingDTO $listingDTO, array $data)
     {
         return Listing::update(
             shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
