@@ -3,6 +3,8 @@
 namespace App\Nova\Actions;
 
 use App\Jobs\Etsy\SyncListings;
+use App\Models\Customer;
+use App\Services\Etsy\EtsyService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -48,6 +50,16 @@ class SyncModelsToEtsy extends Action
      */
     public function fields(NovaRequest $request)
     {
+        $customer = Customer::find(8);
+        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
+        $taxonomy = (new EtsyService())->getSellerTaxonomy($shopOwnerAuth);
+
+        $data = [];
+        foreach ($taxonomy->data as $item) {
+            $cat =
+            $data[] = $item->toArray();
+        }
+
         return [];
     }
 }

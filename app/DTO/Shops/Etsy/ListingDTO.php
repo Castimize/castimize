@@ -9,6 +9,8 @@ use App\Models\ShopOwnerAuth;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Services\Admin\CalculatePricesService;
+use App\Services\Admin\CurrencyService;
+use App\Services\Etsy\EtsyService;
 use Illuminate\Support\Collection;
 
 class ListingDTO
@@ -52,6 +54,12 @@ class ListingDTO
                 materialVolume: $model->model_volume_cc,
                 surfaceArea: $model->model_surface_area_cm2,
             );
+
+        if (app()->environment() === 'production' && $shopOwnerAuth->shop_oauth['currency_code'] !== config('app.currency')) {
+            /** @var CurrencyService $currencyService */
+            $currencyService = app(CurrencyService::class);
+            $price = $currencyService->convertCurrency(config('app.currency'), $shopOwnerAuth->shop_oauth['currency_code'], $price);
+        }
 
         return new self(
             shopId: $shopOwnerAuth->shop_oauth['shop_id'],

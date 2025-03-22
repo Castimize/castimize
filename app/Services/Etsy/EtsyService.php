@@ -144,6 +144,17 @@ class EtsyService
         return $shopReturnPolicy;
     }
 
+    public function getTaxonomyAsSelect(ShopOwnerAuth $shopOwnerAuth)
+    {
+        $taxonomy = $this->getSellerTaxonomy($shopOwnerAuth);
+
+        $data = [];
+        foreach ($taxonomy->data as $item) {
+            $cat =
+            $data[] = $item->toArray();
+        }
+    }
+
     public function getSellerTaxonomy(ShopOwnerAuth $shopOwnerAuth): Collection
     {
         $this->refreshAccessToken($shopOwnerAuth);
