@@ -33,7 +33,7 @@ class SyncHistoryExchangeRatesToExact extends Command
      */
     public function handle()
     {
-        $dateFrom = Carbon::parse('2025-01-07');
+        $dateFrom = Carbon::parse('2025-02-01');
         $dateTo = now();
         $period = CarbonPeriod::create($dateFrom, $dateTo);
 
@@ -49,41 +49,33 @@ class SyncHistoryExchangeRatesToExact extends Command
             $progressBar->start();
 
             foreach ($period as $date) {
-//                $result = $exchangeRates->exchangeRateBetweenDateRange(
-//                    $baseCurrency,
-//                    $supportedCurrencies,
-//                    $date,
-//                    $date
-//                );
+                $currencyHistoryRate = CurrencyHistoryRate::where('convert_currency', 'EUR')
+                    ->where('historical_date', $date->format('Y-m-d'))
+                    ->first();
 
-                //foreach ($result[$date->format('Y-m-d')] as $convertCurrency => $rate) {
-                    $currencyHistoryRate = CurrencyHistoryRate::where('convert_currency', 'EUR')
-                        ->where('historical_date', $date->format('Y-m-d'))
-                        ->first();
+                if (!$currencyHistoryRate) {
+                    $result = $exchangeRates->exchangeRate(
+                        from: $baseCurrency,
+                        to: $supportedCurrencies,
+                        date: $date,
+                    );
 
-                    if (!$currencyHistoryRate) {
-                        $result = $exchangeRates->exchangeRateBetweenDateRange(
-                            $baseCurrency,
-                            $supportedCurrencies,
-                            $date,
-                            $date
-                        );
+                    foreach ($result as $convertCurrency => $rate) {
+                        $currencyHistoryRate = CurrencyHistoryRate::create([
+                            'base_currency' => $baseCurrency,
+                            'convert_currency' => $convertCurrency,
+                            'rate' => $rate,
+                            'historical_date' => $date->format('Y-m-d'),
+                        ]);
 
-                        foreach ($result[$date->format('Y-m-d')] as $convertCurrency => $rate) {
-                            $currencyHistoryRate = CurrencyHistoryRate::create([
-                                'base_currency' => $baseCurrency,
-                                'convert_currency' => $convertCurrency,
-                                'rate' => $rate,
-                                'historical_date' => $date->format('Y-m-d'),
-                            ]);
+                        if ($currencyHistoryRate && $currencyHistoryRate->convert_currency === 'EUR') {
+                            SyncExchangeRateToExact::dispatch($currencyHistoryRate);
                         }
                     }
-                    if ($currencyHistoryRate && $currencyHistoryRate->convert_currency === 'EUR' && $currencyHistoryRate->exact_online_guid === null) {
-//                        $exchangeRate = (new ExactOnlineService())->syncExchangeRate($currencyHistoryRate);
-                        //dd($exchangeRate);
-                        SyncExchangeRateToExact::dispatch($currencyHistoryRate);
-                    }
-                //}
+                } else if ($currencyHistoryRate->exact_online_guid === null) {
+                    SyncExchangeRateToExact::dispatch($currencyHistoryRate);
+                }
+
                 sleep(1);
                 $progressBar->advance();
             }
