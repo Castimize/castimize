@@ -144,14 +144,32 @@ class EtsyService
         return $shopReturnPolicy;
     }
 
-    public function getTaxonomyAsSelect(ShopOwnerAuth $shopOwnerAuth)
+    public function getTaxonomyAsSelect(ShopOwnerAuth $shopOwnerAuth): array
     {
         $taxonomy = $this->getSellerTaxonomy($shopOwnerAuth);
 
         $data = [];
         foreach ($taxonomy->data as $item) {
-            $cat =
-            $data[] = $item->toArray();
+            $this->getChildrenCategories($data, $item);
+        }
+
+        return $data;
+    }
+
+    protected function getChildrenCategories(&$allCategories, $category): void
+    {
+        $allCategories[$category->id] = [
+            'id' => $category->id,
+            'level' => $category->level,
+            'name' => $category->name,
+            'parent_id' => $category->parent_id,
+            'full_path' => property_exists($category, 'full_path_taxonomy_ids') ? implode(',', $category->full_path_taxonomy_ids) : '',
+        ];
+
+        if ($category->children) {
+            foreach ($category->children as $child) {
+                $this->getChildrenCategories($allCategories, $child);
+            }
         }
     }
 
@@ -378,7 +396,13 @@ class EtsyService
             'item_height' => $listingDTO->itemHeight,
         ];
 
-        $listing = $this->handleUpdateListing($shopOwnerAuth, $listingDTO, $data);
+        $this->handleUpdateListing(
+            shopOwnerAuth: $shopOwnerAuth,
+            listingDTO: $listingDTO,
+            data: $data,
+        );
+
+        (new ShopListingModelService())->updateShopListingModel($model->shopListingModel, $listingDTO);
 
         return $listingDTO;
     }

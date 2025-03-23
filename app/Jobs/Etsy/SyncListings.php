@@ -16,6 +16,7 @@ class SyncListings implements ShouldQueue
 
     public function __construct(
         private ShopOwnerAuth $shopOwnerAuth,
+        private int $taxonomyId,
     ) {
     }
 

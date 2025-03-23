@@ -71,7 +71,7 @@ class ListingDTO
             price: $price,
             whoMade: 'i_did',
             whenMade: 'made_to_order',
-            taxonomyId: 12380, // 3D Printer Files
+            taxonomyId: $shopOwnerAuth->shop_oauth['default_taxonomy_id'] ?? 12380, // 3D Printer Files
             shippingProfileId: 262651954760,
             returnPolicyId: 1356324035838,
             materials: [$model->material->name],

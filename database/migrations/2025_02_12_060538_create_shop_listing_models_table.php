@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('shop_owner_id');
             $table->unsignedBigInteger('shop_owner_auth_id');
             $table->unsignedBigInteger('model_id');
+            $table->unsignedBigInteger('taxonomy_id')->nullable();
             $table->unsignedBigInteger('shop_listing_id');
             $table->unsignedBigInteger('shop_listing_image_id')->nullable();
             $table->string('state')->default('draft');

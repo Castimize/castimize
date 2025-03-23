@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
+use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class SyncModelsToEtsy extends Action
@@ -36,6 +37,12 @@ class SyncModelsToEtsy extends Action
             if ($shopOwnerAuth->shop !== 'etsy' || ! $shopOwnerAuth->active) {
                 continue;
             }
+
+            $shopOauth = $shopOwnerAuth->shop_oauth;
+            $shopOauth['default_taxonomy_id'] = $fields->taxonomy_id;
+            $shopOwnerAuth->shop_oauth = $shopOauth;
+            $shopOwnerAuth->save();
+
             SyncListings::dispatch($shopOwnerAuth);
         }
 
@@ -52,14 +59,34 @@ class SyncModelsToEtsy extends Action
     {
         $customer = Customer::find(8);
         $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $taxonomy = (new EtsyService())->getSellerTaxonomy($shopOwnerAuth);
+        $taxonomyAsSelect = (new EtsyService())->getTaxonomyAsSelect($shopOwnerAuth);
 
-        $data = [];
-        foreach ($taxonomy->data as $item) {
-            $cat =
-            $data[] = $item->toArray();
+        $options = [];
+        foreach ($taxonomyAsSelect as $id => $taxonomy) {
+            $fullPathName = '';
+            $fullPath = explode(',', $taxonomy['full_path']);
+            if (count($fullPath) > 0) {
+                foreach ($fullPath as $pathId) {
+                    if (!empty($pathId) && $pathId != $id) {
+                        $fullPathName .= $taxonomyAsSelect[$pathId]['name'] . ' > ';
+                    }
+                }
+                $fullPathName = substr($fullPathName, 0, -3);
+            } else {
+                $fullPathName = $taxonomy['name'];
+            }
+            $options[$id] = [
+                'label' => $taxonomy['name'],
+                'group' => $fullPathName,
+            ];
         }
 
-        return [];
+        return [
+            Select::make(__('Etsy taxonomy'), 'taxonomy_id')
+                ->options($options)
+                ->displayUsingLabels()
+                ->searchable()
+                ->required(),
+        ];
     }
 }

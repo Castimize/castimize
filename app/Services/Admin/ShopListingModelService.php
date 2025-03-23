@@ -16,8 +16,17 @@ class ShopListingModelService
         return $model->shopListingModel()->create([
             'shop_owner_id' => $shopOwnerAuth->shop_owner_id,
             'shop_owner_auth_id' => $shopOwnerAuth->id,
+            'taxonomy_id' => $listingDTO->taxonomyId,
             'shop_listing_id' => $listingDTO->listingId,
             'state' => $listingDTO->state,
         ]);
+    }
+
+    public function updateShopListingModel(ShopListingModel $shopListingModel, ListingDTO $listingDTO): ShopListingModel
+    {
+        $shopListingModel->update([
+            'taxonomy_id' => $listingDTO->taxonomyId,
+            'state' => $listingDTO->state,
+            ]);
     }
 }
