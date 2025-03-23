@@ -84,6 +84,7 @@ class SyncModelsToEtsy extends Action
         return [
             Select::make(__('Etsy taxonomy'), 'taxonomy_id')
                 ->options($options)
+                ->help(__('Select an Etsy taxonomy. The listing will show in all categories shown'))
                 ->displayUsingLabels()
                 ->searchable()
                 ->required(),
