@@ -55,7 +55,7 @@ class ListingDTO
                 surfaceArea: $model->model_surface_area_cm2,
             );
 
-        if (app()->environment() === 'production' && $shopOwnerAuth->shop_oauth['currency_code'] !== config('app.currency')) {
+        if (app()->environment() === 'production' && $shopOwnerAuth->shop_oauth['shop_currency'] !== config('app.currency')) {
             /** @var CurrencyService $currencyService */
             $currencyService = app(CurrencyService::class);
             $price = $currencyService->convertCurrency(config('app.currency'), $shopOwnerAuth->shop_oauth['shop_currency'], $price);
