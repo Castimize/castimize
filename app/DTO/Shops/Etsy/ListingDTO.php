@@ -58,7 +58,7 @@ class ListingDTO
         if (app()->environment() === 'production' && $shopOwnerAuth->shop_oauth['currency_code'] !== config('app.currency')) {
             /** @var CurrencyService $currencyService */
             $currencyService = app(CurrencyService::class);
-            $price = $currencyService->convertCurrency(config('app.currency'), $shopOwnerAuth->shop_oauth['currency_code'], $price);
+            $price = $currencyService->convertCurrency(config('app.currency'), $shopOwnerAuth->shop_oauth['shop_currency'], $price);
         }
 
         return new self(
