@@ -21,7 +21,7 @@ class ModelObserver
      */
     public function created(Model $model): void
     {
-        $this->syncModelToShop($model);
+        //$this->syncModelToShop($model);
     }
 
     /**
@@ -36,7 +36,7 @@ class ModelObserver
      */
     public function updated(Model $model): void
     {
-        $this->syncModelToShop($model);
+        //$this->syncModelToShop($model);
     }
 
     /**
@@ -58,7 +58,7 @@ class ModelObserver
         }
     }
 
-    private function syncModelToShop(Model $model)
+    private function syncModelToShop(Model $model): void
     {
         $shopOwnerAuths = $model->customer?->shopOwner?->shopOwnerAuths;
         if ($shopOwnerAuths) {

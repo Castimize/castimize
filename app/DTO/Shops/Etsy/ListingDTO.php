@@ -44,6 +44,7 @@ class ListingDTO
 
     public static function fromModel(ShopOwnerAuth $shopOwnerAuth, Model $model): self
     {
+        $shopOauth = $shopOwnerAuth->shop_oauth;
         $customsItemSettings = new CustomsItemSettings();
         $parcelSettings = new ParcelSettings();
 
@@ -51,19 +52,19 @@ class ListingDTO
             0.18 :
             (new CalculatePricesService())->calculatePriceOfModel(
                 price: $model->material->prices->first(),
-                materialVolume: $model->model_volume_cc,
-                surfaceArea: $model->model_surface_area_cm2,
+                materialVolume: (float) $model->model_volume_cc,
+                surfaceArea: (float) $model->model_surface_area_cm2,
             );
 
-        if (app()->environment() === 'production' && $shopOwnerAuth->shop_oauth['shop_currency'] !== config('app.currency')) {
+        if (app()->environment() === 'production' && $shopOauth['shop_currency'] !== config('app.currency')) {
             /** @var CurrencyService $currencyService */
             $currencyService = app(CurrencyService::class);
-            $price = $currencyService->convertCurrency(config('app.currency'), $shopOwnerAuth->shop_oauth['shop_currency'], $price);
+            $price = $currencyService->convertCurrency(config('app.currency'), $shopOauth['shop_currency'], $price);
         }
 
         return new self(
-            shopId: $shopOwnerAuth->shop_oauth['shop_id'],
-            listingId: null,
+            shopId: $shopOauth['shop_id'],
+            listingId: $model->shopListingModel?->listing_id ?? null,
             state: null,
             quantity: 1,
             title: $model->model_name ?? $model->name,
@@ -71,9 +72,9 @@ class ListingDTO
             price: $price,
             whoMade: 'i_did',
             whenMade: 'made_to_order',
-            taxonomyId: (int) ($shopOwnerAuth->shop_oauth['default_taxonomy_id'] ?? 12380), // 3D Printer Files
-            shippingProfileId: 262651954760,
-            returnPolicyId: 1356324035838,
+            taxonomyId: (int) ($shopOauth['default_taxonomy_id'] ?? 12380), // 3D Printer Files
+            shippingProfileId: $shopOauth['shop_shipping_profile_id'] ?? null,
+            returnPolicyId: $shopOauth['shop_return_policy_id'] ?? null,
             materials: [$model->material->name],
             itemWeight: $model->model_box_volume * $model->material->density + $customsItemSettings->bag,
             itemLength: $model->model_x_length,

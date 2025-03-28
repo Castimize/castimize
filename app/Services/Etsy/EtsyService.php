@@ -84,7 +84,9 @@ class EtsyService
 
         $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
 
-        $this->addShopToShopOwnerAuth($shopOwnerAuth);
+        $shop = $this->addShopToShopOwnerAuth($shopOwnerAuth);
+        $this->createShippingProfile($shopOwnerAuth, ShippingProfileDTO::fromShop($shop->shop_id));
+        $this->createShopReturnPolicy($shopOwnerAuth);
     }
 
     public function refreshAccessToken(ShopOwnerAuth $shopOwnerAuth): void
@@ -226,6 +228,8 @@ class EtsyService
 
         $shippingProfileDTO->shippingProfileId = $shippingProfile?->shipping_profile_id;
 
+        $this->addShippingProfileToShopOwnerAuth($shopOwnerAuth, $shippingProfile);
+
         return $shippingProfileDTO;
     }
 
@@ -267,7 +271,7 @@ class EtsyService
 
         try {
             foreach ($models as $model) {
-                if ($model->has('shopListingModel')) {
+                if ($model->shopListingModel) {
                     $listingDTO =  $this->updateListing($shopOwnerAuth, $model);
                 } else {
                     $listingDTO = $this->createListing($shopOwnerAuth, $model);
@@ -281,16 +285,22 @@ class EtsyService
         return $listingDTOs;
     }
 
-    public function syncListing(ShopOwnerAuth $shopOwnerAuth, Model $model): ListingDTO
+    public function syncListing(ShopOwnerAuth $shopOwnerAuth, Model $model): ?ListingDTO
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        try {
+            $this->refreshAccessToken($shopOwnerAuth);
+            $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
 
-        if ($model->has('shopListingModel')) {
-            return $this->updateListing($shopOwnerAuth, $model);
+            if ($model->shopListingModel) {
+                return $this->updateListing($shopOwnerAuth, $model);
+            }
+
+            return $this->createListing($shopOwnerAuth, $model);
+        } catch (Exception $exception) {
+            Log::error($exception->getMessage() . PHP_EOL . $exception->getFile() . PHP_EOL . $exception->getTraceAsString());
+
+            return null;
         }
-
-        return $this->createListing($shopOwnerAuth, $model);
     }
 
     public function deleteListing(ShopOwnerAuth $shopOwnerAuth, int $listingId): bool
@@ -322,10 +332,21 @@ class EtsyService
         return $shop;
     }
 
-    private function addReturnPolicyToShopOwnerAuth(ShopOwnerAuth $shopOwnerAuth, ReturnPolicy $returnPolicy)
+    private function addShippingProfileToShopOwnerAuth(ShopOwnerAuth $shopOwnerAuth, ?ShippingProfile $shippingProfile): void
     {
         $shopOauth = $shopOwnerAuth->shop_oauth;
-        if (! array_key_exists('shop_return_policy_id', $shopOauth)) {
+        if (! array_key_exists('shop_return_policy_id', $shopOauth) && $shippingProfile) {
+            $shopOauth['shop_shipping_profile_id'] = $shippingProfile->shipping_profile_id;
+
+            $shopOwnerAuth->shop_oauth = $shopOauth;
+            $shopOwnerAuth->save();
+        }
+    }
+
+    private function addReturnPolicyToShopOwnerAuth(ShopOwnerAuth $shopOwnerAuth, ?ReturnPolicy $returnPolicy): void
+    {
+        $shopOauth = $shopOwnerAuth->shop_oauth;
+        if (! array_key_exists('shop_return_policy_id', $shopOauth) && $returnPolicy) {
             $shopOauth['shop_return_policy_id'] = $returnPolicy->return_policy_id;
 
             $shopOwnerAuth->shop_oauth = $shopOauth;
