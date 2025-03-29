@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('model_name')->nullable();
             $table->string('name');
             $table->string('file_name')->index();
+            $table->string('thumb_name')->nullable();
             $table->float('model_volume_cc');
             $table->float('model_x_length');
             $table->float('model_y_length');

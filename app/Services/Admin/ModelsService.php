@@ -68,6 +68,10 @@ class ModelsService
         }
 
         if ($model) {
+            if (empty($model->thumb_name)) {
+                $model->thumb_name = $fileNameThumb;
+                $model->save();
+            }
             return $model;
         }
 
@@ -77,6 +81,7 @@ class ModelsService
             'model_name' => $request->model_name ?? null,
             'name' => $request->original_file_name,
             'file_name' => $fileName,
+            'thumb_name' => $fileNameThumb,
             'model_volume_cc' => $request->material_volume,
             'model_x_length' => $request->x_dim,
             'model_y_length' => $request->y_dim,

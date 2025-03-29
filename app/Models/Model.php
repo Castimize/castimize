@@ -32,6 +32,7 @@ class Model extends EloquentModel
         'model_name',
         'name',
         'file_name',
+        'thumb_name',
         'model_volume_cc',
         'model_x_length',
         'model_y_length',
