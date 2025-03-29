@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTO\Model\ModelDTO;
 use App\Http\Resources\ModelResource;
 use App\Models\Customer;
 use App\Models\Material;
@@ -139,7 +140,8 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $model = $this->modelsService->storeModelFromApi($request, $customer);
+        $model = $this->modelsService->storeModelFromModelDTO(ModelDTO::fromWpRequest($request, $customer->id), $customer);
+//        $model = $this->modelsService->storeModelFromApi($request, $customer);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
