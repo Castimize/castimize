@@ -69,6 +69,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
         Nova::mainMenu(function (Request $request) {
             if ($request->user()->isManufacturer()) {
+                Nova::withoutGlobalSearch();
                 return [
                     MenuSection::dashboard(ManufacturerDashboard::class)
                         ->icon('chart-bar'),
