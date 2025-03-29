@@ -53,7 +53,7 @@ class ModelResource extends JsonResource
             'raw_file_name' => str_replace('wp-content/uploads/p3d/', '', $this->file_name),
             'file_url' => sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), str_replace('_resized', '', $this->file_name)),
             'file_url_site' => sprintf('%s/%s', env('APP_SITE_URL'), str_replace('_resized', '', $this->file_name)),
-            'file_thumbnail' => Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $thumb) : '',
+            'file_thumbnail' => Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $thumb) : '/' . $thumb,
             'model_volume_cc' => $this->model_volume_cc,
             'model_volume_cc_display' => round($this->model_volume_cc, 2) . 'cm3',
             'model_x_length' => $this->model_x_length,
