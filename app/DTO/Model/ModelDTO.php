@@ -46,7 +46,7 @@ readonly class  ModelDTO
         }
 
         //printer_id.material_id.coating_id.scale.unit
-        $thumbName = sprintf('%s%s%s%s%s%s.thumb.png',
+        $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
             str_replace('_resized', '', $request->file_name),
             $request->printer_id ?? 3,
             $request->wp_id,
