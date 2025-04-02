@@ -277,6 +277,13 @@ class OrdersService
             'updated_at' => now(),
         ]);
 
+        if ($orderDto->isPaid && $order->orderQueues()->count() === 0) {
+            foreach ($order->uploads()->get() as $upload) {
+                // Set upload to order queue
+                $this->uploadsService->setUploadToOrderQueue($upload);
+            }
+        }
+
         CreateInvoicesFromOrder::dispatch($order->wp_id);
 
         return $order;
