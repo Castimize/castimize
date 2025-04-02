@@ -7,6 +7,7 @@ use App\Http\Requests\ShowOrderWpRequest;
 use App\Http\Resources\OrderResource;
 use App\Jobs\CreateOrderFromDTO;
 use App\Jobs\CreateOrderFromWp;
+use App\Jobs\UpdateOrderFromDTO;
 use App\Models\Country;
 use App\Models\Customer;
 use App\Models\Material;
@@ -123,13 +124,15 @@ class OrdersApiController extends ApiController
     public function updateOrderWp(Request $request): JsonResponse
     {
         $order = Order::where('wp_id', $request->id)->first();
+        $logRequestId = null;
+        if ($request->has('log_request_id')) {
+            $logRequestId = $request->log_request_id;
+        }
         if ($order === null) {
-            $logRequestId = null;
-            if ($request->has('log_request_id')) {
-                $logRequestId = $request->log_request_id;
-            }
 //            CreateOrderFromWp::dispatch($request->id, $logRequestId);
             CreateOrderFromDTO::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
+        } else {
+            UpdateOrderFromDTO::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
         }
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);

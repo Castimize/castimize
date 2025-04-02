@@ -266,6 +266,22 @@ class OrdersService
         return $order;
     }
 
+    public function updateOrderFromDto(Order $order, OrderDTO $orderDto): Order
+    {
+        $systemUser = User::find(1);
+
+        $order->update([
+            'is_paid' => $orderDto->isPaid,
+            'paid_at' => $orderDto->paidAt,
+            'updated_by' => $systemUser->id,
+            'updated_at' => now(),
+        ]);
+
+        CreateInvoicesFromOrder::dispatch($order->wp_id);
+
+        return $order;
+    }
+
     public function handleRejectionsAndRefund(Order $order, $orderQueues)
     {
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($order->wp_id);
