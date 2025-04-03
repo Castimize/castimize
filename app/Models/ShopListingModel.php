@@ -12,8 +12,8 @@ class ShopListingModel extends Model
 {
     use HasFactory, Userstamps, SoftDeletes;
 
-//    protected $revisionForceDeleteEnabled = true;
-//    protected $revisionCreationsEnabled = true;
+    protected $revisionForceDeleteEnabled = true;
+    protected $revisionCreationsEnabled = true;
 
 //    protected $primaryKey = ['shop_owner_auth_id', 'model_id'];
 
@@ -50,9 +50,9 @@ class ShopListingModel extends Model
         return $this->belongsTo(ShopOwner::class);
     }
 
-    public function shopOwnerAuth(): BelongsTo
+    public function shop(): BelongsTo
     {
-        return $this->belongsTo(ShopOwnerAuth::class);
+        return $this->belongsTo(Shop::class);
     }
 
     public function model(): BelongsTo

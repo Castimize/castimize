@@ -33,17 +33,17 @@ class SyncModelsToEtsy extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        foreach ($models as $shopOwnerAuth) {
-            if ($shopOwnerAuth->shop !== 'etsy' || ! $shopOwnerAuth->active) {
+        foreach ($models as $shop) {
+            if ($shop->shop !== 'etsy' || ! $shop->active) {
                 continue;
             }
 
-            $shopOauth = $shopOwnerAuth->shop_oauth;
+            $shopOauth = $shop->shop_oauth;
             $shopOauth['default_taxonomy_id'] = $fields->taxonomy_id;
-            $shopOwnerAuth->shop_oauth = $shopOauth;
-            $shopOwnerAuth->save();
+            $shop->shop_oauth = $shopOauth;
+            $shop->save();
 
-            SyncListings::dispatch($shopOwnerAuth);
+            SyncListings::dispatch($shop);
         }
 
         return ActionResponse::message(__('Selected shop listings are being synced'));
@@ -58,8 +58,8 @@ class SyncModelsToEtsy extends Action
     public function fields(NovaRequest $request)
     {
         $customer = Customer::find(8);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $taxonomyAsSelect = (new EtsyService())->getTaxonomyAsSelect($shopOwnerAuth);
+        $shop = $customer->shopOwner->shops->first();
+        $taxonomyAsSelect = (new EtsyService())->getTaxonomyAsSelect($shop);
 
         $options = [];
         foreach ($taxonomyAsSelect as $id => $taxonomy) {

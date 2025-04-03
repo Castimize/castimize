@@ -45,8 +45,8 @@ class ShopOwner extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function shopOwnerAuths(): HasMany
+    public function shops(): HasMany
     {
-        return $this->hasMany(ShopOwnerAuth::class);
+        return $this->hasMany(Shop::class);
     }
 }

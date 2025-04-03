@@ -13,7 +13,7 @@ use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
 #[ObservedBy(ShopOwnerAuthObserver::class)]
-class ShopOwnerAuth extends Model
+class Shop extends Model
 {
     use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
 

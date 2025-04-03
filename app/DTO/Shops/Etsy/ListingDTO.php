@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\DTO\Shops\Etsy;
 
 use App\Models\Model;
-use App\Models\ShopOwnerAuth;
+use App\Models\Shop;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Services\Admin\CalculatePricesService;
@@ -42,7 +42,7 @@ class ListingDTO
     ) {
     }
 
-    public static function fromModel(ShopOwnerAuth $shopOwnerAuth, Model $model): self
+    public static function fromModel(Shop $shopOwnerAuth, Model $model): self
     {
         $shopOauth = $shopOwnerAuth->shop_oauth;
         $customsItemSettings = new CustomsItemSettings();

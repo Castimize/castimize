@@ -44,12 +44,12 @@ class ModelObserver
      */
     public function deleted(Model $model): void
     {
-        $shopOwnerAuths = $model->customer?->shopOwner?->shopOwnerAuths;
-        if ($shopOwnerAuths) {
-            foreach ($shopOwnerAuths as $shopOwnerAuth) {
-                if ($shopOwnerAuth->active && $model->has('shopListingModel')) {
+        $shops = $model->customer?->shopOwner?->shops;
+        if ($shops) {
+            foreach ($shops as $shop) {
+                if ($shop->active && $model->has('shopListingModel')) {
                     try {
-                        (new EtsyService())->deleteListing($shopOwnerAuth, $model->shopListingModel->shop_listing_id);
+                        (new EtsyService())->deleteListing($shop, $model->shopListingModel->shop_listing_id);
                     } catch (Exception $e) {
                         Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                     }
@@ -60,12 +60,12 @@ class ModelObserver
 
     private function syncModelToShop(Model $model): void
     {
-        $shopOwnerAuths = $model->customer?->shopOwner?->shopOwnerAuths;
-        if ($shopOwnerAuths) {
-            foreach ($shopOwnerAuths as $shopOwnerAuth) {
-                if ($shopOwnerAuth->active) {
+        $shops = $model->customer?->shopOwner?->shops;
+        if ($shops) {
+            foreach ($shops as $shop) {
+                if ($shop->active) {
                     try {
-                        (new EtsyService())->syncListing($shopOwnerAuth, $model);
+                        (new EtsyService())->syncListing($shop, $model);
                     } catch (Exception $e) {
                         Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                     }

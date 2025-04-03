@@ -61,6 +61,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::get('etsy/{customerId}/shipping-profile', 'EtsyApiController@getShippingProfile')->name('api.etsy.get-shipping-profile');
             Route::post('etsy/{customerId}/shipping-profile', 'EtsyApiController@createShippingProfile')->name('api.etsy.create-shipping-profile');
             Route::get('etsy/{customerId}/shop/payments/ledger-entries', 'EtsyApiController@getShopPaymentLedgerEntries')->name('api.etsy.get-shop-payment-ledger-entries');
+            Route::get('etsy/{customerId}/shop/receipts', 'EtsyApiController@getShopReceipts')->name('api.etsy.get-shop-receipts');
         });
 
         // Woocommerce endpoints

@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Models\ShopOwnerAuth;
+use App\Models\Shop;
 use Illuminate\Support\Facades\Crypt;
 
 class ShopOwnerAuthObserver
@@ -10,7 +10,7 @@ class ShopOwnerAuthObserver
     /**
      * Handle the ShopOwnerAuth "creating" event.
      */
-    public function creating(ShopOwnerAuth $shopOwnerAuth): void
+    public function creating(Shop $shopOwnerAuth): void
     {
 //        if ($shopOwnerAuth->shop === 'etsy') {
 //            $shopOwnerAuth->shop_oauth = [

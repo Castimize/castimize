@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('shop_listing_models', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('shop_owner_id');
-            $table->unsignedBigInteger('shop_owner_auth_id');
+            $table->unsignedBigInteger('shop_id');
             $table->unsignedBigInteger('model_id');
             $table->unsignedBigInteger('taxonomy_id')->nullable();
             $table->unsignedBigInteger('shop_listing_id');
@@ -24,10 +24,10 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->foreign('shop_owner_id')->references('id')->on('shop_owners');
-            $table->foreign('shop_owner_auth_id')->references('id')->on('shop_owner_auths');
+            $table->foreign('shop_id')->references('id')->on('shops');
             $table->foreign('model_id')->references('id')->on('models');
 
-            $table->index(['shop_owner_id', 'shop_owner_auth_id', 'model_id'], 'so_id_soa_id_m_id_idx');
+            $table->index(['shop_owner_id', 'shop_id', 'model_id'], 'so_id_soa_id_m_id_idx');
         });
 
         Schema::table('shop_listing_models', function (Blueprint $table) {

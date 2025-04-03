@@ -10,7 +10,7 @@ use App\DTO\Shops\Etsy\ShippingProfileDestinationDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDTO;
 use App\Enums\Etsy\EtsyStatesEnum;
 use App\Models\Model;
-use App\Models\ShopOwnerAuth;
+use App\Models\Shop;
 use App\Services\Admin\ShopListingModelService;
 use App\Services\Etsy\Resources\Listing;
 use Etsy\Collection;
@@ -25,7 +25,8 @@ use Etsy\Resources\SellerTaxonomy;
 use Etsy\Resources\ShippingCarrier;
 use Etsy\Resources\ShippingDestination;
 use Etsy\Resources\ShippingProfile;
-use Etsy\Resources\Shop;
+use Etsy\Resources\Shop as EtsyShop;
+use Etsy\Resources\Transaction;
 use Etsy\Resources\User;
 use Etsy\Utils\PermissionScopes;
 use Exception;
@@ -42,21 +43,21 @@ class EtsyService
         );
     }
 
-    public function getAuthorizationUrl(ShopOwnerAuth $shopOwnerAuth): string
+    public function getAuthorizationUrl(Shop $shop): string
     {
-        $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
+        $client = new Client(client_id: $shop->shop_oauth['client_id']);
         $scopes = PermissionScopes::ALL_SCOPES;
 //        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
 
         [$verifier, $code_challenge] = $client->generateChallengeCode();
         $nonce = $client->createNonce();
 
-        $shopOauth = $shopOwnerAuth->shop_oauth;
+        $shopOauth = $shop->shop_oauth;
         $shopOauth['verifier'] = $verifier;
         $shopOauth['nonce'] = $nonce;
 
-        $shopOwnerAuth->shop_oauth = $shopOauth;
-        $shopOwnerAuth->save();
+        $shop->shop_oauth = $shopOauth;
+        $shop->save();
 
         return $client->getAuthorizationUrl(
             redirect_uri: $this->getRedirectUri(),
@@ -70,70 +71,70 @@ class EtsyService
     {
         $nonce = $request->state;
         $code = $request->code;
-        $shopOwnerAuth = ShopOwnerAuth::whereJsonContains('shop_oauth->nonce', $nonce)->first();
+        $shop = Shop::whereJsonContains('shop_oauth->nonce', $nonce)->first();
 
-        $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
+        $client = new Client(client_id: $shop->shop_oauth['client_id']);
 
         $response = $client->requestAccessToken(
             redirect_uri: $this->getRedirectUri(),
             code: $code,
-            verifier: $shopOwnerAuth->shop_oauth['verifier'],
+            verifier: $shop->shop_oauth['verifier'],
         );
 
-        $shopOwnerAuth = $this->storeAccessToken($shopOwnerAuth, $response);
+        $shop = $this->storeAccessToken($shop, $response);
 
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
-        $shop = $this->addShopToShopOwnerAuth($shopOwnerAuth);
-        $this->createShippingProfile($shopOwnerAuth, ShippingProfileDTO::fromShop($shop->shop_id));
-        $this->createShopReturnPolicy($shopOwnerAuth);
+        $etsyShop = $this->addShopToShopOwnerShop($shop);
+        $this->createShippingProfile($shop, ShippingProfileDTO::fromShop($etsyShop->shop_id));
+        $this->createShopReturnPolicy($shop);
     }
 
-    public function refreshAccessToken(ShopOwnerAuth $shopOwnerAuth): void
+    public function refreshAccessToken(Shop $shop): void
     {
-        $client = new Client(client_id: $shopOwnerAuth->shop_oauth['client_id']);
-        $response = $client->refreshAccessToken($shopOwnerAuth->shop_oauth['refresh_token']);
+        $client = new Client(client_id: $shop->shop_oauth['client_id']);
+        $response = $client->refreshAccessToken($shop->shop_oauth['refresh_token']);
         //Log::info(print_r($response, true));
 
-        $this->storeAccessToken($shopOwnerAuth, $response);
+        $this->storeAccessToken($shop, $response);
     }
 
-    public function getShop(ShopOwnerAuth $shopOwnerAuth): Shop|null
+    public function getShop(Shop $shop): EtsyShop|null
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
-        return $this->addShopToShopOwnerAuth($shopOwnerAuth);
+        return $this->addShopToShopOwnerShop($shop);
     }
 
-    public function getShopReturnPolicy(ShopOwnerAuth $shopOwnerAuth, int $returnPolicyId): ReturnPolicy
+    public function getShopReturnPolicy(Shop $shop, int $returnPolicyId): ReturnPolicy
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return ReturnPolicy::get(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
             policy_id: $returnPolicyId,
         );
     }
 
-    public function getShopReturnPolicies(ShopOwnerAuth $shopOwnerAuth): Collection
+    public function getShopReturnPolicies(Shop $shop): Collection
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return ReturnPolicy::all(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
         );
     }
 
-    public function createShopReturnPolicy(ShopOwnerAuth $shopOwnerAuth): ReturnPolicy
+    public function createShopReturnPolicy(Shop $shop): ReturnPolicy
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         $shopReturnPolicy = ReturnPolicy::create(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
             data: [
                 'accepts_returns' => false,
                 'accepts_exchanges' => false,
@@ -141,14 +142,14 @@ class EtsyService
             ],
         );
 
-        $this->addReturnPolicyToShopOwnerAuth($shopOwnerAuth, $shopReturnPolicy);
+        $this->addReturnPolicyToShopOwnerShop($shop, $shopReturnPolicy);
 
         return $shopReturnPolicy;
     }
 
-    public function getTaxonomyAsSelect(ShopOwnerAuth $shopOwnerAuth): array
+    public function getTaxonomyAsSelect(Shop $shop): array
     {
-        $taxonomy = $this->getSellerTaxonomy($shopOwnerAuth);
+        $taxonomy = $this->getSellerTaxonomy($shop);
 
         $data = [];
         foreach ($taxonomy->data as $item) {
@@ -175,42 +176,42 @@ class EtsyService
         }
     }
 
-    public function getSellerTaxonomy(ShopOwnerAuth $shopOwnerAuth): Collection
+    public function getSellerTaxonomy(Shop $shop): Collection
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return SellerTaxonomy::all();
     }
 
-    public function getShippingProfile(ShopOwnerAuth $shopOwnerAuth)
+    public function getShippingProfile(Shop $shop)
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return ShippingProfile::get(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
-            profile_id: $shopOwnerAuth->shop_oauth['shipping_profile_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
+            profile_id: $shop->shop_oauth['shipping_profile_id'],
         );
     }
 
-    public function getShippingProfiles(ShopOwnerAuth $shopOwnerAuth): Collection
+    public function getShippingProfiles(Shop $shop): Collection
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return ShippingProfile::all(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
         );
     }
 
-    public function createShippingProfile(ShopOwnerAuth $shopOwnerAuth, ShippingProfileDTO $shippingProfileDTO): ShippingProfileDTO
+    public function createShippingProfile(Shop $shop, ShippingProfileDTO $shippingProfileDTO): ShippingProfileDTO
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         $shippingProfile = ShippingProfile::create(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
             data: [
                 'title' => $shippingProfileDTO->title,
                 'origin_country_iso' => $shippingProfileDTO->originCountryIso,
@@ -228,18 +229,18 @@ class EtsyService
 
         $shippingProfileDTO->shippingProfileId = $shippingProfile?->shipping_profile_id;
 
-        $this->addShippingProfileToShopOwnerAuth($shopOwnerAuth, $shippingProfile);
+        $this->addShippingProfileToShopOwnerShop($shop, $shippingProfile);
 
         return $shippingProfileDTO;
     }
 
-    public function createShippingProfileDestination(ShopOwnerAuth $shopOwnerAuth, ShippingProfileDestinationDTO $shippingProfileDestinationDTO): ShippingProfileDestinationDTO
+    public function createShippingProfileDestination(Shop $shop, ShippingProfileDestinationDTO $shippingProfileDestinationDTO): ShippingProfileDestinationDTO
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         $shippingDestination = ShippingDestination::create(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
             profile_id: $shippingProfileDestinationDTO->shippingProfileId,
             data: [
                 'primary_cost' => $shippingProfileDestinationDTO->primaryCost,
@@ -255,26 +256,26 @@ class EtsyService
         return $shippingProfileDestinationDTO;
     }
 
-    public function getListings(ShopOwnerAuth $shopOwnerAuth): Collection
+    public function getListings(Shop $shop): Collection
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
-        return Listing::allByShop(shop_id: $shopOwnerAuth->shop_oauth['shop_id']);
+        return Listing::allByShop(shop_id: $shop->shop_oauth['shop_id']);
     }
 
-    public function syncListings(ShopOwnerAuth $shopOwnerAuth, $models): \Illuminate\Support\Collection
+    public function syncListings(Shop $shop, $models): \Illuminate\Support\Collection
     {
         $listingDTOs = collect();
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         try {
             foreach ($models as $model) {
                 if ($model->shopListingModel) {
-                    $listingDTO =  $this->updateListing($shopOwnerAuth, $model);
+                    $listingDTO =  $this->updateListing($shop, $model);
                 } else {
-                    $listingDTO = $this->createListing($shopOwnerAuth, $model);
+                    $listingDTO = $this->createListing($shop, $model);
                 }
                 $listingDTOs->push($listingDTO);
             }
@@ -285,17 +286,17 @@ class EtsyService
         return $listingDTOs;
     }
 
-    public function syncListing(ShopOwnerAuth $shopOwnerAuth, Model $model): ?ListingDTO
+    public function syncListing(Shop $shop, Model $model): ?ListingDTO
     {
         try {
-            $this->refreshAccessToken($shopOwnerAuth);
-            $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+            $this->refreshAccessToken($shop);
+            $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
             if ($model->shopListingModel) {
-                return $this->updateListing($shopOwnerAuth, $model);
+                return $this->updateListing($shop, $model);
             }
 
-            return $this->createListing($shopOwnerAuth, $model);
+            return $this->createListing($shop, $model);
         } catch (Exception $exception) {
             Log::error($exception->getMessage() . PHP_EOL . $exception->getFile() . PHP_EOL . $exception->getTraceAsString());
 
@@ -303,71 +304,71 @@ class EtsyService
         }
     }
 
-    public function deleteListing(ShopOwnerAuth $shopOwnerAuth, int $listingId): bool
+    public function deleteListing(Shop $shop, int $listingId): bool
     {
         return Listing::delete(listing_id: $listingId);
     }
 
-    public function getShippingCarriers(ShopOwnerAuth $shopOwnerAuth): Collection
+    public function getShippingCarriers(Shop $shop): Collection
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return ShippingCarrier::all('NL');
     }
 
-    private function addShopToShopOwnerAuth(ShopOwnerAuth $shopOwnerAuth): Shop|null
+    private function addShopToShopOwnerShop(Shop $shop): EtsyShop|null
     {
-        $shop = User::getShop();
+        $etsyShop = User::getShop();
 
-        $shopOauth = $shopOwnerAuth->shop_oauth;
-        if ($shop && ! array_key_exists('shop_id', $shopOauth)) {
-            $shopOauth['shop_id'] = $shop->shop_id;
-            $shopOauth['shop_currency'] = $shop->currency_code;
+        $shopOauth = $shop->shop_oauth;
+        if ($etsyShop && ! array_key_exists('shop_id', $shopOauth)) {
+            $shopOauth['shop_id'] = $etsyShop->shop_id;
+            $shopOauth['shop_currency'] = $etsyShop->currency_code;
 
-            $shopOwnerAuth->shop_oauth = $shopOauth;
-            $shopOwnerAuth->save();
+            $shop->shop_oauth = $shopOauth;
+            $shop->save();
         }
 
-        return $shop;
+        return $etsyShop;
     }
 
-    private function addShippingProfileToShopOwnerAuth(ShopOwnerAuth $shopOwnerAuth, ?ShippingProfile $shippingProfile): void
+    private function addShippingProfileToShopOwnerShop(Shop $shop, ?ShippingProfile $shippingProfile): void
     {
-        $shopOauth = $shopOwnerAuth->shop_oauth;
+        $shopOauth = $shop->shop_oauth;
         if (! array_key_exists('shop_return_policy_id', $shopOauth) && $shippingProfile) {
             $shopOauth['shop_shipping_profile_id'] = $shippingProfile->shipping_profile_id;
 
-            $shopOwnerAuth->shop_oauth = $shopOauth;
-            $shopOwnerAuth->save();
+            $shop->shop_oauth = $shopOauth;
+            $shop->save();
         }
     }
 
-    private function addReturnPolicyToShopOwnerAuth(ShopOwnerAuth $shopOwnerAuth, ?ReturnPolicy $returnPolicy): void
+    private function addReturnPolicyToShopOwnerShop(Shop $shop, ?ReturnPolicy $returnPolicy): void
     {
-        $shopOauth = $shopOwnerAuth->shop_oauth;
+        $shopOauth = $shop->shop_oauth;
         if (! array_key_exists('shop_return_policy_id', $shopOauth) && $returnPolicy) {
             $shopOauth['shop_return_policy_id'] = $returnPolicy->return_policy_id;
 
-            $shopOwnerAuth->shop_oauth = $shopOauth;
-            $shopOwnerAuth->save();
+            $shop->shop_oauth = $shopOauth;
+            $shop->save();
         }
     }
 
-    private function createListing(ShopOwnerAuth $shopOwnerAuth, Model $model): ListingDTO
+    private function createListing(Shop $shop, Model $model): ListingDTO
     {
-        $listingDTO = ListingDTO::fromModel($shopOwnerAuth, $model);
-        $listing = $this->handleCreateDraftListing($shopOwnerAuth, $listingDTO);
+        $listingDTO = ListingDTO::fromModel($shop, $model);
+        $listing = $this->handleCreateDraftListing($shop, $listingDTO);
 
         if ($listing) {
             $listingDTO->listingId = $listing->listing_id;
             $listingDTO->state = $listing->state;
-            $shopListingModel = (new ShopListingModelService())->createShopListingModel($shopOwnerAuth, $model, $listingDTO);
+            $shopListingModel = (new ShopListingModelService())->createShopListingModel($shop, $model, $listingDTO);
 
-            $listingImageDTO = ListingImageDTO::fromModel($shopOwnerAuth->shop_oauth['shop_id'], $model);
+            $listingImageDTO = ListingImageDTO::fromModel($shop->shop_oauth['shop_id'], $model);
             if ($listingImageDTO->image !== '') {
                 $listingImageDTO->listingId = $listing->listing_id;
-                $listingImage = $this->uploadListingImage($shopOwnerAuth, $listingImageDTO);
+                $listingImage = $this->uploadListingImage($shop, $listingImageDTO);
 
                 if ($listingImage) {
                     $shopListingModel->shop_listing_image_id = $listingImage->listing_image_id;
@@ -380,7 +381,7 @@ class EtsyService
                 }
 
                 $this->handleUpdateListing(
-                    shopOwnerAuth: $shopOwnerAuth,
+                    shop: $shop,
                     listingDTO: $listingDTO,
                     data: [
                         'state' => EtsyStatesEnum::Active->value,
@@ -399,9 +400,9 @@ class EtsyService
         return $listingDTO;
     }
 
-    private function updateListing(ShopOwnerAuth $shopOwnerAuth, Model $model): ListingDTO
+    private function updateListing(Shop $shop, Model $model): ListingDTO
     {
-        $listingDTO = ListingDTO::fromModel($shopOwnerAuth, $model);
+        $listingDTO = ListingDTO::fromModel($shop, $model);
 
         $data = [
             'title' => $listingDTO->title,
@@ -418,7 +419,7 @@ class EtsyService
         ];
 
         $this->handleUpdateListing(
-            shopOwnerAuth: $shopOwnerAuth,
+            shop: $shop,
             listingDTO: $listingDTO,
             data: $data,
         );
@@ -428,10 +429,10 @@ class EtsyService
         return $listingDTO;
     }
 
-    private function handleCreateDraftListing(ShopOwnerAuth $shopOwnerAuth, ListingDTO $listingDTO)
+    private function handleCreateDraftListing(Shop $shop, ListingDTO $listingDTO)
     {
         return Listing::create(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
             data: [
                 'quantity' => $listingDTO->quantity,
                 'title' => $listingDTO->title,
@@ -458,19 +459,19 @@ class EtsyService
         return $listing->save($data);
     }
 
-    private function handleUpdateListing(ShopOwnerAuth $shopOwnerAuth, ListingDTO $listingDTO, array $data)
+    private function handleUpdateListing(Shop $shop, ListingDTO $listingDTO, array $data)
     {
         return Listing::update(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
             listing_id: $listingDTO->listingId,
             data: $data,
         );
     }
 
-    public function uploadListingImage(ShopOwnerAuth $shopOwnerAuth, ListingImageDTO $listingImageDTO): ?ListingImage
+    public function uploadListingImage(Shop $shop, ListingImageDTO $listingImageDTO): ?ListingImage
     {
         return ListingImage::create(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
             listing_id: $listingImageDTO->listingId,
             data: [
                 'image' => $listingImageDTO->image,
@@ -482,26 +483,47 @@ class EtsyService
         );
     }
 
-    public function getShopPaymentAccountLedgerEntries(ShopOwnerAuth $shopOwnerAuth)
+    public function getShopPaymentAccountLedgerEntries(Shop $shop)
     {
-        $this->refreshAccessToken($shopOwnerAuth);
-        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return LedgerEntry::all(
-            shop_id: $shopOwnerAuth->shop_oauth['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
         );
     }
 
-    private function storeAccessToken(ShopOwnerAuth $shopOwnerAuth, array $response): ShopOwnerAuth
+    public function getShopReceipts(Shop $shop)
     {
-        $shopOauth = $shopOwnerAuth->shop_oauth;
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+
+        return Receipt::all(
+            shop_id: $shop->shop_oauth['shop_id'],
+        );
+    }
+
+    public function getTransactions(Shop $shop, int $listingId)
+    {
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+
+        return Transaction::allByListing(
+            shop_id: $shop->shop_oauth['shop_id'],
+            listing_id: $listingId,
+        );
+    }
+
+    private function storeAccessToken(Shop $shop, array $response): Shop
+    {
+        $shopOauth = $shop->shop_oauth;
         $shopOauth['access_token'] = $response['access_token'];
         $shopOauth['refresh_token'] = $response['refresh_token'];
 
-        $shopOwnerAuth->shop_oauth = $shopOauth;
-        $shopOwnerAuth->active = true;
-        $shopOwnerAuth->save();
+        $shop->shop_oauth = $shopOauth;
+        $shop->active = true;
+        $shop->save();
 
-        return $shopOwnerAuth;
+        return $shop;
     }
 }

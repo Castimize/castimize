@@ -173,4 +173,19 @@ class EtsyApiController extends ApiController
 
         return response()->json($shopPaymentLedgerEntries->toJson());
     }
+
+    public function getShopReceipts(int $customerId): JsonResponse
+    {
+        $customer = Customer::find($customerId);
+        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
+        $shopReceipts = $this->etsyService->getShopReceipts($shopOwnerAuth);
+
+        $response = [];
+
+        foreach ($shopReceipts->data as $shopReceipt) {
+            $response[] = $shopReceipt->toArray();
+        }
+
+        return response()->json($response);
+    }
 }

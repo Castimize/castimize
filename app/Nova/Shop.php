@@ -16,16 +16,16 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 
-class ShopOwnerAuth extends Resource
+class Shop extends Resource
 {
     use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\ShopOwnerAuth>
+     * @var class-string<\App\Models\Shop>
      */
-    public static $model = \App\Models\ShopOwnerAuth::class;
+    public static $model = \App\Models\Shop::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
