@@ -24,8 +24,8 @@ class EtsyApiController extends ApiController
     public function getTaxonomy(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $taxonomy = $this->etsyService->getTaxonomyAsSelect($shopOwnerAuth);
+        $shop = $customer->shopOwner->shops->first();
+        $taxonomy = $this->etsyService->getTaxonomyAsSelect($shop);
 
 //        $data = [];
 //        foreach ($taxonomy->data as $item) {
@@ -38,8 +38,8 @@ class EtsyApiController extends ApiController
     public function getShop(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $shop = $this->etsyService->getShop($shopOwnerAuth);
+        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->etsyService->getShop($shop);
 
         return response()->json($shop->toArray());
     }
@@ -47,8 +47,8 @@ class EtsyApiController extends ApiController
     public function getShopReturnPolicy(int $customerId, int $returnPolicyId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $shopReturnPolicy = $this->etsyService->getShopReturnPolicy($shopOwnerAuth, $returnPolicyId);
+        $shop = $customer->shopOwner->shops->first();
+        $shopReturnPolicy = $this->etsyService->getShopReturnPolicy($shop, $returnPolicyId);
 
         return response()->json($shopReturnPolicy->toArray());
     }
@@ -56,8 +56,8 @@ class EtsyApiController extends ApiController
     public function getShopReturnPolicies(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $shopReturnPolicies = $this->etsyService->getShopReturnPolicies($shopOwnerAuth);
+        $shop = $customer->shopOwner->shops->first();
+        $shopReturnPolicies = $this->etsyService->getShopReturnPolicies($shop);
 
         return response()->json($shopReturnPolicies->paginate(100));
     }
@@ -65,8 +65,8 @@ class EtsyApiController extends ApiController
     public function createShopReturnPolicy(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $shopReturnPolicy = $this->etsyService->createShopReturnPolicy($shopOwnerAuth);
+        $shop = $customer->shopOwner->shops->first();
+        $shopReturnPolicy = $this->etsyService->createShopReturnPolicy($shop);
 
         return response()->json($shopReturnPolicy->toArray());
     }
@@ -74,8 +74,8 @@ class EtsyApiController extends ApiController
     public function getListings(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $listings = $this->etsyService->getListings($shopOwnerAuth);
+        $shop = $customer->shopOwner->shops->first();
+        $listings = $this->etsyService->getListings($shop);
 
         return response()->json($listings->toJson());
     }
@@ -83,16 +83,16 @@ class EtsyApiController extends ApiController
     public function syncListings(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-//        $this->etsyService->refreshAccessToken($shopOwnerAuth);
-//        $etsy = new Etsy($shopOwnerAuth->shop_oauth['client_id'], $shopOwnerAuth->shop_oauth['access_token']);
+        $shop = $customer->shopOwner->shops->first();
+//        $this->etsyService->refreshAccessToken($shop);
+//        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
         $models = Model::whereDoesntHave('shopListingModel')->where('customer_id', $customerId)->get();
 
-//        $listingImageDTO = ListingImageDTO::fromModel($shopOwnerAuth->shop_oauth['shop_id'], $models->first());
+//        $listingImageDTO = ListingImageDTO::fromModel($shop->shop_oauth['shop_id'], $models->first());
 //        if ($listingImageDTO->image !== '') {
 //            $listingImageDTO->listingId = 1882130223;
 //            try {
-//                $listingImage = $this->etsyService->uploadListingImage($shopOwnerAuth, $listingImageDTO);
+//                $listingImage = $this->etsyService->uploadListingImage($shop, $listingImageDTO);
 //            } catch (\Exception $exception) {
 //                dd($exception->getMessage());
 //            }
@@ -100,7 +100,7 @@ class EtsyApiController extends ApiController
 //        }
 
 
-        $listings = $this->etsyService->syncListings($shopOwnerAuth, $models);
+        $listings = $this->etsyService->syncListings($shop, $models);
 
         return response()->json(['no']);
 //        return response()->json($listings->toArray());
@@ -109,8 +109,8 @@ class EtsyApiController extends ApiController
     public function deleteListing(int $customerId, int $listingId)
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $deleted = $this->etsyService->syncListings($shopOwnerAuth, $listingId);
+        $shop = $customer->shopOwner->shops->first();
+        $deleted = $this->etsyService->syncListings($shop, $listingId);
 
         return response()->json(['deleted' => $deleted]);
     }
@@ -118,8 +118,8 @@ class EtsyApiController extends ApiController
     public function getShippingCarriers(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $shippingCarriers = $this->etsyService->getShippingCarriers($shopOwnerAuth);
+        $shop = $customer->shopOwner->shops->first();
+        $shippingCarriers = $this->etsyService->getShippingCarriers($shop);
 
 
         return response()->json($shippingCarriers->toJson());
@@ -128,8 +128,8 @@ class EtsyApiController extends ApiController
     public function getShippingProfile(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $shippingProfiles = $this->etsyService->getShippingProfiles($shopOwnerAuth);
+        $shop = $customer->shopOwner->shops->first();
+        $shippingProfiles = $this->etsyService->getShippingProfiles($shop);
 
 
         return response()->json($shippingProfiles->toJson());
@@ -139,18 +139,18 @@ class EtsyApiController extends ApiController
     {
         $countries = Country::with(['logisticsZone.shippingFee'])->get();
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $shopId = $shopOwnerAuth->shop_oauth['shop_id'];
+        $shop = $customer->shopOwner->shops->first();
+        $shopId = $shop->shop_oauth['shop_id'];
 
         $shippingProfileDTO = $this->etsyService->createShippingProfile(
-            shopOwnerAuth: $shopOwnerAuth,
+            shop: $shop,
             shippingProfileDTO: ShippingProfileDTO::fromShop($shopId)
         );
 
         foreach ($countries as $country) {
             if ($country->has('logisticsZone')) {
                 $shippingProfileDestinationDTO = $this->etsyService->createShippingProfileDestination(
-                    shopOwnerAuth: $shopOwnerAuth,
+                    shop: $shop,
                     shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
                         shopId: $shopId,
                         country: $country,
@@ -167,8 +167,8 @@ class EtsyApiController extends ApiController
     public function getShopPaymentLedgerEntries(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $shopPaymentLedgerEntries = $this->etsyService->getShopPaymentAccountLedgerEntries($shopOwnerAuth);
+        $shop = $customer->shopOwner->shops->first();
+        $shopPaymentLedgerEntries = $this->etsyService->getShopPaymentAccountLedgerEntries($shop);
 
 
         return response()->json($shopPaymentLedgerEntries->toJson());
@@ -177,8 +177,8 @@ class EtsyApiController extends ApiController
     public function getShopReceipts(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
-        $shopOwnerAuth = $customer->shopOwner->shopOwnerAuths->first();
-        $shopReceipts = $this->etsyService->getShopReceipts($shopOwnerAuth);
+        $shop = $customer->shopOwner->shops->first();
+        $shopReceipts = $this->etsyService->getShopReceipts($shop);
 
         $response = [];
 
