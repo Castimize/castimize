@@ -11,11 +11,11 @@ use App\Models\Shop;
 
 class ShopListingModelService
 {
-    public function createShopListingModel(Shop $shopOwnerAuth, Model $model, ListingDTO $listingDTO): ShopListingModel
+    public function createShopListingModel(Shop $shop, Model $model, ListingDTO $listingDTO): ShopListingModel
     {
         return $model->shopListingModel()->create([
-            'shop_owner_id' => $shopOwnerAuth->shop_owner_id,
-            'shop_owner_auth_id' => $shopOwnerAuth->id,
+            'shop_owner_id' => $shop->shop_owner_id,
+            'shop_id' => $shop->id,
             'taxonomy_id' => $listingDTO->taxonomyId,
             'shop_listing_id' => $listingDTO->listingId,
             'state' => $listingDTO->state,
@@ -27,6 +27,8 @@ class ShopListingModelService
         $shopListingModel->update([
             'taxonomy_id' => $listingDTO->taxonomyId,
             'state' => $listingDTO->state,
-            ]);
+        ]);
+
+        return $shopListingModel;
     }
 }

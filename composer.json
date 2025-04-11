@@ -62,6 +62,7 @@
         "spatie/laravel-permission": "^6.9",
         "stechstudio/laravel-zipstream": "^5.1",
         "stripe/stripe-php": "^15.8",
+        "theiconic/name-parser": "^1.2",
         "titasgailius/search-relations": "^2.0",
         "tomodo531/filterable-filters": "^2.0",
         "venturecraft/revisionable": "^1.41",

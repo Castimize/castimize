@@ -42,9 +42,9 @@ class ListingDTO
     ) {
     }
 
-    public static function fromModel(Shop $shopOwnerAuth, Model $model): self
+    public static function fromModel(Shop $shop, Model $model): self
     {
-        $shopOauth = $shopOwnerAuth->shop_oauth;
+        $shopOauth = $shop->shop_oauth;
         $customsItemSettings = new CustomsItemSettings();
         $parcelSettings = new ParcelSettings();
 

@@ -2,7 +2,7 @@
 
 namespace App\Enums\Etsy;
 
-enum EtsyStatesEnum: string
+enum EtsyListingStatesEnum: string
 {
     case Active = 'active';
     case Inactive = 'inactive';

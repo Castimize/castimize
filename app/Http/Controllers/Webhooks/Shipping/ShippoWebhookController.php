@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Webhooks\Shipping;
 
+use App\Enums\Woocommerce\WcOrderStatesEnum;
 use App\Http\Controllers\Webhooks\WebhookController;
 use App\Models\CustomerShipment;
 use App\Models\ManufacturerShipment;
@@ -146,7 +147,7 @@ class ShippoWebhookController extends WebhookController
                     // ToDo: If all order queues completed, update order in woocommerce to customer
                     foreach ($orders as $order) {
                         if ($order->allOrderQueuesEndStatus()) {
-                            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, 'completed');
+                            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Completed->value);
                         }
                     }
                 }

@@ -2,8 +2,14 @@
 
 namespace App\DTO\Order;
 
+use App\DTO\Shops\Etsy\ListingDTO;
+use App\Enums\Woocommerce\WcOrderStatesEnum;
+use App\Models\Shop;
+use App\Services\Admin\CalculatePricesService;
 use Carbon\Carbon;
+use Etsy\Resources\Receipt;
 use Illuminate\Support\Collection;
+use TheIconic\NameParser\Parser;
 
 readonly class  OrderDTO
 {
@@ -90,7 +96,7 @@ readonly class  OrderDTO
             }
         }
 
-        $isPaid = $wpOrder['date_paid'] !== null;
+        $isPaid = ! empty($wpOrder['date_paid']);
         $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $wpOrder['date_created_gmt']), 'GMT')?->setTimezone(env('APP_TIMEZONE'));
         $updatedAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $wpOrder['date_modified_gmt']), 'GMT')?->setTimezone(env('APP_TIMEZONE'));
 
@@ -150,11 +156,158 @@ readonly class  OrderDTO
             metaData: $wpOrder['meta_data'],
             comments: $wpOrder['customer_note'],
             promoCode: null,
-            isPaid: $isPaid !== null,
+            isPaid: (bool) $wpOrder['date_paid'],
             paidAt: $wpOrder['date_paid'] ? Carbon::parse($wpOrder['date_paid']) : null,
             createdAt: $createdAt,
             updatedAt: $updatedAt,
-            uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDTO::fromWpRequest($lineItem)),
+            uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDTO::fromWpRequest($lineItem, $wpOrder['shipping']->country)),
+        );
+    }
+
+    public static function fromEtsyReceipt(Shop $shop, Receipt $receipt, array $lines): OrderDTO
+    {
+        $parser = new Parser();
+
+        $customer = $shop->shopOwner->customer;
+        $billingAddress = $customer->addresses()->wherePivot('default_billing', 1)->first();
+
+        $name = $parser->parse($receipt->name);
+        $billingVatNumber = $customer->vat_number;
+        $billingEmail = $receipt->buyer_email ?? $customer->email;
+        $shippingEmail = $receipt->buyer_email ?? $receipt->seller_email;
+
+        $isPaid = false;
+        $createdAt = Carbon::createFromTimestamp($receipt->created_timestamp);
+        $updatedAt = Carbon::createFromTimestamp($receipt->updated_timestamp);
+
+        $taxPercentage = null;
+        $vatExempt = 'no';
+        $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
+            countryIso: $receipt->country_iso,
+            uploads: collect($lines)->map(fn ($line) => CalculateShippingFeeUploadDTO::fromEtsyLine($line)),
+        )->calculated_total;
+
+        $shippingFeeTax = 0;
+        $totalItems = 0;
+        $totalItemsTax = 0;
+        foreach ($lines as $line) {
+            $listingDTO = ListingDTO::fromModel($shop, $line['shop_listing_model']->model);
+            $totalItems += $listingDTO->price * $line['transaction']->quantity;
+        }
+        if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
+            $taxPercentage = 21;
+            $vatExempt = 'yes';
+            $shippingFeeTax = ($taxPercentage / 100) * $shippingFee;
+            $totalItemsTax = ($taxPercentage / 100) * $totalItems;
+        }
+
+        $metaData = [
+            [
+                'key' => '_shipping_email',
+                'value' => $shippingEmail,
+            ],
+            [
+                'key' => '_wc_order_attribution_utm_source',
+                'value' => 'Etsy',
+            ],
+            [
+                'key'=> '_wc_stripe_mode',
+                'value'=> 'live',
+            ],
+            [
+                'key' => 'is_vat_exempt',
+                'value' => $vatExempt,
+            ],
+            [
+                'key'=> 'wcpdf_order_locale',
+                'value'=> 'en_US',
+            ],
+        ];
+
+        if ($billingVatNumber) {
+            $metaData[] = [
+                'key' => '_billing_eu_vat_number',
+                'value' => $billingVatNumber,
+            ];
+            $metaData[] = [
+                'key' => 'billing_eu_vat_number_details',
+                'value' => [
+                    'vat_number' => [
+                        'data' => $billingVatNumber ? substr($billingVatNumber, 0, 2) : null,
+                        'label' => 'VAT Number',
+                    ],
+                    'country_code' => [
+                        'data' => $billingVatNumber ? substr($billingVatNumber, 2) : null,
+                        'label' => 'Country Code',
+                    ],
+                    'business_name' => [
+                        'data' => $customer->company,
+                        'label' => 'Business Name',
+                    ],
+                    'business_address' => [
+                        'data' => $billingAddress->full_address_with_new_lines,
+                        'label' => 'Business Address',
+                    ],
+                ],
+            ];
+        }
+
+        return new self(
+            customerId: $customer->wp_id,
+            source: 'etsy',
+            wpId: null,
+            orderNumber: $receipt->receipt_id,
+            orderKey: $receipt->receipt_id,
+            status: $receipt->status ?? WcOrderStatesEnum::Pending->value,
+            firstName: $name->getFirstname(),
+            lastName: $name->getLastname(),
+            email: $billingEmail,
+            billingFirstName: $customer->first_name,
+            billingLastName: $customer->last_name,
+            billingCompany: $customer->company,
+            billingPhoneNumber: $customer->phone,
+            billingEmail: $customer->email,
+            billingAddressLine1: $billingAddress->address_line1,
+            billingAddressLine2: $billingAddress->address_line2,
+            billingPostalCode: $billingAddress->postal_code,
+            billingCity: $billingAddress->city->name,
+            billingState: $billingAddress->state->name,
+            billingCountry: $billingAddress->country->alpha2,
+            billingVatNumber: $billingVatNumber,
+            shippingFirstName: $name->getFirstname(),
+            shippingLastName: $name->getLastname(),
+            shippingCompany: null,
+            shippingPhoneNumber: $customer->phone,
+            shippingEmail: $shippingEmail,
+            shippingAddressLine1: $receipt->first_line,
+            shippingAddressLine2: $receipt->second_line,
+            shippingPostalCode: $receipt->zip,
+            shippingCity: ucfirst($receipt->city),
+            shippingState: $receipt->state,
+            shippingCountry: $receipt->country_iso,
+            shippingFee: $shippingFee / 100,
+            shippingFeeTax: $shippingFeeTax / 100,
+            discountFee: null,
+            discountFeeTax: null,
+            total: ($totalItems + $shippingFee) / 100,
+            totalTax: ($totalItemsTax + $shippingFeeTax) / 100,
+            totalRefund: null,
+            totalRefundTax: null,
+            taxPercentage: $taxPercentage,
+            currencyCode: $receipt->grandtotal->currency_code ?? 'USD',
+            paymentMethod: $receipt->payment_method,
+            paymentIssuer: $receipt->payment_method,
+            paymentIntentId: null,
+            customerIpAddress: null,
+            customerUserAgent: 'Etsy API',
+            metaData: $metaData,
+            comments: 'Etsy receipt: ' . $receipt->receipt_id . '\n' . $receipt->message_from_buyer,
+            promoCode: null,
+            isPaid: $isPaid,
+            paidAt: null,
+            createdAt: $createdAt,
+            updatedAt: $updatedAt,
+            uploads: collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage)),
         );
     }
 }

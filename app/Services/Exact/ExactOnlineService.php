@@ -2,6 +2,7 @@
 
 namespace App\Services\Exact;
 
+use App\Enums\Admin\PaymentIssuersEnum;
 use App\Models\Country;
 use App\Models\CurrencyHistoryRate;
 use App\Models\Customer;
@@ -306,10 +307,10 @@ class ExactOnlineService
     private function findGlAccountForPaymentMethod(string $paymentIssuer): ?string
     {
         Log::info($paymentIssuer);
-        if (Str::startsWith($paymentIssuer, 'stripe')) {
+        if (in_array($paymentIssuer, PaymentIssuersEnum::getStripeMethods(), true)) {
             return self::GL_1103;
         }
-        if ($paymentIssuer === 'ppcp') {
+        if ($paymentIssuer === PaymentIssuersEnum::Paypal->value) {
             return self::GL_1104;
         }
         return null;

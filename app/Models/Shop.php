@@ -56,6 +56,11 @@ class Shop extends Model
         return $this->belongsTo(ShopOwner::class);
     }
 
+    public function shopOrders(): HasMany
+    {
+        return $this->hasMany(ShopOrder::class);
+    }
+
     public function shopListingModels(): HasMany
     {
         return $this->hasMany(ShopListingModel::class);

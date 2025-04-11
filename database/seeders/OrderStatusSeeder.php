@@ -64,8 +64,8 @@ class OrderStatusSeeder extends Seeder
         ]);
 
         OrderStatus::create([
-            'status' => 'Cancelled',
-            'slug' => 'cancelled',
+            'status' => 'Canceled',
+            'slug' => 'canceled',
             'end_status' => true,
         ]);
 

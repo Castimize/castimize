@@ -2,6 +2,7 @@
 
 namespace App\Nova\Actions;
 
+use App\Enums\Admin\OrderStatusesEnum;
 use App\Models\OrderQueue;
 use App\Models\ReprintCulprit;
 use App\Models\ReprintReason;
@@ -83,7 +84,7 @@ class PoReprintByManufacturerAction extends Action
                 'manufacturer_costs' => $model->manufacturer_costs,
                 'currency_code' => $model->currency_code,
             ]);
-            $orderQueuesService->setStatus($newOrderQueue, 'in-queue');
+            $orderQueuesService->setStatus($newOrderQueue, OrderStatusesEnum::InQueue->value);
         }
 
         return ActionResponse::message(__('Successfully created reprint for selected PO\'s.'));

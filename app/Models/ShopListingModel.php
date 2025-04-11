@@ -24,7 +24,7 @@ class ShopListingModel extends Model
      */
     protected $fillable = [
         'shop_owner_id',
-        'shop_owner_auth_id',
+        'shop_id',
         'model_id',
         'shop_listing_id',
         'shop_listing_image_id',

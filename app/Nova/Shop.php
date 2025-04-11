@@ -86,6 +86,8 @@ class Shop extends Resource
 
             HasMany::make(__('Listings'), 'shopListingModels', ShopListingModel::class),
 
+            HasMany::make(__('Orders'), 'shopOrders', ShopOrder::class),
+
             new Panel(__('History'), $this->commonMetaData()),
         ];
     }

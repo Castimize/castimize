@@ -2,6 +2,9 @@
 
 namespace App\DTO\Model;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
 readonly class  ModelDTO
 {
     public function __construct(
@@ -15,6 +18,7 @@ readonly class  ModelDTO
         public ?string $modelName,
         public string $fileName,
         public ?string $thumbName,
+        public bool $uploadedThumb,
         public float $modelVolumeCc,
         public float $modelXLength,
         public float $modelYLength,
@@ -33,7 +37,7 @@ readonly class  ModelDTO
 
     }
 
-    public static function fromWpRequest($request, int $customerId)
+    public static function fromWpRequest(Request $request, int $customerId): ModelDTO
     {
         $categories = null;
         if ($request->has('categories')) {
@@ -45,15 +49,26 @@ readonly class  ModelDTO
             }
         }
 
-        //printer_id.material_id.coating_id.scale.unit
-        $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
-            str_replace('_resized', '', $request->file_name),
-            $request->printer_id ?? 3,
-            $request->wp_id,
-            $request->coating_id ?? null,
-            $request->scale ?? 1,
-            'mm',
-        );
+        if ($request->hasFile('thumb_image')) {
+            $uploadedThumb = true;
+            $file = $request->file('thumb_image');
+            $thumbFileName = $file->getClientOriginalName();
+            $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
+            $thumbFileExtension = $file->getClientOriginalExtension();
+            $thumbName = time().'_'.str_replace(' ','_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
+            Storage::disk('r2')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
+        } else {
+            $uploadedThumb = false;
+            //printer_id.material_id.coating_id.scale.unit
+            $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
+                str_replace('_resized', '', $request->file_name),
+                $request->printer_id ?? 3,
+                $request->wp_id,
+                $request->coating_id ?? null,
+                1,
+                'mm',
+            );
+        }
 
         return new self(
             wpId: (string) $request->wp_id,
@@ -66,6 +81,7 @@ readonly class  ModelDTO
             modelName: $request->model_name ?? null,
             fileName: $request->file_name,
             thumbName: $thumbName,
+            uploadedThumb: $uploadedThumb,
             modelVolumeCc: $request->material_volume,
             modelXLength: $request->x_dim,
             modelYLength: $request->y_dim,

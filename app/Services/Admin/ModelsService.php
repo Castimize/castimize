@@ -135,7 +135,7 @@ class ModelsService
                 Storage::disk('r2')->put($withoutResizedFileName, file_get_contents($fileUrl));
             }
             // Check file thumb exists on local storage of site and not on R2
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileNameThumb)) {
+            if (! $modelDTO->uploadedThumb && !str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileNameThumb)) {
                 Storage::disk('r2')->put($fileNameThumb, file_get_contents($fileThumb));
             }
         } catch (Exception $e) {

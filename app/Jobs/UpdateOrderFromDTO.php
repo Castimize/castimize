@@ -35,7 +35,7 @@ class UpdateOrderFromDTO implements ShouldQueue
     {
         $order = Order::where('wp_id', $this->orderDto->wpId)->first();
 
-        if ($order !== null) {
+        if ($order === null) {
             return;
         }
 

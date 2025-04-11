@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\DTO\Order\OrderDTO;
 use App\DTO\Order\UploadDTO;
+use App\Enums\Woocommerce\WcOrderStatesEnum;
 use App\Jobs\CreateInvoicesFromOrder;
 use App\Models\Country;
 use App\Models\Currency;
@@ -11,6 +12,7 @@ use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Model;
 use App\Models\Order;
+use App\Models\Upload;
 use App\Models\User;
 use App\Services\Woocommerce\WoocommerceApiService;
 use Carbon\Carbon;
@@ -273,9 +275,17 @@ class OrdersService
         $order->update([
             'is_paid' => $orderDto->isPaid,
             'paid_at' => $orderDto->paidAt,
+            'total' => $orderDto->total,
+            'total_tax' => $orderDto->totalTax,
+            'discount_fee' => $orderDto->discountFee,
+            'discount_fee_tax' => $orderDto->discountFeeTax,
+            'shipping_fee' => $orderDto->shippingFee,
+            'shipping_fee_tax' => $orderDto->shippingFeeTax,
             'updated_by' => $systemUser->id,
             'updated_at' => now(),
         ]);
+
+        $this->updateUploads($orderDto->uploads);
 
         if ($orderDto->isPaid && $order->orderQueues()->count() === 0) {
             foreach ($order->uploads()->get() as $upload) {
@@ -329,7 +339,7 @@ class OrdersService
         $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
 
         if ($cancelOrder) {
-            $this->woocommerceApiService->updateOrderStatus($order->wp_id, 'cancelled');
+            $this->woocommerceApiService->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Cancelled->value);
         }
 
         return $refundOrder;
@@ -382,7 +392,7 @@ class OrdersService
         $refundOrder = (new WoocommerceApiService())->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
 
         if ($cancelOrder) {
-            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, 'cancelled');
+            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Cancelled->value);
         }
 
         return $refundOrder;
@@ -473,6 +483,23 @@ class OrdersService
         }
 
         return $biggestCustomerLeadTime;
+    }
+
+    private function updateUploads($uploads): void
+    {
+        /** @var UploadDTO $uploadDto */
+        foreach ($uploads as $uploadDto) {
+            $upload = Upload::where('wp_id', $uploadDto->wpId)->first();
+            if ($upload) {
+                $upload->update([
+                    'quantity' => $uploadDto->quantity,
+                    'subtotal' => $uploadDto->subtotal,
+                    'subtotal_tax' => $uploadDto->subtotalTax,
+                    'total' => $uploadDto->total,
+                    'total_tax' => $uploadDto->totalTax,
+                ]);
+            }
+        }
     }
 
     private function storeOrderLineItems($wpOrder, Order $order, Customer $customer, Country $country, Currency $currency, bool $isPaid)

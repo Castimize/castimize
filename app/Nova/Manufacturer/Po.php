@@ -2,6 +2,7 @@
 
 namespace App\Nova\Manufacturer;
 
+use App\Enums\Admin\OrderStatusesEnum;
 use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Filters\ContractDateDaterangepickerFilter;
 use App\Nova\Filters\EntryDateDaterangepickerFilter;
@@ -168,11 +169,11 @@ class Po extends Resource
             NovaBackButton::make(__('Back'))
                 ->onlyOnDetail(),
             PoStatusCard::make()->statuses([
-                'in-queue' => __('In queue'),
-                'in-production' => __('In production'),
-                'available-for-shipping' => __('Available for shipping'),
-                'in-transit-to-dc' => __('In transit to dc'),
-                'at-dc' => __('Completed'),
+                OrderStatusesEnum::InQueue->value => __('In queue'),
+                OrderStatusesEnum::InProduction->value => __('In production'),
+                OrderStatusesEnum::AvailableForShipping->value => __('Available for shipping'),
+                OrderStatusesEnum::InTransitToDc->value => __('In transit to dc'),
+                OrderStatusesEnum::AtDc->value => __('Completed'),
             ])->refreshIntervalSeconds(),
         ];
     }

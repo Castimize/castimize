@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTO\Order\OrderDTO;
 use App\DTO\Shops\Etsy\ListingImageDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDestinationDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDTO;
+use App\Enums\Shops\ShopOwnerShopsEnum;
 use App\Models\Country;
 use App\Models\Customer;
 use App\Models\Model;
+use App\Models\Shop;
 use App\Services\Etsy\EtsyService;
+use App\Services\Woocommerce\WoocommerceApiService;
 use Etsy\Etsy;
 use Illuminate\Http\JsonResponse;
 
@@ -176,15 +180,31 @@ class EtsyApiController extends ApiController
 
     public function getShopReceipts(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
-        $shopReceipts = $this->etsyService->getShopReceipts($shop);
+        $etsyService = app(EtsyService::class);
+        $woocommerceApiService = app(WoocommerceApiService::class);
 
-        $response = [];
+        $shops = Shop::with(['shopOwner.customer'])->where('active', true)->where('shop', ShopOwnerShopsEnum::Etsy->value)->get();
 
-        foreach ($shopReceipts->data as $shopReceipt) {
-            $response[] = $shopReceipt->toArray();
+        foreach ($shops as $shop) {
+            $receipts = $etsyService->getShopReceipts($shop);
+            foreach ($receipts->data as $receipt) {
+                $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
+                if (count($lines) > 0) {
+                    $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
+                    dd($orderDTO);
+                    $woocommerceApiService->createOrder($orderDTO);
+                }
+            }
         }
+//        $customer = Customer::find($customerId);
+//        $shop = $customer->shopOwner->shops->first();
+//        $shopReceipts = $this->etsyService->getShopReceipts($shop, ['min_created' => now()->subDays(2)->timestamp]);
+//
+//        $response = [];
+//
+//        foreach ($shopReceipts->data as $shopReceipt) {
+//            $response[] = $shopReceipt->toArray();
+//        }
 
         return response()->json($response);
     }

@@ -8,9 +8,10 @@ use App\DTO\Shops\Etsy\ListingDTO;
 use App\DTO\Shops\Etsy\ListingImageDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDestinationDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDTO;
-use App\Enums\Etsy\EtsyStatesEnum;
+use App\Enums\Etsy\EtsyListingStatesEnum;
 use App\Models\Model;
 use App\Models\Shop;
+use App\Models\ShopListingModel;
 use App\Services\Admin\ShopListingModelService;
 use App\Services\Etsy\Resources\Listing;
 use Etsy\Collection;
@@ -384,14 +385,14 @@ class EtsyService
                     shop: $shop,
                     listingDTO: $listingDTO,
                     data: [
-                        'state' => EtsyStatesEnum::Active->value,
+                        'state' => EtsyListingStatesEnum::Active->value,
                     ],
                 );
 
-                $shopListingModel->state = EtsyStatesEnum::Active->value;
+                $shopListingModel->state = EtsyListingStatesEnum::Active->value;
                 $shopListingModel->save();
 
-                $listingDTO->state = EtsyStatesEnum::Active->value;
+                $listingDTO->state = EtsyListingStatesEnum::Active->value;
             }
         } else {
             throw new Exception('Listing not created: ' . print_r($listingDTO, true));
@@ -493,14 +494,31 @@ class EtsyService
         );
     }
 
-    public function getShopReceipts(Shop $shop)
+    public function getShopReceipts(Shop $shop, array $params = [])
     {
         $this->refreshAccessToken($shop);
         $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return Receipt::all(
             shop_id: $shop->shop_oauth['shop_id'],
+            params: $params,
         );
+    }
+
+    public function getShopListingsFromReceipt(Shop $shop, Receipt $receipt): array
+    {
+        $lines = [];
+        foreach ($receipt->transactions->data as $transaction) {
+            $shopListingModel = ShopListingModel::with('model')->where('shop_id', $shop->id)->where('shop_listing_id', $transaction->listing_id)->first();
+            if ($shopListingModel) {
+                $lines[] = [
+                    'transaction' => $transaction,
+                    'shop_listing_model' => $shopListingModel,
+                ];
+            }
+        }
+
+        return $lines;
     }
 
     public function getTransactions(Shop $shop, int $listingId)

@@ -2,7 +2,10 @@
 
 namespace App\DTO\Order;
 
+use App\Models\Country;
 use App\Models\Material;
+use App\Models\Shop;
+use Etsy\Resources\Receipt;
 
 readonly class  UploadDTO
 {
@@ -34,8 +37,9 @@ readonly class  UploadDTO
 
     }
 
-    public static function fromWpRequest($lineItem)
+    public static function fromWpRequest($lineItem, string $countryIso): UploadDTO
     {
+        $country = Country::where('alpha2', $countryIso)->first();
         $name = null;
         $fileName = null;
         $material = null;
@@ -88,6 +92,92 @@ readonly class  UploadDTO
             total: $lineItem->total,
             totalTax: $lineItem->total_tax,
             metaData: $lineItem->meta_data,
+            customerLeadTime: $customerLeadTime,
+        );
+    }
+
+    public static function fromEtsyReceipt(Shop $shop, Receipt $receipt, $line, ?int $taxPercentage = null): UploadDTO
+    {
+        $country = Country::where('alpha2', $receipt->country_iso)->first();
+        $model = $line['shop_listing_model']->model;
+        $material = $model->material;
+
+        $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
+
+        $total = $line['transaction']->price->amount;
+        $totalTax = 0;
+        if ($taxPercentage) {
+            $totalTax = ($taxPercentage / 100) * $total;
+        }
+        $metaDataWeight = $model->model_volume_cc * $material->density;
+        $metaDataScale = sprintf('&times;%s (%s &times; %s &times; %s cm)', $model->model_scale, round($model->model_x_length, 2), round($model->model_y_length, 2), round($model->model_x_length, 2));
+
+        $metaData = [
+            [
+                'key' => 'pa_p3d_printer',
+                'value' => '3. Default',
+            ],
+            [
+                'key' => 'pa_p3d_filename',
+                'value' => $model->name,
+            ],
+            [
+                'key' => 'pa_p3d_material',
+                'value' => sprintf('%s. %s', $material->wp_id, $material->name),
+            ],
+            [
+                'key' => 'pa_p3d_model',
+                'value' => $model->file_name,
+            ],
+            [
+                'key' => 'pa_p3d_unit',
+                'value' => 'mm',
+            ],
+            [
+                'key' => 'pa_p3d_scale',
+                'value' => $metaDataScale,
+            ],
+            [
+                'key' => '_p3d_stats_material_volume',
+                'value' => round($model->model_volume_cc, 2),
+            ],
+            [
+                'key' => '_p3d_stats_print_time',
+                'value' => '0',
+            ],
+            [
+                'key' => '_p3d_stats_surface_area',
+                'value' => round($model->model_surface_area_cm2, 2),
+            ],
+            [
+                'key' => '_p3d_stats_weight',
+                'value' => round($metaDataWeight, 2),
+            ],
+            [
+                'key' => '_p3d_stats_box_volume',
+                'value' => round($model->model_box_volume, 2),
+            ],
+        ];
+
+        return new self(
+            wpId: $model->wp_id ?? null,
+            materialId: $material?->id,
+            materialName: $material?->name,
+            name: $model->name,
+            fileName: $model->file_name,
+            modelVolumeCc: $model->model_volume_cc,
+            modelXLength: $model->model_x_length,
+            modelYLength: $model->model_y_length,
+            modelZLength: $model->model_z_length,
+            modelBoxVolume: $model->model_box_volume,
+            surfaceArea: $model->model_surface_area_cm2,
+            modelParts: 1,
+            quantity: $line['transaction']->quantity ?? 1,
+            subtotal: $total / 100,
+            subtotalTax: $totalTax / 100,
+            total: $total / 100,
+            totalTax: $totalTax / 100,
+            metaData: $metaData,
             customerLeadTime: $customerLeadTime,
         );
     }
