@@ -15,7 +15,7 @@ use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class SyncModelsToEtsy extends Action
+class EtsySyncModelsAction extends Action
 {
     use InteractsWithQueue, Queueable;
 

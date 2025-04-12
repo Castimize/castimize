@@ -3,7 +3,7 @@
 namespace App\Nova;
 
 use App\Nova\Actions\EtsyAuthorizationUrlAction;
-use App\Nova\Actions\SyncModelsToEtsy;
+use App\Nova\Actions\EtsySyncModelsAction;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
@@ -135,7 +135,7 @@ class Shop extends Resource
     {
         return [
             EtsyAuthorizationUrlAction::make(),
-            SyncModelsToEtsy::make(),
+            EtsySyncModelsAction::make(),
         ];
     }
 }

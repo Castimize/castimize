@@ -57,7 +57,7 @@ class Model extends EloquentModel
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
             'categories' => 'json',
-            'meta_data' => AsArrayObject::class,
+            'meta_data' => 'array',
         ];
     }
 

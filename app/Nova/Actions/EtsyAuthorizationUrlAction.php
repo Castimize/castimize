@@ -53,9 +53,11 @@ class EtsyAuthorizationUrlAction extends Action
     public function fields(NovaRequest $request)
     {
         return [
-            Text::make(__('Oath key'), 'oauthKey'),
+            Text::make(__('Oath key'), 'oauthKey')
+                ->default(config('services.shops.etsy.client_id')),
 
-            Text::make(__('Oath secret'), 'oauthSecret'),
+            Text::make(__('Oath secret'), 'oauthSecret')
+                ->default(config('services.shops.etsy.client_secret')),
         ];
     }
 }
