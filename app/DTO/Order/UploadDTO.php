@@ -127,7 +127,7 @@ readonly class  UploadDTO
             ],
             [
                 'key' => 'pa_p3d_model',
-                'value' => $model->file_name,
+                'value' => str_replace('wp-content/uploads/p3d/', '', $model->file_name),
             ],
             [
                 'key' => 'pa_p3d_unit',
