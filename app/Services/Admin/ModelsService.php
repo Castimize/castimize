@@ -187,4 +187,28 @@ class ModelsService
 
         return $model;
     }
+
+    public function updateModelFromModelDTO(Model $model, ModelDTO $modelDTO, ?int $customerId = null): Model
+    {
+        $model->model_name = $modelDTO->modelName;
+        $categories = null;
+        if ($modelDTO->categories) {
+            $categories = [];
+            foreach ($modelDTO->categories as $category) {
+                $categories[] = [
+                    'category' => $category,
+                ];
+            }
+        }
+        $model->categories = $categories;
+
+        if ($modelDTO->thumbName) {
+            $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $modelDTO->thumbName);
+            $model->thumb_name = $fileNameThumb;
+        }
+
+        $model->save();
+
+        return $model;
+    }
 }

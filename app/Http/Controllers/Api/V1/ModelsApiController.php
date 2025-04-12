@@ -155,7 +155,8 @@ class ModelsApiController extends ApiController
         if (!$model || (int)$model->customer->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
-        $model = $this->modelsService->updateModelFromApi($request, $model, $model->customer_id);
+        $model = $this->modelsService->updateModelFromModelDTO($model, ModelDTO::fromWPUpdateRequest($request, $model, $model->customer_id), $model->customer_id);
+//        $model = $this->modelsService->updateModelFromApi($request, $model, $model->customer_id);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);

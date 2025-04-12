@@ -2,6 +2,7 @@
 
 namespace App\DTO\Model;
 
+use App\Models\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -92,6 +93,54 @@ readonly class  ModelDTO
             modelScale: $request->scale ?? 1,
             categories: $categories,
             metaData: $request->meta_data ?? null,
+        );
+    }
+
+    public static function fromWPUpdateRequest(Request $request, Model $model, int $customerId): ModelDTO
+    {
+        $categories = null;
+        if ($request->has('categories')) {
+            $categories = [];
+            foreach (explode(',', $request->categories) as $category) {
+                $categories[] = [
+                    'category' => $category,
+                ];
+            }
+        }
+
+        $uploadedThumb = false;
+        if ($request->hasFile('thumb_image')) {
+            $uploadedThumb = true;
+            $file = $request->file('thumb_image');
+            $thumbFileName = $file->getClientOriginalName();
+            $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
+            $thumbFileExtension = $file->getClientOriginalExtension();
+            $thumbName = time().'_'.str_replace(' ','_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
+            Storage::disk('r2')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
+        }
+
+        return new self(
+            wpId: $model->material?->wp_id,
+            customerId: $customerId,
+            materialId: $model->material_id,
+            printerId: 3,
+            coatingId: null,
+            unit: 'mm',
+            name: $model->name,
+            modelName: $request->model_name ?? $model->model_name,
+            fileName: $model->file_name,
+            thumbName: $thumbName ?? null,
+            uploadedThumb: $uploadedThumb,
+            modelVolumeCc: $model->model_volume_cc,
+            modelXLength: $model->model_x_length,
+            modelYLength: $model->model_y_length,
+            modelZLength: $model->model_z_length,
+            modelBoxVolume: $model->model_box_volume,
+            surfaceArea: $model->model_surface_area_cm2,
+            modelParts: $model->model_parts ?? 1,
+            modelScale: $model->scale ?? 1,
+            categories: $categories,
+            metaData: $model->meta_data,
         );
     }
 }
