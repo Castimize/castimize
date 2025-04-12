@@ -102,7 +102,7 @@ class ModelsApiController extends ApiController
         return response()->json(['model_name' => $modelName]);
     }
 
-    public function getCustomModelSAttributes(int $customerId, Request $request): JsonResponse
+    public function getCustomModelAttributes(int $customerId, Request $request): JsonResponse
     {
         ini_set('precision', 53);
         $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
