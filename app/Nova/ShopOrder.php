@@ -81,7 +81,7 @@ class ShopOrder extends Resource
             Text::make(__('Shop receipt ID'), 'shop_receipt_id')
                 ->sortable(),
 
-            BelongsTo::make(__('Order number'), 'order_number', Order::class)
+            BelongsTo::make(__('Order number'), 'order', Order::class)
                 ->sortable(),
 
             Text::make(__('State'), 'state')

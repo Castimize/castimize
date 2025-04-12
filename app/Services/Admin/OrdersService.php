@@ -275,6 +275,8 @@ class OrdersService
         $order->update([
             'is_paid' => $orderDto->isPaid,
             'paid_at' => $orderDto->paidAt,
+            'payment_method' => $orderDto->paymentMethod,
+            'payment_issuer' => $orderDto->paymentIssuer,
             'total' => $orderDto->total,
             'total_tax' => $orderDto->totalTax,
             'discount_fee' => $orderDto->discountFee,
