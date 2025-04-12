@@ -3,6 +3,8 @@
 namespace App\Nova\Manufacturer;
 
 use Alexwenzel\DependencyContainer\DependencyContainer;
+use App\Enums\Shippo\ShippoDistanceUnitsEnum;
+use App\Enums\Shippo\ShippoMassUnitsEnum;
 use App\Nova\OrderQueue;
 use App\Nova\Resource;
 use App\Nova\Settings\Shipping\DcSettings;
@@ -370,7 +372,7 @@ class Shipment extends Resource
 
                 Select::make(__('Distance unit'), 'parcel_distance_unit')
                     ->default($parcelSettings->distanceUnit)
-                    ->options(ShippoService::DISTANCE_UNITS)
+                    ->options(ShippoDistanceUnitsEnum::values())
                     ->displayUsingLabels(),
 
                 Number::make(__('Length'), 'parcel_length')
@@ -384,7 +386,7 @@ class Shipment extends Resource
 
                 Select::make(__('Mass unit'), 'parcel_mass_unit')
                     ->default($parcelSettings->massUnit)
-                    ->options(ShippoService::MASS_UNITS)->displayUsingLabels(),
+                    ->options(ShippoMassUnitsEnum::values())->displayUsingLabels(),
 
                 Number::make(__('Weight'), 'parcel_weight')
                     ->default($parcelSettings->weight),

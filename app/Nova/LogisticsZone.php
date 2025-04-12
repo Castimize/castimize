@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 
+use App\Enums\Shippo\ShippoServicesEnum;
 use App\Services\Shippo\ShippoService;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
@@ -68,7 +69,7 @@ class LogisticsZone extends Resource
                 ->rules('max:255'),
 
             Select::make(__('Shipping service level token'), 'shipping_servicelevel_token')
-                ->options(ShippoService::SERVICES)
+                ->options(ShippoServicesEnum::values())
                 ->displayUsingLabels(),
 
             HasOne::make(__('Shipping fee'), 'shippingFee')

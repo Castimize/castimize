@@ -2,6 +2,8 @@
 
 namespace App\Nova;
 
+use App\Enums\Shippo\ShippoDistanceUnitsEnum;
+use App\Enums\Shippo\ShippoMassUnitsEnum;
 use App\Nova\Actions\ShipmentInTransitToCustomerStatusAction;
 use App\Nova\Filters\CreatedAtDaterangepickerFilter;
 use App\Nova\Settings\Shipping\DcSettings;
@@ -485,7 +487,7 @@ class CustomerShipment extends Resource
 
             Select::make(__('Distance unit'), 'parcel_distance_unit')
                 ->default($parcelSettings->distanceUnit)
-                ->options(ShippoService::DISTANCE_UNITS)
+                ->options(ShippoDistanceUnitsEnum::values())
                 ->displayUsingLabels(),
 
             Number::make(__('Length'), 'parcel_length')
@@ -499,7 +501,7 @@ class CustomerShipment extends Resource
 
             Select::make(__('Mass unit'), 'parcel_mass_unit')
                 ->default($parcelSettings->massUnit)
-                ->options(ShippoService::MASS_UNITS)->displayUsingLabels(),
+                ->options(ShippoMassUnitsEnum::values())->displayUsingLabels(),
 
             Number::make(__('Weight'), 'parcel_weight')
                 ->default($parcelSettings->weight),

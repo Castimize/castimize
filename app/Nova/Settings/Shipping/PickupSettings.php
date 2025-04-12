@@ -37,11 +37,11 @@ class PickupSettings extends SystemSettings
     {
         return [
             Select::make(__('Building type'), 'buildingType')
-                ->options(ShippoBuildingTypesEnum::cases())
+                ->options(ShippoBuildingTypesEnum::values())
                 ->displayUsingLabels(),
 
             Select::make(__('Building location type'), 'buildingLocationType')
-                ->options(ShippoBuildingLocationTypesEnum::cases())
+                ->options(ShippoBuildingLocationTypesEnum::values())
                 ->displayUsingLabels(),
         ];
     }

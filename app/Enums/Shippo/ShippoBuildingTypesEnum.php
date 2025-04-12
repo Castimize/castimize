@@ -10,4 +10,16 @@ enum ShippoBuildingTypesEnum: string
     case Floor = 'floor';
     case Room = 'room';
     case Suite = 'suite';
+
+    public static function values(): array
+    {
+        return [
+            self::Apartment->value => self::Apartment->name,
+            self::Building->value => self::Building->name,
+            self::Department->value => self::Department->name,
+            self::Floor->value => self::Floor->name,
+            self::Room->value => self::Room->name,
+            self::Suite->value => self::Suite->name,
+        ];
+    }
 }

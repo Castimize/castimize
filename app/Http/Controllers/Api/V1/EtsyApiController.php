@@ -188,6 +188,7 @@ class EtsyApiController extends ApiController
         foreach ($shops as $shop) {
             $receipts = $etsyService->getShopReceipts($shop);
             foreach ($receipts->data as $receipt) {
+                dd($receipt);
                 $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
                 if (count($lines) > 0) {
                     $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);

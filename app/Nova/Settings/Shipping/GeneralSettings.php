@@ -2,6 +2,7 @@
 
 namespace App\Nova\Settings\Shipping;
 
+use App\Enums\Shippo\ShippoVatTypesEnum;
 use App\Services\Shippo\ShippoService;
 use Devloops\NovaSystemSettings\Contracts\SystemSettings;
 use Laravel\Nova\Fields\Select;
@@ -51,7 +52,7 @@ class GeneralSettings extends SystemSettings
 
             Select::make(__('Tax type'), 'taxType')
                 ->default('VAT')
-                ->options(ShippoService::VAT_TYPES),
+                ->options(ShippoVatTypesEnum::values()),
 
             Text::make(__('Contents explanation'), 'contentsExplanation'),
 

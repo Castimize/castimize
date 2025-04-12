@@ -2,6 +2,7 @@
 
 namespace App\Nova\Settings\Shipping;
 
+use App\Enums\Shippo\ShippoMassUnitsEnum;
 use App\Services\Shippo\ShippoService;
 use Devloops\NovaSystemSettings\Contracts\SystemSettings;
 use Laravel\Nova\Fields\Number;
@@ -38,7 +39,7 @@ class CustomsItemSettings extends SystemSettings
     {
         return [
             Select::make(__('Mass unit'), 'massUnit')
-                ->options(ShippoService::MASS_UNITS)
+                ->options(ShippoMassUnitsEnum::values())
                 ->displayUsingLabels(),
 
             Number::make(__('Bag'), 'bag')
