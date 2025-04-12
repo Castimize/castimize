@@ -143,15 +143,14 @@ class ModelsService
         }
 
         if ($model) {
-            if (empty($model->thumb_name)) {
-                $model->thumb_name = $fileNameThumb;
-                $model->save();
-            }
+            $model->thumb_name = $fileNameThumb;
+            $model->save();
+
             return $model;
         }
 
         return Model::create([
-            'customer_id' => $customer?->id,
+            'customer_id' => $modelDTO->customerId,
             'material_id' => $material->id,
             'model_name' => $modelDTO->modelName,
             'name' => $modelDTO->name,
