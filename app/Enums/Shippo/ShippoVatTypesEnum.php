@@ -11,11 +11,11 @@ enum ShippoVatTypesEnum: string
 
     public static function values(): array
     {
-        return [
-            self::EIN->value => self::EIN->value,
-            self::VAT->value => self::VAT->value,
-            self::IOSS->value => self::IOSS->value,
-            self::ARN->value => self::ARN->value,
-        ];
+        $values = [];
+        foreach (self::cases() as $case) {
+            $values[$case->value] = $case->name;
+        }
+
+        return $values;
     }
 }

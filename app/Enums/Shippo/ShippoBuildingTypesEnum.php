@@ -13,13 +13,11 @@ enum ShippoBuildingTypesEnum: string
 
     public static function values(): array
     {
-        return [
-            self::Apartment->value => self::Apartment->name,
-            self::Building->value => self::Building->name,
-            self::Department->value => self::Department->name,
-            self::Floor->value => self::Floor->name,
-            self::Room->value => self::Room->name,
-            self::Suite->value => self::Suite->name,
-        ];
+        $values = [];
+        foreach (self::cases() as $case) {
+            $values[$case->value] = $case->name;
+        }
+
+        return $values;
     }
 }

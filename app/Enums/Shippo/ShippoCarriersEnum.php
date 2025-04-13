@@ -8,8 +8,11 @@ enum ShippoCarriersEnum: string
 
     public static function values(): array
     {
-        return [
-            self::UPS->value => 'UPS',
-        ];
+        $values = [];
+        foreach (self::cases() as $case) {
+            $values[$case->value] = $case->name;
+        }
+
+        return $values;
     }
 }

@@ -96,7 +96,7 @@ readonly class  ModelDTO
         );
     }
 
-    public static function fromWPUpdateRequest(Request $request, Model $model, int $customerId): ModelDTO
+    public static function fromWpUpdateRequest(Request $request, Model $model, int $customerId): ModelDTO
     {
         $categories = null;
         if ($request->has('categories')) {
