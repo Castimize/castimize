@@ -41,7 +41,7 @@ readonly class  ModelDTO
     public static function fromWpRequest(Request $request, int $customerId): ModelDTO
     {
         $categories = null;
-        if ($request->has('categories')) {
+        if ($request->categories) {
             $categories = [];
             foreach (explode(',', $request->categories) as $category) {
                 $categories[] = [
@@ -99,7 +99,7 @@ readonly class  ModelDTO
     public static function fromWpUpdateRequest(Request $request, Model $model, int $customerId): ModelDTO
     {
         $categories = null;
-        if ($request->has('categories')) {
+        if ($request->categories) {
             $categories = [];
             foreach (explode(',', $request->categories) as $category) {
                 $categories[] = [

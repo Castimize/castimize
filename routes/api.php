@@ -50,9 +50,12 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             // Etsy
             Route::get('etsy/{customerId}/taxonomy', 'EtsyApiController@getTaxonomy')->name('api.etsy.get-taxonomy');
             Route::get('etsy/{customerId}/shop', 'EtsyApiController@getShop')->name('api.etsy.get-shop');
+            Route::get('etsy/{customerId}/shop/authorization-url', 'EtsyApiController@getShopAuthorizationUrl')->name('api.etsy.get-shop-authorization-url');
             Route::get('etsy/{customerId}/shop/return-policies', 'EtsyApiController@getShopReturnPolicies')->name('api.etsy.get-shop-return-policies');
             Route::get('etsy/{customerId}/shop/return-policies/{returnPolicyId}', 'EtsyApiController@getShopReturnPolicy')->name('api.etsy.get-shop-return-policy');
             Route::post('etsy/{customerId}/shop/return-policies', 'EtsyApiController@createShopReturnPolicy')->name('api.etsy.create-shop-return-policy');
+            Route::get('etsy/{customerId}/shop/payments/ledger-entries', 'EtsyApiController@getShopPaymentLedgerEntries')->name('api.etsy.get-shop-payment-ledger-entries');
+            Route::get('etsy/{customerId}/shop/receipts', 'EtsyApiController@getShopReceipts')->name('api.etsy.get-shop-receipts');
             Route::get('etsy/{customerId}/listings', 'EtsyApiController@getListings')->name('api.etsy.get-listings');
             Route::get('etsy/{customerId}/listings/sync', 'EtsyApiController@syncListings')->name('api.etsy.sync-listings');
             Route::get('etsy/{customerId}/listings/{listingId}', 'EtsyApiController@dgetListing')->name('api.etsy.get-listing');
@@ -60,8 +63,6 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::get('etsy/{customerId}/shipping-carriers', 'EtsyApiController@getShippingCarriers')->name('api.etsy.get-shipping-carriers');
             Route::get('etsy/{customerId}/shipping-profile', 'EtsyApiController@getShippingProfile')->name('api.etsy.get-shipping-profile');
             Route::post('etsy/{customerId}/shipping-profile', 'EtsyApiController@createShippingProfile')->name('api.etsy.create-shipping-profile');
-            Route::get('etsy/{customerId}/shop/payments/ledger-entries', 'EtsyApiController@getShopPaymentLedgerEntries')->name('api.etsy.get-shop-payment-ledger-entries');
-            Route::get('etsy/{customerId}/shop/receipts', 'EtsyApiController@getShopReceipts')->name('api.etsy.get-shop-receipts');
         });
 
         // Woocommerce endpoints

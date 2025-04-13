@@ -13,10 +13,13 @@ use App\Models\Country;
 use App\Models\Customer;
 use App\Models\Model;
 use App\Models\Shop;
+use App\Services\Admin\LogRequestService;
 use App\Services\Etsy\EtsyService;
 use App\Services\Woocommerce\WoocommerceApiService;
 use Etsy\Etsy;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class EtsyApiController extends ApiController
 {
@@ -46,6 +49,19 @@ class EtsyApiController extends ApiController
         $shop = $this->etsyService->getShop($shop);
 
         return response()->json($shop->toArray());
+    }
+
+    public function getShopAuthorizationUrl(Request $request, int $customerId): JsonResponse
+    {
+        $customer = Customer::find($customerId);
+        $shop = $customer->shopOwner?->shops?->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
+        if ($shop === null) {
+            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+        $url = $this->etsyService->getAuthorizationUrl($shop);
+
+        return response()->json(['url' => $url]);
     }
 
     public function getShopReturnPolicy(int $customerId, int $returnPolicyId): JsonResponse
@@ -180,32 +196,32 @@ class EtsyApiController extends ApiController
 
     public function getShopReceipts(int $customerId): JsonResponse
     {
-        $etsyService = app(EtsyService::class);
-        $woocommerceApiService = app(WoocommerceApiService::class);
-
-        $shops = Shop::with(['shopOwner.customer'])->where('active', true)->where('shop', ShopOwnerShopsEnum::Etsy->value)->get();
-
-        foreach ($shops as $shop) {
-            $receipts = $etsyService->getShopReceipts($shop);
-            foreach ($receipts->data as $receipt) {
-                dd($receipt);
-                $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
-                if (count($lines) > 0) {
-                    $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
-                    dd($orderDTO);
-                    $woocommerceApiService->createOrder($orderDTO);
-                }
-            }
-        }
-//        $customer = Customer::find($customerId);
-//        $shop = $customer->shopOwner->shops->first();
-//        $shopReceipts = $this->etsyService->getShopReceipts($shop, ['min_created' => now()->subDays(2)->timestamp]);
+//        $etsyService = app(EtsyService::class);
+//        $woocommerceApiService = app(WoocommerceApiService::class);
 //
-//        $response = [];
+//        $shops = Shop::with(['shopOwner.customer'])->where('active', true)->where('shop', ShopOwnerShopsEnum::Etsy->value)->get();
 //
-//        foreach ($shopReceipts->data as $shopReceipt) {
-//            $response[] = $shopReceipt->toArray();
+//        foreach ($shops as $shop) {
+//            $receipts = $etsyService->getShopReceipts($shop);
+//            foreach ($receipts->data as $receipt) {
+//                dd($receipt);
+//                $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
+//                if (count($lines) > 0) {
+//                    $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
+//                    dd($orderDTO);
+//                    $woocommerceApiService->createOrder($orderDTO);
+//                }
+//            }
 //        }
+        $customer = Customer::find($customerId);
+        $shop = $customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
+        $shopReceipts = $this->etsyService->getShopReceipts($shop, ['min_created' => now()->subDays(2)->timestamp]);
+
+        $response = [];
+
+        foreach ($shopReceipts->data as $shopReceipt) {
+            $response[] = $shopReceipt->toArray();
+        }
 
         return response()->json($response);
     }
