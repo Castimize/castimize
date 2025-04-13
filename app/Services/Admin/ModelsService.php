@@ -191,9 +191,8 @@ class ModelsService
     public function updateModelFromModelDTO(Model $model, ModelDTO $modelDTO, ?int $customerId = null): Model
     {
         $model->model_name = $modelDTO->modelName;
-        $categories = null;
         if ($modelDTO->categories) {
-            $model->categories = $categories;
+            $model->categories = $modelDTO->categories;
         }
 
         if ($modelDTO->thumbName) {
