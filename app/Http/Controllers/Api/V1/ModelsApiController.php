@@ -103,7 +103,11 @@ class ModelsApiController extends ApiController
         }
 
         if ($request->order_column) {
-            $customerModels = $customerModels->sortBy($request->order_column, $request->order_dir);
+            if ($request->order_dir === 'asc') {
+                $customerModels = $customerModels->sortBy($request->order_column);
+            } else {
+                $customerModels = $customerModels->sortByDesc($request->order_column);
+            }
         }
 
         $customerModels = $customerModels->slice($request->start, $request->length);
