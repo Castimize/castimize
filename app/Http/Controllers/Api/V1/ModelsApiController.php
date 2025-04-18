@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class ModelsApiController extends ApiController
@@ -48,6 +49,67 @@ class ModelsApiController extends ApiController
 
         $models = [];
         foreach ($customer->models as $model) {
+            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s-%s',
+                $model->model_name,
+                $model->name,
+                $model->material_id,
+                $model->model_volume_cc,
+                $model->model_surface_area_cm2,
+                $model->model_box_volume,
+                $model->model_x_length,
+                $model->model_y_length,
+                $model->model_z_length
+            );
+            if (!array_key_exists($key, $models)) {
+                $models[$key] = $model;
+            }
+        }
+        $models = collect($models);
+
+        $response = ModelResource::collection($models->keyBy->id);
+        LogRequestService::addResponse(request(), $response);
+        return $response;
+    }
+
+    public function showModelsWpCustomerPaginated(Request $request, int $customerId): AnonymousResourceCollection
+    {
+        $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
+        if ($customer === null) {
+            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+
+        $customerModels = $customer->models;
+
+        if ($request->search_value) {
+            $customerModels = $customerModels->filter(function ($model) use ($request) {
+                return (Str::contains($model->model_name, $request->search_value) ||
+                    Str::contains($model->model_volume_cc, $request->search_value) ||
+                    Str::contains($model->model_surface_area_cm2, $request->search_value)
+                );
+            })->filter(function ($model) use ($request) {
+                if (is_array($model->categories)) {
+                    foreach ($model->categories as $category) {
+                        if (Str::contains($category, $request->search_value)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
+        if ($request->order_column) {
+            $customerModels = $customerModels->sortBy($request->order_column, $request->order_dir);
+        }
+
+        $customerModels = $customerModels->slice($request->start, $request->length);
+
+        $models = [];
+        foreach ($customerModels as $model) {
             $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s-%s',
                 $model->model_name,
                 $model->name,
