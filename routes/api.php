@@ -37,7 +37,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             // Models
             Route::get('models/wp/{customerId}/{model}', 'ModelsApiController@show')->name('api.models.show');
             Route::get('models/wp/{customerId}', 'ModelsApiController@showModelsWpCustomer')->name('api.models.show-customer-wp-models');
-            Route::get('models/wp/{customerId}/paginated', 'ModelsApiController@showModelsWpCustomerPaginated')->name('api.models.show-customer-wp-models-paginated');
+            Route::post('models/wp/{customerId}/paginated', 'ModelsApiController@showModelsWpCustomerPaginated')->name('api.models.show-customer-wp-models-paginated');
             Route::post('models/store-from-upload', 'ModelsApiController@storeFromUpload')->name('api.models.store-from-upload');
             Route::post('models/wp/{customerId}', 'ModelsApiController@store')->name('api.models.wp.store');
             Route::post('models/wp/{customerId}/get-custom-model-name', 'ModelsApiController@getCustomModelName')->name('api.models.get-custom-model-name');
