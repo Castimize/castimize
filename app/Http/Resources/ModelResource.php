@@ -46,10 +46,10 @@ class ModelResource extends JsonResource
         if (Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb)) {
             $fileThumbnail = sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $thumb);
         } else {
-            $fileHeaders = get_headers($siteThumb);
-            if (!str_contains($fileHeaders[0], '404')) {
+//            $fileHeaders = get_headers($siteThumb);
+//            if (!str_contains($fileHeaders[0], '404')) {
                 $fileThumbnail = '/' . $thumb;
-            }
+//            }
         }
 
         $thumbnailKey = '3'. $this->material->wp_id . $this->model_scale . 'mm';
