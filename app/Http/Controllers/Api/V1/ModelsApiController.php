@@ -171,7 +171,7 @@ class ModelsApiController extends ApiController
 
         $response = ModelResource::collection($models);
         LogRequestService::addResponse(request(), $response);
-        return response()->json(['items' => $response, 'total' => $customer->models->count()]);
+        return response()->json(['items' => $response, 'total' => $customer->models->count(), 'filtered' => $models->count()]);
     }
 
     public function storeModelWp(Request $request): JsonResponse
