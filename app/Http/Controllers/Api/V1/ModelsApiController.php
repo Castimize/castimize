@@ -90,7 +90,7 @@ class ModelsApiController extends ApiController
                     ->orWhereJsonContains('categories', $request->search_value);
             })->orWhereHas('material', function ($query) use ($request) {
                 $query->where('name', 'like', '%' . $request->search_value . '%');
-            });
+            })->where('customer_id', $customerId);
 //            $customerModels = $customerModels->filter(function ($model) use ($request) {
 //                return (Str::contains($model->name, $request->search_value) ||
 //                   Str::contains($model->model_name, $request->search_value) ||
