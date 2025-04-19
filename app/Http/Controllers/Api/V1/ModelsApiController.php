@@ -71,7 +71,7 @@ class ModelsApiController extends ApiController
         return $response;
     }
 
-    public function showModelsWpCustomerPaginated(Request $request, int $customerId): AnonymousResourceCollection
+    public function showModelsWpCustomerPaginated(Request $request, int $customerId): JsonResponse
     {
         $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
         if ($customer === null) {
@@ -133,7 +133,7 @@ class ModelsApiController extends ApiController
 
         $response = ModelResource::collection($models->keyBy->id);
         LogRequestService::addResponse(request(), $response);
-        return $response;
+        return response()->json(['items' => $response, 'total' => $customer->models->count()]);
     }
 
     public function storeModelWp(Request $request): JsonResponse
