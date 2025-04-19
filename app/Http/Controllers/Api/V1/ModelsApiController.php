@@ -79,59 +79,97 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $customerModels = $customer->models;
+        $customerModels = $customer->models();
 
         if ($request->search_value) {
-            $customerModels = $customerModels->filter(function ($model) use ($request) {
-                return (Str::contains($model->model_name, $request->search_value) ||
-                    Str::contains($model->model_volume_cc, $request->search_value) ||
-                    Str::contains($model->model_surface_area_cm2, $request->search_value)
-                );
-            })->filter(function ($model) use ($request) {
-                if (is_array($model->categories)) {
-                    foreach ($model->categories as $category) {
-                        if (Str::contains($category, $request->search_value)) {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                }
-
-                return true;
+            $customerModels->where(function ($query) use ($request) {
+                $query->where('models.name', 'like', '%' . $request->search_value . '%')
+                    ->orWhere('model_name', 'like', '%' . $request->search_value . '%')
+                    ->orWhere('model_volume_cc', 'like', '%' . $request->search_value . '%')
+                    ->orWhere('model_surface_area_cm2', 'like', '%' . $request->search_value . '%')
+                    ->orWhereJsonContains('categories', $request->search_value);
+            })->orWhereHas('material', function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search_value . '%');
             });
+//            $customerModels = $customerModels->filter(function ($model) use ($request) {
+//                return (Str::contains($model->name, $request->search_value) ||
+//                   Str::contains($model->model_name, $request->search_value) ||
+//                    Str::contains($model->model_volume_cc, $request->search_value) ||
+//                    Str::contains($model->model_surface_area_cm2, $request->search_value) ||
+//                    Str::contains($model->material->name, $request->search_value)
+//                );
+//            })->filter(function ($model) use ($request) {
+//                if (is_array($model->categories)) {
+//                    foreach ($model->categories as $category) {
+//                        if (Str::contains($category, $request->search_value)) {
+//                            return true;
+//                        }
+//                    }
+//
+//                    return false;
+//                }
+//
+//                return true;
+//            });
         }
 
         if ($request->order_column) {
-            if ($request->order_dir === 'asc') {
-                $customerModels = $customerModels->sortBy($request->order_column);
+            $mapper = [
+                'id' => 'id',
+                'name' => 'name',
+                'material' => 'material_name',
+                'material_volume' => 'model_volume_cc',
+                'surface_area' =>'model_surface_area_cm2',
+                'scale' => 'model_scale',
+                'categories' => 'categories',
+            ];
+
+            if ($mapper[$request->order_column] === 'name') {
+                $customerModels->orderBy('model_name', $request->order_dir)
+                    ->orderBy('name', $request->order_dir);
+            } elseif ($mapper[$request->order_column] === 'material_name') {
+                $customerModels->join('materials', 'models.material_id', '=', 'materials.id')
+                    ->orderBy('materials.name', $request->order_dir);
             } else {
-                $customerModels = $customerModels->sortByDesc($request->order_column);
+                $customerModels->orderBy($mapper[$request->order_column], $request->order_dir);
             }
         }
 
-        $customerModels = $customerModels->slice($request->start, $request->length);
+        $customerModels = $customerModels->offset($request->start)
+            ->limit($request->length)
+            ->distinct([
+                'model_name',
+                'name',
+                'material_id',
+                'model_volume_cc',
+                'model_surface_area_cm2',
+                'model_box_volume',
+                'model_x_length',
+                'model_y_length',
+                'model_z_length',
+            ]);
 
-        $models = [];
-        foreach ($customerModels as $model) {
-            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s-%s',
-                $model->model_name,
-                $model->name,
-                $model->material_id,
-                $model->model_volume_cc,
-                $model->model_surface_area_cm2,
-                $model->model_box_volume,
-                $model->model_x_length,
-                $model->model_y_length,
-                $model->model_z_length
-            );
-            if (!array_key_exists($key, $models)) {
-                $models[$key] = $model;
-            }
-        }
-        $models = collect($models);
+//        $models = [];
+//        foreach ($customerModels->get() as $model) {
+//            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s-%s',
+//                $model->model_name,
+//                $model->name,
+//                $model->material_id,
+//                $model->model_volume_cc,
+//                $model->model_surface_area_cm2,
+//                $model->model_box_volume,
+//                $model->model_x_length,
+//                $model->model_y_length,
+//                $model->model_z_length
+//            );
+//            if (!array_key_exists($key, $models)) {
+//                $models[$key] = $model;
+//            }
+//        }
+//        $models = collect($models);
+        $models = $customerModels->get();
 
-        $response = ModelResource::collection($models->keyBy->id);
+        $response = ModelResource::collection($models);
         LogRequestService::addResponse(request(), $response);
         return response()->json(['items' => $response, 'total' => $customer->models->count()]);
     }
