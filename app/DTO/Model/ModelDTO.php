@@ -64,7 +64,7 @@ readonly class  ModelDTO
             $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
                 str_replace('_resized', '', $request->file_name),
                 $request->printer_id ?? 3,
-                $request->wp_id,
+                1,
                 $request->coating_id ?? null,
                 1,
                 'mm',
