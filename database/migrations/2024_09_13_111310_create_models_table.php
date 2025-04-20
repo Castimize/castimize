@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('customer_id')->nullable()->index();
             $table->unsignedBigInteger('material_id')->nullable()->index();
-            $table->string('model_name')->nullable();
-            $table->string('name');
+            $table->string('model_name')->nullable()->index();
+            $table->string('name')->index();
             $table->string('file_name')->index();
             $table->string('thumb_name')->nullable();
             $table->float('model_volume_cc');
@@ -34,6 +34,16 @@ return new class extends Migration
 
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('set null');
             $table->foreign('material_id')->references('id')->on('materials')->onDelete('set null');
+
+            $table->index([
+                'model_volume_cc',
+                'model_x_length',
+                'model_y_length',
+                'model_z_length',
+                'model_surface_area_cm2',
+                'model_parts',
+                'model_box_volume',
+            ], 'models_stats_index');
         });
 
         Schema::table('models', function (Blueprint $table) {

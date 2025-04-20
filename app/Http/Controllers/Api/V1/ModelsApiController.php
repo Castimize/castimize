@@ -73,44 +73,29 @@ class ModelsApiController extends ApiController
 
     public function showModelsWpCustomerPaginated(Request $request, int $customerId): JsonResponse
     {
-        $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
+        $customer = Customer::where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $customerModels = $customer->models();
+        $customerModels = Model::with(['material'])
+            ->where('customer_id', $customer->id);
 
         if ($request->search_value) {
-            $customerModels->where(function ($query) use ($request) {
+            $customerModels
+                ->where(function ($query) use ($request) {
                 $query->where('models.name', 'like', '%' . $request->search_value . '%')
                     ->orWhere('model_name', 'like', '%' . $request->search_value . '%')
                     ->orWhere('model_volume_cc', 'like', '%' . $request->search_value . '%')
+                    ->orWhere('model_x_length', 'like', '%' . $request->search_value . '%')
+                    ->orWhere('model_y_length', 'like', '%' . $request->search_value . '%')
+                    ->orWhere('model_z_length', 'like', '%' . $request->search_value . '%')
                     ->orWhere('model_surface_area_cm2', 'like', '%' . $request->search_value . '%')
-                    ->orWhereJsonContains('categories', $request->search_value);
+                    ->orWhere('categories', 'like', '%' . $request->search_value . '%');
             })->orWhereHas('material', function ($query) use ($request) {
                 $query->where('name', 'like', '%' . $request->search_value . '%');
-            })->where('customer_id', $customerId);
-//            $customerModels = $customerModels->filter(function ($model) use ($request) {
-//                return (Str::contains($model->name, $request->search_value) ||
-//                   Str::contains($model->model_name, $request->search_value) ||
-//                    Str::contains($model->model_volume_cc, $request->search_value) ||
-//                    Str::contains($model->model_surface_area_cm2, $request->search_value) ||
-//                    Str::contains($model->material->name, $request->search_value)
-//                );
-//            })->filter(function ($model) use ($request) {
-//                if (is_array($model->categories)) {
-//                    foreach ($model->categories as $category) {
-//                        if (Str::contains($category, $request->search_value)) {
-//                            return true;
-//                        }
-//                    }
-//
-//                    return false;
-//                }
-//
-//                return true;
-//            });
+            });
         }
 
         if ($request->order_column) {
@@ -135,7 +120,7 @@ class ModelsApiController extends ApiController
             }
         }
 
-        $customerModels = $customerModels->offset($request->start)
+        $customerModels->offset($request->start)
             ->limit($request->length)
             ->distinct([
                 'model_name',
@@ -149,24 +134,6 @@ class ModelsApiController extends ApiController
                 'model_z_length',
             ]);
 
-//        $models = [];
-//        foreach ($customerModels->get() as $model) {
-//            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s-%s',
-//                $model->model_name,
-//                $model->name,
-//                $model->material_id,
-//                $model->model_volume_cc,
-//                $model->model_surface_area_cm2,
-//                $model->model_box_volume,
-//                $model->model_x_length,
-//                $model->model_y_length,
-//                $model->model_z_length
-//            );
-//            if (!array_key_exists($key, $models)) {
-//                $models[$key] = $model;
-//            }
-//        }
-//        $models = collect($models);
         $models = $customerModels->get();
 
         $response = ModelResource::collection($models);
