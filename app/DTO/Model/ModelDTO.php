@@ -11,6 +11,7 @@ readonly class  ModelDTO
     public function __construct(
         public string $wpId,
         public ?int $customerId,
+        public ?int $shopListingId,
         public ?int $materialId,
         public ?int $printerId,
         public ?int $coatingId,
@@ -64,16 +65,30 @@ readonly class  ModelDTO
             $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
                 str_replace('_resized', '', $request->file_name),
                 $request->printer_id ?? 3,
-                1,
+                $request->wp_id ?? 1,
                 $request->coating_id ?? null,
                 1,
                 'mm',
             );
+
+            $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
+            $fileHeaders = get_headers($fileNameThumb);
+            if (str_contains($fileHeaders[0], '404')) {
+                $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
+                    str_replace('_resized', '', $request->file_name),
+                    $request->printer_id ?? 3,
+                    1,
+                    $request->coating_id ?? null,
+                    1,
+                    'mm',
+                );
+            }
         }
 
         return new self(
             wpId: (string) $request->wp_id,
             customerId: $customerId,
+            shopListingId: null,
             materialId: null,
             printerId: $request->printer_id ?? 3,
             coatingId: $request->coating_id ?? null,
@@ -122,6 +137,7 @@ readonly class  ModelDTO
         return new self(
             wpId: $model->material?->wp_id,
             customerId: $customerId,
+            shopListingId: $request->shop_listing_id ?? null,
             materialId: $model->material_id,
             printerId: 3,
             coatingId: null,
