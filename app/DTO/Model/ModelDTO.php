@@ -72,7 +72,8 @@ readonly class  ModelDTO
             );
 
             $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
-            $fileHeaders = get_headers($fileNameThumb);
+            $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
+            $fileHeaders = get_headers($fileThumb);
             if (str_contains($fileHeaders[0], '404')) {
                 $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
                     str_replace('_resized', '', $request->file_name),
@@ -82,6 +83,16 @@ readonly class  ModelDTO
                     1,
                     'mm',
                 );
+
+                $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
+                $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
+                $fileHeaders = get_headers($fileThumb);
+                if (str_contains($fileHeaders[0], '404')) {
+                    $model = Model::where('file_name', 'like', '%' . str_replace('_resized', '', $request->file_name) . '%')->first();
+                    if ($model) {
+                        $thumbName = str_replace(env('APP_SITE_STL_UPLOAD_DIR'), '', $model->thumb_name);
+                    }
+                }
             }
         }
 
