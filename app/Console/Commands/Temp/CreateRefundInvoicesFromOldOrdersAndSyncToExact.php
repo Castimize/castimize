@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands\Temp;
 
-use App\Jobs\CreateInvoicesFromOrder;
+use App\Jobs\CreateRefundInvoicesFromOrder;
 use App\Models\Order;
 use Illuminate\Console\Command;
 
@@ -37,8 +37,21 @@ class CreateRefundInvoicesFromOldOrdersAndSyncToExact extends Command
             ->orderByDesc('created_at')
             ->get();
 
+        $totalOrders = $orders->count();
+        $progressBar = $this->output->createProgressBar($totalOrders);
+
+        $this->info("Creating refund invoices for $totalOrders");
+        $progressBar->start();
+
         foreach ($orders as $order) {
-            CreateInvoicesFromOrder::dispatch($order->wp_id);
+            $this->info("Creating refund invoice for $order->order_number");
+            CreateRefundInvoicesFromOrder::dispatch($order->wp_id);
+
+            $progressBar->advance();
         }
+
+        $progressBar->finish();
+
+        return true;
     }
 }
