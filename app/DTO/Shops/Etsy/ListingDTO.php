@@ -12,6 +12,7 @@ use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\CurrencyService;
 use App\Services\Etsy\EtsyService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class ListingDTO
 {
@@ -61,6 +62,8 @@ class ListingDTO
             $currencyService = app(CurrencyService::class);
             $price = $currencyService->convertCurrency(config('app.currency'), $shopOauth['shop_currency'], $price);
         }
+
+        Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listing->toJson(), true));
 
         return new self(
             shopId: $shopOauth['shop_id'],
