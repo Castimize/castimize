@@ -286,7 +286,7 @@ class ModelsService
                             shop: $shop,
                             model: $model,
                             listingId: $modelDTO->shopListingId,
-                            taxonomyId: $listing->taxonomy_id,
+                            listing: $listing,
                         ),
                     );
                 } else {
@@ -297,7 +297,7 @@ class ModelsService
                             shop: $shop,
                             model: $model,
                             listingId: $modelDTO->shopListingId,
-                            taxonomyId: $listing->taxonomy_id,
+                            listing: $listing,
                         ),
                     );
                 }

@@ -42,7 +42,7 @@ class ListingDTO
     ) {
     }
 
-    public static function fromModel(Shop $shop, Model $model, ?int $listingId = null, ?int $taxonomyId = null): self
+    public static function fromModel(Shop $shop, Model $model, ?int $listingId = null, $listing = null): self
     {
         $shopOauth = $shop->shop_oauth;
         $customsItemSettings = new CustomsItemSettings();
@@ -65,14 +65,14 @@ class ListingDTO
         return new self(
             shopId: $shopOauth['shop_id'],
             listingId: $listingId ?? $model->shopListingModel?->listing_id ?? null,
-            state: null,
+            state: $listing ? $listing->state : null,
             quantity: 1,
             title: $model->model_name ?? $model->name,
             description: '3D print model: ' . ($model->model_name ?? $model->name),
             price: $price,
             whoMade: 'i_did',
             whenMade: 'made_to_order',
-            taxonomyId: (int) ($taxonomyId ?? $shopOauth['default_taxonomy_id'] ?? 12380), // 3D Printer Files
+            taxonomyId: (int) ($listing && $listing->taxonomy_id ?? $shopOauth['default_taxonomy_id'] ?? 12380), // 3D Printer Files
             shippingProfileId: $shopOauth['shop_shipping_profile_id'] ?? null,
             returnPolicyId: $shopOauth['shop_return_policy_id'] ?? null,
             materials: [$model->material->name],
@@ -84,7 +84,7 @@ class ListingDTO
             itemDimensionsUnit: $parcelSettings->distanceUnit,
             processingMin: $model->material->dc_lead_time + ($model->customer?->country?->logisticsZone?->shippingFee?->default_lead_time ?? 0),
             processingMax: null,
-            listingImages: null,
+            listingImages: $listing ? $listing->images : null,
         );
     }
 }
