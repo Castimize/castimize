@@ -3,15 +3,82 @@
 namespace App\Services\Admin;
 
 use App\DTO\Model\ModelDTO;
+use App\DTO\Shops\Etsy\ListingDTO;
+use App\Enums\Shops\ShopOwnerShopsEnum;
+use App\Http\Resources\ModelResource;
 use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Model;
+use App\Services\Etsy\EtsyService;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ModelsService
 {
+    public function getModelsPaginated($request, Customer $customer): array
+    {
+        $customerModels = Model::with(['material'])
+            ->where('customer_id', $customer->id);
+
+        if ($request->search_value) {
+            $customerModels
+                ->where(function ($query) use ($request) {
+                    $query->where('models.name', 'like', '%' . $request->search_value . '%')
+                        ->orWhere('model_name', 'like', '%' . $request->search_value . '%')
+                        ->orWhere('model_volume_cc', 'like', '%' . $request->search_value . '%')
+                        ->orWhere('model_x_length', 'like', '%' . $request->search_value . '%')
+                        ->orWhere('model_y_length', 'like', '%' . $request->search_value . '%')
+                        ->orWhere('model_z_length', 'like', '%' . $request->search_value . '%')
+                        ->orWhere('model_surface_area_cm2', 'like', '%' . $request->search_value . '%')
+                        ->orWhere('categories', 'like', '%' . $request->search_value . '%');
+                })->orWhereHas('material', function ($query) use ($request) {
+                    $query->where('name', 'like', '%' . $request->search_value . '%');
+                });
+        }
+
+        if ($request->order_column) {
+            $mapper = [
+                'id' => 'id',
+                'name' => 'name',
+                'material' => 'material_name',
+                'material_volume' => 'model_volume_cc',
+                'surface_area' =>'model_surface_area_cm2',
+                'scale' => 'model_scale',
+                'categories' => 'categories',
+            ];
+
+            if ($mapper[$request->order_column] === 'name') {
+                $customerModels->orderBy('model_name', $request->order_dir)
+                    ->orderBy('name', $request->order_dir);
+            } elseif ($mapper[$request->order_column] === 'material_name') {
+                $customerModels->join('materials', 'models.material_id', '=', 'materials.id')
+                    ->orderBy('materials.name', $request->order_dir);
+            } else {
+                $customerModels->orderBy($mapper[$request->order_column], $request->order_dir);
+            }
+        }
+
+        $customerModels->distinct([
+                'model_name',
+                'models.name',
+                'material_id',
+                'model_volume_cc',
+                'model_surface_area_cm2',
+                'model_box_volume',
+                'model_x_length',
+                'model_y_length',
+                'model_z_length',
+            ]);
+
+        $total = $customerModels->count();
+        $models = $customerModels->offset($request->start)
+            ->limit($request->length)
+            ->get();
+
+        return ['items' => ModelResource::collection($models), 'total' => $total];
+    }
+
     public function storeModelFromApi($request, ?Customer $customer = null): Model|null
     {
         $material = Material::where('wp_id', $request->wp_id)->first();
@@ -201,6 +268,41 @@ class ModelsService
         }
 
         $model->save();
+
+        if ($modelDTO->shopListingId && $model->customer->shopOwner) {
+            $shops = $model->customer->shopOwner->shops;
+            $shop = $shops->where('shop', ShopOwnerShopsEnum::Etsy->value)
+                ->where('active', true)
+                ->first();
+            if ($shop) {
+                $listing = (new EtsyService())->getListing($shop, $modelDTO->shopListingId);
+                if (! $listing) {
+                    throw new Exception('Listing not found');
+                }
+                if ($model->shopListingModel) {
+                    (new ShopListingModelService())->updateShopListingModel(
+                        shopListingModel: $model->shopListingModel,
+                        listingDTO: ListingDTO::fromModel(
+                            shop: $shop,
+                            model: $model,
+                            listingId: $modelDTO->shopListingId,
+                            taxonomyId: $listing->taxonomy_id,
+                        ),
+                    );
+                } else {
+                    (new ShopListingModelService())->createShopListingModel(
+                        shop: $shop,
+                        model: $model,
+                        listingDTO: ListingDTO::fromModel(
+                            shop: $shop,
+                            model: $model,
+                            listingId: $modelDTO->shopListingId,
+                            taxonomyId: $listing->taxonomy_id,
+                        ),
+                    );
+                }
+            }
+        }
 
         return $model;
     }

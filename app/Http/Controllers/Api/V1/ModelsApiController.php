@@ -79,66 +79,14 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $customerModels = Model::with(['material'])
-            ->where('customer_id', $customer->id);
+        $response = $this->modelsService->getModelsPaginated($request, $customer);
 
-        if ($request->search_value) {
-            $customerModels
-                ->where(function ($query) use ($request) {
-                $query->where('models.name', 'like', '%' . $request->search_value . '%')
-                    ->orWhere('model_name', 'like', '%' . $request->search_value . '%')
-                    ->orWhere('model_volume_cc', 'like', '%' . $request->search_value . '%')
-                    ->orWhere('model_x_length', 'like', '%' . $request->search_value . '%')
-                    ->orWhere('model_y_length', 'like', '%' . $request->search_value . '%')
-                    ->orWhere('model_z_length', 'like', '%' . $request->search_value . '%')
-                    ->orWhere('model_surface_area_cm2', 'like', '%' . $request->search_value . '%')
-                    ->orWhere('categories', 'like', '%' . $request->search_value . '%');
-            })->orWhereHas('material', function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->search_value . '%');
-            });
-        }
-
-        if ($request->order_column) {
-            $mapper = [
-                'id' => 'id',
-                'name' => 'name',
-                'material' => 'material_name',
-                'material_volume' => 'model_volume_cc',
-                'surface_area' =>'model_surface_area_cm2',
-                'scale' => 'model_scale',
-                'categories' => 'categories',
-            ];
-
-            if ($mapper[$request->order_column] === 'name') {
-                $customerModels->orderBy('model_name', $request->order_dir)
-                    ->orderBy('name', $request->order_dir);
-            } elseif ($mapper[$request->order_column] === 'material_name') {
-                $customerModels->join('materials', 'models.material_id', '=', 'materials.id')
-                    ->orderBy('materials.name', $request->order_dir);
-            } else {
-                $customerModels->orderBy($mapper[$request->order_column], $request->order_dir);
-            }
-        }
-
-        $customerModels->offset($request->start)
-            ->limit($request->length)
-            ->distinct([
-                'model_name',
-                'name',
-                'material_id',
-                'model_volume_cc',
-                'model_surface_area_cm2',
-                'model_box_volume',
-                'model_x_length',
-                'model_y_length',
-                'model_z_length',
-            ]);
-
-        $models = $customerModels->get();
-
-        $response = ModelResource::collection($models);
-        LogRequestService::addResponse(request(), $response);
-        return response()->json(['items' => $response, 'total' => $customer->models->count(), 'filtered' => $models->count()]);
+        LogRequestService::addResponse(request(), $response['items']);
+        return response()->json([
+            'items' => $response['items'],
+            'total' => $response['total'],
+            'filtered' => $response['items']->count(),
+        ]);
     }
 
     public function storeModelWp(Request $request): JsonResponse

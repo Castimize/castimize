@@ -25,6 +25,7 @@ class ShopListingModelService
     public function updateShopListingModel(ShopListingModel $shopListingModel, ListingDTO $listingDTO): ShopListingModel
     {
         $shopListingModel->update([
+            'shop_listing_id' => $listingDTO->listingId,
             'taxonomy_id' => $listingDTO->taxonomyId,
             'state' => $listingDTO->state,
         ]);

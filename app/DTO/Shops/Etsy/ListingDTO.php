@@ -42,7 +42,7 @@ class ListingDTO
     ) {
     }
 
-    public static function fromModel(Shop $shop, Model $model): self
+    public static function fromModel(Shop $shop, Model $model, ?int $listingId = null, ?int $taxonomyId = null): self
     {
         $shopOauth = $shop->shop_oauth;
         $customsItemSettings = new CustomsItemSettings();
@@ -64,7 +64,7 @@ class ListingDTO
 
         return new self(
             shopId: $shopOauth['shop_id'],
-            listingId: $model->shopListingModel?->listing_id ?? null,
+            listingId: $listingId ?? $model->shopListingModel?->listing_id ?? null,
             state: null,
             quantity: 1,
             title: $model->model_name ?? $model->name,
@@ -72,7 +72,7 @@ class ListingDTO
             price: $price,
             whoMade: 'i_did',
             whenMade: 'made_to_order',
-            taxonomyId: (int) ($shopOauth['default_taxonomy_id'] ?? 12380), // 3D Printer Files
+            taxonomyId: (int) ($taxonomyId ?? $shopOauth['default_taxonomy_id'] ?? 12380), // 3D Printer Files
             shippingProfileId: $shopOauth['shop_shipping_profile_id'] ?? null,
             returnPolicyId: $shopOauth['shop_return_policy_id'] ?? null,
             materials: [$model->material->name],

@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\Shops\ShopOwnerShopsEnum;
 use App\Models\Model;
 use App\Services\Etsy\EtsyService;
 use Exception;
@@ -47,7 +48,7 @@ class ModelObserver
         $shops = $model->customer?->shopOwner?->shops;
         if ($shops) {
             foreach ($shops as $shop) {
-                if ($shop->active && $model->has('shopListingModel')) {
+                if ($shop->active && $shop->shop === ShopOwnerShopsEnum::Etsy->value && $model->has('shopListingModel')) {
                     try {
                         (new EtsyService())->deleteListing($shop, $model->shopListingModel->shop_listing_id);
                     } catch (Exception $e) {
@@ -63,7 +64,7 @@ class ModelObserver
         $shops = $model->customer?->shopOwner?->shops;
         if ($shops) {
             foreach ($shops as $shop) {
-                if ($shop->active) {
+                if ($shop->active && $shop->shop === ShopOwnerShopsEnum::Etsy->value) {
                     try {
                         (new EtsyService())->syncListing($shop, $model);
                     } catch (Exception $e) {

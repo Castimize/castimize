@@ -257,6 +257,14 @@ class EtsyService
         return $shippingProfileDestinationDTO;
     }
 
+    public function getListing(Shop $shop, int $listingId)
+    {
+        $this->refreshAccessToken($shop);
+        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+
+        return Listing::get(listing_id: $listingId);
+    }
+
     public function getListings(Shop $shop): Collection
     {
         $this->refreshAccessToken($shop);
