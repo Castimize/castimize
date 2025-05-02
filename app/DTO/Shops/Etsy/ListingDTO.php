@@ -43,7 +43,7 @@ class ListingDTO
     ) {
     }
 
-    public static function fromModel(Shop $shop, Model $model, ?int $listingId = null, $listing = null): self
+    public static function fromModel(Shop $shop, Model $model, ?int $listingId = null, $listing = null, $listingImages = null): self
     {
         $shopOauth = $shop->shop_oauth;
         $customsItemSettings = new CustomsItemSettings();
@@ -63,7 +63,7 @@ class ListingDTO
             $price = $currencyService->convertCurrency(config('app.currency'), $shopOauth['shop_currency'], $price);
         }
 
-        Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listing->toJson(), true));
+        Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listingImages->toJson(), true));
 
         return new self(
             shopId: $shopOauth['shop_id'],
@@ -87,7 +87,7 @@ class ListingDTO
             itemDimensionsUnit: $parcelSettings->distanceUnit,
             processingMin: $model->material->dc_lead_time + ($model->customer?->country?->logisticsZone?->shippingFee?->default_lead_time ?? 0),
             processingMax: null,
-            listingImages: $listing ? $listing->images : null,
+            listingImages: $listingImages,
         );
     }
 }

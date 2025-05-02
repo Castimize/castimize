@@ -257,6 +257,8 @@ class ModelsService
 
     public function updateModelFromModelDTO(Model $model, ModelDTO $modelDTO, ?int $customerId = null): Model
     {
+        $etsyService = (new EtsyService());
+
         $model->model_name = $modelDTO->modelName;
         if ($modelDTO->categories) {
             $model->categories = $modelDTO->categories;
@@ -275,10 +277,12 @@ class ModelsService
                 ->where('active', true)
                 ->first();
             if ($shop) {
-                $listing = (new EtsyService())->getListing($shop, $modelDTO->shopListingId);
+                $listing = $etsyService->getListing($shop, $modelDTO->shopListingId);
                 if (! $listing) {
                     throw new Exception('Listing not found');
                 }
+                $listingImages = $etsyService->getListingImages($shop, $listing->listing_id);
+
                 if ($model->shopListingModel) {
                     (new ShopListingModelService())->updateShopListingModel(
                         shopListingModel: $model->shopListingModel,
@@ -287,6 +291,7 @@ class ModelsService
                             model: $model,
                             listingId: $modelDTO->shopListingId,
                             listing: $listing,
+                            listingImages: $listingImages,
                         ),
                     );
                 } else {
@@ -298,6 +303,7 @@ class ModelsService
                             model: $model,
                             listingId: $modelDTO->shopListingId,
                             listing: $listing,
+                            listingImages: $listingImages,
                         ),
                     );
                 }
