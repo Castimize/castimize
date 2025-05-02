@@ -291,7 +291,7 @@ class ModelsService
                             model: $model,
                             listingId: $modelDTO->shopListingId,
                             listing: $listing,
-                            listingImages: $listingImages,
+                            listingImages: $listingImages ? collect($listingImages->data) : null,
                         ),
                     );
                 } else {
@@ -303,7 +303,7 @@ class ModelsService
                             model: $model,
                             listingId: $modelDTO->shopListingId,
                             listing: $listing,
-                            listingImages: $listingImages,
+                            listingImages: $listingImages ? collect($listingImages->data) : null,
                         ),
                     );
                 }
