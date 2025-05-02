@@ -8,6 +8,7 @@ use App\DTO\Shops\Etsy\ListingDTO;
 use App\Models\Model;
 use App\Models\ShopListingModel;
 use App\Models\Shop;
+use Illuminate\Support\Facades\Log;
 
 class ShopListingModelService
 {
@@ -24,6 +25,7 @@ class ShopListingModelService
 
     public function updateShopListingModel(ShopListingModel $shopListingModel, ListingDTO $listingDTO): ShopListingModel
     {
+        Log::info('Updating shop listing model ' . PHP_EOL . print_r(((array) $listingDTO), true));
         $shopListingModel->update([
             'shop_listing_id' => $listingDTO->listingId,
             'taxonomy_id' => $listingDTO->taxonomyId,
