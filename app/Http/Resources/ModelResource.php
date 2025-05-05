@@ -57,7 +57,7 @@ class ModelResource extends JsonResource
         return [
             'id' => $this->id,
             'customer_id' => $this->customer_id,
-            'is_shop_owner' => $this->customer->shopOwner ? 1 : 0,
+            'is_shop_owner' => $this->customer?->shopOwner ? 1 : 0,
             'shop_listing_id' => $this->shopListingModel?->shop_listing_id ?? null,
             'material_name' => $this->material->name,
             'material_id' => $this->material->id,
