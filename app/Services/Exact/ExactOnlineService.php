@@ -2,6 +2,7 @@
 
 namespace App\Services\Exact;
 
+use App\Enums\Admin\PaymentIssuersEnum;
 use App\Models\Country;
 use App\Models\CurrencyHistoryRate;
 use App\Models\Customer;
@@ -306,10 +307,10 @@ class ExactOnlineService
     private function findGlAccountForPaymentMethod(string $paymentIssuer): ?string
     {
         Log::info($paymentIssuer);
-        if (Str::startsWith($paymentIssuer, 'stripe')) {
+        if (in_array($paymentIssuer, PaymentIssuersEnum::getStripeMethods(), true)) {
             return self::GL_1103;
         }
-        if ($paymentIssuer === 'ppcp') {
+        if ($paymentIssuer === PaymentIssuersEnum::Paypal->value) {
             return self::GL_1104;
         }
         return null;
@@ -337,25 +338,5 @@ class ExactOnlineService
             }
         }
         throw new RuntimeException(__('VAT Code not found for :countryCode', ['countryCode' => $countryCode]));
-    }
-
-    /**
-     * @param string $iban
-     * @return string|null
-     */
-    private function getBicFromIban(string $iban): ?string
-    {
-        return match (true) {
-            str_contains($iban, 'RABO') => 'RABONL2U',
-            str_contains($iban, 'ABNA') => 'ABNANL2A',
-            str_contains($iban, 'INGB') => 'INGBNL2A',
-            str_contains($iban, 'KNAB') => 'KNABNL2H',
-            str_contains($iban, 'SNSB') => 'SNSBNL2A',
-            str_contains($iban, 'TRIO') => 'TRIONL2U',
-            str_contains($iban, 'RBRB') => 'RBRBNL21',
-            str_contains($iban, 'ASNB') => 'ASNBNL21',
-            str_contains($iban, 'BUNQ') => 'BUNQNL2A',
-            str_contains($iban, 'FVLB') => 'FVLBNL22',
-        };
     }
 }

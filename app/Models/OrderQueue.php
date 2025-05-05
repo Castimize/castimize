@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Admin\OrderStatusesEnum;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -50,7 +51,6 @@ class OrderQueue extends Model
         'contract_date',
         'manufacturer_costs',
         'currency_code',
-        'total',
         'status_manual_changed',
         'remarks',
     ];
@@ -266,7 +266,7 @@ class OrderQueue extends Model
                 $allAtDc = true;
                 $allOrderQueues = $orderQueue->order->orderQueues;
                 foreach ($allOrderQueues as $oq) {
-                    if (in_array($oq->getLastStatus()->slug, OrderStatus::MANUFACTURER_STATUSES, true)) {
+                    if (in_array($oq->getLastStatus()->slug, OrderStatusesEnum::getManufacturerStatuses(), true)) {
                         $allAtDc = false;
                     }
                 }
@@ -370,12 +370,12 @@ class OrderQueue extends Model
     public function calculateTargetDate($statusSlug): mixed
     {
         return match ($statusSlug) {
-            'in-queue' => Carbon::parse($this->created_at)->addBusinessDays(1),
-            'rejection-request' => Carbon::parse($this->rejection?->created_at ?? now()->format('Y-m-d H:i:s'))->addBusinessDays(1),
-            'in-production' => $this->contract_date,
-            'available-for-shipping' => $this->getAvailableForShippingDate($this->final_arrival_date),
-            'in-transit-to-dc' => $this->getInTransitToDcDate($this->final_arrival_date),
-            'at-dc' => $this->final_arrival_date->subBusinessDays($this->shippingFee->default_lead_time),
+            OrderStatusesEnum::InQueue->value => Carbon::parse($this->created_at)->addBusinessDays(1),
+            OrderStatusesEnum::RejectionRequest->value => Carbon::parse($this->rejection?->created_at ?? now()->format('Y-m-d H:i:s'))->addBusinessDays(1),
+            OrderStatusesEnum::InProduction->value => $this->contract_date,
+            OrderStatusesEnum::AvailableForShipping->value => $this->getAvailableForShippingDate($this->final_arrival_date),
+            OrderStatusesEnum::InTransitToDc->value => $this->getInTransitToDcDate($this->final_arrival_date),
+            OrderStatusesEnum::AtDc->value => $this->final_arrival_date->subBusinessDays($this->shippingFee->default_lead_time),
             default => $this->final_arrival_date,
         };
     }

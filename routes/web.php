@@ -3,6 +3,7 @@
 use App\Http\Controllers\ModelsDownloadController;
 use App\Http\Controllers\PoLabelsDownloadController;
 use App\Http\Controllers\PrivateRejectionImageController;
+use App\Http\Controllers\Webhooks\Etsy\EtsyAuthController;
 use App\Http\Controllers\Webhooks\Payments\StripeWebhookController;
 use App\Http\Controllers\Webhooks\Shipping\ShippoWebhookController;
 use App\Http\Middleware\RequestLogger;
@@ -23,6 +24,15 @@ Route::group([
     Route::get('test', function () {
         dd((new ExactOnlineService())->getGlAccounts());
     });
+});
+
+Route::group([
+    'prefix' => 'providers',
+    'namespace' => 'App\Http\Controllers',
+], function () {
+    Route::get('etsy/oauth', EtsyAuthController::class)
+        ->name('providers.etsy.oauth');
+
 });
 
 Route::group(['middleware' => [RequestLogger::class]], function () {

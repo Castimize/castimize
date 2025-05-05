@@ -2,12 +2,14 @@
 
 namespace App\Services\Admin;
 
+use App\DTO\Order\CalculateShippingFeeUploadDTO;
 use App\Models\Country;
 use App\Models\ManufacturerCost;
 use App\Models\Material;
 use App\Models\Price;
 use App\Models\ShippingFee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -92,6 +94,28 @@ class CalculatePricesService
         return (float)($total * $quantity);
     }
 
+    public function calculateShippingFeeNew(string $countryIso, Collection $uploads)
+    {
+        $country = Country::with(['logisticsZone.shippingFee'])->where('alpha2', $countryIso)->first();
+        if ($country === null || $country->logisticsZone === null) {
+            throw new NotFoundHttpException(__('404 not found'));
+        }
+        $shippingFee = $country->logisticsZone->shippingFee;
+        $shippingFee->calculated_total = $shippingFee->default_rate;
+        $totalVolume = $this->getTotalVolumeOfUploads($uploads);
+        if ($totalVolume > $shippingFee->cc_threshold_1) {
+            $shippingFee->calculated_total += ($shippingFee->rate_increase_1 / 100) * $shippingFee->default_rate;
+        }
+        if ($totalVolume > $shippingFee->cc_threshold_2) {
+            $shippingFee->calculated_total += ($shippingFee->rate_increase_2 / 100) * $shippingFee->default_rate;
+        }
+        if ($totalVolume > $shippingFee->cc_threshold_3) {
+            $shippingFee->calculated_total += ($shippingFee->rate_increase_3 / 100) * $shippingFee->default_rate;
+        }
+
+        return $shippingFee;
+    }
+
     /**
      * @param Request $request
      * @return ShippingFee
@@ -119,14 +143,16 @@ class CalculatePricesService
     }
 
     /**
-     * @param array $uploads
+     * @param Collection $uploads
      * @return float|int|null
      */
-    private function getTotalVolumeOfUploads(array $uploads): float|int|null
+    private function getTotalVolumeOfUploads(Collection $uploads): float|int|null
     {
         $totalVolume = 0.00;
-        foreach ($uploads as $upload) {
-            $totalVolume += $upload['3dp_options']['model_stats_raw']['model']['box_volume'] * $upload['quantity'];
+        /** @var CalculateShippingFeeUploadDTO $calculateShippingFeeUploadDTO */
+        foreach ($uploads as $calculateShippingFeeUploadDTO) {
+            $totalVolume += $calculateShippingFeeUploadDTO->modelBoxVolume * $calculateShippingFeeUploadDTO->quantity;
+//            $totalVolume += $upload['3dp_options']['model_stats_raw']['model']['box_volume'] * $upload['quantity'];
         }
         return $totalVolume;
     }

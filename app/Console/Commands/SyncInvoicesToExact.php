@@ -1,23 +1,12 @@
 <?php
 
-namespace App\Console\Commands\Temp;
+namespace App\Console\Commands;
 
 use App\Jobs\SyncCustomerToExact;
-use App\Jobs\SyncExchangeRateToExact;
 use App\Jobs\SyncInvoiceToExact;
-use App\Models\CurrencyHistoryRate;
-use App\Models\Customer;
 use App\Models\Invoice;
-use App\Services\Admin\LogRequestService;
-use App\Services\Exact\ExactOnlineService;
-use AshAllenDesign\LaravelExchangeRates\Classes\ExchangeRate;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
-use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class SyncInvoicesToExact extends Command
 {
@@ -33,7 +22,7 @@ class SyncInvoicesToExact extends Command
      *
      * @var string
      */
-    protected $description = 'Temp command to sync invoices to Exact';
+    protected $description = 'Command to sync invoices to Exact';
 
     /**
      * Execute the console command.

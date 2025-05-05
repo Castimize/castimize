@@ -2,28 +2,31 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTO\Order\OrderDTO;
 use App\Http\Requests\ShowOrderWpRequest;
 use App\Http\Resources\OrderResource;
+use App\Jobs\CreateOrderFromDTO;
 use App\Jobs\CreateOrderFromWp;
+use App\Jobs\UpdateOrderFromDTO;
 use App\Models\Country;
+use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrdersService;
 use App\Services\Exact\ExactOnlineService;
-use Codexshaper\WooCommerce\Facades\Query;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use JsonException;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 class OrdersApiController extends ApiController
 {
-    public function __construct(protected OrdersService $ordersService, protected ExactOnlineService $exactOnlineService)
-    {
+    public function __construct(
+        protected OrdersService $ordersService,
+        protected ExactOnlineService $exactOnlineService,
+    ) {
     }
 
     /**
@@ -36,9 +39,9 @@ class OrdersApiController extends ApiController
 //        dd($wpCustomer);
 //        $order = Order::where('order_number', $orderNumber)->first();
 //        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($orderNumber);
+//        dd($wpOrder);
 //        $isPaid = $wpOrder['date_paid'] !== null;
 //        (new OrdersService())->storeOrderLineItems($wpOrder, $order, $order->customer, $order->country, $order->currency, $isPaid);
-//        dd($wpOrder);
         abort_if(Gate::denies('viewOrder'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $order = Order::where('order_number', $orderNumber)->first();
@@ -103,7 +106,8 @@ class OrdersApiController extends ApiController
             $logRequestId = $request->log_request_id;
         }
 
-        CreateOrderFromWp::dispatch($request->id, $logRequestId);
+//        CreateOrderFromWp::dispatch($request->id, $logRequestId);
+        CreateOrderFromDTO::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
         $response = $wpOrder;
@@ -120,12 +124,15 @@ class OrdersApiController extends ApiController
     public function updateOrderWp(Request $request): JsonResponse
     {
         $order = Order::where('wp_id', $request->id)->first();
+        $logRequestId = null;
+        if ($request->has('log_request_id')) {
+            $logRequestId = $request->log_request_id;
+        }
         if ($order === null) {
-            $logRequestId = null;
-            if ($request->has('log_request_id')) {
-                $logRequestId = $request->log_request_id;
-            }
-            CreateOrderFromWp::dispatch($request->id, $logRequestId);
+//            CreateOrderFromWp::dispatch($request->id, $logRequestId);
+            CreateOrderFromDTO::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
+        } else {
+            UpdateOrderFromDTO::dispatch(OrderDto::fromWpRequest($request), $logRequestId);
         }
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);

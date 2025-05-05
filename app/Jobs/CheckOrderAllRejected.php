@@ -13,16 +13,11 @@ class CheckOrderAllRejected implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(private Order $order)
-    {
+    public function __construct(
+        private Order $order,
+    ) {
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         $cacheKey = sprintf('create-order-all-rejected-job-%s', $this->order->id);

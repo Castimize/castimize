@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CountriesTableSeeder::class);
         $this->call(OrderStatusSeeder::class);
 
-        if (env('APP_ENV') === 'local') {
+        if (env('APP_ENV') === 'local' || env('APP_ENV') === 'testing') {
             $this->call(TestDataSeeder::class);
         }
     }

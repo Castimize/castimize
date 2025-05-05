@@ -46,5 +46,11 @@ return [
             'tolerance' => env('STRIPE_WEBHOOK_TOLERANCE', 300),
         ],
     ],
+    'shops' => [
+        'etsy' => [
+            'client_id' => env('ETSY_CLIENT_ID'),
+            'client_secret' => env('ETSY_CLIENT_SECRET'),
+        ],
+    ],
 
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Nova\Lenses;
 
+use App\Enums\Admin\OrderStatusesEnum;
 use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Actions\DownloadPoLabelsAction;
 use App\Nova\Actions\PoReprintByManufacturerAction;
@@ -58,7 +59,7 @@ class AvailableForShipping extends Lens
     public static function query(LensRequest $request, $query)
     {
         return $request->withOrdering($request->withFilters(
-            $query->whereHasLastOrderQueueStatus('available-for-shipping')
+            $query->whereHasLastOrderQueueStatus(OrderStatusesEnum::AvailableForShipping->value)
                 ->where('manufacturer_id', auth()->user()->manufacturer?->id)
                 ->whereHas('order', function (Builder $query) {
                     $query->removeTestEmailAddresses('email')
@@ -90,13 +91,13 @@ class AvailableForShipping extends Lens
     {
         return [
             PoStatusCard::make()->statuses([
-                'in-queue' => __('In queue'),
-                'in-production' => __('In production'),
-                'available-for-shipping' => __('Available for shipping'),
-                'in-transit-to-dc' => __('In transit to dc'),
-                'at-dc' => __('Completed'),
+                OrderStatusesEnum::InQueue->value => __('In queue'),
+                OrderStatusesEnum::InProduction->value => __('In production'),
+                OrderStatusesEnum::AvailableForShipping->value => __('Available for shipping'),
+                OrderStatusesEnum::InTransitToDc->value => __('In transit to dc'),
+                OrderStatusesEnum::AtDc->value => __('Completed'),
             ])
-                ->activeSlug('available-for-shipping')
+                ->activeSlug(OrderStatusesEnum::AvailableForShipping->value)
                 ->refreshIntervalSeconds(),
         ];
     }

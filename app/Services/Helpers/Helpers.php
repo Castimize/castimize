@@ -9,6 +9,5 @@
  */
 function currencyFormatter(float $amount, string $currency = 'USD', string $locale = 'nl_NL'): string
 {
-    $formatter = new NumberFormatter($locale, NumberFormatter::CURRENCY);
-    return $formatter->formatCurrency($amount, $currency);
+    return (new NumberFormatter($locale, NumberFormatter::CURRENCY))->formatCurrency($amount, $currency);
 }

@@ -2,7 +2,6 @@
 
 namespace App\Services\Admin;
 
-use App\Models\Address;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;

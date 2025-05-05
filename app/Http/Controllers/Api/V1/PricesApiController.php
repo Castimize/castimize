@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTO\Order\CalculateShippingFeeUploadDTO;
 use App\Http\Resources\CalculatedPriceResource;
 use App\Http\Resources\CalculatedShippingFeeResource;
 use App\Services\Admin\CalculatePricesService;
@@ -56,7 +57,10 @@ class PricesApiController extends ApiController
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         try {
-            $shippingFee = $this->calculatePricesService->calculateShippingFee($request);
+            $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
+                countryIso: $request->country,
+                uploads: collect($request->uploads)->map(fn ($upload) => CalculateShippingFeeUploadDTO::fromWpRequest($upload)),
+            );
         } catch (UnprocessableEntityHttpException $e) {
 //            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
             return response()->json([

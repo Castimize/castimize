@@ -488,11 +488,11 @@ class Order extends Resource
 //                ->sizeOnForms('w-full')
                 ->onlyOnForms(),
 
-            Text::make(__('Shipping address line 1'), 'shipping_address_1')
+            Text::make(__('Shipping address line 1'), 'shipping_address_line1')
 //                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 
-            Text::make(__('Shipping address line 2'), 'shipping_address_2')
+            Text::make(__('Shipping address line 2'), 'shipping_address_line2')
 //                ->sizeOnForms('w-1/2')
                 ->onlyOnForms(),
 

@@ -25,59 +25,6 @@ use Shippo_Transaction;
 
 class ShippoService
 {
-    public const VAT_TYPES = [
-        'EIN' => 'EIN',
-        'VAT' => 'VAT',
-        'IOSS' => 'IOSS',
-        'ARN' => 'ARN',
-    ];
-
-    public const DISTANCE_UNITS = [
-        'cm' => 'Cm',
-        'in' => 'In',
-        'ft' => 'Ft',
-        'mm' => 'Mm',
-        'm' => 'M',
-        'yd' => 'Yd',
-    ];
-
-    public const MASS_UNITS = [
-        'g' => 'G',
-        'oz' => 'Oz',
-        'lb' => 'Lb',
-        'kg' => 'Kg',
-    ];
-
-    public const SERVICES = [
-        'ups_standard' => 'UPS Standard℠',
-        'ups_saver' => 'UPS Express Saver',
-        'ups_express_saver_worldwide_ca' => 'UPS Worldwide Express Saver®',
-    ];
-
-    public const BUILDING_TYPES = [
-        'apartment' => 'Apartment',
-        'building' => 'Building',
-        'department' => 'Department',
-        'floor' => 'Floor',
-        'room' => 'Room',
-        'suite' => 'Suite',
-    ];
-
-    public const BUILDING_LOCATION_TYPES = [
-        'Front Door' => 'Front Door',
-        'Back Door' => 'Back Door',
-        'Side Door' => 'Side Door',
-        'Knock on Door' => 'Knock on Door',
-        'Ring Bell' => 'Ring Bell',
-        'Mail Room' => 'Mail Room',
-        'Office' => 'Office',
-        'Reception' => 'Reception',
-        'In/At Mailbox' => 'In At Mailbox',
-        'Security Deck' => 'Security Deck',
-        'Shipping Dock' => 'Shipping Dock',
-        'Other' => 'Other',
-    ];
-
     public $packageTypes = [];
 
     protected $_carriers = [];

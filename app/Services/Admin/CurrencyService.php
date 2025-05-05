@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class CurrencyService
 {
-    private $exchangeRate;
+    private ExchangeRate $exchangeRate;
 
     public function __construct()
     {

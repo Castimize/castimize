@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTO\Model\ModelDTO;
 use App\Http\Resources\ModelResource;
 use App\Models\Customer;
 use App\Models\Material;
@@ -12,6 +13,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class ModelsApiController extends ApiController
@@ -68,6 +71,24 @@ class ModelsApiController extends ApiController
         return $response;
     }
 
+    public function showModelsWpCustomerPaginated(Request $request, int $customerId): JsonResponse
+    {
+        $customer = Customer::where('wp_id', $customerId)->first();
+        if ($customer === null) {
+            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+
+        $response = $this->modelsService->getModelsPaginated($request, $customer);
+
+        LogRequestService::addResponse(request(), $response['items']);
+        return response()->json([
+            'items' => $response['items'],
+            'total' => $response['total'],
+            'filtered' => $response['items']->count(),
+        ]);
+    }
+
     public function storeModelWp(Request $request): JsonResponse
     {
         $model = $this->modelsService->storeModelFromApi($request);
@@ -100,7 +121,7 @@ class ModelsApiController extends ApiController
         return response()->json(['model_name' => $modelName]);
     }
 
-    public function getCustomModelNames(int $customerId, Request $request): JsonResponse
+    public function getCustomModelAttributes(int $customerId, Request $request): JsonResponse
     {
         ini_set('precision', 53);
         $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
@@ -123,6 +144,9 @@ class ModelsApiController extends ApiController
 
             $newUploads[$itemKey] = $upload;
             if ($model) {
+                if ($model->thumb_name) {
+                    $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(env('FILESYSTEM_DISK'))->exists($model->thumb_name) ? sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $model->thumb_name) : '/' . $model->thumb_name;
+                }
                 $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
             }
         }
@@ -139,7 +163,8 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $model = $this->modelsService->storeModelFromApi($request, $customer);
+        $model = $this->modelsService->storeModelFromModelDTO(ModelDTO::fromWpRequest($request, $customer->id), $customer);
+//        $model = $this->modelsService->storeModelFromApi($request, $customer);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
@@ -153,7 +178,8 @@ class ModelsApiController extends ApiController
         if (!$model || (int)$model->customer->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
-        $model = $this->modelsService->updateModelFromApi($request, $model, $model->customer_id);
+        $model = $this->modelsService->updateModelFromModelDTO($model, ModelDTO::fromWpUpdateRequest($request, $model, $model->customer_id), $model->customer_id);
+//        $model = $this->modelsService->updateModelFromApi($request, $model, $model->customer_id);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);

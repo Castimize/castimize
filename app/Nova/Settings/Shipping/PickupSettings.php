@@ -2,11 +2,10 @@
 
 namespace App\Nova\Settings\Shipping;
 
-use App\Services\Shippo\ShippoService;
+use App\Enums\Shippo\ShippoBuildingLocationTypesEnum;
+use App\Enums\Shippo\ShippoBuildingTypesEnum;
 use Devloops\NovaSystemSettings\Contracts\SystemSettings;
-use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
-use Laravel\Nova\Fields\Text;
 
 
 class PickupSettings extends SystemSettings
@@ -38,11 +37,11 @@ class PickupSettings extends SystemSettings
     {
         return [
             Select::make(__('Building type'), 'buildingType')
-                ->options(ShippoService::BUILDING_TYPES)
+                ->options(ShippoBuildingTypesEnum::values())
                 ->displayUsingLabels(),
 
             Select::make(__('Building location type'), 'buildingLocationType')
-                ->options(ShippoService::BUILDING_LOCATION_TYPES)
+                ->options(ShippoBuildingLocationTypesEnum::values())
                 ->displayUsingLabels(),
         ];
     }

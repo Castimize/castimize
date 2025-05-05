@@ -2,6 +2,7 @@
 
 namespace App\Nova\Actions;
 
+use App\Enums\Admin\OrderStatusesEnum;
 use App\Models\OrderQueue;
 use App\Models\ReprintCulprit;
 use App\Models\ReprintReason;
@@ -75,15 +76,15 @@ class PoReprintByDcAction extends Action
                 'upload_id' => $model->upload_id,
                 'order_id' => $model->upload->order_id,
                 'shipping_fee_id' => $model->shipping_fee_id,
-                'manufacturer_shipment_id' => $model->manufacturer_shipment_id,
+                'manufacturer_shipment_id' => null,
                 'manufacturer_cost_id' => $model->manufacturer_cost_id,
-                'customer_shipment_id' => $model->customer_shipment_id,
+                'customer_shipment_id' => null,
                 'due_date' => $model->due_date,
                 'final_arrival_date' => $model->final_arrival_date,
                 'manufacturer_costs' => $model->manufacturer_costs,
                 'currency_code' => $model->currency_code,
             ]);
-            $orderQueuesService->setStatus($newOrderQueue, 'in-queue');
+            $orderQueuesService->setStatus($newOrderQueue, OrderStatusesEnum::InQueue->value);
         }
 
         return ActionResponse::message(__('Successfully created reprint for selected PO\'s.'));

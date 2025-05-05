@@ -35,6 +35,7 @@ use App\Nova\Settings\Shipping\GeneralSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Nova\Settings\Shipping\PickupSettings;
 use App\Nova\ShippingFee;
+use App\Nova\ShopOwner;
 use App\Nova\State;
 use App\Nova\User;
 //use CodencoDev\NovaGridSystem\NovaGridSystem;
@@ -68,6 +69,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
         Nova::mainMenu(function (Request $request) {
             if ($request->user()->isManufacturer()) {
+                Nova::withoutGlobalSearch();
                 return [
                     MenuSection::dashboard(ManufacturerDashboard::class)
                         ->icon('chart-bar'),
@@ -91,6 +93,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Order::class),
                     MenuItem::resource(OrderQueue::class),
                     MenuItem::resource(Customer::class),
+                    MenuItem::resource(ShopOwner::class)
+                        ->canSee(function (NovaRequest $request) {
+                            return $request->user()->isSuperAdmin() || $request->user()->username = 'oknoeff';
+                        }),
                     MenuItem::resource(Reprint::class),
                     MenuItem::resource(Rejection::class),
                 ])->icon('clipboard-list')

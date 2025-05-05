@@ -18,7 +18,7 @@ class ModelResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $thumb = sprintf('%s.thumb.png', str_replace('_resized', '', $this->file_name));
+        $thumb = $this->thumb_name ?? sprintf('%s.thumb.png', str_replace('_resized', '', $this->file_name));
         $metaData = $this->meta_data;
 //        if ($metaData) {
 //            for ($i = 0, $iMax = count($metaData); $i < $iMax; $i++) {
@@ -41,9 +41,24 @@ class ModelResource extends JsonResource
             $calculatedTotal = (new CalculatePricesService())->calculatePriceOfModel($price, $this->model_volume_cc, $this->model_surface_area_cm2);
         }
 
+        $fileThumbnail = null;
+        $siteThumb = sprintf('%s/%s', env('APP_SITE_URL'), $thumb);
+        if (Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb)) {
+            $fileThumbnail = sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $thumb);
+        } else {
+//            $fileHeaders = get_headers($siteThumb);
+//            if (!str_contains($fileHeaders[0], '404')) {
+                $fileThumbnail = '/' . $thumb;
+//            }
+        }
+
+        $thumbnailKey = '3'. $this->material->wp_id . $this->model_scale . 'mm';
+
         return [
             'id' => $this->id,
             'customer_id' => $this->customer_id,
+            'is_shop_owner' => $this->customer?->shopOwner ? 1 : 0,
+            'shop_listing_id' => $this->shopListingModel?->shop_listing_id ?? null,
             'material_name' => $this->material->name,
             'material_id' => $this->material->id,
             'material_wp_id' => $this->material->wp_id,
@@ -53,7 +68,8 @@ class ModelResource extends JsonResource
             'raw_file_name' => str_replace('wp-content/uploads/p3d/', '', $this->file_name),
             'file_url' => sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), str_replace('_resized', '', $this->file_name)),
             'file_url_site' => sprintf('%s/%s', env('APP_SITE_URL'), str_replace('_resized', '', $this->file_name)),
-            'file_thumbnail' => Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $thumb) : '',
+            'file_thumbnail' => $fileThumbnail,
+            'thumbnail_key' => $thumbnailKey,
             'model_volume_cc' => $this->model_volume_cc,
             'model_volume_cc_display' => round($this->model_volume_cc, 2) . 'cm3',
             'model_x_length' => $this->model_x_length,

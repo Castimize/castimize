@@ -2,6 +2,8 @@
 
 namespace App\Nova\Settings\Shipping;
 
+use App\Enums\Shippo\ShippoDistanceUnitsEnum;
+use App\Enums\Shippo\ShippoMassUnitsEnum;
 use App\Services\Shippo\ShippoService;
 use Devloops\NovaSystemSettings\Contracts\SystemSettings;
 use Laravel\Nova\Fields\Select;
@@ -41,7 +43,7 @@ class ParcelSettings extends SystemSettings
     {
         return [
             Select::make(__('Distance unit'), 'distanceUnit')
-                ->options(ShippoService::DISTANCE_UNITS)
+                ->options(ShippoDistanceUnitsEnum::values())
                 ->displayUsingLabels(),
 
             Text::make(__('Length'),'length'),
@@ -51,7 +53,7 @@ class ParcelSettings extends SystemSettings
             Text::make(__('Height'), 'height'),
 
             Select::make(__('Mass unit'), 'massUnit')
-                ->options(ShippoService::MASS_UNITS)
+                ->options(ShippoMassUnitsEnum::values())
                 ->displayUsingLabels(),
 
             Text::make(__('Weight'), 'weight'),
