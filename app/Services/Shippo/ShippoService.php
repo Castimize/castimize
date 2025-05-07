@@ -2,6 +2,7 @@
 
 namespace App\Services\Shippo;
 
+use App\Enums\Admin\CurrencyEnum;
 use App\Models\Material;
 use App\Models\Order;
 use App\Models\Upload;
@@ -330,8 +331,8 @@ class ShippoService
             'quantity' => $upload->quantity,
             'net_weight' => round($netWeight, 2), // (in gram) = volume (cm3) * density + bag
             'mass_unit' => $this->customsItemSettings->massUnit,
-            'value_amount' => $upload->total,
-            'value_currency' => $upload->currency_code ?? 'USD',
+            'value_amount' => $upload->total > 0.00 ? $upload->total : 1.00,
+            'value_currency' => $upload->total > 0.00 ? ($upload->currency_code ?? CurrencyEnum::USD->value) : CurrencyEnum::USD->value,
             'origin_country' => $isCustomerShipment ? 'NL' : 'US',
             'tariff_number' => $tariffNUmber,
             'metadata' => __('Order ID #:order_number', ['order_number' => $upload->order->order_number]),
@@ -351,7 +352,7 @@ class ShippoService
             'certify' => true,
             'certify_signer' => $this->generalSettings->certifySigner,
             'commercial_invoice' => true,
-            'contents_type' => 'MERCHANDISE',
+            'contents_type' => $params['contents_type'] ?? 'MERCHANDISE',
             'contents_explanation' => $this->generalSettings->contentsExplanation,
             'non_delivery_option' => 'RETURN',
             'exporter_reference' => $params['exporter_reference'],

@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Enums\Shippo\ShippoContentTypesEnum;
 use App\Models\Country;
 use App\Models\CustomerShipment;
 use App\Models\ManufacturerShipment;
@@ -181,11 +182,15 @@ class ShippingService
         $orderNumber = null;
         $currency = null;
         $shippingCountry = null;
+        $contentsType = ShippoContentTypesEnum::GIFT->value;
         foreach ($customerShipment->selectedPOs as $selectedPO) {
             if ($orderNumber === null) {
                 $orderNumber = $selectedPO->upload->order->order_number;
                 $currency = $selectedPO->upload->order->currency_code;
                 $shippingCountry = $selectedPO->upload->order->shipping_country;
+            }
+            if ($selectedPO->upload->total > 0.00) {
+                $contentsType = ShippoContentTypesEnum::MERCHANDISE->value;
             }
             $this->_shippoService->createCustomsItem($selectedPO->upload);
         }
@@ -195,6 +200,7 @@ class ShippingService
                 'exporter_reference' => $customerShipment->id,
                 'importer_reference' => $orderNumber,
                 'currency' => $currency,
+                'contents_type' => $contentsType,
                 //'eori_number' => strtoupper($customerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
             ])
             ->createShipment();
