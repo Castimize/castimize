@@ -2,7 +2,7 @@
 
 namespace App\Services\Admin;
 
-use App\Enums\Shippo\ShippoContentTypesEnum;
+use App\Enums\Shippo\ShippoCustomsDeclarationContentTypesEnum;
 use App\Models\Country;
 use App\Models\CustomerShipment;
 use App\Models\ManufacturerShipment;
@@ -182,7 +182,7 @@ class ShippingService
         $orderNumber = null;
         $currency = null;
         $shippingCountry = null;
-        $contentsType = ShippoContentTypesEnum::GIFT->value;
+        $contentsType = ShippoCustomsDeclarationContentTypesEnum::GIFT->value;
         foreach ($customerShipment->selectedPOs as $selectedPO) {
             if ($orderNumber === null) {
                 $orderNumber = $selectedPO->upload->order->order_number;
@@ -190,7 +190,7 @@ class ShippingService
                 $shippingCountry = $selectedPO->upload->order->shipping_country;
             }
             if ($selectedPO->upload->total > 0.00) {
-                $contentsType = ShippoContentTypesEnum::MERCHANDISE->value;
+                $contentsType = ShippoCustomsDeclarationContentTypesEnum::MERCHANDISE->value;
             }
             $this->_shippoService->createCustomsItem($selectedPO->upload);
         }

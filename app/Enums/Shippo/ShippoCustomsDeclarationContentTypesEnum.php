@@ -2,7 +2,7 @@
 
 namespace App\Enums\Shippo;
 
-enum ShippoContentTypesEnum: string
+enum ShippoCustomsDeclarationContentTypesEnum: string
 {
     case DOCUMENTS = 'DOCUMENTS';
     case GIFT = 'GIFT';

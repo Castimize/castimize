@@ -3,6 +3,11 @@
 namespace App\Services\Shippo;
 
 use App\Enums\Admin\CurrencyEnum;
+use App\Enums\Shippo\ShippoCustomsDeclarationContentTypesEnum;
+use App\Enums\Shippo\ShippoCustomsDeclarationIncoTermsEnum;
+use App\Enums\Shippo\ShippoCustomsDeclarationNonDeliveryOptionsEnum;
+use App\Enums\Shippo\ShippoLabelFileTypesEnum;
+use App\Enums\Shippo\ShippoOrderStatusesEnum;
 use App\Models\Material;
 use App\Models\Order;
 use App\Models\Upload;
@@ -277,7 +282,7 @@ class ShippoService
             'currency' => $order->currency_code,
             'notes' => $order->comments,
             'order_number' => $order->order_number,
-            'order_status' => 'PAID',
+            'order_status' => ShippoOrderStatusesEnum::PAID->value,
             'placed_at' => str_replace('+00:00', 'Z', Carbon::parse($order->created_at)->setTimezone('UTC')->format('c')),
             'shipping_cost' => (string)$order->shipping_fee,
             'shipping_cost_currency' => $order->currency_code,
@@ -352,12 +357,12 @@ class ShippoService
             'certify' => true,
             'certify_signer' => $this->generalSettings->certifySigner,
             'commercial_invoice' => true,
-            'contents_type' => $params['contents_type'] ?? 'MERCHANDISE',
+            'contents_type' => $params['contents_type'] ?? ShippoCustomsDeclarationContentTypesEnum::MERCHANDISE->value,
             'contents_explanation' => $this->generalSettings->contentsExplanation,
-            'non_delivery_option' => 'RETURN',
+            'non_delivery_option' => ShippoCustomsDeclarationNonDeliveryOptionsEnum::RETURN->value,
             'exporter_reference' => $params['exporter_reference'],
             'importer_reference' => $params['importer_reference'],
-            'inco_term' => 'DDU',
+            'inco_term' => ShippoCustomsDeclarationIncoTermsEnum::DDU->value,
 //            'b13a_filing_option' => 'NOT_REQUIRED',
             'currency' => $params['currency'],
             'exporter_identification' => [
@@ -407,7 +412,7 @@ class ShippoService
         $typeShipment = $isCustomerShipment ? 'customer_shipment' : 'manufacturer_shipment';
         $data = [
             'rate' => $rateId,
-            'label_file_type' => 'ZPLII',
+            'label_file_type' => ShippoLabelFileTypesEnum::ZPLII->value,
             'metadata' => sprintf('%s:%s', $typeShipment, $shipmentId),
             'async' => false,
         ];
