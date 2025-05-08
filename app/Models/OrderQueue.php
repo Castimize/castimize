@@ -308,9 +308,9 @@ class OrderQueue extends Model
         return $options;
     }
 
-    public static function getOverviewHeaders(): array
+    public static function getOverviewHeaders(bool $isCustomerShipment = true): array
     {
-        return [
+        $headers = [
             'material' => __('Material'),
             'id' => __('PO'),
             'parts' => __('# Parts'),
@@ -318,6 +318,12 @@ class OrderQueue extends Model
             'weight' => __('Weight (g)'),
             'costs' => __('Costs'),
         ];
+
+        if ($isCustomerShipment) {
+            $headers['remarks'] = __('Remarks');
+        }
+
+        return $headers;
     }
 
     public function getOverviewItem(bool $isCustomerShipment = true): array
@@ -359,7 +365,7 @@ class OrderQueue extends Model
             $currencyCode = $isCustomerShipment ? $item->upload->currency_code : $item->currency_code;
         }
 
-        return [
+        $footer = [
             'material' => '',
             'id' => '',
             'parts' => $totalParts,
@@ -367,6 +373,12 @@ class OrderQueue extends Model
             'weight' => round($totalWeight, 2),
             'costs' => currencyFormatter((float)$totalCosts, $currencyCode),
         ];
+
+        if ($isCustomerShipment) {
+            $footer['remarks'] = '';
+        }
+
+        return $footer;
     }
 
     /**
