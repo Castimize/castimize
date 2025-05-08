@@ -326,7 +326,7 @@ class OrderQueue extends Model
         $netWeight = ($this->upload->model_volume_cc * $this->upload->material->density + $customsItemSettings->bag) * $this->upload->quantity;
         $costs = $isCustomerShipment ? (float)$this->upload->total : (float)$this->manufacturer_costs;
         $currencyCode = $isCustomerShipment ? $this->upload->currency_code : $this->currency_code;
-        return [
+        $data = [
             'material' => $this->upload->material_name,
             'id' => $this->id,
             'parts' => $this->upload->model_parts * $this->upload->quantity,
@@ -334,6 +334,12 @@ class OrderQueue extends Model
             'weight' => round($netWeight, 2),
             'costs' => currencyFormatter($costs, $currencyCode),
         ];
+
+        if ($isCustomerShipment) {
+            $data['remarks'] = $this->remarks;
+        }
+
+        return $data;
     }
 
     public static function getOverviewFooter(Collection $items, bool $isCustomerShipment = true): array
