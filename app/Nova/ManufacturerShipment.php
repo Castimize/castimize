@@ -278,7 +278,7 @@ class ManufacturerShipment extends Resource
                 ->required()
                 ->placeholder(__('Select PO\'s'))
                 ->options(\App\Models\OrderQueue::getAvailableForShippingOrderQueueOptions())
-                ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders()),
+                ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders(false)),
 
             Heading::make('<h3 class="font-normal text-xl">' . __('General') . '</h3>')
                 ->asHtml()
