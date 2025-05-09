@@ -35,7 +35,7 @@ class ShippingProfileDTO
         return new self(
             shopId: $shopId,
             shippingProfileId: null,
-            title: 'Castimize test shipping profile',
+            title: 'Castimize shipping profile',
             originCountryIso: 'NL',
             primaryCost: 7.75,
             secondaryCost: 0.00,

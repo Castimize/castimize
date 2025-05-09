@@ -87,7 +87,23 @@ class EtsyService
         $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         $etsyShop = $this->addShopToShopOwnerShop($shop);
-        $this->createShippingProfile($shop, ShippingProfileDTO::fromShop($etsyShop->shop_id));
+
+        $shippingProfileDTO = ShippingProfileDTO::fromShop($etsyShop->shop_id);
+        $shippingProfiles = $this->getShippingProfiles($shop);
+        $createShippingProfile = true;
+        foreach ($shippingProfiles->data as $shippingProfile) {
+            if ($shippingProfile->title === $shippingProfileDTO->title) {
+                $createShippingProfile = false;
+
+                $shippingProfileDTO->shippingProfileId = $shippingProfile->shipping_profile_id;
+
+                $this->addShippingProfileToShopOwnerShop($shop, $shippingProfile);
+            }
+        }
+
+        if ($createShippingProfile) {
+            $this->createShippingProfile($shop, $shippingProfileDTO);
+        }
         $this->createShopReturnPolicy($shop);
     }
 
