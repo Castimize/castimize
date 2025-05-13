@@ -71,7 +71,7 @@ class Price extends Model
     /**
      * Interact with price model volume cc
      */
-    protected function priceModelVolumeCc(): Attribute
+    protected function priceVolumeCc(): Attribute
     {
         return Attribute::make(
             get: fn ($value) => $value / 100,
