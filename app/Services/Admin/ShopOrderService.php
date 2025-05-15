@@ -11,7 +11,7 @@ use Etsy\Resources\Receipt;
 
 class ShopOrderService
 {
-    public function createShopOrder(Shop $shop, Receipt $receipt, Order $wcOrder): ShopOrder
+    public function createShopOrder(Shop $shop, Receipt $receipt, $wcOrder): ShopOrder
     {
         return $shop->shopOrders()->create([
             'shop_owner_id' => $shop->shop_owner_id,
