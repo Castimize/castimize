@@ -14,3 +14,6 @@ Schedule::command('castimize:get-currency-historical-rates')
 Schedule::command('castimize:sync-invoices-to-exact')
     ->timezone('Europe/Amsterdam')
     ->everyThreeHours();
+Schedule::command('castimize:get-etsy-receipts')
+    ->timezone('Europe/Amsterdam')
+    ->hourly();
