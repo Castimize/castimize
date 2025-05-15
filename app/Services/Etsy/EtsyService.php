@@ -74,6 +74,10 @@ class EtsyService
         $code = $request->code;
         $shop = Shop::whereJsonContains('shop_oauth->nonce', $nonce)->first();
 
+        if ($shop === null) {
+            throw new Exception(__('Shop not found'));
+        }
+
         $client = new Client(client_id: $shop->shop_oauth['client_id']);
 
         $response = $client->requestAccessToken(
