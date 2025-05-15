@@ -63,7 +63,7 @@ class ListingDTO
             $price = $currencyService->convertCurrency(config('app.currency'), $shopOauth['shop_currency'], $price);
         }
 
-        Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listingImages->toJson(), true));
+        Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listingImages, true));
 
         return new self(
             shopId: $shopOauth['shop_id'],
