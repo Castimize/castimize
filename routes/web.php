@@ -26,15 +26,6 @@ Route::group([
     });
 });
 
-Route::group([
-    'prefix' => 'providers',
-    'namespace' => 'App\Http\Controllers',
-], function () {
-    Route::get('etsy/oauth', EtsyAuthController::class)
-        ->name('providers.etsy.oauth');
-
-});
-
 Route::group(['middleware' => [RequestLogger::class]], function () {
     Route::group([
         'namespace' => 'App\Http\Controllers',
@@ -45,6 +36,14 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
         Route::post('/webhooks/shipping/shippo/callback', ShippoWebhookController::class)
             ->name('webhooks.shipping.shippo.callback')
             ->middleware(VerifyShippoWebhookSignature::class);
+    });
+
+    Route::group([
+        'prefix' => 'providers',
+        'namespace' => 'App\Http\Controllers',
+    ], function () {
+        Route::get('etsy/oauth', EtsyAuthController::class)
+            ->name('providers.etsy.oauth');
     });
 });
 
