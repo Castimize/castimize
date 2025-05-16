@@ -8,7 +8,9 @@ use App\Models\Shop;
 use App\Services\Admin\ShopOrderService;
 use App\Services\Etsy\EtsyService;
 use App\Services\Woocommerce\WoocommerceApiService;
+use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class GetEtsyReceipts extends Command
 {
@@ -35,14 +37,18 @@ class GetEtsyReceipts extends Command
         $shops = Shop::with(['shopOwner.customer'])->where('active', true)->where('shop', ShopOwnerShopsEnum::Etsy->value)->get();
 
         foreach ($shops as $shop) {
-            $receipts = $etsyService->getShopReceipts($shop, ['min_created' => $date]);
-            foreach ($receipts->data as $receipt) {
-                $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
-                if (count($lines) > 0) {
-                    $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
-                    $wcOrder = $woocommerceApiService->createOrder($orderDTO);
-                    $shopOrderService->createShopOrder($shop, $receipt, $wcOrder);
+            try {
+                $receipts = $etsyService->getShopReceipts($shop, ['min_created' => $date]);
+                foreach ($receipts->data as $receipt) {
+                    $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
+                    if (count($lines) > 0) {
+                        $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
+                        $wcOrder = $woocommerceApiService->createOrder($orderDTO);
+                        $shopOrderService->createShopOrder($shop, $receipt, $wcOrder);
+                    }
                 }
+            } catch (Exception $e) {
+                Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getLine());
             }
         }
 
