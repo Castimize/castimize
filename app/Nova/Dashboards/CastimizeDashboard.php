@@ -22,6 +22,11 @@ class CastimizeDashboard extends Dashboard
 {
     use CustomMetricsCharts;
 
+    public function name()
+    {
+        return app()->environment('production') ? __('Castimize Dashboard') : __('Castimize Staging Dashboard');
+    }
+
     /**
      * Get the cards for the dashboard.
      *
