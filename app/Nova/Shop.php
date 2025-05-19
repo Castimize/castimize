@@ -32,7 +32,10 @@ class Shop extends Resource
      *
      * @var string
      */
-    public static $title = 'id';
+    public function title()
+    {
+        return sprintf('%s - %s (%s)', $this->id, $this->shopOwner->customer->name, $this->shopOwner->customer->wp_id);
+    }
 
     /**
      * The columns that should be searched.

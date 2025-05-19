@@ -113,7 +113,7 @@ class EtsyService
 
     public function refreshAccessToken(Shop $shop): void
     {
-        if (!array_key_exists('refresh_token', $shop->shop_oauth) || !array_key_exists('\App\Services\Etsy\EtsyService', $shop->shop_oauth)) {
+        if (!array_key_exists('refresh_token', $shop->shop_oauth) || !array_key_exists('access_token', $shop->shop_oauth)) {
             $shop->active = 0;
             $shop->save();
             throw new Exception(__('Shop is unauthenticated :shopOwner', ['shopOwner' => $shop->shop_owner_id]));
