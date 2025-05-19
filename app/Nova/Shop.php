@@ -68,6 +68,10 @@ class Shop extends Resource
             ID::make()
                 ->sortable(),
 
+            Text::make(__('Customer'), function () {
+                return sprintf('%s (%s)', $this->shopOwner->customer->name, $this->shopOwner->customer->wp_id);
+            }),
+
             BelongsTo::make(__('Shop owner'), 'shopOwner', ShopOwner::class)
                 ->onlyOnForms(),
 
