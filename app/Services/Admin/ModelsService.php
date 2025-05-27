@@ -48,7 +48,9 @@ class ModelsService
                 'categories' => 'categories',
             ];
 
-            if ($mapper[$request->order_column] === 'name') {
+            if (! array_key_exists($request->order_column, $mapper)) {
+                $customerModels->orderBy('id');
+            } elseif ($mapper[$request->order_column] === 'name') {
                 $customerModels->orderBy('model_name', $request->order_dir)
                     ->orderBy('name', $request->order_dir);
             } elseif ($mapper[$request->order_column] === 'material_name') {
