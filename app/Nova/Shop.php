@@ -27,12 +27,7 @@ class Shop extends Resource
      */
     public static $model = \App\Models\Shop::class;
 
-    /**
-     * The single value that should be used to represent the resource when being displayed.
-     *
-     * @var string
-     */
-    public function title()
+    public function title(): string
     {
         return sprintf('%s - %s (%s)', $this->id, $this->shopOwner->customer->name, $this->shopOwner->customer->wp_id);
     }
@@ -70,6 +65,10 @@ class Shop extends Resource
 
             Text::make(__('Customer'), function () {
                 return sprintf('%s (%s)', $this->shopOwner->customer->name, $this->shopOwner->customer->wp_id);
+            }),
+
+            Text::make(__('Customer Vat number'), function () {
+                return $this->shopOwner->customer->vat_number;
             }),
 
             BelongsTo::make(__('Shop owner'), 'shopOwner', ShopOwner::class)
@@ -141,8 +140,12 @@ class Shop extends Resource
     public function actions(NovaRequest $request)
     {
         return [
-            EtsyAuthorizationUrlAction::make(),
-            EtsySyncModelsAction::make(),
+            EtsyAuthorizationUrlAction::make()->canSee(function () {
+                return $this->resource->shopOwner->customer->vat_number !== null;
+            }),
+            EtsySyncModelsAction::make()->canSee(function () {
+                return $this->resource->shopOwner->customer->vat_number !== null;
+            }),
         ];
     }
 }
