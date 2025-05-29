@@ -21,12 +21,10 @@ class ShopOwner extends Resource
      */
     public static $model = \App\Models\ShopOwner::class;
 
-    /**
-     * The single value that should be used to represent the resource when being displayed.
-     *
-     * @var string
-     */
-    public static $title = 'id';
+    public function title(): string
+    {
+        return sprintf('%s - %s (%s)', $this->id, $this->customer->name, $this->customer->wp_id);
+    }
 
     /**
      * The columns that should be searched.

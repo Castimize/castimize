@@ -36,8 +36,6 @@ class WoocommerceApiService
                 'state' => $orderDTO->shippingState,
                 'postcode' => $orderDTO->shippingPostalCode,
                 'country' => $orderDTO->shippingCountry,
-//                'email' => $orderDTO->shippingEmail,
-//                'phone' => $orderDTO->shippingPhoneNumber,
             ],
             'meta_data' => $orderDTO->metaData,
             // products added to an order
@@ -50,18 +48,25 @@ class WoocommerceApiService
                 'total_tax' => (string) $uploadDTO->totalTax,
                 'meta_data' => $uploadDTO->metaData,
             ])->toArray(),
-//            'shipping_lines' => [
-//                [
-//                    'method_title' => 'Rate',
-//                    'method_id' => 'flat_rate',
-//                    'total' => $orderDTO->shippingFee,
-//                    'total_tax' => $orderDTO->shippingFeeTax,
-//                ],
-//            ],
+            'shipping_lines' => [
+                [
+                    'method_title' => 'Rate',
+                    'method_id' => 'flat_rate',
+                    'total' => (string) $orderDTO->shippingFee,
+                    'total_tax' => (string) $orderDTO->shippingFeeTax,
+                ],
+            ],
         ];
 //        dd($data);
 
         return Order::create($data);
+    }
+
+    public function deleteOrder(int $wpOrderId)
+    {
+        $options = ['force' => true]; // Set force option true for delete permanently. Default value false
+
+        return Order::delete($wpOrderId, $options);
     }
 
     public function updateOrderStatus(int $wpOrderId, string $status)
