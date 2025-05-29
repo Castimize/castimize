@@ -29,7 +29,7 @@ class Shop extends Resource
 
     public function title(): string
     {
-        return sprintf('%s - %s (%s)', $this->id, $this->shopOwner->customer->name, $this->shopOwner->customer->wp_id);
+        return sprintf('%s - %s (%s)', $this->id, $this->shopOwner->customer?->name, $this->shopOwner->customer?->wp_id);
     }
 
     /**
@@ -64,11 +64,11 @@ class Shop extends Resource
                 ->sortable(),
 
             Text::make(__('Customer'), function () {
-                return sprintf('%s (%s)', $this->shopOwner->customer->name, $this->shopOwner->customer->wp_id);
+                return sprintf('%s (%s)', $this->shopOwner->customer?->name, $this->shopOwner->customer?->wp_id);
             }),
 
             Text::make(__('Customer Vat number'), function () {
-                return $this->shopOwner->customer->vat_number;
+                return $this->shopOwner->customer?->vat_number;
             }),
 
             BelongsTo::make(__('Shop owner'), 'shopOwner', ShopOwner::class)
