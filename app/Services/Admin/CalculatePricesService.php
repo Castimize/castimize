@@ -91,7 +91,7 @@ class CalculatePricesService
             $total = ($materialVolume * $cost->costs_volume_cc) + ($surfaceArea * $cost->costs_surface_cm2);
         }
 
-        return (float)($total * $quantity);
+        return (float) ($total * $quantity);
     }
 
     public function calculateShippingFeeNew(string $countryIso, Collection $uploads)
