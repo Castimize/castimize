@@ -54,10 +54,15 @@ class ModelResource extends JsonResource
 
         $thumbnailKey = '3'. $this->material->wp_id . $this->model_scale . 'mm';
 
+        $isShopOwner = 0;
+        if ($this->customer && $this->customer->shopOwner) {
+            $isShopOwner = 1;
+        }
+
         return [
             'id' => $this->id,
             'customer_id' => $this->customer_id,
-            'is_shop_owner' => $this->customer?->shopOwner ? 1 : 0,
+            'is_shop_owner' => $isShopOwner,
             'shop_listing_id' => $this->shopListingModel?->shop_listing_id ?? null,
             'material_name' => $this->material->name,
             'material_id' => $this->material->id,

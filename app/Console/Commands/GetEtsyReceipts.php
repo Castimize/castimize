@@ -5,11 +5,13 @@ namespace App\Console\Commands;
 use App\DTO\Order\OrderDTO;
 use App\Enums\Shops\ShopOwnerShopsEnum;
 use App\Models\Shop;
+use App\Models\ShopOwner;
 use App\Services\Admin\ShopOrderService;
 use App\Services\Etsy\EtsyService;
 use App\Services\Woocommerce\WoocommerceApiService;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class GetEtsyReceipts extends Command
@@ -40,11 +42,27 @@ class GetEtsyReceipts extends Command
             try {
                 $receipts = $etsyService->getShopReceipts($shop, ['min_created' => $date]);
                 foreach ($receipts->data as $receipt) {
-                    $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
-                    if (count($lines) > 0) {
-                        $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
-                        $wcOrder = $woocommerceApiService->createOrder($orderDTO);
-                        $shopOrderService->createShopOrder($shop, $receipt, $wcOrder);
+                    // Check if order already in shop_orders
+                    $shopOrder = ShopOwner::where('shop_receipt_id', $receipt->receipt_id)->first();
+                    if ($shopOrder === null) {
+                        $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
+                        if (count($lines) > 0) {
+                            DB::beginTransaction();
+                            $wcOrder = null;
+                            try {
+                                $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
+                                $wcOrder = $woocommerceApiService->createOrder($orderDTO);
+                                $shopOrderService->createShopOrder($shop, $receipt, $wcOrder);
+
+                                DB::commit();
+                            } catch (Exception $e) {
+                                if ($wcOrder !== null) {
+                                    $woocommerceApiService->deleteOrder((int)$wcOrder['id']);
+                                }
+
+                                DB::rollBack();
+                            }
+                        }
                     }
                 }
             } catch (Exception $e) {

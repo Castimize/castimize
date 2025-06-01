@@ -117,7 +117,7 @@ class StripeWebhookController extends WebhookController
             ->first();
 
         if ($order !== null && $charge->status === 'succeeded' && $charge->refunded) {
-            $order->total_refund = $charge->amount_refunded;
+            $order->total_refund = ($charge->amount_refunded / 100);
             if ($order->total === $order->total_refund) {
                 $order->total_refund_tax = $order->total_tax;
             }
