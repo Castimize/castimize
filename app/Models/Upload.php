@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Observers\UploadObserver;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+#[ObservedBy([UploadObserver::class])]
 class Upload extends Model
 {
     use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
@@ -49,6 +52,7 @@ class Upload extends Model
         'total_tax',
         'total_refund',
         'total_refund_tax',
+        'manufacturer_discount',
         'currency_code',
         'customer_lead_time',
         'meta_data',
@@ -146,6 +150,17 @@ class Upload extends Model
     }
 
     /**
+     * Interact with manufacturer_discount
+     */
+    protected function manufacturerDiscount(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value * 100,
+            set: fn ($value) => $value / 100,
+        );
+    }
+
+    /**
      * Interact with  manufacturer_costs
      */
     protected function manufacturerCosts(): Attribute
@@ -205,12 +220,19 @@ class Upload extends Model
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function orderQueue(): HasOne
+    {
+        return $this->hasOne(OrderQueue::class)->latestOfMany();
+    }
+
+    public function orderQueues(): HasMany
+    {
+        return $this->hasMany(OrderQueue::class);
     }
 
     /**
@@ -235,18 +257,5 @@ class Upload extends Model
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
-    }
-
-    /**
-     * @return HasOne
-     */
-    public function orderQueue(): HasOne
-    {
-        return $this->hasOne(OrderQueue::class)->latestOfMany();
-    }
-
-    public function orderQueues(): HasMany
-    {
-        return $this->hasMany(OrderQueue::class);
     }
 }
