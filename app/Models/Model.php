@@ -4,10 +4,10 @@ namespace App\Models;
 
 use App\Observers\ModelObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
@@ -75,6 +75,11 @@ class Model extends EloquentModel
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
+    }
+
+    public function materials(): BelongsToMany
+    {
+        return $this->belongsToMany(Material::class);
     }
 
     public function shopListingModel(): HasOne

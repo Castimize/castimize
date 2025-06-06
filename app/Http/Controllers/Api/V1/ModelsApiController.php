@@ -41,7 +41,7 @@ class ModelsApiController extends ApiController
      */
     public function showModelsWpCustomer(int $customerId): AnonymousResourceCollection
     {
-        $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
+        $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
@@ -49,10 +49,10 @@ class ModelsApiController extends ApiController
 
         $models = [];
         foreach ($customer->models as $model) {
-            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s-%s',
+            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s',
                 $model->model_name,
                 $model->name,
-                $model->material_id,
+//                $model->material_id,
                 $model->model_volume_cc,
                 $model->model_surface_area_cm2,
                 $model->model_box_volume,
@@ -101,7 +101,7 @@ class ModelsApiController extends ApiController
 
     public function getCustomModelName(int $customerId, Request $request): JsonResponse
     {
-        $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
+        $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
@@ -124,7 +124,7 @@ class ModelsApiController extends ApiController
     public function getCustomModelAttributes(int $customerId, Request $request): JsonResponse
     {
         ini_set('precision', 53);
-        $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
+        $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
