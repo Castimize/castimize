@@ -313,9 +313,9 @@ class OrdersService
             if (!$orderQueue->rejection) {
                 $refundAll = false;
             } else {
-                $refundAmount += $orderQueue->rejection->amount;
+                $refundAmount += $orderQueue->upload->total;
                 $refundTaxAmount += $orderQueue->upload->total_tax;
-                $lineItems[] = $this->orderQueuesService->getRefundLineItem($orderQueue, $orderQueue->rejection->amount, $wpOrder['line_items']);
+                $lineItems[] = $this->orderQueuesService->getRefundLineItem($orderQueue, $orderQueue->upload->total, $wpOrder['line_items']);
                 $orderQueue->upload->total_refund = $refundAmount;
                 $orderQueue->upload->total_refund_tax = $orderQueue->upload->total_tax;
                 $orderQueue->upload->save();
