@@ -150,7 +150,7 @@ readonly class  ModelDTO
         }
 
         return new self(
-            wpId: $request->wp_id,
+            wpId: (string) $model->materials->first()->wp_id,
             customerId: $customerId,
             shopListingId: $request->shop_listing_id ?? null,
             materials: $model->materials,
