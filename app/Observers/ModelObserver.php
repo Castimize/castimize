@@ -37,7 +37,7 @@ class ModelObserver
      */
     public function updated(Model $model): void
     {
-        //$this->syncModelToShop($model);
+        $this->syncModelToShop($model);
     }
 
     /**
