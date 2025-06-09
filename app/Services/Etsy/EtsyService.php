@@ -14,11 +14,13 @@ use App\Models\Shop;
 use App\Models\ShopListingModel;
 use App\Services\Admin\ShopListingModelService;
 use App\Services\Etsy\Resources\Listing;
+use App\Services\Etsy\Resources\ListingVariationOption;
 use Etsy\Collection;
 use Etsy\Etsy;
 use Etsy\OAuth\Client;
 use Etsy\Resources\LedgerEntry;
 use Etsy\Resources\ListingImage;
+use Etsy\Resources\ListingInventory;
 use Etsy\Resources\Payment;
 use Etsy\Resources\Receipt;
 use Etsy\Resources\ReturnPolicy;
@@ -407,6 +409,7 @@ class EtsyService
             $listingDTO->state = $listing->state;
             $shopListingModel = (new ShopListingModelService())->createShopListingModel($shop, $model, $listingDTO);
 
+            // Create imageDRTO because needed to set listing active
             $listingImageDTO = ListingImageDTO::fromModel($shop->shop_oauth['shop_id'], $model);
             if ($listingImageDTO->image !== '') {
                 $listingImageDTO->listingId = $listing->listing_id;
@@ -421,6 +424,10 @@ class EtsyService
                 } else {
                     throw new Exception('Listing image not created: ' . print_r($listingImageDTO, true));
                 }
+
+                // Update variations for materials for listing
+                $this->createListingVariationOptions($shop, $listingDTO);
+                $this->createListingInventory($shop, $listingDTO);
 
                 $this->handleUpdateListing(
                     shop: $shop,
@@ -446,6 +453,20 @@ class EtsyService
     {
         $listingDTO = ListingDTO::fromModel($shop, $model);
 
+        // Set listing to draft first to update variations
+        $this->handleUpdateListing(
+            shop: $shop,
+            listingDTO: $listingDTO,
+            data: [
+                'state' => EtsyListingStatesEnum::Draft->value,
+            ],
+        );
+
+        // Update variations for materials for listing
+        $this->createListingVariationOptions($shop, $listingDTO);
+        $this->createListingInventory($shop, $listingDTO);
+
+        // Also set state to active again
         $data = [
             'title' => $listingDTO->title,
             'description' => $listingDTO->description,
@@ -458,6 +479,7 @@ class EtsyService
             'item_length' => $listingDTO->itemLength,
             'item_width' => $listingDTO->itemWidth,
             'item_height' => $listingDTO->itemHeight,
+            'state' => EtsyListingStatesEnum::Active->value,
         ];
 
         $this->handleUpdateListing(
@@ -492,6 +514,57 @@ class EtsyService
                 'item_height' => $listingDTO->itemHeight,
                 'type' => 'physical',
 //                'image_ids' => null,
+            ],
+        );
+    }
+
+    public function createListingVariationOptions(Shop $shop, ListingDTO $listingDTO)
+    {
+        return ListingVariationOption::create(
+            listing_id: $listingDTO->listingId,
+            data: [
+                'property_id' => $listingDTO->listingInventory->first()->property_id,
+                'formatted_values' => $listingDTO->materials->map(function ($material) {
+                    return $material->name;
+                })->toArray(),
+                'is_available' => true,
+                'visible' => true,
+            ],
+        );
+    }
+
+    public function createListingInventory(Shop $shop, ListingDTO $listingDTO)
+    {
+        $products = [];
+        foreach ($listingDTO->listingInventory as $listingInventory) {
+            $products[] = [
+                'sku' => $listingInventory->sku,
+                'property_values' => [
+                    [
+                        'property_id' => 515,
+                        'value' => $listingInventory->name,
+                    ],
+                ],
+                'offerings' => [
+                    [
+                        'price' => [
+                            'amount' => $listingInventory->price * 100,
+                            'currency_code' => $listingInventory->currency->value,
+                        ],
+                        'quantity' => 1,
+                        'is_enabled' => true,
+                    ],
+                ],
+            ];
+        }
+
+        return ListingInventory::update(
+            listing_id: $listingDTO->listingId,
+            data: [
+                'products' => $products,
+                'price_on_property' => 515,
+                'quantity_on_property' => 515,
+                'sku_on_property' => 515,
             ],
         );
     }

@@ -15,9 +15,6 @@ use UnexpectedValueException;
 
 class WebhookController extends Controller
 {
-    /**
-     * WebhookController constructor.
-     */
     public function __construct()
     {
     }

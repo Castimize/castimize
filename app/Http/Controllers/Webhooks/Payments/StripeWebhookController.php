@@ -6,14 +6,10 @@ use App\Http\Controllers\Webhooks\WebhookController;
 use App\Jobs\CreateInvoicesFromOrder;
 use App\Jobs\SetOrderCanceled;
 use App\Jobs\SetOrderPaid;
-use App\Jobs\UploadToOrderQueue;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
-use JsonException;
 use Stripe\Charge;
 use Stripe\Event;
 use Stripe\PaymentIntent;
@@ -23,13 +19,6 @@ use UnexpectedValueException;
 
 class StripeWebhookController extends WebhookController
 {
-    /**
-     * Handle a Stripe webhook call.
-     *
-     * @param Request $request
-     * @return Response
-     * @throws JsonException
-     */
     public function __invoke(Request $request): Response
     {
         try {
@@ -71,10 +60,6 @@ class StripeWebhookController extends WebhookController
         return $this->missingMethod();
     }
 
-    /**
-     * @param PaymentIntent $paymentIntent
-     * @return Response
-     */
     protected function handlePaymentIntentSucceeded(PaymentIntent $paymentIntent): Response
     {
         $logRequestId = null;
@@ -93,10 +78,6 @@ class StripeWebhookController extends WebhookController
         return $this->successMethod();
     }
 
-    /**
-     * @param PaymentIntent $paymentIntent
-     * @return Response
-     */
     protected function handlePaymentIntentCanceled(PaymentIntent $paymentIntent): Response
     {
         $logRequestId = null;

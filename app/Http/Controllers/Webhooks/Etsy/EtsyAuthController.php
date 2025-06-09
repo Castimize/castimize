@@ -8,7 +8,6 @@ use App\Services\Etsy\EtsyService;
 use Exception;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class EtsyAuthController
@@ -24,8 +23,5 @@ class EtsyAuthController
         }
 
         return new Response('Success', 200);
-
-        // ToDo: When saving
-//        $clientId = '98lip7kiicbc8hf0rfdruhfi';
     }
 }

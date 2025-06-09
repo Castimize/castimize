@@ -9,6 +9,7 @@ use App\Http\Resources\ModelResource;
 use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Model;
+use App\Models\User;
 use App\Services\Etsy\EtsyService;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -18,7 +19,7 @@ class ModelsService
 {
     public function getModelsPaginated($request, Customer $customer): array
     {
-        $customerModels = Model::with(['material'])
+        $customerModels = Model::with(['materials'])
             ->where('customer_id', $customer->id);
 
         if ($request->search_value) {
@@ -32,7 +33,7 @@ class ModelsService
                         ->orWhere('model_z_length', 'like', '%' . $request->search_value . '%')
                         ->orWhere('model_surface_area_cm2', 'like', '%' . $request->search_value . '%')
                         ->orWhere('categories', 'like', '%' . $request->search_value . '%');
-                })->orWhereHas('material', function ($query) use ($request) {
+                })->orWhereHas('materials', function ($query) use ($request) {
                     $query->where('name', 'like', '%' . $request->search_value . '%');
                 });
         }
@@ -54,8 +55,8 @@ class ModelsService
                 $customerModels->orderBy('model_name', $request->order_dir)
                     ->orderBy('name', $request->order_dir);
             } elseif ($mapper[$request->order_column] === 'material_name') {
-                $customerModels->join('materials', 'models.material_id', '=', 'materials.id')
-                    ->orderBy('materials.name', $request->order_dir);
+//                $customerModels->join('materials', 'models.material_id', '=', 'materials.id')
+//                    ->orderBy('materials.name', $request->order_dir);
             } else {
                 $customerModels->orderBy($mapper[$request->order_column], $request->order_dir);
             }
@@ -64,7 +65,7 @@ class ModelsService
         $customerModels->distinct([
                 'model_name',
                 'models.name',
-                'material_id',
+//                'material_id',
                 'model_volume_cc',
                 'model_surface_area_cm2',
                 'model_box_volume',
@@ -83,6 +84,8 @@ class ModelsService
 
     public function storeModelFromApi($request, ?Customer $customer = null): Model|null
     {
+        $systemUser = User::find(1);
+
         $material = Material::where('wp_id', $request->wp_id)->first();
         $fileName = $request->file_name;
         $categories = null;
@@ -98,7 +101,7 @@ class ModelsService
         if ($customer) {
             $model = $customer->models->where('name', $request->original_file_name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
-                ->where('material_id', $material->id)
+//                ->where('material_id', $material->id)
                 ->where('model_volume_cc', $request->material_volume)
                 ->first();
 
@@ -108,7 +111,7 @@ class ModelsService
         } else {
             $model = Model::where('name', $request->original_file_name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
-                ->where('material_id', $material->id)
+//                ->where('material_id', $material->id)
                 ->where('model_volume_cc', $request->material_volume)
                 ->first();
         }
@@ -142,12 +145,15 @@ class ModelsService
                 $model->thumb_name = $fileNameThumb;
                 $model->save();
             }
+
+            $model->materials()->sync($material->id);
+
             return $model;
         }
 
-        return Model::create([
+        $model = Model::create([
             'customer_id' => $customer?->id,
-            'material_id' => $material->id,
+//            'material_id' => $material->id,
             'model_name' => $request->model_name ?? null,
             'name' => $request->original_file_name,
             'file_name' => $fileName,
@@ -163,6 +169,10 @@ class ModelsService
             'meta_data' => $request->meta_data ?? null,
             'categories' => $categories,
         ]);
+
+        $model->materials()->attach($material->id);
+
+        return $model;
     }
 
     public function storeModelFromModelDTO(ModelDTO $modelDTO, ?Customer $customer = null): Model|null
@@ -172,8 +182,8 @@ class ModelsService
         if ($customer) {
             $model = $customer->models->where('name', $modelDTO->name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
-                ->where('material_id', $material->id)
-                ->where('model_volume_cc', $modelDTO->modelVolumeCc)
+//                ->where('material_id', $material->id)
+                ->where('model_scale', $modelDTO->modelScale)
                 ->first();
 
             if ($model && $model->model_name === $modelDTO->modelName) {
@@ -182,8 +192,8 @@ class ModelsService
         } else {
             $model = Model::where('name', $modelDTO->name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
-                ->where('material_id', $material->id)
-                ->where('model_volume_cc', $modelDTO->modelVolumeCc)
+//                ->where('material_id', $material->id)
+                ->where('model_scale', $modelDTO->modelScale)
                 ->first();
         }
 
@@ -215,12 +225,14 @@ class ModelsService
             $model->thumb_name = $fileNameThumb;
             $model->save();
 
+            $model->materials()->sync($material->id);
+
             return $model;
         }
 
-        return Model::create([
+        $model = Model::create([
             'customer_id' => $modelDTO->customerId,
-            'material_id' => $material->id,
+//            'material_id' => $material->id,
             'model_name' => $modelDTO->modelName,
             'name' => $modelDTO->name,
             'file_name' => $fileName,
@@ -236,6 +248,10 @@ class ModelsService
             'meta_data' => $modelDTO->metaData,
             'categories' => $modelDTO->categories,
         ]);
+
+        $model->materials()->syncWithoutDetaching([$material->id]);
+
+        return $model;
     }
 
     public function updateModelFromApi($request, Model $model, ?int $customerId = null): Model

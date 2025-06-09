@@ -6,6 +6,7 @@ namespace App\Nova;
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\File;
 use Laravel\Nova\Fields\ID;
@@ -81,7 +82,7 @@ class Model extends Resource
                 })
                 ->sortable(),
 
-            BelongsTo::make(__('Material'), 'material')
+            BelongsToMany::make(__('Materials'), 'materials')
                 ->sortable(),
 
             Text::make(__('Model volume cc'), 'model_volume_cc')

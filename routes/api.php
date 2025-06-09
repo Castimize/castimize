@@ -34,6 +34,10 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::post('prices/calculate', 'PricesApiController@calculatePrice')->name('api.prices.calculate');
             Route::post('prices/calculate/shipping', 'PricesApiController@calculateShipping')->name('api.prices.calculate.shipping');
 
+            // Materials
+            Route::get('materials', 'MaterialsApiController@index')->name('api.materials.index');
+            Route::get('materials/{material}', 'MaterialsApiController@show')->name('api.materials.show');
+
             // Models
             Route::get('models/wp/{customerId}/{model}', 'ModelsApiController@show')->name('api.models.show');
             Route::get('models/wp/{customerId}', 'ModelsApiController@showModelsWpCustomer')->name('api.models.show-customer-wp-models');

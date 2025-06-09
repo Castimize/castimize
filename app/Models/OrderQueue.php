@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Admin\OrderStatusesEnum;
+use App\Filters\HasLastOrderQueueStatusFilter;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -237,24 +238,17 @@ class OrderQueue extends Model
         return $this->hasOne(Reprint::class);
     }
 
-    public function scopeWhereHasLastOrderQueueStatus($query, string $statusSlug)
+    public function scopeWhereHasLastOrderQueueStatus($query, string $statusSlug): void
     {
-        $query->whereHas('orderQueueStatuses', function ($q) use ($statusSlug) {
-            $q->where('slug', $statusSlug)
-                ->whereIn('id', function ($query) {
-                    $query
-                        ->selectRaw('max(id)')
-                        ->from('order_queue_statuses')
-                        ->whereColumn('order_queue_id', 'order_queue.id');
-                });
-        });
+        $hasLastOrderQueueStatusFilter = new HasLastOrderQueueStatusFilter($statusSlug);
+        $query->tap($hasLastOrderQueueStatusFilter);
     }
 
     public static function getAtDcOrderQueueOptions(): array
     {
         $options = [];
         $orderQueues = self::with(['order.orderQueues', 'orderQueueStatuses'])
-            ->whereHasLastOrderQueueStatus('at-dc')
+            ->whereHasLastOrderQueueStatus(OrderStatusesEnum::AtDc->value)
             ->whereNull('customer_shipment_id')
             ->get()
             ->sortBy('order.order_number')
@@ -288,7 +282,7 @@ class OrderQueue extends Model
     {
         $options = [];
         $orderQueues = self::with(['upload.material.materialGroup', 'order.orderQueues', 'orderQueueStatuses'])
-            ->whereHasLastOrderQueueStatus('available-for-shipping')
+            ->whereHasLastOrderQueueStatus(OrderStatusesEnum::AvailableForShipping->value)
             ->whereHas('order', function (Builder $query) {
                 $query->removeTestEmailAddresses('email')
                     ->removeTestCustomerIds('customer_id');

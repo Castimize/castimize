@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Filters\RemoveTestCustomerIdsFilter;
+use App\Filters\RemoveTestEmailAddressesFilter;
 use App\Observers\OrderObserver;
 use Carbon\Carbon;
 use DateTimeInterface;
@@ -427,28 +429,14 @@ class Order extends Model
 
     public function scopeRemoveTestEmailAddresses($query, string $column)
     {
-        return $query->whereNotIn($column, [
-            'matthbon@hotmail.com',
-            'oknoeff@gmail.com',
-            'robinkoonen@gmail.com',
-            'oscar@castimize.com',
-            'robin@castimize.com',
-            'koen@castimize.com',
-            'info@castimize.com',
-        ]);
+        $removeTestEmailAddressesFilter = new RemoveTestEmailAddressesFilter($column);
+        return $query->tap($removeTestEmailAddressesFilter);
     }
 
     public function scopeRemoveTestCustomerIds($query, string $column)
     {
-        return $query->whereNotIn($column, [
-            8,
-            9,
-            10,
-            11,
-            12,
-            15,
-            19,
-        ]);
+        $removeTestEmailAddressesFilter = new RemoveTestCustomerIdsFilter($column);
+        return $query->tap($removeTestEmailAddressesFilter);
     }
 
     /**

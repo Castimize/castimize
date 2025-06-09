@@ -2,20 +2,14 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Material;
 use App\Services\Admin\CalculatePricesService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
-use function Aws\map;
+use stdClass;
 
 class ModelResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         $thumb = $this->thumb_name ?? sprintf('%s.thumb.png', str_replace('_resized', '', $this->file_name));
@@ -64,9 +58,10 @@ class ModelResource extends JsonResource
             'customer_id' => $this->customer_id,
             'is_shop_owner' => $isShopOwner,
             'shop_listing_id' => $this->shopListingModel?->shop_listing_id ?? null,
-            'material_name' => $this->material->name,
-            'material_id' => $this->material->id,
-            'material_wp_id' => $this->material->wp_id,
+//            'material_name' => $this->material->name,
+//            'material_id' => $this->material->id,
+//            'material_wp_id' => $this->material->wp_id,
+            'materials' => MaterialResource::collection($this->materials),
             'model_name' => $this->model_name,
             'name' => $this->name,
             'file_name' => $this->file_name,

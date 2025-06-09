@@ -2,6 +2,7 @@
 
 namespace App\DTO\Model;
 
+use App\Models\Material;
 use App\Models\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,7 +13,8 @@ readonly class  ModelDTO
         public string $wpId,
         public ?int $customerId,
         public ?int $shopListingId,
-        public ?int $materialId,
+        public array $materials,
+//        public ?int $materialId,
         public ?int $printerId,
         public ?int $coatingId,
         public ?string $unit,
@@ -41,6 +43,8 @@ readonly class  ModelDTO
 
     public static function fromWpRequest(Request $request, int $customerId): ModelDTO
     {
+        $material = Material::where('wp_id', $request->wp_id)->first();
+
         $categories = null;
         if ($request->categories) {
             $categories = [];
@@ -100,7 +104,7 @@ readonly class  ModelDTO
             wpId: (string) $request->wp_id,
             customerId: $customerId,
             shopListingId: null,
-            materialId: null,
+            materials: [$material],
             printerId: $request->printer_id ?? 3,
             coatingId: $request->coating_id ?? null,
             unit: 'mm',
@@ -146,10 +150,10 @@ readonly class  ModelDTO
         }
 
         return new self(
-            wpId: $model->material?->wp_id,
+            wpId: $request->wp_id,
             customerId: $customerId,
             shopListingId: $request->shop_listing_id ?? null,
-            materialId: $model->material_id,
+            materials: $model->materials,
             printerId: 3,
             coatingId: null,
             unit: 'mm',
