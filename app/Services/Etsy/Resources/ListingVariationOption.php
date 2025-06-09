@@ -66,56 +66,19 @@ class ListingVariationOption extends Resource {
     }
 
     /**
-     * Create a Etsy listing variation option.
-     *
-     * @param int $listing_id
-     * @param array $data
-     * @return Collection
-     */
-    public static function create(
-        int $listing_id,
-        array $data
-    ) {
-        return self::request(
-            'POST',
-            "/application/listings/{$listing_id}/variation_options}",
-            'ListingVariationOption',
-            $data
-        );
-    }
-
-    /**
-     * Delete an Etsy listing variation option.
-     *
-     * @param int $listing_id
-     * @param int $variation_option_id
-     * @return bool
-     */
-    public static function delete(
-        int $listing_id,
-        int $variation_option_id,
-    ): bool {
-        return self::deleteRequest(
-            "/application/listings/{$listing_id}/variation_options/{$variation_option_id}",
-        );
-    }
-
-    /**
      * Updates an Etsy listing variation option.
      *
      * @param int $listing_id
-     * @param int $variation_option_id
      * @param array $data
      * @return Collection
      */
     public static function update(
         int $listing_id,
-        int $variation_option_id,
         array $data
     ): Collection {
         return self::request(
-            'PATCH',
-            "/application/listings/{$listing_id}/variation_options/{$variation_option_id}",
+            'PUT',
+            "/application/listings/{$listing_id}/variation_options",
             'ListingVariationOption',
             $data
         );
