@@ -466,6 +466,13 @@ class EtsyService
         $this->createListingVariationOptions($shop, $listingDTO);
         $this->createListingInventory($shop, $listingDTO);
 
+        $materials = [];
+        if ($listingDTO->materials) {
+            foreach ($listingDTO->materials as $material) {
+                $materials[] = $material->name;
+            }
+        }
+
         // Also set state to active again
         $data = [
             'title' => $listingDTO->title,
@@ -474,7 +481,7 @@ class EtsyService
             'taxonomy_id' => $listingDTO->taxonomyId,
             'shipping_profile_id' => $listingDTO->shippingProfileId,
             'return_policy_id' => $listingDTO->returnPolicyId,
-            'materials' => $listingDTO->materials,
+            'materials' => $materials,
             'item_weight' => $listingDTO->itemWeight,
             'item_length' => $listingDTO->itemLength,
             'item_width' => $listingDTO->itemWidth,
