@@ -100,7 +100,7 @@ class ListingDTO
                     shop: $shop,
                     material: $material,
                     model: $model,
-                    listingId: $listingId,
+                    listingId: $listingId ?? $model->shopListingModel?->listing_id ?? null,
                 );
             }),
         );
