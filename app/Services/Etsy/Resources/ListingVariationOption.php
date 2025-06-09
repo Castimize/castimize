@@ -70,12 +70,11 @@ class ListingVariationOption extends Resource {
      *
      * @param int $listing_id
      * @param array $data
-     * @return Collection
      */
     public static function update(
         int $listing_id,
         array $data
-    ): Collection {
+    ) {
         return self::request(
             'PUT',
             "/application/listings/{$listing_id}/variation_options",

@@ -527,9 +527,9 @@ class EtsyService
         );
     }
 
-    public function createListingVariationOptions(Shop $shop, ListingDTO $listingDTO)
+    public function createListingVariationOptions(Shop $shop, ListingDTO $listingDTO): void
     {
-        return ListingVariationOption::update(
+        ListingVariationOption::update(
             listing_id: $listingDTO->listingId,
             data: [
                 'property_id' => 515,
