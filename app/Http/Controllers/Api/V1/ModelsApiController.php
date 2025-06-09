@@ -162,9 +162,9 @@ class ModelsApiController extends ApiController
 
         $model = $this->modelsService->storeModelFromModelDTO(ModelDTO::fromWpRequest($request, $customer->id), $customer);
 
-        if ($model) {
-            $this->modelsService->syncModelToShop($model);
-        }
+//        if ($model) {
+//            $this->modelsService->syncModelToShop($model);
+//        }
 //        $model = $this->modelsService->storeModelFromApi($request, $customer);
 
         $response = new ModelResource($model);
@@ -182,7 +182,7 @@ class ModelsApiController extends ApiController
         $model = $this->modelsService->updateModelFromModelDTO($model, ModelDTO::fromWpUpdateRequest($request, $model, $model->customer_id), $model->customer_id);
 //        $model = $this->modelsService->updateModelFromApi($request, $model, $model->customer_id);
 
-        $this->modelsService->syncModelToShop($model);
+//        $this->modelsService->syncModelToShop($model);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);

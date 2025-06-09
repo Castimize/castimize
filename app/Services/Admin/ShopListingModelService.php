@@ -33,6 +33,8 @@ class ShopListingModelService
             'state' => $listingDTO->state,
         ]);
 
+        $shopListingModel->refresh();
+
         return $shopListingModel;
     }
 }

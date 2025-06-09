@@ -453,6 +453,8 @@ class EtsyService
     {
         $listingDTO = ListingDTO::fromModel($shop, $model);
 
+        Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listingDTO, true));
+
         // Set listing to draft first to update variations
         $this->handleUpdateListing(
             shop: $shop,

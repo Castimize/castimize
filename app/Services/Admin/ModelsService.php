@@ -294,8 +294,7 @@ class ModelsService
         $model->materials()->sync($modelDTO->materials);
 
         if ($modelDTO->shopListingId && $model->customer->shopOwner) {
-            $shops = $model->customer->shopOwner->shops;
-            $shop = $shops->where('shop', ShopOwnerShopsEnum::Etsy->value)
+            $shop = $model->customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)
                 ->where('active', true)
                 ->first();
             if ($shop) {
@@ -306,33 +305,37 @@ class ModelsService
                 $listingImages = $etsyService->getListingImages($shop, $listing->listing_id);
 
                 if ($model->shopListingModel) {
+                    $listingDTO = ListingDTO::fromModel(
+                        shop: $shop,
+                        model: $model,
+                        listingId: $modelDTO->shopListingId,
+                        listing: $listing,
+                        listingImages: $listingImages ? collect($listingImages->data) : null,
+                    );
                     (new ShopListingModelService())->updateShopListingModel(
                         shopListingModel: $model->shopListingModel,
-                        listingDTO: ListingDTO::fromModel(
-                            shop: $shop,
-                            model: $model,
-                            listingId: $modelDTO->shopListingId,
-                            listing: $listing,
-                            listingImages: $listingImages ? collect($listingImages->data) : null,
-                        ),
+                        listingDTO: $listingDTO,
                     );
                 } else {
+                    $listingDTO = ListingDTO::fromModel(
+                        shop: $shop,
+                        model: $model,
+                        listingId: $modelDTO->shopListingId,
+                        listing: $listing,
+                        listingImages: $listingImages ? collect($listingImages->data) : null,
+                    );
                     (new ShopListingModelService())->createShopListingModel(
                         shop: $shop,
                         model: $model,
-                        listingDTO: ListingDTO::fromModel(
-                            shop: $shop,
-                            model: $model,
-                            listingId: $modelDTO->shopListingId,
-                            listing: $listing,
-                            listingImages: $listingImages ? collect($listingImages->data) : null,
-                        ),
+                        listingDTO: $listingDTO,
                     );
                 }
+
+                $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
+
+                $this->syncModelToShop($model);
             }
         }
-
-        $model->load(['materials', 'customer.shopOwner.shops']);
 
         return $model;
     }

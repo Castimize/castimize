@@ -74,7 +74,7 @@ class ListingDTO
 
         return new self(
             shopId: $shopOauth['shop_id'],
-            listingId: $listingId ?? $model->shopListingModel?->listing_id ?? null,
+            listingId: $listingId ?? $model->shopListingModel?->shop_listing_id ?? null,
             state: $listing ? $listing->state : null,
             quantity: 1,
             title: $model->model_name ?? $model->name,
@@ -100,7 +100,7 @@ class ListingDTO
                     shop: $shop,
                     material: $material,
                     model: $model,
-                    listingId: $model->shopListingModel?->listing_id ?? null,
+                    listingId: $model->shopListingModel?->shop_listing_id ?? null,
                 );
             }),
         );
