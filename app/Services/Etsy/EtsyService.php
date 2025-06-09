@@ -532,7 +532,7 @@ class EtsyService
         return ListingVariationOption::create(
             listing_id: $listingDTO->listingId,
             data: [
-                'property_id' => $listingDTO->listingInventory->first()->property_id,
+                'property_id' => 515,
                 'formatted_values' => $listingDTO->materials->map(function ($material) {
                     return $material->name;
                 })->toArray(),
