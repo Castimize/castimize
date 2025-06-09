@@ -330,6 +330,8 @@ class ModelsService
             }
         }
 
+        $model->load(['materials']);
+
         return $model;
     }
 }
