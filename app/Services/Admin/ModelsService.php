@@ -183,7 +183,7 @@ class ModelsService
             $model = $customer->models->where('name', $modelDTO->name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
 //                ->where('material_id', $material->id)
-                ->where('model_volume_cc', $modelDTO->modelVolumeCc)
+                ->where('model_scale', $modelDTO->modelScale)
                 ->first();
 
             if ($model && $model->model_name === $modelDTO->modelName) {
@@ -193,7 +193,7 @@ class ModelsService
             $model = Model::where('name', $modelDTO->name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
 //                ->where('material_id', $material->id)
-                ->where('model_volume_cc', $modelDTO->modelVolumeCc)
+                ->where('model_scale', $modelDTO->modelScale)
                 ->first();
         }
 
@@ -249,7 +249,7 @@ class ModelsService
             'categories' => $modelDTO->categories,
         ]);
 
-        $model->materials()->attach($material->id);
+        $model->materials()->syncWithoutDetaching([$material->id]);
 
         return $model;
     }

@@ -8,11 +8,6 @@ use Illuminate\Support\Facades\Storage;
 
 class UploadResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         $thumb = sprintf('%s.thumb.png', str_replace('_resized', '', $this->file_name));

@@ -50,16 +50,16 @@ class Listing extends Resource {
         'state',
         'is_supply',
         'production_partner_ids',
-        'type'
+        'type',
     ];
 
     /**
      * @var array
      */
     protected $_associations = [
-        "Shop" => "Shop",
-        "User" => "User",
-        "Images" => "ListingImage"
+        'Shop' => 'Shop',
+        'User' => 'User',
+        'Images' => 'ListingImage',
     ];
 
     /**
@@ -72,9 +72,9 @@ class Listing extends Resource {
         array $params = []
     ): Collection {
         return self::request(
-            "GET",
-            "/application/listings/active",
-            "Listing",
+            'GET',
+            '/application/listings/active',
+            'Listing',
             $params
         );
     }
@@ -96,9 +96,9 @@ class Listing extends Resource {
             $params['includes'] = $includes;
         }
         return self::request(
-            "GET",
-            "/application/listings/batch",
-            "Listing",
+            'GET',
+            '/application/listings/batch',
+            'Listing',
             $params
         );
     }
@@ -115,9 +115,9 @@ class Listing extends Resource {
         array $params = []
     ): Collection {
         return self::request(
-            "GET",
+            'GET',
             "/application/shops/{$shop_id}/listings",
-            "Listing",
+            'Listing',
             $params
         );
     }
@@ -134,9 +134,9 @@ class Listing extends Resource {
         array $params = []
     ): Collection {
         return self::request(
-            "GET",
+            'GET',
             "/application/shops/{$shop_id}/listings/active",
-            "Listing",
+            'Listing',
             $params
         );
     }
@@ -153,9 +153,9 @@ class Listing extends Resource {
         array $params = []
     ): Collection {
         return self::request(
-            "GET",
+            'GET',
             "/application/shops/{$shop_id}/listings/featured",
-            "Listing",
+            'Listing',
             $params
         );
     }
@@ -174,9 +174,9 @@ class Listing extends Resource {
         array $params = []
     ): Collection {
         return self::request(
-            "GET",
+            'GET',
             "/application/shops/{$shop_id}/receipts/{$receipt_id}/listings",
-            "Listing",
+            'Listing',
             $params
         );
     }
@@ -193,9 +193,9 @@ class Listing extends Resource {
         int $policy_id
     ): Collection {
         return self::request(
-            "GET",
+            'GET',
             "/application/shops/{$shop_id}/policies/return/{$policy_id}/listings",
-            "Listing"
+            'Listing'
         );
     }
 
@@ -214,9 +214,9 @@ class Listing extends Resource {
     ): Collection {
         $params['shop_section_ids'] = $section_ids;
         return self::request(
-            "GET",
+            'GET',
             "/application/shops/{$shop_id}/shop-sections/listings",
-            "Listing",
+            'Listing',
             $params
         );
     }
@@ -232,9 +232,9 @@ class Listing extends Resource {
         array $params = []
     ) {
         return self::request(
-            "GET",
+            'GET',
             "/application/listings/{$listing_id}",
-            "Listing",
+            'Listing',
             $params
         );
     }
@@ -250,9 +250,9 @@ class Listing extends Resource {
         array $data
     ) {
         return self::request(
-            "POST",
+            'POST',
             "/application/shops/{$shop_id}/listings",
-            "Listing",
+            'Listing',
             $data
         );
     }
@@ -284,9 +284,9 @@ class Listing extends Resource {
         array $data
     ) {
         return self::request(
-            "PATCH",
+            'PATCH',
             "/application/shops/{$shop_id}/listings/{$listing_id}",
-            "Listing",
+            'Listing',
             $data
         );
     }
@@ -309,7 +309,7 @@ class Listing extends Resource {
         return $this->updateRequest(
             "/application/shops/{$shop_id}/listings/{$listing_id}",
             $data,
-            "PATCH"
+            'PATCH'
         );
     }
 
@@ -548,6 +548,17 @@ class Listing extends Resource {
             $this->shop_id,
             $this->listing_id,
             $language
+        );
+    }
+
+    /**
+     * Get the variation options for the listing.
+     *
+     * @return Collection[\Etsy\Resources\ListingVariationOption]
+     */
+    public function variationOptions(): Collection {
+        return ListingVariationOption::all(
+            $this->listing_id
         );
     }
 }

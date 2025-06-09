@@ -15,9 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UsersApiController extends ApiController
 {
-    /**
-     * @return UserResource
-     */
     public function show(): UserResource
     {
         abort_if(Gate::denies('viewUser'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -27,10 +24,6 @@ class UsersApiController extends ApiController
         return $response;
     }
 
-    /**
-     * @param StoreUserRequest $request
-     * @return JsonResponse
-     */
     public function storeUserWp(StoreUserRequest $request): JsonResponse
     {
         try {
@@ -46,10 +39,6 @@ class UsersApiController extends ApiController
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    /**
-     * @param DeleteUserRequest $request
-     * @return Response
-     */
     public function deleteUserWp(DeleteUserRequest $request): Response
     {
         $user = User::where('wp_id', $request->wp_id)->first();

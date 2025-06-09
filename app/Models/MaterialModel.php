@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ModelMaterial extends Model
+class MaterialModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'model_material';
+    protected $table = 'material_model';
 
     protected $primaryKey = ['model_id', 'material_id'];
 

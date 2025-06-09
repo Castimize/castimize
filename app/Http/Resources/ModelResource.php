@@ -10,11 +10,6 @@ use stdClass;
 
 class ModelResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         $thumb = $this->thumb_name ?? sprintf('%s.thumb.png', str_replace('_resized', '', $this->file_name));

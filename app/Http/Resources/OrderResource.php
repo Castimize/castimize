@@ -7,11 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -69,7 +64,6 @@ class OrderResource extends JsonResource
             'paid_at' => $this->paid_at,
             'order_customer_lead_time' => $this->order_customer_lead_time,
             'arrived_at' => $this->arrived_at,
-            //'meta_data' => $this->meta_data,
             'line_items' => UploadResource::collection($this->uploads),
         ];
     }

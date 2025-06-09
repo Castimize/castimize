@@ -48,10 +48,6 @@ class AddressApiController extends ApiController
         return response()->json($response);
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse|CalculatedShippingFeeResource
-     */
     public function calculateShipping(Request $request): JsonResponse|CalculatedShippingFeeResource
     {
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');

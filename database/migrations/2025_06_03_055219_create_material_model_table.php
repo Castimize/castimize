@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('model_material', function (Blueprint $table) {
-            $table->unsignedBigInteger('model_id');
+        Schema::create('material_model', function (Blueprint $table) {
             $table->unsignedBigInteger('material_id');
+            $table->unsignedBigInteger('model_id');
             $table->timestamps();
 
-            $table->primary(['model_id', 'material_id']);
+            $table->primary(['material_id', 'model_id']);
 
-            $table->foreign('model_id')->references('id')->on('models')->onDelete('cascade');
             $table->foreign('material_id')->references('id')->on('materials')->onDelete('cascade');
+            $table->foreign('model_id')->references('id')->on('models')->onDelete('cascade');
         });
     }
 
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('model_material');
+        Schema::dropIfExists('material_model');
     }
 };

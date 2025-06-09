@@ -10,7 +10,6 @@ use App\Nova\Settings\Shipping\CustomsItemSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\CurrencyService;
-use App\Services\Etsy\EtsyService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -29,7 +28,7 @@ class ListingDTO
         public int $taxonomyId,
         public int $shippingProfileId,
         public int $returnPolicyId,
-        public ?array $materials,
+        public ?Collection $materials,
         public ?float $itemWeight,
         public ?float $itemLength,
         public ?float $itemWidth,
@@ -40,6 +39,8 @@ class ListingDTO
         public ?int $processingMax,
         /** @var Collection<ListingImageDTO> */
         public ?Collection $listingImages,
+        /** @var Collection<ListingInventoryDTO> */
+        public ?Collection $listingInventory,
     ) {
     }
 
@@ -49,13 +50,19 @@ class ListingDTO
         $customsItemSettings = new CustomsItemSettings();
         $parcelSettings = new ParcelSettings();
 
-        $price = app()->environment() !== 'production' ?
-            0.18 :
-            (new CalculatePricesService())->calculatePriceOfModel(
-                price: $model->material->prices->first(),
-                materialVolume: (float) $model->model_volume_cc,
-                surfaceArea: (float) $model->model_surface_area_cm2,
-            );
+        $price = 0.00;
+        foreach ($model->materials as $material) {
+            $priceMaterial = app()->environment() !== 'production' ?
+                0.18 :
+                (new CalculatePricesService())->calculatePriceOfModel(
+                    price: $material->prices->sortBy('price_volume_cc')->first(),
+                    materialVolume: (float)$model->model_volume_cc,
+                    surfaceArea: (float)$model->model_surface_area_cm2,
+                );
+            if ($price === 0.00 || $priceMaterial < $price) {
+                $price = $priceMaterial;
+            }
+        }
 
         if (app()->environment() === 'production' && $shopOauth['shop_currency'] !== config('app.currency')) {
             /** @var CurrencyService $currencyService */
@@ -78,7 +85,7 @@ class ListingDTO
             taxonomyId: (int) ($listing && $listing->taxonomy_id ?? $shopOauth['default_taxonomy_id'] ?? 12380), // 3D Printer Files
             shippingProfileId: $shopOauth['shop_shipping_profile_id'] ?? null,
             returnPolicyId: $shopOauth['shop_return_policy_id'] ?? null,
-            materials: [$model->material->name],
+            materials: $model->materials,
             itemWeight: $model->model_box_volume * $model->material->density + $customsItemSettings->bag,
             itemLength: $model->model_x_length,
             itemWidth: $model->model_y_length,
@@ -88,6 +95,14 @@ class ListingDTO
             processingMin: $model->material->dc_lead_time + ($model->customer?->country?->logisticsZone?->shippingFee?->default_lead_time ?? 0),
             processingMax: null,
             listingImages: $listingImages,
+            listingInventory: $model->materials->map(function ($material) use ($shop, $model, $listingId) {
+                return ListingInventoryDTO::fromModel(
+                    shop: $shop,
+                    material: $material,
+                    model: $model,
+                    listingId: $listingId,
+                );
+            }),
         );
     }
 }

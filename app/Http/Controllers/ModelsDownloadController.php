@@ -5,19 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\OrderQueue;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use STS\ZipStream\Facades\Zip;
 
 class ModelsDownloadController extends Controller
 {
     use ValidatesRequests;
 
-    /**
-     * Handle a models download.
-     *
-     * @param Request $request
-     * @throws ValidationException
-     */
     public function __invoke(Request $request)
     {
         if (! $request->hasValidSignature()) {
