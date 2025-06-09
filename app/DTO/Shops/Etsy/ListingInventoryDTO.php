@@ -24,7 +24,7 @@ class ListingInventoryDTO
     ) {
     }
 
-    public static function fromModel(Shop $shop, Material $material, Model $model, int $listingId): self
+    public static function fromModel(Shop $shop, Material $material, Model $model, ?int $listingId): self
     {
         $shopOauth = $shop->shop_oauth;
 
