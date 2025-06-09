@@ -289,6 +289,8 @@ class ModelsService
 
         $model->save();
 
+        $model->materials()->sync($modelDTO->materials);
+
         if ($modelDTO->shopListingId && $model->customer->shopOwner) {
             $shops = $model->customer->shopOwner->shops;
             $shop = $shops->where('shop', ShopOwnerShopsEnum::Etsy->value)

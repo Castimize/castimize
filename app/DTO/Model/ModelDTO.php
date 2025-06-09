@@ -153,7 +153,7 @@ readonly class  ModelDTO
             wpId: (string) $model->materials->first()->wp_id,
             customerId: $customerId,
             shopListingId: $request->shop_listing_id ?? null,
-            materials: $model->materials,
+            materials: $request->materials,
             printerId: 3,
             coatingId: null,
             unit: 'mm',
