@@ -507,10 +507,10 @@ class EtsyService
         return Listing::create(
             shop_id: $shop->shop_oauth['shop_id'],
             data: [
-                'quantity' => $listingDTO->quantity,
                 'title' => $listingDTO->title,
                 'description' => $listingDTO->description,
-                'price' => $listingDTO->price,
+                'quantity' => 0,
+                'price' => 0,
                 'who_made' => $listingDTO->whoMade,
                 'when_made' => $listingDTO->whenMade,
                 'taxonomy_id' => $listingDTO->taxonomyId,
