@@ -542,6 +542,7 @@ class EtsyService
 
     public function createListingVariationOptions(Shop $shop, ListingDTO $listingDTO): void
     {
+        Log::info('Listing variation options creating: ' . $listingDTO->listingId);
         $listingId = $listingDTO->listingId;
         $variationResponse = $this->client->put("/v3/application/listings/{$listingId}/variation-options", [
             [
@@ -569,6 +570,7 @@ class EtsyService
 
     public function createListingInventory(Shop $shop, ListingDTO $listingDTO): void
     {
+        Log::info('Listing inventory creating: ' . $listingDTO->listingId);
         $listingId = $listingDTO->listingId;
 
         $products = [];
