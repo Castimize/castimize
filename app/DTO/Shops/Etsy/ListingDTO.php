@@ -70,11 +70,11 @@ class ListingDTO
             $price = $currencyService->convertCurrency(config('app.currency'), $shopOauth['shop_currency'], $price);
         }
 
-        Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listingImages, true));
+//        Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listingImages, true));
 
         return new self(
             shopId: $shopOauth['shop_id'],
-            listingId: $listingId ?? $model->shopListingModel?->shop_listing_id ?? null,
+            listingId: $listing ? $listing->listing_id : ($listingId ?? $model->shopListingModel?->shop_listing_id ?? null),
             state: $listing ? $listing->state : null,
             quantity: 1,
             title: $model->model_name ?? $model->name,
@@ -95,12 +95,12 @@ class ListingDTO
             processingMin: $model->material->dc_lead_time + ($model->customer?->country?->logisticsZone?->shippingFee?->default_lead_time ?? 0),
             processingMax: null,
             listingImages: $listingImages,
-            listingInventory: $model->materials->map(function ($material) use ($shop, $model, $listingId) {
+            listingInventory: $model->materials->map(function ($material) use ($shop, $model, $listing) {
                 return ListingInventoryDTO::fromModel(
                     shop: $shop,
                     material: $material,
                     model: $model,
-                    listingId: $model->shopListingModel?->shop_listing_id ?? null,
+                    listingId: $listing ? $listing->listing_id : ($model->shopListingModel?->shop_listing_id ?? null),
                 );
             }),
         );
