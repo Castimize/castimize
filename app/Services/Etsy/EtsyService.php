@@ -543,7 +543,7 @@ class EtsyService
     public function createListingVariationOptions(Shop $shop, ListingDTO $listingDTO): void
     {
         $listingId = $listingDTO->listingId;
-        $variationResponse = $this->client->put("/application/listings/{$listingId}/variation-options", [
+        $variationResponse = $this->client->put("/v3/application/listings/{$listingId}/variation-options", [
             [
                 'property_id' => 515, // Material
                 'formatted_values' => $listingDTO->materials->map(function ($material) {
@@ -594,7 +594,7 @@ class EtsyService
             ];
         }
 
-        $inventoryResponse = $this->client->put("/application/inventory/{$listingId}", [
+        $inventoryResponse = $this->client->put("/v3/application/inventory/{$listingId}", [
                 'products' => $products,
                 'price_on_property' => 515,
                 'quantity_on_property' => 515,
