@@ -549,16 +549,5 @@ class Listing extends Resource {
             $this->listing_id,
             $language
         );
-    }
-
-    /**
-     * Get the variation options for the listing.
-     *
-     * @return Collection[\Etsy\Resources\ListingVariationOption]
-     */
-    public function variationOptions(): Collection {
-        return ListingVariationOption::all(
-            $this->listing_id
-        );
-    }
+    }\
 }
