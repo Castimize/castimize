@@ -470,18 +470,11 @@ class EtsyService
         Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listingDTO, true));
 
         // Set listing to draft first to update variations if not already in draft
-        if ($listing->state !== EtsyListingStatesEnum::Draft->value) {
-            $this->handleUpdateListing(
-                shop: $shop,
-                listingDTO: $listingDTO,
-                data: [
-                    'state' => EtsyListingStatesEnum::Draft->value,
-                ],
-            );
+        if ($listing->state === EtsyListingStatesEnum::Draft->value) {
+            // Update variations for materials for listing
+            $this->createListingVariationOptions($shop, $listingDTO);
         }
 
-        // Update variations for materials for listing
-        $this->createListingVariationOptions($shop, $listingDTO);
         $this->createListingInventory($shop, $listingDTO);
 
         $materials = [];
@@ -504,7 +497,6 @@ class EtsyService
             'item_length' => $listingDTO->itemLength,
             'item_width' => $listingDTO->itemWidth,
             'item_height' => $listingDTO->itemHeight,
-            'state' => EtsyListingStatesEnum::Active->value,
         ];
 
         $this->handleUpdateListing(
