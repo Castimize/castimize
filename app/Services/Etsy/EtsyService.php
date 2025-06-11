@@ -465,11 +465,12 @@ class EtsyService
     private function updateListing(Shop $shop, Model $model): ListingDTO
     {
         $listingDTO = ListingDTO::fromModel($shop, $model);
+        $listing = $this->getListing($shop, $listingDTO->listingId);
 
         Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listingDTO, true));
 
         // Set listing to draft first to update variations if not already in draft
-        if ($model->shopListingModel->state !== EtsyListingStatesEnum::Draft->value) {
+        if ($listing->state !== EtsyListingStatesEnum::Draft->value) {
             $this->handleUpdateListing(
                 shop: $shop,
                 listingDTO: $listingDTO,
