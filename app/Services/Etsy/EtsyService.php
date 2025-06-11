@@ -593,9 +593,9 @@ class EtsyService
 
         $inventoryResponse = $this->client->put("/v3/application/inventory/{$listingId}", [
                 'products' => $products,
-                'price_on_property' => 515,
-                'quantity_on_property' => 515,
-                'sku_on_property' => 515,
+                'price_on_property' => [515],
+                'quantity_on_property' => [515],
+                'sku_on_property' => [515],
             ],
         );
         Log::info('Listing inventory created: ' . print_r($inventoryResponse, true));
