@@ -542,6 +542,9 @@ class EtsyService
 
     public function createListingVariationOptions(Shop $shop, ListingDTO $listingDTO): void
     {
+        $response = $this->client->get("/v3/application/listings/{$listingDTO->listingId}");
+        Log::info('Listing get: ' . print_r($response, true));
+
         Log::info('Listing variation options creating: ' . $listingDTO->listingId);
         $listingId = $listingDTO->listingId;
         $variationResponse = $this->client->put("/v3/application/listings/{$listingId}/variation-options", [
