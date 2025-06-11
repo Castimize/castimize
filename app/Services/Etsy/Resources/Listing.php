@@ -549,5 +549,5 @@ class Listing extends Resource {
             $this->listing_id,
             $language
         );
-    }\
+    }
 }
