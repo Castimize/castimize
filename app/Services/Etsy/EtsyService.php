@@ -17,6 +17,7 @@ use App\Services\Etsy\Resources\Listing;
 use App\Services\Etsy\Resources\ListingVariationOption;
 use Etsy\Collection;
 use Etsy\Etsy;
+use Etsy\EtsyClient;
 use Etsy\OAuth\Client;
 use Etsy\Resources\LedgerEntry;
 use Etsy\Resources\ListingImage;
@@ -39,6 +40,8 @@ use Illuminate\Support\Facades\URL;
 
 class EtsyService
 {
+    private $client;
+
     public function getRedirectUri(): string
     {
         return URL::route(
@@ -48,7 +51,7 @@ class EtsyService
 
     public function getAuthorizationUrl(Shop $shop): string
     {
-        $client = new Client(client_id: $shop->shop_oauth['client_id']);
+        $this->client = new Client(client_id: $shop->shop_oauth['client_id']);
         $scopes = PermissionScopes::ALL_SCOPES;
 //        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
 
@@ -80,9 +83,9 @@ class EtsyService
             throw new Exception(__('Shop not found'));
         }
 
-        $client = new Client(client_id: $shop->shop_oauth['client_id']);
+        $this->client = new Client(client_id: $shop->shop_oauth['client_id']);
 
-        $response = $client->requestAccessToken(
+        $response = $this->client->requestAccessToken(
             redirect_uri: $this->getRedirectUri(),
             code: $code,
             verifier: $shop->shop_oauth['verifier'],
@@ -120,8 +123,8 @@ class EtsyService
             $shop->save();
             throw new Exception(__('Shop is unauthenticated :shopOwner', ['shopOwner' => $shop->shop_owner_id]));
         }
-        $client = new Client(client_id: $shop->shop_oauth['client_id']);
-        $response = $client->refreshAccessToken($shop->shop_oauth['refresh_token']);
+        $this->client = new Client(client_id: $shop->shop_oauth['client_id']);
+        $response = $this->client->refreshAccessToken($shop->shop_oauth['refresh_token']);
         //Log::info(print_r($response, true));
 
         $this->storeAccessToken($shop, $response);
@@ -306,6 +309,11 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
+//        Etsy::$client = new EtsyClient(
+//            consumer_key: $shop->shop_oauth['client_id'],
+//            consumer_secret: $shop->shop_oauth['client_secret'],
+//        );
+
         try {
             foreach ($models as $model) {
                 if ($model->shopListingModel) {
@@ -327,6 +335,11 @@ class EtsyService
         try {
             $this->refreshAccessToken($shop);
             $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+
+//            Etsy::$client = new EtsyClient(
+//                consumer_key: $shop->shop_oauth['client_id'],
+//                consumer_secret: $shop->shop_oauth['client_secret'],
+//            );
 
             if ($model->shopListingModel) {
                 return $this->updateListing($shop, $model);
@@ -507,10 +520,10 @@ class EtsyService
         return Listing::create(
             shop_id: $shop->shop_oauth['shop_id'],
             data: [
-                'quantity' => $listingDTO->quantity,
                 'title' => $listingDTO->title,
                 'description' => $listingDTO->description,
-                'price' => $listingDTO->price,
+                'quantity' => 0,
+                'price' => 0,
                 'who_made' => $listingDTO->whoMade,
                 'when_made' => $listingDTO->whenMade,
                 'taxonomy_id' => $listingDTO->taxonomyId,
@@ -529,21 +542,35 @@ class EtsyService
 
     public function createListingVariationOptions(Shop $shop, ListingDTO $listingDTO): void
     {
-        ListingVariationOption::update(
-            listing_id: $listingDTO->listingId,
-            data: [
-                'property_id' => 515,
+        $listingId = $listingDTO->listingId;
+        $variationResponse = $this->client->put("/application/listings/{$listingId}/variation-options", [
+            [
+                'property_id' => 515, // Material
                 'formatted_values' => $listingDTO->materials->map(function ($material) {
                     return $material->name;
                 })->toArray(),
                 'is_available' => true,
                 'visible' => true,
-            ],
-        );
+            ]
+        ]);
+        Log::info('Listing variation options created: ' . print_r($variationResponse, true));
+//        ListingVariationOption::update(
+//            listing_id: $listingId,
+//            data: [
+//                'property_id' => 515,
+//                'formatted_values' => $listingDTO->materials->map(function ($material) {
+//                    return $material->name;
+//                })->toArray(),
+//                'is_available' => true,
+//                'visible' => true,
+//            ],
+//        );
     }
 
-    public function createListingInventory(Shop $shop, ListingDTO $listingDTO)
+    public function createListingInventory(Shop $shop, ListingDTO $listingDTO): void
     {
+        $listingId = $listingDTO->listingId;
+
         $products = [];
         foreach ($listingDTO->listingInventory as $listingInventory) {
             $products[] = [
@@ -567,15 +594,24 @@ class EtsyService
             ];
         }
 
-        return ListingInventory::update(
-            listing_id: $listingDTO->listingId,
-            data: [
+        $inventoryResponse = $this->client->put("/application/inventory/{$listingId}", [
                 'products' => $products,
                 'price_on_property' => 515,
                 'quantity_on_property' => 515,
                 'sku_on_property' => 515,
             ],
         );
+        Log::info('Listing inventory created: ' . print_r($inventoryResponse, true));
+
+//        return ListingInventory::update(
+//            listing_id: $listingDTO->listingId,
+//            data: [
+//                'products' => $products,
+//                'price_on_property' => 515,
+//                'quantity_on_property' => 515,
+//                'sku_on_property' => 515,
+//            ],
+//        );
     }
 
     private function saveListing(Listing $listing, array $data): Listing

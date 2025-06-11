@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\DTO\Order\OrderDTO;
 use App\Enums\Shops\ShopOwnerShopsEnum;
 use App\Models\Shop;
-use App\Models\ShopOwner;
+use App\Models\ShopOrder;
 use App\Services\Admin\ShopOrderService;
 use App\Services\Etsy\EtsyService;
 use App\Services\Woocommerce\WoocommerceApiService;
@@ -43,7 +43,7 @@ class GetEtsyReceipts extends Command
                 $receipts = $etsyService->getShopReceipts($shop, ['min_created' => $date]);
                 foreach ($receipts->data as $receipt) {
                     // Check if order already in shop_orders
-                    $shopOrder = ShopOwner::where('shop_receipt_id', $receipt->receipt_id)->first();
+                    $shopOrder = ShopOrder::where('shop_receipt_id', $receipt->receipt_id)->first();
                     if ($shopOrder === null) {
                         $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
                         if (count($lines) > 0) {
