@@ -14,10 +14,8 @@ use App\Models\Shop;
 use App\Models\ShopListingModel;
 use App\Services\Admin\ShopListingModelService;
 use App\Services\Etsy\Resources\Listing;
-use App\Services\Etsy\Resources\ListingVariationOption;
 use Etsy\Collection;
 use Etsy\Etsy;
-use Etsy\EtsyClient;
 use Etsy\OAuth\Client;
 use Etsy\Resources\LedgerEntry;
 use Etsy\Resources\ListingImage;
@@ -35,6 +33,7 @@ use Etsy\Resources\Transaction;
 use Etsy\Resources\User;
 use Etsy\Utils\PermissionScopes;
 use Exception;
+use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
@@ -317,11 +316,25 @@ class EtsyService
     public function getListingInventory(Shop $shop, int $listingId)
     {
         $this->refreshAccessToken($shop);
-        $inventory = $this->client->get("/application/inventory/{$listingId}");
+        $shop->refresh();
 
-        Log::info('Listing inventory: ' . print_r($inventory, true));
+        $client = new GuzzleClient([
+            'base_uri' => 'https://openapi.etsy.com/v3/application/',
+            'headers' => [
+                'Authorization' => 'Bearer ' . $shop->shop_oauth['access_token'],
+                'Content-Type'  => 'application/json',
+            ],
+        ]);
 
-        return $inventory;
+        $response = $client->get("listings/{$listingId}/inventory");
+
+        $data = json_decode($response->getBody()->getContents(), true);
+
+//        $inventory = $this->client->get("/application/inventory/{$listingId}");
+
+        Log::info('Listing inventory: ' . print_r($data, true));
+
+        return $data;
     }
 
     public function syncListings(Shop $shop, $models): \Illuminate\Support\Collection
