@@ -307,7 +307,7 @@ class EtsyService
     public function getListingProperties(Shop $shop, int $listingId)
     {
         $this->refreshAccessToken($shop);
-        $properties = $this->client->get("/v3/application/shops/{$shop->shop_oauth['shop_id']}/listings/{$listingId}/properties");
+        $properties = $this->client->get("/application/shops/{$shop->shop_oauth['shop_id']}/listings/{$listingId}/properties");
 
         Log::info('Listing properties: ' . print_r($properties, true));
 
@@ -555,7 +555,7 @@ class EtsyService
     {
         Log::info('Listing variation options creating: ' . $listingDTO->listingId);
         $listingId = $listingDTO->listingId;
-        $variationResponse = $this->client->put("/v3/application/listings/{$listingId}/variation-options", [
+        $variationResponse = $this->client->put("/application/listings/{$listingId}/variation-options", [
             [
                 'property_id' => 513, // Material
                 'formatted_values' => $listingDTO->materials->map(function ($material) {
@@ -607,7 +607,7 @@ class EtsyService
             ];
         }
 
-        $inventoryResponse = $this->client->put("/v3/application/inventory/{$listingId}", [
+        $inventoryResponse = $this->client->put("/application/inventory/{$listingId}", [
                 'products' => $products,
                 'price_on_property' => [513],
                 'quantity_on_property' => [513],
