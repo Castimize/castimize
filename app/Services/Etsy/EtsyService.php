@@ -307,7 +307,7 @@ class EtsyService
     public function getListingProperties(Shop $shop, int $listingId)
     {
         $this->refreshAccessToken($shop);
-        $properties = $this->client->get("/v3/applicatio/shops/{$shop->shop_oauth['shop_id']}/listings/{$listingId}/properties");
+        $properties = $this->client->get("/v3/application/shops/{$shop->shop_oauth['shop_id']}/listings/{$listingId}/properties");
 
         Log::info('Listing properties: ' . print_r($properties, true));
 
