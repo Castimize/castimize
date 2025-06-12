@@ -306,10 +306,16 @@ class EtsyService
 
     public function getListingProperties(Shop $shop, int $listingId)
     {
-        return ListingProperty::all(
-            shop_id: $shop->shop_oauth['shop_id'],
-            listing_id: $listingId,
-        );
+        $properties = $this->client->get("/v3/applicatio/shops/{$shop->shop_oauth['shop_id']}/listings/{$listingId}/properties");
+
+        Log::info('Listing properties: ' . print_r($properties, true));
+
+        return $properties;
+
+//        return ListingProperty::all(
+//            shop_id: $shop->shop_oauth['shop_id'],
+//            listing_id: $listingId,
+//        );
     }
 
     public function syncListings(Shop $shop, $models): \Illuminate\Support\Collection
