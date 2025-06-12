@@ -317,7 +317,7 @@ class EtsyService
     public function getListingInventory(Shop $shop, int $listingId)
     {
         $this->refreshAccessToken($shop);
-        $inventory = $this->client->get("/application/listings/{$listingId}/inventory");
+        $inventory = $this->client->get("/application/inventory/{$listingId}");
 
         Log::info('Listing inventory: ' . print_r($inventory, true));
 
