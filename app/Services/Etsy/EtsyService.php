@@ -22,6 +22,7 @@ use Etsy\OAuth\Client;
 use Etsy\Resources\LedgerEntry;
 use Etsy\Resources\ListingImage;
 use Etsy\Resources\ListingInventory;
+use Etsy\Resources\ListingProperty;
 use Etsy\Resources\Payment;
 use Etsy\Resources\Receipt;
 use Etsy\Resources\ReturnPolicy;
@@ -303,6 +304,14 @@ class EtsyService
         return Listing::allByShop(shop_id: $shop->shop_oauth['shop_id']);
     }
 
+    public function getListingProperties(Shop $shop, int $listingId)
+    {
+        return ListingProperty::all(
+            shop_id: $shop->shop_oauth['shop_id'],
+            listing_id: $listingId,
+        );
+    }
+
     public function syncListings(Shop $shop, $models): \Illuminate\Support\Collection
     {
         $listingDTOs = collect();
@@ -541,7 +550,7 @@ class EtsyService
         $listingId = $listingDTO->listingId;
         $variationResponse = $this->client->put("/v3/application/listings/{$listingId}/variation-options", [
             [
-                'property_id' => 515, // Material
+                'property_id' => 513, // Material
                 'formatted_values' => $listingDTO->materials->map(function ($material) {
                     return $material->name;
                 })->toArray(),
@@ -574,7 +583,7 @@ class EtsyService
                 'sku' => $listingInventory->sku,
                 'property_values' => [
                     [
-                        'property_id' => 515,
+                        'property_id' => 513,
                         'value' => $listingInventory->name,
                     ],
                 ],
@@ -593,9 +602,9 @@ class EtsyService
 
         $inventoryResponse = $this->client->put("/v3/application/inventory/{$listingId}", [
                 'products' => $products,
-                'price_on_property' => [515],
-                'quantity_on_property' => [515],
-                'sku_on_property' => [515],
+                'price_on_property' => [513],
+                'quantity_on_property' => [513],
+                'sku_on_property' => [513],
             ],
         );
         Log::info('Listing inventory created: ' . print_r($inventoryResponse, true));
