@@ -312,11 +312,16 @@ class EtsyService
         Log::info('Listing properties: ' . print_r($properties, true));
 
         return $properties;
+    }
 
-//        return ListingProperty::all(
-//            shop_id: $shop->shop_oauth['shop_id'],
-//            listing_id: $listingId,
-//        );
+    public function getListingInventory(Shop $shop, int $listingId)
+    {
+        $this->refreshAccessToken($shop);
+        $inventory = $this->client->get("/application/listings/{$listingId}/inventory");
+
+        Log::info('Listing inventory: ' . print_r($inventory, true));
+
+        return $inventory;
     }
 
     public function syncListings(Shop $shop, $models): \Illuminate\Support\Collection
