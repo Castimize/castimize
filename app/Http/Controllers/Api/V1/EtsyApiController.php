@@ -104,9 +104,9 @@ class EtsyApiController extends ApiController
     {
         $customer = Customer::find($customerId);
         $shop = $customer->shopOwner->shops->first();
-        $listing = $this->etsyService->getListingProperties($shop, $listingId);
+        $properties = $this->etsyService->getListingProperties($shop, $listingId);
 
-        return response()->json($listing->toJson());
+        return response()->json($properties);
     }
 
     public function syncListings(int $customerId): JsonResponse
