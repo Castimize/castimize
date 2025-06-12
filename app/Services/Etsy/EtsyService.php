@@ -306,6 +306,7 @@ class EtsyService
 
     public function getListingProperties(Shop $shop, int $listingId)
     {
+        $this->refreshAccessToken($shop);
         $properties = $this->client->get("/v3/applicatio/shops/{$shop->shop_oauth['shop_id']}/listings/{$listingId}/properties");
 
         Log::info('Listing properties: ' . print_r($properties, true));
@@ -506,12 +507,12 @@ class EtsyService
 //            'price' => $listingDTO->price,
             'taxonomy_id' => $listingDTO->taxonomyId,
             'shipping_profile_id' => $listingDTO->shippingProfileId,
-//            'return_policy_id' => $listingDTO->returnPolicyId,
+            'return_policy_id' => $listingDTO->returnPolicyId,
             'materials' => $materials,
-//            'item_weight' => $listingDTO->itemWeight,
-//            'item_length' => $listingDTO->itemLength,
-//            'item_width' => $listingDTO->itemWidth,
-//            'item_height' => $listingDTO->itemHeight,
+            'item_weight' => $listingDTO->itemWeight,
+            'item_length' => $listingDTO->itemLength,
+            'item_width' => $listingDTO->itemWidth,
+            'item_height' => $listingDTO->itemHeight,
         ];
 
         $this->handleUpdateListing(
