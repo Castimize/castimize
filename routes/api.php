@@ -64,6 +64,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::get('etsy/{customerId}/listings', 'EtsyApiController@getListings')->name('api.etsy.get-listings');
             Route::get('etsy/{customerId}/listings/sync', 'EtsyApiController@syncListings')->name('api.etsy.sync-listings');
             Route::get('etsy/{customerId}/listings/{listingId}', 'EtsyApiController@dgetListing')->name('api.etsy.get-listing');
+            Route::get('etsy/{customerId}/listings/{listingId}/properties', 'EtsyApiController@dgetListingProperties')->name('api.etsy.get-listing-properties');
             Route::get('etsy/{customerId}/listings/{listingId}/delete', 'EtsyApiController@deleteListing')->name('api.etsy.delete-listing');
             Route::get('etsy/{customerId}/shipping-carriers', 'EtsyApiController@getShippingCarriers')->name('api.etsy.get-shipping-carriers');
             Route::get('etsy/{customerId}/shipping-profile', 'EtsyApiController@getShippingProfile')->name('api.etsy.get-shipping-profile');
