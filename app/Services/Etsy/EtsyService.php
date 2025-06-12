@@ -322,7 +322,8 @@ class EtsyService
             'base_uri' => 'https://openapi.etsy.com/v3/application/',
             'headers' => [
                 'Authorization' => 'Bearer ' . $shop->shop_oauth['access_token'],
-                'Content-Type'  => 'application/json',
+                'x-api-key' => $shop->shop_oauth['client_id'],
+                'Content-Type' => 'application/json',
             ],
         ]);
 
