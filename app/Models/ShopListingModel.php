@@ -26,6 +26,7 @@ class ShopListingModel extends Model
         'shop_owner_id',
         'shop_id',
         'model_id',
+        'taxonomy_id',
         'shop_listing_id',
         'shop_listing_image_id',
         'state',

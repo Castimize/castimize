@@ -19,7 +19,6 @@ use Etsy\Etsy;
 use Etsy\OAuth\Client;
 use Etsy\Resources\LedgerEntry;
 use Etsy\Resources\ListingImage;
-use Etsy\Resources\ListingInventory;
 use Etsy\Resources\ListingProperty;
 use Etsy\Resources\Payment;
 use Etsy\Resources\Receipt;
@@ -33,7 +32,6 @@ use Etsy\Resources\Transaction;
 use Etsy\Resources\User;
 use Etsy\Utils\PermissionScopes;
 use Exception;
-use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
@@ -55,8 +53,8 @@ class EtsyService
         $scopes = PermissionScopes::ALL_SCOPES;
 //        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
 
-        [$verifier, $code_challenge] = $client->generateChallengeCode();
-        $nonce = $client->createNonce();
+        [$verifier, $code_challenge] = $this->client->generateChallengeCode();
+        $nonce = $this->client->createNonce();
 
         $shopOauth = $shop->shop_oauth;
         $shopOauth['verifier'] = $verifier;
@@ -65,7 +63,7 @@ class EtsyService
         $shop->shop_oauth = $shopOauth;
         $shop->save();
 
-        return $client->getAuthorizationUrl(
+        return $this->client->getAuthorizationUrl(
             redirect_uri: $this->getRedirectUri(),
             scope: $scopes,
             code_challenge: $code_challenge,
@@ -318,20 +316,10 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $shop->refresh();
 
-        $client = new GuzzleClient([
-            'base_uri' => 'https://openapi.etsy.com/v3/application/',
-            'headers' => [
-                'Authorization' => 'Bearer ' . $shop->shop_oauth['access_token'],
-                'x-api-key' => $shop->shop_oauth['client_id'],
-                'Content-Type' => 'application/json',
-            ],
-        ]);
-
-        $response = $client->get("listings/{$listingId}/inventory");
-
-        $data = json_decode($response->getBody()->getContents(), true);
-
-//        $inventory = $this->client->get("/application/inventory/{$listingId}");
+        $data = (new EtsyInventoryService(
+            clientId: $shop->shop_oauth['client_id'],
+            accessToken: $shop->shop_oauth['access_token'],
+        ))->getInventory($listingId);
 
         Log::info('Listing inventory: ' . print_r($data, true));
 
@@ -474,7 +462,7 @@ class EtsyService
                 }
 
                 // Update variations for materials for listing
-                $this->createListingVariationOptions($shop, $listingDTO);
+//                $this->createListingVariationOptions($shop, $listingDTO);
                 $this->createListingInventory($shop, $listingDTO);
 
                 $this->handleUpdateListing(
@@ -507,7 +495,7 @@ class EtsyService
         // Set listing to draft first to update variations if not already in draft
         if ($listing->state === EtsyListingStatesEnum::Draft->value) {
             // Update variations for materials for listing
-            $this->createListingVariationOptions($shop, $listingDTO);
+//            $this->createListingVariationOptions($shop, $listingDTO);
         }
 
         $this->createListingInventory($shop, $listingDTO);
@@ -626,24 +614,14 @@ class EtsyService
             ];
         }
 
-        $inventoryResponse = $this->client->put("/application/inventory/{$listingId}", [
-                'products' => $products,
-                'price_on_property' => [513],
-                'quantity_on_property' => [513],
-                'sku_on_property' => [513],
-            ],
+        $inventoryResponse = (new EtsyInventoryService(
+            clientId: $shop->shop_oauth['client_id'],
+            accessToken: $shop->shop_oauth['access_token'],
+        ))->updateInventory(
+            listingId: $listingId,
+            products: $products,
         );
-        Log::info('Listing inventory created: ' . print_r($inventoryResponse, true));
-
-//        return ListingInventory::update(
-//            listing_id: $listingDTO->listingId,
-//            data: [
-//                'products' => $products,
-//                'price_on_property' => 515,
-//                'quantity_on_property' => 515,
-//                'sku_on_property' => 515,
-//            ],
-//        );
+        Log::info('Listing inventory created: ' . $inventoryResponse);
     }
 
     private function saveListing(Listing $listing, array $data): Listing
