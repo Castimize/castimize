@@ -304,26 +304,19 @@ class ModelsService
                 }
                 $listingImages = $etsyService->getListingImages($shop, $listing->listing_id);
 
+                $listingDTO = ListingDTO::fromModel(
+                    shop: $shop,
+                    model: $model,
+                    listingId: $listing->listing_id,
+                    listing: $listing,
+                    listingImages: $listingImages ? collect($listingImages->data) : null,
+                );
                 if ($model->shopListingModel) {
-                    $listingDTO = ListingDTO::fromModel(
-                        shop: $shop,
-                        model: $model,
-                        listingId: $modelDTO->shopListingId,
-                        listing: $listing,
-                        listingImages: $listingImages ? collect($listingImages->data) : null,
-                    );
                     (new ShopListingModelService())->updateShopListingModel(
                         shopListingModel: $model->shopListingModel,
                         listingDTO: $listingDTO,
                     );
                 } else {
-                    $listingDTO = ListingDTO::fromModel(
-                        shop: $shop,
-                        model: $model,
-                        listingId: $modelDTO->shopListingId,
-                        listing: $listing,
-                        listingImages: $listingImages ? collect($listingImages->data) : null,
-                    );
                     (new ShopListingModelService())->createShopListingModel(
                         shop: $shop,
                         model: $model,
