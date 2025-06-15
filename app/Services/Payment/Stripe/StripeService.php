@@ -4,6 +4,7 @@ namespace App\Services\Payment\Stripe;
 
 use Stripe\Balance;
 use Stripe\Charge;
+use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
@@ -15,6 +16,11 @@ class StripeService
     public function __construct()
     {
         Stripe::setApiKey(config('services.stripe.secret'));
+    }
+
+    public function getCustomers(?array $params = null)
+    {
+        return Customer::all(params: $params);
     }
 
     /**

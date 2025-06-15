@@ -6,15 +6,14 @@ use App\Http\Controllers\Webhooks\WebhookController;
 use App\Jobs\CreateInvoicesFromOrder;
 use App\Jobs\SetOrderCanceled;
 use App\Jobs\SetOrderPaid;
-use App\Jobs\UploadToOrderQueue;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use Stripe\Charge;
+use Stripe\Customer as StripeCustomer;
 use Stripe\Event;
 use Stripe\PaymentIntent;
 use Symfony\Component\HttpFoundation\Response;
@@ -63,6 +62,10 @@ class StripeWebhookController extends WebhookController
             case 'charge.refunded':
                 $charge = $event->data->object; // contains a \Stripe\Charge
                 $this->handleChargeRefunded($charge);
+                break;
+            case 'customer.created':
+                $customer = $event->data->object; // contains a \Stripe\Customer
+                $this->handleCustomerCreatedAndUpdated($customer);
                 break;
             default:
                 echo 'Received unknown event type ' . $event->type;
@@ -127,6 +130,25 @@ class StripeWebhookController extends WebhookController
 
             try {
                 LogRequestService::addResponse(request(), $order);
+            } catch (Throwable $exception) {
+                Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            }
+        }
+
+        return $this->successMethod();
+    }
+
+    protected function handleCustomerCreatedAndUpdated(StripeCustomer $stripeCustomer): Response
+    {
+        $customer = Customer::where('email', $stripeCustomer->email)
+            ->first();
+
+        if ($customer !== null && $customer->stripe_id === null) {
+            $customer->stripe_id = $stripeCustomer->id;
+            $customer->save();
+
+            try {
+                LogRequestService::addResponse(request(), $customer);
             } catch (Throwable $exception) {
                 Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
             }

@@ -18,10 +18,11 @@ return new class extends Migration
             $table->unsignedBigInteger('currency_id')->index()->nullable();
             $table->integer('wp_id')->index()->nullable();
             $table->string('exact_online_guid')->nullable();
+            $table->string('stripe_id')->nullable();
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('company')->nullable();
-            $table->string('email')->nullable();
+            $table->string('email')->index()->nullable();
             $table->string('phone')->nullable();
             $table->string('vat_number')->nullable();
             $table->text('comments')->nullable();
