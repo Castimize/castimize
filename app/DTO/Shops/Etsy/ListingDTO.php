@@ -11,7 +11,6 @@ use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\CurrencyService;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 class ListingDTO
 {
@@ -70,8 +69,6 @@ class ListingDTO
             $price = $currencyService->convertCurrency(config('app.currency'), $shopOauth['shop_currency'], $price);
         }
 
-//        Log::info('Listing DTO with listing ' . PHP_EOL . print_r($listingImages, true));
-
         return new self(
             shopId: $shopOauth['shop_id'],
             listingId: $listing ? $listing->listing_id : ($listingId ?? $model->shopListingModel?->shop_listing_id ?? null),
@@ -79,10 +76,10 @@ class ListingDTO
             quantity: 1,
             title: $model->model_name ?? $model->name,
             description: '3D print model: ' . ($model->model_name ?? $model->name),
-            price: $price,
+            price: (int) ($price * 100),
             whoMade: 'i_did',
             whenMade: 'made_to_order',
-            taxonomyId: (int) ($listing && $listing->taxonomy_id ?? $shopOauth['default_taxonomy_id'] ?? 12380), // 3D Printer Files
+            taxonomyId: (int) ($listing ? $listing->taxonomy_id : ($shopOauth['default_taxonomy_id'] ?? 12380)), // 3D Printer Files
             shippingProfileId: $shopOauth['shop_shipping_profile_id'] ?? null,
             returnPolicyId: $shopOauth['shop_return_policy_id'] ?? null,
             materials: $model->materials,
