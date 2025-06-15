@@ -104,7 +104,7 @@ class EtsyApiController extends ApiController
     {
         $customer = Customer::find($customerId);
         $shop = $customer->shopOwner->shops->first();
-        $properties = $this->etsyService->getListingProperties($shop, $listingId);
+        $properties = $this->etsyService->getTaxonomyProperties($shop);
 
         return response()->json($properties);
     }
@@ -182,7 +182,7 @@ class EtsyApiController extends ApiController
 
         $shippingProfileDTO = $this->etsyService->createShippingProfile(
             shop: $shop,
-            shippingProfileDTO: ShippingProfileDTO::fromShop($shopId)
+            shippingProfileDTO: ShippingProfileDTO::fromShop($shopId),
         );
 
         foreach ($countries as $country) {
