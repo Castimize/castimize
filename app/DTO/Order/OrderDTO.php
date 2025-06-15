@@ -264,7 +264,7 @@ readonly class  OrderDTO
             orderKey: $receipt->receipt_id,
             status: $receipt->status ?? WcOrderStatesEnum::Pending->value,
             firstName: $name->getFirstname(),
-            lastName: $name->getLastname(),
+            lastName: $name->getMiddlename() !== '' ? $name->getMiddlename() . ' ' . $name->getLastName() : $name->getLastName(),
             email: $billingEmail,
             billingFirstName: $customer->first_name,
             billingLastName: $customer->last_name,
