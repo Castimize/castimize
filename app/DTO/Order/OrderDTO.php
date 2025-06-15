@@ -191,7 +191,11 @@ readonly class  OrderDTO
         $totalItems = 0;
         $totalItemsTax = 0;
         foreach ($lines as $line) {
-            $listingDTO = ListingDTO::fromModel($shop, $line['shop_listing_model']->model);
+            $listingDTO = ListingDTO::fromModel(
+                shop: $shop,
+                model: $line['shop_listing_model']->model,
+                taxonomyId: $line['taxonomy_id'],
+            );
             $totalItems += $listingDTO->price * $line['transaction']->quantity;
         }
         if ($billingVatNumber !== null && $billingAddress->country_id === 1) {

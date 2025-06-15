@@ -44,7 +44,7 @@ class ListingInventoryDTO
 
         return new self(
             listingId: $listingId,
-            sku: app(HelperService::class)->generateSku($material->name, (int) $material->wp_id),
+            sku: 'CAST-' . app(HelperService::class)->generateSku($material->name, (int) $material->wp_id),
             name: $material->name,
             price: $price,
             currency: CurrencyEnum::from($shopOauth['shop_currency']),

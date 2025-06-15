@@ -192,7 +192,6 @@ class ModelsService
         } else {
             $model = Model::where('name', $modelDTO->name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
-//                ->where('material_id', $material->id)
                 ->where('model_scale', $modelDTO->modelScale)
                 ->first();
         }
@@ -232,7 +231,6 @@ class ModelsService
 
         $model = Model::create([
             'customer_id' => $modelDTO->customerId,
-//            'material_id' => $material->id,
             'model_name' => $modelDTO->modelName,
             'name' => $modelDTO->name,
             'file_name' => $fileName,
@@ -308,6 +306,7 @@ class ModelsService
                     shop: $shop,
                     model: $model,
                     listingId: $listing->listing_id,
+                    taxonomyId: $modelDTO->shopTaxonomyId ?? $listing->taxonomy_id,
                     listing: $listing,
                     listingImages: $listingImages ? collect($listingImages->data) : null,
                 );

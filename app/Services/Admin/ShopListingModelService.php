@@ -33,7 +33,7 @@ class ShopListingModelService
         Log::info('Updating shop listing model ' . $shopListingModel->id);
         $shopListingModel->update([
             'shop_listing_id' => $listingDTO->listingId,
-            'taxonomy_id' => $listingDTO->taxonomyId,
+//            'taxonomy_id' => $listingDTO->taxonomyId,
             'shop_listing_image_id' => $listingDTO->listingImages ? $listingDTO->listingImages->first()->listing_image_id : $shopListingModel->shop_listing_image_id,
             'state' => $listingDTO->state,
         ]);

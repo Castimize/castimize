@@ -162,11 +162,6 @@ class ModelsApiController extends ApiController
 
         $model = $this->modelsService->storeModelFromModelDTO(ModelDTO::fromWpRequest($request, $customer->id), $customer);
 
-//        if ($model) {
-//            $this->modelsService->syncModelToShop($model);
-//        }
-//        $model = $this->modelsService->storeModelFromApi($request, $customer);
-
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
         return $response->response()
@@ -180,9 +175,6 @@ class ModelsApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $model = $this->modelsService->updateModelFromModelDTO($model, ModelDTO::fromWpUpdateRequest($request, $model, $model->customer_id), $model->customer_id);
-//        $model = $this->modelsService->updateModelFromApi($request, $model, $model->customer_id);
-
-//        $this->modelsService->syncModelToShop($model);
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
