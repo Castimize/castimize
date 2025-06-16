@@ -188,6 +188,7 @@ class ModelsService
                 ->first();
 
             if ($model && $model->model_name === $modelDTO->modelName) {
+                $model->materials()->syncWithoutDetaching([$material->id]);
                 return $model;
             }
         } else {
@@ -225,7 +226,7 @@ class ModelsService
             $model->thumb_name = $fileNameThumb;
             $model->save();
 
-            $model->materials()->sync($material->id);
+            $model->materials()->syncWithoutDetaching([$material->id]);
 
             return $model;
         }
