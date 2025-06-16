@@ -75,8 +75,9 @@ class ModelsService
             ]);
 
         $total = $customerModels->count();
-        $models = $customerModels->offset($request->start)
-            ->limit($request->length)
+        $models = $customerModels
+            ->limit($request->length ?? 10)
+            ->offset($request->start ?? 0)
             ->get();
 
         return ['items' => ModelResource::collection($models), 'total' => $total];
