@@ -231,7 +231,7 @@ class ModelsService
         }
 
         $model = Model::create([
-            'customer_id' => $modelDTO->customerId,
+            'customer_id' => $customer->id,
             'model_name' => $modelDTO->modelName,
             'name' => $modelDTO->name,
             'file_name' => $fileName,
