@@ -189,6 +189,7 @@ class ModelsService
 
             if ($model && $model->model_name === $modelDTO->modelName) {
                 $model->materials()->syncWithoutDetaching([$material->id]);
+                $model->refresh();
                 return $model;
             }
         } else {
