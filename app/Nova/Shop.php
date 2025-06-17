@@ -141,10 +141,10 @@ class Shop extends Resource
     {
         return [
             EtsyAuthorizationUrlAction::make()->canSee(function () {
-                return $this->resource->shopOwner->customer->vat_number !== null;
+                return $this->shopOwner->customer->vat_number !== null;
             }),
             EtsySyncModelsAction::make()->canSee(function () {
-                return $this->resource->shopOwner->customer->vat_number !== null;
+                return $this->shopOwner->customer->vat_number !== null;
             }),
         ];
     }
