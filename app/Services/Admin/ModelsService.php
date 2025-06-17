@@ -314,7 +314,7 @@ class ModelsService
     {
         $etsyService = (new EtsyService());
 
-        if ($modelDTO->shopListingId && $model->customer->shopOwner) {
+        if (($modelDTO->shopListingId || $model->shopListingModel) && $model->customer->shopOwner) {
             $shop = $model->customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)
                 ->where('active', true)
                 ->first();
