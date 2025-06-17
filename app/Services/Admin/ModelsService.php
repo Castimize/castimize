@@ -319,36 +319,41 @@ class ModelsService
                 ->where('active', true)
                 ->first();
             if ($shop) {
-                $listing = $etsyService->getListing($shop, $modelDTO->shopListingId);
-                if (! $listing) {
-                    throw new Exception('Listing not found');
-                }
-                $listingImages = $etsyService->getListingImages($shop, $listing->listing_id);
+                $shopListingId = $modelDTO->shopListingId ?? $model->shopListingModel->shop_listing_id ?? null;
+                if ($shopListingId) {
+                    $listing = $etsyService->getListing($shop, $shopListingId);
+                    if (! $listing) {
+                        Log::error('Lsting not found');
+                        $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
+                        return $model;
+                    }
+                    $listingImages = $etsyService->getListingImages($shop, $listing->listing_id);
 
-                $listingDTO = ListingDTO::fromModel(
-                    shop: $shop,
-                    model: $model,
-                    listingId: $listing->listing_id,
-                    taxonomyId: $modelDTO->shopTaxonomyId ?? $listing->taxonomy_id,
-                    listing: $listing,
-                    listingImages: $listingImages ? collect($listingImages->data) : null,
-                );
-                if ($model->shopListingModel) {
-                    (new ShopListingModelService())->updateShopListingModel(
-                        shopListingModel: $model->shopListingModel,
-                        listingDTO: $listingDTO,
-                    );
-                } else {
-                    (new ShopListingModelService())->createShopListingModel(
+                    $listingDTO = ListingDTO::fromModel(
                         shop: $shop,
                         model: $model,
-                        listingDTO: $listingDTO,
+                        listingId: $listing->listing_id,
+                        taxonomyId: $modelDTO->shopTaxonomyId ?? $listing->taxonomy_id,
+                        listing: $listing,
+                        listingImages: $listingImages ? collect($listingImages->data) : null,
                     );
+                    if ($model->shopListingModel) {
+                        (new ShopListingModelService())->updateShopListingModel(
+                            shopListingModel: $model->shopListingModel,
+                            listingDTO: $listingDTO,
+                        );
+                    } else {
+                        (new ShopListingModelService())->createShopListingModel(
+                            shop: $shop,
+                            model: $model,
+                            listingDTO: $listingDTO,
+                        );
+                    }
+
+                    $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
+
+                    $this->syncModelToShop($model);
                 }
-
-                $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
-
-                $this->syncModelToShop($model);
             }
         }
 
