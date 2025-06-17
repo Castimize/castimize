@@ -163,7 +163,6 @@ class ModelsApiController extends ApiController
         $model = $this->modelsService->storeModelFromModelDTO(ModelDTO::fromWpRequest($request, $customer->id), $customer);
 
         $response = new ModelResource($model);
-        dd($response->toArray($request));
         LogRequestService::addResponse($request, $response);
         return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
