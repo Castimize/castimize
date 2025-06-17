@@ -190,7 +190,11 @@ class ModelsService
             if ($model && $model->model_name === $modelDTO->modelName) {
                 $model->materials()->syncWithoutDetaching([$material->id]);
                 $model->refresh();
-                return $model;
+
+                return $this->isShopOwnerModel(
+                    model: $model,
+                    modelDTO: $modelDTO,
+                );
             }
         } else {
             $model = Model::where('name', $modelDTO->name)
@@ -229,7 +233,10 @@ class ModelsService
 
             $model->materials()->syncWithoutDetaching([$material->id]);
 
-            return $model;
+            return $this->isShopOwnerModel(
+                model: $model,
+                modelDTO: $modelDTO,
+            );
         }
 
         $model = Model::create([
@@ -252,9 +259,10 @@ class ModelsService
 
         $model->materials()->syncWithoutDetaching([$material->id]);
 
-        $model->load(['materials', 'customer.shopOwner.shops']);
-
-        return $model;
+        return $this->isShopOwnerModel(
+            model: $model,
+            modelDTO: $modelDTO,
+        );
     }
 
     public function updateModelFromApi($request, Model $model, ?int $customerId = null): Model
@@ -293,6 +301,18 @@ class ModelsService
         $model->save();
 
         $model->materials()->sync($modelDTO->materials);
+
+        $model = $this->isShopOwnerModel(
+            model: $model,
+            modelDTO: $modelDTO,
+        );
+
+        return $model;
+    }
+
+    private function isShopOwnerModel(Model $model, ModelDTO $modelDTO)
+    {
+        $etsyService = (new EtsyService());
 
         if ($modelDTO->shopListingId && $model->customer->shopOwner) {
             $shop = $model->customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)
@@ -335,7 +355,7 @@ class ModelsService
         return $model;
     }
 
-    public function syncModelToShop(Model $model): void
+    private function syncModelToShop(Model $model): void
     {
         $shops = $model->customer?->shopOwner?->shops;
         if ($shops) {
