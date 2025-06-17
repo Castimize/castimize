@@ -50,6 +50,8 @@ class ListingDTO
         $parcelSettings = new ParcelSettings();
 
         $price = 0.00;
+        $density = 0.00;
+        $dcLeadTime = 0;
         foreach ($model->materials as $material) {
             $priceMaterial = app()->environment() !== 'production' ?
                 0.18 :
@@ -60,6 +62,8 @@ class ListingDTO
                 );
             if ($price === 0.00 || $priceMaterial < $price) {
                 $price = $priceMaterial;
+                $density = $material->density;
+                $dcLeadTime = $material->dc_lead_time;
             }
         }
 
@@ -83,13 +87,13 @@ class ListingDTO
             shippingProfileId: $shopOauth['shop_shipping_profile_id'] ?? null,
             returnPolicyId: $shopOauth['shop_return_policy_id'] ?? null,
             materials: $model->materials,
-            itemWeight: $model->model_box_volume * $model->material->density + $customsItemSettings->bag,
+            itemWeight: $model->model_box_volume * $density + $customsItemSettings->bag,
             itemLength: $model->model_x_length,
             itemWidth: $model->model_y_length,
             itemHeight: $model->model_z_length,
             itemWeightUnit: $parcelSettings->massUnit,
             itemDimensionsUnit: $parcelSettings->distanceUnit,
-            processingMin: $model->material->dc_lead_time + ($model->customer?->country?->logisticsZone?->shippingFee?->default_lead_time ?? 0),
+            processingMin: $dcLeadTime + ($model->customer?->country?->logisticsZone?->shippingFee?->default_lead_time ?? 0),
             processingMax: null,
             listingImages: $listingImages,
             listingInventory: $model->materials->map(function ($material) use ($shop, $model, $listing) {
