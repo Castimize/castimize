@@ -104,7 +104,7 @@ readonly class  ModelDTO
             printerId: $request->printer_id ?? 3,
             coatingId: $request->coating_id ?? null,
             unit: 'mm',
-            name: $request->original_file_name,
+            name: $request->original_file_name ?? $request->file_name,
             modelName: $request->model_name ?? null,
             fileName: $request->file_name,
             thumbName: $thumbName,
