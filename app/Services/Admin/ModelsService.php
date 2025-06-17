@@ -320,7 +320,7 @@ class ModelsService
                 ->first();
             if ($shop) {
                 $shopListingId = $modelDTO->shopListingId ?? $model->shopListingModel->shop_listing_id ?? null;
-                if ($shopListingId) {
+                if ($shopListingId && ! empty($shopListingId)) {
                     $listing = $etsyService->getListing($shop, $shopListingId);
                     if (! $listing) {
                         Log::error('Lsting not found');
