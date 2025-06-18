@@ -105,7 +105,7 @@ class ModelsApiController extends ApiController
         }
 
         $upload = json_decode($request->upload, true, 512, JSON_THROW_ON_ERROR);
-        [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
+        [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
 
         $model = $customer->models->where('name', $upload['3dp_options']['filename'])
             ->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
@@ -129,7 +129,7 @@ class ModelsApiController extends ApiController
 
         $newUploads = [];
         foreach (json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR) as $itemKey => $upload) {
-            [$materialId, $materialName] = explode('. ', $upload['3dp_options']['material_name']);
+            [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
             $material = Material::where('wp_id', ($upload['3dp_options']['material_id'] ?? $materialId))->first();
             $model = null;
             if ($material) {
