@@ -39,10 +39,10 @@ class OrderQueuesService
                         'manufacturer_id' => $manufacturer->id,
                         'manufacturer_cost_id' => $manufacturerCost->id,
                         'manufacturer_costs' => (new CalculatePricesService())->calculateCostsOfModel(
-                            $manufacturerCost,
-                            $upload->model_volume_cc,
-                            $upload->model_surface_area_cm2,
-                            $upload->quantity
+                            cost: $manufacturerCost,
+                            materialVolume: $upload->model_volume_cc,
+                            surfaceArea: $upload->model_surface_area_cm2,
+                            quantity: $upload->quantity,
                         ),
                         'due_date' => $upload->order->due_date,
                         'final_arrival_date' => Carbon::parse($upload->order->created_at)->addBusinessDays($upload->customer_lead_time),
@@ -52,6 +52,25 @@ class OrderQueuesService
         }
 
         return $orderQueues;
+    }
+
+    public function recalculateManufacturerCosts(Upload $upload): void
+    {
+        foreach ($upload->orderQueues as $orderQueue) {
+            if ($upload->manufacturer_discount !== null) {
+                $manufacturerMaterialCost = $orderQueue->manufacturer->costs->where('active', true)->where('material_id', $upload->material_id)->first();
+                $costs = (new CalculatePricesService())->calculateCostsOfModel(
+                    cost: $manufacturerMaterialCost,
+                    materialVolume: $upload->model_volume_cc,
+                    surfaceArea: $upload->model_surface_area_cm2,
+                    quantity: $upload->quantity,
+                );
+
+                $manufacturerCosts = $costs * ((100 - $upload->manufacturer_discount) / 100);
+                $orderQueue->manufacturer_costs = $manufacturerCosts;
+                $orderQueue->save();
+            }
+        }
     }
 
     /**

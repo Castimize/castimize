@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1e8580094347de5644434c84276e6bb5",
+    "content-hash": "8fef98c1a6eec0d4432bfc12001afd3d",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -600,7 +600,7 @@
         },
         {
             "name": "castimize/custom-styles",
-            "version": "dev-feature/etsy_implementation",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/CustomStyles",
@@ -636,7 +636,7 @@
         },
         {
             "name": "castimize/inline-text-edit",
-            "version": "dev-feature/etsy_implementation",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/InlineTextEdit",
@@ -672,7 +672,7 @@
         },
         {
             "name": "castimize/po-status-card",
-            "version": "dev-feature/etsy_implementation",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/PoStatusCard",
@@ -708,7 +708,7 @@
         },
         {
             "name": "castimize/select-manufacturer-with-overview",
-            "version": "dev-feature/etsy_implementation",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/SelectManufacturerWithOverview",
@@ -744,7 +744,7 @@
         },
         {
             "name": "castimize/select-with-overview",
-            "version": "dev-feature/etsy_implementation",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/SelectWithOverview",
@@ -3516,6 +3516,86 @@
                 "source": "https://github.com/laravel/framework"
             },
             "time": "2024-11-12T15:36:15+00:00"
+        },
+        {
+            "name": "laravel/nightwatch",
+            "version": "v1.7.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/nightwatch.git",
+                "reference": "6ac69db88861e00741417f9d0b5557aada4b95c4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/nightwatch/zipball/6ac69db88861e00741417f9d0b5557aada4b95c4",
+                "reference": "6ac69db88861e00741417f9d0b5557aada4b95c4",
+                "shasum": ""
+            },
+            "require": {
+                "ext-zlib": "*",
+                "guzzlehttp/promises": "^2.0",
+                "laravel/framework": "^10.0|^11.0|^12.0",
+                "monolog/monolog": "^3.0",
+                "nesbot/carbon": "^2.0|^3.0",
+                "php": "^8.2",
+                "psr/http-message": "^1.0|^2.0",
+                "psr/log": "^1.0|^2.0|^3.0",
+                "symfony/console": "^6.0|^7.0",
+                "symfony/http-foundation": "^6.0|^7.0"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^7.0",
+                "guzzlehttp/psr7": "^2.0",
+                "laravel/horizon": "^5.4",
+                "laravel/pint": "1.21.0",
+                "mockery/mockery": "^1.0",
+                "mongodb/laravel-mongodb": "^5.0",
+                "orchestra/testbench": "^8.0|^9.0|^10.0",
+                "orchestra/testbench-core": "^8.0|^9.0|^10.0",
+                "phpstan/phpstan": "^1.0",
+                "phpunit/phpunit": "^10.0|^11.0",
+                "ramsey/uuid": "^4.0",
+                "spatie/laravel-ignition": "^2.0",
+                "symfony/mailer": "^6.0|^7.0",
+                "symfony/mime": "^6.0|^7.0",
+                "symfony/var-dumper": "^6.0|^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Nightwatch\\NightwatchServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Nightwatch\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "The official Laravel Nightwatch package.",
+            "homepage": "https://nightwatch.laravel.com",
+            "keywords": [
+                "Insights",
+                "laravel",
+                "monitoring"
+            ],
+            "support": {
+                "docs": "https://nightwatch.laravel.com/docs",
+                "issues": "https://github.com/laravel/nightwatch/issues",
+                "source": "https://github.com/laravel/nightwatch"
+            },
+            "time": "2025-06-17T02:22:28+00:00"
         },
         {
             "name": "laravel/nova",
