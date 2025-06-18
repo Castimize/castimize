@@ -21,6 +21,7 @@ class ModelsService
     {
         $customerModels = Model::with(['materials'])
             ->where('customer_id', $customer->id);
+        $total = $customerModels->count();
 
         if ($request->search_value) {
             $customerModels
@@ -74,10 +75,9 @@ class ModelsService
                 'model_z_length',
             ]);
 
-        $total = $customerModels->count();
         $models = $customerModels
-            ->limit($request->length ?? 10)
             ->offset($request->start ?? 0)
+            ->limit($request->length ?? 10)
             ->get();
 
         return ['items' => ModelResource::collection($models), 'total' => $total];
