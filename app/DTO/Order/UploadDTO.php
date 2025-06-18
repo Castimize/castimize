@@ -58,7 +58,7 @@ readonly class  UploadDTO
                 $fileName = $metaData->value;
             }
             if ($metaData->key === 'pa_p3d_material') {
-                [$materialId, $materialName] = explode('. ', $metaData->value);
+                [$materialId, $materialName] = array_pad(explode('. ', $metaData->value), 2, null);
                 $material = Material::where('wp_id', $materialId)->first();
                 $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
             }
