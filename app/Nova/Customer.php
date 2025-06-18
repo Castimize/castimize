@@ -130,7 +130,7 @@ class Customer extends Resource
             TelInput::make(__('Phone'), 'phone')
                 ->hideFromIndex(),
 
-            TelInput::make(__('Vat number'), 'vat_number')
+            Text::make(__('Vat number'), 'vat_number')
                 ->hideFromIndex(),
 
             Number::make(__('# Orders'), 'orders_count')
