@@ -114,7 +114,7 @@ class Customer extends Resource
             })->exceptOnForms(),
 
             BelongsTo::make(__('User'), 'user')
-                ->exceptOnForms()
+                ->nullable()
                 ->sortable(),
 
             Text::make(__('First name'), 'first_name')
