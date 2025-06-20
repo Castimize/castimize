@@ -75,6 +75,10 @@ trait ManufacturerPOFieldsTrait
             })
                 ->sortable(),
 
+            Text::make(__('Discount'), function () {
+                return $this->upload->manufacturer_discount ? $this->upload->manufacturer_discount . '%' : '';
+            }),
+
             Text::make(__('Purity mark'), function () {
                 return $this->upload->material->materialGroup->name === 'Gold & Silver' ? __('Yes') : __('No');
             }),

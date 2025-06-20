@@ -21,6 +21,8 @@ class ModelsService
         $customerModels = Model::with(['material'])
             ->where('customer_id', $customer->id);
 
+        $total = $customerModels->count();
+
         if ($request->search_value) {
             $customerModels
                 ->where(function ($query) use ($request) {
@@ -73,7 +75,6 @@ class ModelsService
                 'model_z_length',
             ]);
 
-        $total = $customerModels->count();
         $models = $customerModels->offset($request->start)
             ->limit($request->length)
             ->get();

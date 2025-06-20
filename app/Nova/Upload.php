@@ -3,9 +3,11 @@
 namespace App\Nova;
 
 use App\Nova\Actions\PoCanceledStatusAction;
+use App\Nova\Actions\PoSetManufacturerDiscountAction;
 use App\Nova\Actions\UploadToOrderQueueAction;
 use App\Traits\Nova\CommonMetaDataTrait;
 use App\Traits\Nova\OrderQueueStatusFieldTrait;
+use Castimize\InlineTextEdit\InlineTextEdit;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\File;
 use Laravel\Nova\Fields\FormData;
@@ -98,6 +100,17 @@ class Upload extends Resource
                     }
                 ),
 
+            Text::make(__('Manufacturer discount'), function () {
+                return $this->manufacturer_discount ? $this->manufacturer_discount . '%' : '';
+            })
+                ->hideByDefault()
+                ->onlyOnDetail(),
+
+            Number::make(__('Manufacturer discount'), 'manufacturer_discount')
+                ->help(__('In percentage'))
+                ->onlyOnForms()
+                ->step(0.01),
+
             Text::make(__('Manufacturer'), function () {
                 return $this->orderQueue?->manufacturer
                     ? '<span><a class="link-default" href="/admin/resources/maufacturers/' . $this->orderQueue->manufacturer->id . '">' . $this->orderQueue->manufacturer->name . '</a></span>'
@@ -143,6 +156,10 @@ class Upload extends Resource
                 return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
             })
                 ->sortable(),
+
+            InlineTextEdit::make(__('Manufacturer discount'), 'manufacturer_discount')
+                ->help(__('In percentage like 0,05 for 5%'))
+                ->modelClass(\App\Models\Upload::class),
 
             Text::make(__('Manufacturer'), function () {
                 return $this->orderQueue?->manufacturer
@@ -223,6 +240,10 @@ class Upload extends Resource
         return [
             PoCanceledStatusAction::make()
                 ->confirmText(__('Are you sure you want to cancel and refund the selected uploads?'))
+                ->confirmButtonText(__('Confirm'))
+                ->cancelButtonText(__('Cancel')),
+            PoSetManufacturerDiscountAction::make()
+                ->confirmText(__('Are you sure you want to set manufacturer discount and recalculate manufacturer costs for the selected uploads?'))
                 ->confirmButtonText(__('Confirm'))
                 ->cancelButtonText(__('Cancel')),
             UploadToOrderQueueAction::make()

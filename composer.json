@@ -38,6 +38,7 @@
         "jeffbeltran/sanctum-tokens": "^2.1",
         "kaiserkiwi/nova-queue-management": "^1.2",
         "laravel/framework": "11.31.0.0",
+        "laravel/nightwatch": "^1.7",
         "laravel/nova": "^4.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
