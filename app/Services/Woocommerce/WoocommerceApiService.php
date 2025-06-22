@@ -2,11 +2,25 @@
 
 namespace App\Services\Woocommerce;
 
+use App\DTO\Customer\CustomerDTO;
 use App\DTO\Order\OrderDTO;
+use Codexshaper\WooCommerce\Facades\Customer;
 use Codexshaper\WooCommerce\Facades\Order;
 
 class WoocommerceApiService
 {
+    public function updateCustomerVatNumber(CustomerDTO $customerDTO)
+    {
+        $data = [
+            'meta_data' => [
+                'billing_eu_vat_number' => $customerDTO->vatNumber,
+            ],
+        ];
+
+        return Customer::update($data);
+    }
+
+
     public function createOrder(OrderDTO $orderDTO)
     {
         $data = [

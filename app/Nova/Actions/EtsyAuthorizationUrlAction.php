@@ -33,13 +33,13 @@ class EtsyAuthorizationUrlAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $shopOwnerAuth = $models->first();
-        $shopOwnerAuth->shop_oauth = [
+        $shop = $models->first();
+        $shop->shop_oauth = [
                 'client_id' => $fields->oauthKey,
                 'client_secret' => Crypt::encryptString($fields->oathSecret),
             ];
 
-        $url = (new EtsyService())->getAuthorizationUrl($shopOwnerAuth);
+        $url = (new EtsyService())->getAuthorizationUrl($shop);
 
         return ActionResponse::openInNewTab($url);
     }

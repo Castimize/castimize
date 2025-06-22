@@ -64,6 +64,7 @@ class StripeWebhookController extends WebhookController
                 $this->handleChargeRefunded($charge);
                 break;
             case 'customer.created':
+            case 'customer.updated':
                 $customer = $event->data->object; // contains a \Stripe\Customer
                 $this->handleCustomerCreatedAndUpdated($customer);
                 break;
@@ -143,9 +144,13 @@ class StripeWebhookController extends WebhookController
         $customer = Customer::where('email', $stripeCustomer->email)
             ->first();
 
-        if ($customer !== null && $customer->stripe_id === null) {
-            $customer->stripe_id = $stripeCustomer->id;
-            $customer->save();
+        if ($customer) {
+            $stripeData = $customer->stripe_data;
+            if (! array_key_exists('stripe_id', $stripeData)) {
+                $stripeData['stripe_id'] = $stripeCustomer->id;
+                $customer->stripe_data = $stripeData;
+                $customer->save();
+            }
 
             try {
                 LogRequestService::addResponse(request(), $customer);
