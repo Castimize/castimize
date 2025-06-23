@@ -16,14 +16,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CustomersApiController extends ApiController
 {
-    public function __construct(protected CustomersService $customersService)
-    {
+    public function __construct(
+        private CustomersService $customersService,
+    ) {
     }
 
-    /**
-     * @param Customer $customer
-     * @return CustomerResource
-     */
     public function show(Customer $customer): CustomerResource
     {
         abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -33,10 +30,6 @@ class CustomersApiController extends ApiController
         return $response;
     }
 
-    /**
-     * @param ShowCustomerWpRequest $request
-     * @return CustomerResource
-     */
     public function showCustomerWp(ShowCustomerWpRequest $request): CustomerResource
     {
         $customer = Customer::where('wp_id', $request->wp_id)->first();
@@ -49,10 +42,6 @@ class CustomersApiController extends ApiController
         return $response;
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function storeCustomerWp(Request $request): JsonResponse
     {
         $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($request->id);
@@ -64,10 +53,6 @@ class CustomersApiController extends ApiController
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function updateCustomerWp(Request $request): JsonResponse
     {
         return response()->json($request->all());
@@ -78,10 +63,6 @@ class CustomersApiController extends ApiController
 //            ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
     public function deleteCustomerWp(Request $request): Response
     {
         $customer = Customer::where('wp_id', $request->id)->first();

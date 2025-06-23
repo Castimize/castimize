@@ -13,11 +13,14 @@ class WoocommerceApiService
     {
         $data = [
             'meta_data' => [
-                'billing_eu_vat_number' => $customerDTO->vatNumber,
+                [
+                    'key' => 'billing_eu_vat_number',
+                    'value' => $customerDTO->vatNumber,
+                ],
             ],
         ];
 
-        return Customer::update($data);
+        return Customer::update($customerDTO->wpId, $data);
     }
 
 

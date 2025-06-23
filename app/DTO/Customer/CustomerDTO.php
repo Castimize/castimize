@@ -2,11 +2,13 @@
 
 namespace App\DTO\Customer;
 
+use App\Models\Customer;
 use Illuminate\Http\Request;
 
 readonly class CustomerDTO
 {
     public function __construct(
+        public ?int $id,
         public ?int $wpId,
         public ?int $countryId,
         public ?int $currencyId,
@@ -39,10 +41,11 @@ readonly class CustomerDTO
     ) {
     }
 
-    public static function fromApiRequest(Request $request): self
+    public static function fromApiRequest(Customer $customer, Request $request): self
     {
         return new self(
-            wpId: $request->wp_id ?? null,
+            id: $customer->id,
+            wpId: $request->wp_id ?? $customer->wp_id ?? null,
             countryId: $request->country ?? null,
             currencyId: $request->currency ?? null,
             firstName: $request->firstName ?? null,
@@ -50,7 +53,7 @@ readonly class CustomerDTO
             company: $request->company ?? null,
             email: $request->email ?? null,
             phone: $request->phone ?? null,
-            vatNumber: $request->vatNumber ?? null,
+            vatNumber: $request->vatNumber ?? $customer->vat_number ?? null,
             billingContactName: $request->billingContactName ?? null,
             billingCompany: $request->billingCompany ?? null,
             billingPhone: $request->billingPhone ?? null,

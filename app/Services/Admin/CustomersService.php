@@ -146,7 +146,12 @@ class CustomersService
         $customer->update($data);
 
         if (array_key_exists('vat_number', $data)) {
-            app(WoocommerceApiService::class)->updateCustomerVatNumber($customer, CustomerDTO::fromApiRequest($request));
+            app(WoocommerceApiService::class)->updateCustomerVatNumber(
+                customerDTO: CustomerDTO::fromApiRequest(
+                    customer: $customer,
+                    request: $request,
+                ),
+            );
         }
 
         return $customer;

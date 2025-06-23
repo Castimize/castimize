@@ -19,8 +19,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ModelsApiController extends ApiController
 {
-    public function __construct(private ModelsService $modelsService)
-    {
+    public function __construct(
+        private ModelsService $modelsService,
+    ) {
     }
 
     public function show(int $customerId, Model $model): ModelResource
@@ -35,10 +36,6 @@ class ModelsApiController extends ApiController
         return $response;
     }
 
-    /**
-     * @param int $customerId
-     * @return AnonymousResourceCollection
-     */
     public function showModelsWpCustomer(int $customerId): AnonymousResourceCollection
     {
         $customer = Customer::with('models.material')->where('wp_id', $customerId)->first();
@@ -197,10 +194,6 @@ class ModelsApiController extends ApiController
         return response(null, Response::HTTP_NO_CONTENT);
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function storeFromUpload(Request $request): JsonResponse
     {
         return response()->json($request->toArray());

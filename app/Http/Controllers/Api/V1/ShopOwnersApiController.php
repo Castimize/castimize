@@ -19,13 +19,10 @@ class ShopOwnersApiController extends ApiController
     ) {
     }
 
-    /**
-     * @param Customer $customer
-     * @return ShopOwnerResource
-     */
-    public function show(Customer $customer): ShopOwnerResource
+    public function show(int $customerId): ShopOwnerResource
     {
         abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
         if (! $customer->shopOwner) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
@@ -36,9 +33,10 @@ class ShopOwnersApiController extends ApiController
         return $response;
     }
 
-    public function store(Request $request, Customer $customer): ShopOwnerResource
+    public function store(Request $request, int $customerId): ShopOwnerResource
     {
-        if ($customer->shopOwner) {
+        $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
+        if ($customer && $customer->shopOwner) {
             LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop owner already exists, use the update method'], Response::HTTP_BAD_REQUEST);
             abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop owner already exists use the update method');
         }
@@ -60,9 +58,10 @@ class ShopOwnersApiController extends ApiController
         return $response;
     }
 
-    public function update(Request $request, Customer $customer): ShopOwnerResource
+    public function update(Request $request, int $customerId): ShopOwnerResource
     {
-        if (! $customer->shopOwner) {
+        $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
+        if ($customer && ! $customer->shopOwner) {
             LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop owner doesn\'t exist, use the store method'], Response::HTTP_BAD_REQUEST);
             abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop owner doesn\'t exist, use the store method');
         }
