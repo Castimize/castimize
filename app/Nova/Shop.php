@@ -3,9 +3,7 @@
 namespace App\Nova;
 
 use App\Nova\Actions\EtsyAuthorizationUrlAction;
-use App\Nova\Actions\EtsySyncModelsAction;
 use App\Traits\Nova\CommonMetaDataTrait;
-use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Code;
@@ -141,9 +139,6 @@ class Shop extends Resource
     {
         return [
             EtsyAuthorizationUrlAction::make()->canSee(function () {
-                return $this->resource->shopOwner?->customer->vat_number !== null;
-            }),
-            EtsySyncModelsAction::make()->canSee(function () {
                 return $this->resource->shopOwner?->customer->vat_number !== null;
             }),
         ];

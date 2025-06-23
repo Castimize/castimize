@@ -86,16 +86,6 @@ class ModelsApiController extends ApiController
         ]);
     }
 
-    public function storeModelWp(Request $request): JsonResponse
-    {
-        $model = $this->modelsService->storeModelFromApi($request);
-
-        $response = new ModelResource($model);
-        LogRequestService::addResponse($request, $response);
-        return $response->response()
-            ->setStatusCode(Response::HTTP_CREATED);
-    }
-
     public function getCustomModelName(int $customerId, Request $request): JsonResponse
     {
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
