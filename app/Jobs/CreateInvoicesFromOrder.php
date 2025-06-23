@@ -21,8 +21,10 @@ class CreateInvoicesFromOrder implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public int $wpOrderId, public ?int $logRequestId = null)
-    {
+    public function __construct(
+        public int $wpOrderId,
+        public ?int $logRequestId = null,
+    ) {
     }
 
     /**
