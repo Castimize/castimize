@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Enums\Woocommerce\WcOrderDocumentTypesEnum;
 use App\Jobs\SyncCustomerToExact;
 use App\Jobs\SyncInvoiceToExact;
 use App\Models\Customer;
@@ -30,13 +31,13 @@ class InvoicesService
         }
 
         if ($debit) {
-            $invoiceDocument = Invoice::WOOCOMMERCE_DOCUMENT_INVOICE;
+            $invoiceDocument = WcOrderDocumentTypesEnum::Invoice->value;
             $invoiceNumber = $wpOrder['documents']->$invoiceDocument->number;
             $invoiceDate = Carbon::createFromTimestamp($wpOrder['documents']->$invoiceDocument->date_timestamp);
             $total = $wpOrder['total'];
             $totalTax = $wpOrder['total_tax'];
         } else {
-            $creditNoteDocument = Invoice::WOOCOMMERCE_DOCUMENT_CREDIT_NOTE;
+            $creditNoteDocument = WcOrderDocumentTypesEnum::CreditNote->value;
             $invoiceNumber = $wpOrder['documents']->$creditNoteDocument->number;
             $invoiceDate = Carbon::createFromTimestamp($wpOrder['documents']->$creditNoteDocument->date_timestamp);
             $total = 0.00;

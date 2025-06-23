@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Invoice;
+use App\Enums\Woocommerce\WcOrderDocumentTypesEnum;
 use App\Models\Order;
 use App\Services\Admin\InvoicesService;
 use App\Services\Admin\LogRequestService;
@@ -44,12 +44,12 @@ class CreateInvoicesFromOrder implements ShouldQueue
             }
             $order->wpOrder = $wpOrder;
 
-            $invoiceDocument = Invoice::WOOCOMMERCE_DOCUMENT_INVOICE;
-            if (isset($wpOrder['documents']->$invoiceDocument)) {
+            $invoiceDocument = WcOrderDocumentTypesEnum::Invoice->value;
+            if (property_exists($wpOrder['documents'], $invoiceDocument)) {
                 $invoicesService->storeInvoiceFromWpOrder($customer, $order);
             }
-            $creditNoteDocument = Invoice::WOOCOMMERCE_DOCUMENT_CREDIT_NOTE;
-            if (isset($wpOrder['documents']->$creditNoteDocument)) {
+            $creditNoteDocument = WcOrderDocumentTypesEnum::CreditNote->value;
+            if (property_exists($wpOrder['documents'], $creditNoteDocument)) {
                 $invoicesService->storeInvoiceFromWpOrder($customer, $order, false);
             }
 
