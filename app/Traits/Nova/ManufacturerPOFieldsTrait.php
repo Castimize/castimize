@@ -74,7 +74,7 @@ trait ManufacturerPOFieldsTrait
                 ->sortable(),
 
             Text::make(__('Total costs'), function () {
-                return $this->manufacturer_costs ? currencyFormatter((float) $this->manufacturer_costs, $this->currency_code) : '';
+                return $this->manufacturer_costs && $this->manufacturer_costs > 0.00 ? currencyFormatter((float) $this->manufacturer_costs, $this->currency_code) : '';
             })
                 ->sortable(),
 
