@@ -451,7 +451,7 @@ class ShippingService
     {
         $valid = 1;
         if (is_array($validation_results)) {
-            if (app()->environment('production') || !$test) {
+            if (app()->environment('production')) {
                 $valid = $validation_results['is_valid'] ? 1 : 0;
             }
         }
