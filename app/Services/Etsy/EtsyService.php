@@ -599,10 +599,15 @@ class EtsyService
         foreach ($receipt->transactions->data as $transaction) {
             $shopListingModel = ShopListingModel::with('model')->where('shop_id', $shop->id)->where('shop_listing_id', $transaction->listing_id)->first();
             if ($shopListingModel) {
-                $lines[] = [
-                    'transaction' => $transaction,
-                    'shop_listing_model' => $shopListingModel,
-                ];
+                foreach ($transaction->variations as $variation) {
+                    if ($variation->formatted_name === 'Material') {
+                        $lines[] = [
+                            'transaction' => $transaction,
+                            'shop_listing_model' => $shopListingModel,
+                            'material' => $variation->formatted_value,
+                        ];
+                    }
+                }
             }
         }
 

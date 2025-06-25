@@ -100,7 +100,7 @@ readonly class  UploadDTO
     {
         $country = Country::where('alpha2', $receipt->country_iso)->first();
         $model = $line['shop_listing_model']->model;
-        $material = $model->material;
+        $material = $model->materials->where('name', $line['material'])->first();
 
         $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
 
@@ -161,8 +161,8 @@ readonly class  UploadDTO
 
         return new self(
             wpId: $model->wp_id ?? null,
-            materialId: $material?->id,
-            materialName: $material?->name,
+            materialId: $material->id,
+            materialName: $material->name,
             name: $model->name,
             fileName: $model->file_name,
             modelVolumeCc: $model->model_volume_cc,
