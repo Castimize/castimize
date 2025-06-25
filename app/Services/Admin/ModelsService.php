@@ -360,7 +360,7 @@ class ModelsService
         return $model;
     }
 
-    private function syncModelToShop(Model $model): void
+    public function syncModelToShop(Model $model): void
     {
         $shops = $model->customer?->shopOwner?->shops;
         if ($shops) {
