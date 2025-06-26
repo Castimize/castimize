@@ -16,9 +16,6 @@ class Invoice extends Model
 {
     use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
 
-    public const WOOCOMMERCE_DOCUMENT_INVOICE = 'invoice';
-    public const WOOCOMMERCE_DOCUMENT_CREDIT_NOTE = 'credit-note';
-
     protected $revisionForceDeleteEnabled = true;
     protected $revisionCreationsEnabled = true;
 
