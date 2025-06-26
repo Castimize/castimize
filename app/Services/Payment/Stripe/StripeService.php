@@ -2,10 +2,14 @@
 
 namespace App\Services\Payment\Stripe;
 
+use App\Models\Customer as CastimizeCustomer;
 use Stripe\Balance;
 use Stripe\Charge;
+use Stripe\Collection;
+use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
 use Stripe\PaymentIntent;
+use Stripe\SetupIntent;
 use Stripe\Stripe;
 
 class StripeService
@@ -17,6 +21,19 @@ class StripeService
         Stripe::setApiKey(config('services.stripe.secret'));
     }
 
+    public function getCustomers(?array $params = null): Collection
+    {
+        return Customer::all(params: $params);
+    }
+
+    public function createCustomer(CastimizeCustomer $customer): Customer
+    {
+        return Customer::create([
+            'name' => $customer->name,
+            'email' => $customer->email,
+        ]);
+    }
+
     /**
      * @return Balance
      * @throws ApiErrorException
@@ -26,7 +43,7 @@ class StripeService
         return Balance::retrieve([]);
     }
 
-    public function createCharge(int $amount, string $currency, string $customerId, string $sourceId, string $description = '')
+    public function createCharge(int $amount, string $currency, string $customerId, string $sourceId, string $description = ''): Charge
     {
         return Charge::create([
             'amount' => $amount,
@@ -40,5 +57,12 @@ class StripeService
     public function getPaymentIntent(string $paymentIntentId): PaymentIntent
     {
         return PaymentIntent::retrieve($paymentIntentId);
+    }
+
+    public function createSetupIntent(CastimizeCustomer $customer): SetupIntent
+    {
+        return SetupIntent::create([
+            'customer' => $customer->stripe_data['stripe_id'],
+        ]);
     }
 }
