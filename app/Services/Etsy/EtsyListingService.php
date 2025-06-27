@@ -42,7 +42,7 @@ class EtsyListingService
                 data: [
                     'title' => $listingDTO->title,
                     'description' => $listingDTO->description,
-                    'quantity' => 1,
+                    'quantity' => 999,
                     'price' => $listingDTO->price,
                     'who_made' => $listingDTO->whoMade,
                     'when_made' => $listingDTO->whenMade,

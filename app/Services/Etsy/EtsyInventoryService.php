@@ -48,7 +48,7 @@ class EtsyInventoryService
                 'offerings' => [
                     [
                         'price' => $product['price'],
-                        'quantity' => 1,
+                        'quantity' => 999,
                         'is_enabled' => true,
                     ],
                 ],
