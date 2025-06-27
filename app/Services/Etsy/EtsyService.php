@@ -511,7 +511,7 @@ class EtsyService
             'title' => $listingDTO->title,
             'description' => $listingDTO->description,
             'taxonomy_id' => $listingDTO->taxonomyId,
-            'shipping_profile_id' => $listingDTO->shippingProfileId,
+            //'shipping_profile_id' => $listingDTO->shippingProfileId,
             'return_policy_id' => $listingDTO->returnPolicyId,
             'materials' => $materials,
             'item_weight' => $listingDTO->itemWeight,
