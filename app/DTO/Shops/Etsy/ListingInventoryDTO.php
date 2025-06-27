@@ -19,6 +19,7 @@ class ListingInventoryDTO
         public string $sku,
         public string $name,
         public float $price,
+        public int $quantity,
         public CurrencyEnum $currency,
         public bool $isEnabled,
     ) {
@@ -47,6 +48,7 @@ class ListingInventoryDTO
             sku: 'CAST-' . app(HelperService::class)->generateSku($material->name, (int) $material->wp_id),
             name: $material->name,
             price: $price,
+            quantity: 9999,
             currency: CurrencyEnum::from($shopOauth['shop_currency']),
             isEnabled: true,
         );

@@ -314,7 +314,7 @@ class EtsyService
             listingId: $listingId,
         );
 
-        Log::info('Listing inventory: ' . print_r($data, true));
+        //Log::info('Listing inventory: ' . print_r($data, true));
 
         return $data;
     }
@@ -463,7 +463,7 @@ class EtsyService
                 }
 
                 // Create variations for materials for listing and add inventory
-                $this->createListingInventory($shop, $listingDTO);
+                $this->updateListingInventory($shop, $listingDTO, []);
 
                 $etsyListingService->updateListing(
                     listingId: $listing->listing_id,
@@ -496,8 +496,9 @@ class EtsyService
 
         Log::info('Update listing: ' . $listingDTO->listingId);
 
-        // Update inventory with variations
-        $this->createListingInventory($shop, $listingDTO);
+        // Update inventory with variations, first get existing inventory so we can keep the existing intact
+        $inventory = $this->getListingInventory($shop, $listingDTO->listingId);
+        $this->updateListingInventory($shop, $listingDTO, $inventory);
 
         $materials = [];
         if ($listingDTO->materials) {
@@ -530,18 +531,35 @@ class EtsyService
         return $listingDTO;
     }
 
-    public function createListingInventory(Shop $shop, ListingDTO $listingDTO): void
+    public function updateListingInventory(Shop $shop, ListingDTO $listingDTO, array $existingInventory): void
     {
         Log::info('Listing inventory creating: ' . $listingDTO->listingId);
         $listingId = $listingDTO->listingId;
 
         $variations = [];
         foreach ($listingDTO->listingInventory as $listingInventory) {
+            $sku = $listingInventory->sku;
+            $price = $listingInventory->price;
+            $currency = $listingInventory->currency;
+            $quantity = $listingInventory->quantity;
+            if (array_key_exists('products', $existingInventory)) {
+                foreach ($existingInventory['products'] as $product) {
+                    foreach ($product['property_values'] as $propertyValue) {
+                        if ($propertyValue['property_name'] === 'Material' && $propertyValue['values'][0] === $listingInventory->name) {
+                            $offering = $product['offerings'][0];
+                            $sku = $product['sku'];
+                            $price = $offering['price']['amount'];
+                            //$quantity = $offering['quantity'];
+                        }
+                    }
+                }
+            }
             $variations[] = [
-                'sku' => $listingInventory->sku,
+                'sku' => $sku,
                 'material' => $listingInventory->name,
-                'price' => $listingInventory->price,
-                'currency_code' => $listingInventory->currency->value,
+                'price' => $price,
+                'quantity' => $quantity,
+                'currency_code' => $currency->value,
             ];
         }
         try {

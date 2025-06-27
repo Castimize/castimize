@@ -26,9 +26,13 @@ class EtsyInventoryService
 
     public function getInventory(int $listingId)
     {
-        $response = $this->client->get("/application/listings/{$listingId}/inventory");
+        try {
+            $response = $this->client->get("listings/{$listingId}/inventory");
 
-        return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+            return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (Exception $e) {
+            return [];
+        }
     }
 
     public function updateInventory(int $listingId, array $products)
@@ -48,7 +52,7 @@ class EtsyInventoryService
                 'offerings' => [
                     [
                         'price' => $product['price'],
-                        'quantity' => 999,
+                        'quantity' => $product['quantity'],
                         'is_enabled' => true,
                     ],
                 ],
