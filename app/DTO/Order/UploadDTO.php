@@ -5,6 +5,7 @@ namespace App\DTO\Order;
 use App\Models\Country;
 use App\Models\Material;
 use App\Models\Shop;
+use App\Services\Admin\CalculatePricesService;
 use Etsy\Resources\Receipt;
 
 readonly class  UploadDTO
@@ -104,7 +105,12 @@ readonly class  UploadDTO
 
         $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
 
-        $total = $line['transaction']->price->amount;
+        $total = (new CalculatePricesService())->calculatePriceOfModel(
+            price: $material->prices->first(),
+            materialVolume: (float) $model->model_volume_cc,
+            surfaceArea: (float) $model->model_surface_area_cm2,
+        );
+//        $total = $line['transaction']->price->amount;
         $totalTax = 0;
         if ($taxPercentage) {
             $totalTax = ($taxPercentage / 100) * $total;

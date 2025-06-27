@@ -190,14 +190,12 @@ readonly class  OrderDTO
         $shippingFeeTax = 0;
         $totalItems = 0;
         $totalItemsTax = 0;
-        foreach ($lines as $line) {
-            $listingDTO = ListingDTO::fromModel(
-                shop: $shop,
-                model: $line['shop_listing_model']->model,
-                taxonomyId: $line['taxonomy_id'],
-            );
-            $totalItems += $listingDTO->price * $line['transaction']->quantity;
+        $uploads = collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage));
+        /** @var UploadDTO $upload */
+        foreach ($uploads as $upload) {
+            $totalItems += $upload->total * $upload->quantity;
         }
+
         if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
             $taxPercentage = 21;
             $vatExempt = 'yes';
@@ -311,7 +309,7 @@ readonly class  OrderDTO
             paidAt: null,
             createdAt: $createdAt,
             updatedAt: $updatedAt,
-            uploads: collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage)),
+            uploads: $uploads,
         );
     }
 }

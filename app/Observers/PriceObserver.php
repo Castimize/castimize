@@ -35,18 +35,18 @@ class PriceObserver
         }
     }
 
-    public function updated(Price $price): void
-    {
-        $modelsService = new ModelsService();
-        $material = $price->material;
-        $models = Model::with(['materials', 'customer.shopOwner.shops'])
-            ->has('shopListingModel')
-            ->whereHas('materials', function ($query) use ($material) {
-                $query->where('id', $material->id);
-            })->get();
-
-        foreach ($models as $model) {
-            $modelsService->syncModelToShop($model);
-        }
-    }
+//    public function updated(Price $price): void
+//    {
+//        $modelsService = new ModelsService();
+//        $material = $price->material;
+//        $models = Model::with(['materials', 'customer.shopOwner.shops'])
+//            ->has('shopListingModel')
+//            ->whereHas('materials', function ($query) use ($material) {
+//                $query->where('id', $material->id);
+//            })->get();
+//
+//        foreach ($models as $model) {
+//            $modelsService->syncModelToShop($model);
+//        }
+//    }
 }
