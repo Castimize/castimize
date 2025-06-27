@@ -5,6 +5,7 @@ namespace App\Services\Etsy;
 use App\Models\Shop;
 use Exception;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
 
 class EtsyInventoryService
 {
@@ -31,6 +32,7 @@ class EtsyInventoryService
 
             return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
+            Log::error($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString());
             return [];
         }
     }
