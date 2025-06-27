@@ -503,7 +503,7 @@ class EtsyService
         $materials = [];
         if ($listingDTO->materials) {
             foreach ($listingDTO->materials as $material) {
-                $materials[] = $material->name;
+                $materials[] = str_replace('(1µm)', '(1 micron)', $material->name);
             }
         }
 
@@ -548,7 +548,7 @@ class EtsyService
                         if ($propertyValue['property_name'] === 'Material' && $propertyValue['values'][0] === $listingInventory->name) {
                             $offering = $product['offerings'][0];
                             $sku = $product['sku'];
-                            $price = $offering['price']['amount'];
+                            $price = $offering['price']['amount'] / $offering['price']['divisor'];
                             //$quantity = $offering['quantity'];
                         }
                     }
@@ -556,12 +556,13 @@ class EtsyService
             }
             $variations[] = [
                 'sku' => $sku,
-                'material' => $listingInventory->name,
+                'material' => str_replace('(1µm)', '(1 micron)', $listingInventory->name),
                 'price' => $price,
                 'quantity' => $quantity,
                 'currency_code' => $currency->value,
             ];
         }
+//        dd($variations);
         try {
             $inventoryResponse = (new EtsyInventoryService(
                 shop: $shop,
