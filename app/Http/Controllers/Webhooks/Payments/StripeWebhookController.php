@@ -9,6 +9,7 @@ use App\Jobs\SetOrderPaid;
 use App\Jobs\UploadToOrderQueue;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
+use App\Services\Admin\OrdersService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
@@ -23,6 +24,12 @@ use UnexpectedValueException;
 
 class StripeWebhookController extends WebhookController
 {
+    public function __construct(
+        private OrdersService $ordersService,
+    ) {
+        parent::__construct();
+    }
+
     /**
      * Handle a Stripe webhook call.
      *
@@ -116,20 +123,14 @@ class StripeWebhookController extends WebhookController
             ->where('order_number', $charge->metadata->order_id)
             ->first();
 
-        if ($order !== null && $charge->status === 'succeeded' && $charge->refunded) {
-            $order->total_refund = ($charge->amount_refunded / 100);
-            if ($order->total === $order->total_refund) {
-                $order->total_refund_tax = $order->total_tax;
-            }
-            $order->save();
-
-            CreateInvoicesFromOrder::dispatch($order->wp_id);
-
-            try {
-                LogRequestService::addResponse(request(), $order);
-            } catch (Throwable $exception) {
-                Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
-            }
+        $this->ordersService->handleStripeRefund(
+            order: $order,
+            charge: $charge,
+        );
+        try {
+            LogRequestService::addResponse(request(), $order);
+        } catch (Throwable $exception) {
+            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
         }
 
         return $this->successMethod();
