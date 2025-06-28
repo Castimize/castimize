@@ -348,7 +348,7 @@ class OrdersService
         return $refundOrder;
     }
 
-    public function handleStripeRefund(Order $order, Charge $charge)
+    public function handleStripeRefund(Order $order, Charge $charge): void
     {
         if ($order !== null && $charge->status === 'succeeded' && $charge->refunded) {
             $order->total_refund = ($charge->amount_refunded / 100);
@@ -357,7 +357,7 @@ class OrdersService
             }
             $order->save();
 
-            $wcOrderRefunds = \Codexshaper\WooCommerce\Facades\Order::refunds($order->wp_id);
+            $this->uploadsService->handleStripeRefund($order);
 
             CreateInvoicesFromOrder::dispatch($order->wp_id);
         }
