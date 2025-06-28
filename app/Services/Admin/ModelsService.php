@@ -182,7 +182,7 @@ class ModelsService
 
         if ($customer) {
             $model = $customer->models->where('name', $modelDTO->name)
-                ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
+//                ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
 //                ->where('material_id', $material->id)
                 ->where('model_scale', $modelDTO->modelScale)
                 ->first();
