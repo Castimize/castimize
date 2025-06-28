@@ -19,8 +19,7 @@ class ModelsService
 {
     public function getModelsPaginated($request, Customer $customer): array
     {
-        $customerModels = Model::with(['materials'])
-            ->where('customer_id', $customer->id);
+        $customerModels = $customer->models()->with('materials');
         $total = $customerModels->count();
 
         if ($request->search_value) {
