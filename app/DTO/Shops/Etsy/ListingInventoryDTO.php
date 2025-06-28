@@ -50,7 +50,7 @@ class ListingInventoryDTO
             price: $price,
             quantity: 999,
             currency: CurrencyEnum::from($shopOauth['shop_currency']),
-            isEnabled: true,
+            isEnabled: false,
         );
     }
 }

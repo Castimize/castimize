@@ -542,6 +542,7 @@ class EtsyService
             $price = $listingInventory->price;
             $currency = $listingInventory->currency;
             $quantity = $listingInventory->quantity;
+            $isEnabled = $listingInventory->isEnabled;
             if (array_key_exists('products', $existingInventory)) {
                 foreach ($existingInventory['products'] as $product) {
                     foreach ($product['property_values'] as $propertyValue) {
@@ -549,7 +550,8 @@ class EtsyService
                             $offering = $product['offerings'][0];
                             $sku = $product['sku'];
                             $price = $offering['price']['amount'] / $offering['price']['divisor'];
-                            //$quantity = $offering['quantity'];
+                            $quantity = $offering['quantity'];
+                            $isEnabled = $offering['is_enabled'];
                         }
                     }
                 }
@@ -560,6 +562,7 @@ class EtsyService
                 'price' => $price,
                 'quantity' => $quantity,
                 'currency_code' => $currency->value,
+                'is_enabled' => $isEnabled,
             ];
         }
 //        dd($variations);
