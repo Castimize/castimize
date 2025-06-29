@@ -19,8 +19,8 @@ class ShopOwnerResource extends JsonResource
             'id' => $this->id,
             'customer_id' => $this->customer_id,
             'vat_number' => $this->customer->vat_number,
-            'stripe_id' => array_key_exists('stripe_id', $this->customer->stripe_data) ? $this->customer->stripe_data['stripe_id'] : null,
-            'stripe_mandate_id' => array_key_exists('mandate_id', $this->customer->stripe_data) ? $this->customer->stripe_data['mandate_id'] : null,
+            'stripe_id' => is_array($this->customer->stripe_data) && array_key_exists('stripe_id', $this->customer->stripe_data) ? $this->customer->stripe_data['stripe_id'] : null,
+            'stripe_mandate_id' => is_array($this->customer->stripe_data) && array_key_exists('mandate_id', $this->customer->stripe_data) ? $this->customer->stripe_data['mandate_id'] : null,
             'shops' => ShopResource::collection($this->shops)->toArray($request),
             'shops_list' => ShopOwnerShopsEnum::cases(),
         ];
