@@ -8,7 +8,7 @@ use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
 use Etsy\Resources\Receipt;
 
-readonly class  UploadDTO
+readonly class UploadDTO
 {
     public function __construct(
         public ?string $wpId,

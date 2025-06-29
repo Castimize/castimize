@@ -12,7 +12,7 @@ use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\CurrencyService;
 use Illuminate\Support\Collection;
 
-class ListingDTO
+readonly class ListingDTO
 {
     public function __construct(
         public int $shopId,
