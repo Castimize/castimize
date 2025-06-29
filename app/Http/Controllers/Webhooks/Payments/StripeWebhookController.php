@@ -79,6 +79,11 @@ class StripeWebhookController extends WebhookController
                 $setupIntent = $event->data->object; // contains a \Stripe\SetupIntent
                 $this->handleSetupIntentSucceeded($setupIntent);
                 break;
+            case 'setup_intent.canceled':
+            case 'setup_intent.requires_action':
+            case 'setup_intent.setup_failed':
+                Log::info('Event: ' . $event->type . ': ' . PHP_EOL . print_r($event->data, true));
+                return $this->successMethod();
             case 'charge.refunded':
                 $charge = $event->data->object; // contains a \Stripe\Charge
                 $this->handleChargeRefunded($charge);
