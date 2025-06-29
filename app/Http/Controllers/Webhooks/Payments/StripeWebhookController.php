@@ -39,7 +39,7 @@ class StripeWebhookController extends WebhookController
         } catch(UnexpectedValueException $e) {
             LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
             // Invalid payload
-            return $this->invalidMethod();
+            return $this->badRequestMethod();
         }
 
         // Handle the event
@@ -161,8 +161,12 @@ class StripeWebhookController extends WebhookController
     {
         try {
             LogRequestService::addResponse(request(), $setupIntent);
+
+            return $this->successMethod();
         } catch (Throwable $exception) {
             Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+
+            return $this->badRequestMethod();
         }
     }
 
@@ -179,8 +183,12 @@ class StripeWebhookController extends WebhookController
 
         try {
             LogRequestService::addResponse(request(), $setupIntent);
+
+            return $this->successMethod();
         } catch (Throwable $exception) {
             Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+
+            return $this->badRequestMethod();
         }
     }
 

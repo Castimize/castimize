@@ -31,10 +31,10 @@ class ShippoWebhookController extends WebhookController
         } catch(UnexpectedValueException $e) {
             Log::error($e->getMessage());
             // Invalid payload
-            return $this->invalidMethod();
+            return $this->badRequestMethod();
         } catch (Exception $e) {
             Log::error($e->getMessage());
-            return $this->invalidMethod();
+            return $this->badRequestMethod();
         }
 
         // Handle the event
