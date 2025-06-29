@@ -27,7 +27,7 @@ class ModelsApiController extends ApiController
     public function show(int $customerId, Model $model): ModelResource
     {
         abort_if(Gate::denies('viewModel'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if (!$model || (int) $model->customer->wp_id !== $customerId) {
+        if (! $model || (int) $model->customer?->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
@@ -49,7 +49,6 @@ class ModelsApiController extends ApiController
             $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s',
                 $model->model_name,
                 $model->name,
-//                $model->material_id,
                 $model->model_volume_cc,
                 $model->model_surface_area_cm2,
                 $model->model_box_volume,
@@ -119,22 +118,24 @@ class ModelsApiController extends ApiController
 
         $newUploads = [];
         foreach (json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR) as $itemKey => $upload) {
-            [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
-            $material = Material::where('wp_id', ($upload['3dp_options']['material_id'] ?? $materialId))->first();
-            $model = null;
-            if ($material) {
-                $model = $customer->models->where('file_name', 'wp-content/uploads/p3d/' . str_replace('_resized', '', $upload['3dp_options']['model_name']))
-                    ->where('material_id', $material->id)
-                    ->where('model_scale', $upload['3dp_options']['scale'])
-                    ->first();
-            }
-
-            $newUploads[$itemKey] = $upload;
-            if ($model) {
-                if ($model->thumb_name) {
-                    $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(env('FILESYSTEM_DISK'))->exists($model->thumb_name) ? sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $model->thumb_name) : '/' . $model->thumb_name;
+            if (array_key_exists('3dp_options', $upload)) {
+                [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
+                $material = Material::where('wp_id', ($upload['3dp_options']['material_id'] ?? $materialId))->first();
+                $model = null;
+                if ($material) {
+                    $model = $customer->models->where('file_name', 'wp-content/uploads/p3d/' . str_replace('_resized', '', $upload['3dp_options']['model_name']))
+                        ->where('material_id', $material->id)
+                        ->where('model_scale', $upload['3dp_options']['scale'])
+                        ->first();
                 }
-                $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
+
+                $newUploads[$itemKey] = $upload;
+                if ($model) {
+                    if ($model->thumb_name) {
+                        $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(env('FILESYSTEM_DISK'))->exists($model->thumb_name) ? sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $model->thumb_name) : '/' . $model->thumb_name;
+                    }
+                    $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
+                }
             }
         }
 
@@ -161,7 +162,7 @@ class ModelsApiController extends ApiController
     public function update(Request $request, int $customerId, Model $model): JsonResponse
     {
         ini_set('precision', 53);
-        if (!$model || (int)$model->customer->wp_id !== $customerId) {
+        if (! $model || (int) $model->customer?->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $model = $this->modelsService->updateModelFromModelDTO($model, ModelDTO::fromWpUpdateRequest($request, $model, $model->customer_id), $model->customer_id);
@@ -174,7 +175,7 @@ class ModelsApiController extends ApiController
 
     public function destroy(int $customerId, Model $model): Response
     {
-        if (!$model || (int)$model->customer->wp_id !== $customerId) {
+        if (! $model || (int) $model->customer?->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $model->delete();

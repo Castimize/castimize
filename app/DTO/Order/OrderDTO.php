@@ -11,7 +11,7 @@ use Etsy\Resources\Receipt;
 use Illuminate\Support\Collection;
 use TheIconic\NameParser\Parser;
 
-readonly class  OrderDTO
+readonly class OrderDTO
 {
     public function __construct(
         public int $customerId,

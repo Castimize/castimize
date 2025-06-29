@@ -7,7 +7,7 @@ use App\Models\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-readonly class  ModelDTO
+readonly class ModelDTO
 {
     public function __construct(
         public string $wpId,

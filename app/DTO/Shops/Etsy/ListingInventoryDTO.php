@@ -12,7 +12,7 @@ use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\CurrencyService;
 use App\Services\Admin\HelperService;
 
-class ListingInventoryDTO
+readonly class ListingInventoryDTO
 {
     public function __construct(
         public ?int $listingId,
