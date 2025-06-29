@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\Cors;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(
             // Specify the routes to exclude from CSRF protection
             except: [
+                'customers/*/payments/create-setup-intent',
                 'models/download',
                 'webhooks/payment/stripe/callback',
                 'webhooks/shipping/shippo/callback',
@@ -27,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'register',
             ]
         );
+        $middleware->append(Cors::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         Integration::handles($exceptions);
