@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ShopOwnersService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,13 +20,13 @@ class ShopOwnersApiController extends ApiController
     ) {
     }
 
-    public function show(int $customerId): ShopOwnerResource
+    public function show(int $customerId): ShopOwnerResource|JsonResponse
     {
         abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
-        if (! $customer->shopOwner) {
+        if (! $customer || ! $customer->shopOwner) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
-            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+            return response()->json([]);
         }
 
         $response = new ShopOwnerResource($customer->shopOwner);
