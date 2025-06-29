@@ -36,7 +36,7 @@ class SyncCustomerStripeId extends Command
 
         foreach ($customers as $customer) {
             $stripeCustomer = $stripeService->getCustomers(['email' => $customer->email]);
-            $stripeData = $customer->stripe_data;
+            $stripeData = $customer->stripe_data ?? [];
             $stripeData['stripe_id'] = $stripeCustomer->first()?->id;
             $customer->stripe_data = $stripeData;
             $customer->save();

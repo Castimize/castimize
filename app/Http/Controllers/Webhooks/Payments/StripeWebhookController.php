@@ -96,7 +96,7 @@ class StripeWebhookController extends WebhookController
             ->first();
 
         if ($customer) {
-            $stripeData = $customer->stripe_data;
+            $stripeData = $customer->stripe_data ?? [];
             if (! array_key_exists('stripe_id', $stripeData)) {
                 $stripeData['stripe_id'] = $stripeCustomer->id;
                 $customer->stripe_data = $stripeData;
@@ -165,7 +165,7 @@ class StripeWebhookController extends WebhookController
     {
         $customer = Customer::where('stripe_id', $setupIntent->customer)->first();
         if ($customer) {
-            $stripeData = $customer->stripe_data;
+            $stripeData = $customer->stripe_data ?? [];
             $stripeData['mandate_id'] = $setupIntent->mandate;
             $stripeData['payment_method'] = $setupIntent->mandate;
             $customer->stripe_data = $stripeData;
