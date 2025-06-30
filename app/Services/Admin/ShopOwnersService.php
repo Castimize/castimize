@@ -9,6 +9,14 @@ use Illuminate\Http\Request;
 
 class ShopOwnersService
 {
+    public function update(ShopOwner $shopOwner, array $data): ShopOwner
+    {
+        $shopOwner->update($data);
+        $shopOwner->refresh();
+
+        return $shopOwner;
+    }
+
     public function createShopOwner(Customer $customer)
     {
         return $customer->shopOwner()->create([

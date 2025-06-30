@@ -5,6 +5,7 @@ namespace App\Nova;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -59,6 +60,9 @@ class ShopOwner extends Resource
                 ->sortable(),
 
             BelongsTo::make(__('Customer'), 'customer')
+                ->sortable(),
+
+            Boolean::make(__('Active'), 'active')
                 ->sortable(),
 
             HasMany::make(__('Shops'), 'shops', Shop::class),

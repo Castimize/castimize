@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('shop_owners', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('customer_id')->index();
+            $table->boolean('active')->default(false);
             $table->timestamps();
             $table->softDeletes();
 
