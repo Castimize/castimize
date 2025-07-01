@@ -67,7 +67,7 @@ class StripeService
         ];
 
         if (! app()->environment('production')) {
-            $data['payment_method_type'] = ['card', 'sepa_debit'];
+            $data['payment_method_types'] = ['card', 'sepa_debit'];
         }
         return SetupIntent::create($data);
     }
