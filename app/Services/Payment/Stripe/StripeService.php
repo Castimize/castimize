@@ -61,8 +61,14 @@ class StripeService
 
     public function createSetupIntent(CastimizeCustomer $customer): SetupIntent
     {
-        return SetupIntent::create([
+        $data = [
             'customer' => $customer->stripe_data['stripe_id'],
-        ]);
+            'usage' => 'off_session',
+        ];
+
+        if (! app()->environment('production')) {
+            $data['payment_method_type'] = ['card', 'sepa_debit'];
+        }
+        return SetupIntent::create($data);
     }
 }
