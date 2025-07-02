@@ -8,7 +8,9 @@ use Stripe\Charge;
 use Stripe\Collection;
 use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
+use Stripe\Mandate;
 use Stripe\PaymentIntent;
+use Stripe\PaymentMethod;
 use Stripe\SetupIntent;
 use Stripe\Stripe;
 
@@ -70,5 +72,20 @@ class StripeService
             $data['payment_method_types'] = ['card', 'sepa_debit'];
         }
         return SetupIntent::create($data);
+    }
+
+    public function getPaymentMethod(string $paymentMethodId): PaymentMethod
+    {
+        return PaymentMethod::retrieve($paymentMethodId);
+    }
+
+    public function getPaymentMethods()
+    {
+        return PaymentMethod::all();
+    }
+
+    public function getMandate(string $mandateId): Mandate
+    {
+        return Mandate::retrieve($mandateId);
     }
 }
