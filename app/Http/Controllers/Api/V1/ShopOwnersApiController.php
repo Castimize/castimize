@@ -43,12 +43,12 @@ class ShopOwnersApiController extends ApiController
 
         $shopOwner = $this->shopOwnersService->createShopOwner($customer);
 
-        if ($request->vat_number) {
+        if ($request->billing_eu_vat_number) {
             $this->customersService->updateCustomer(
                 request: $request,
                 customer: $customer,
                 data: [
-                    'vat_number' => $request->vat_number,
+                    'vat_number' => $request->billing_eu_vat_number,
                 ],
             );
         }
@@ -88,12 +88,12 @@ class ShopOwnersApiController extends ApiController
 
         $shopOwner = $customer->shopOwner;
 
-        if ($request->vat_number) {
+        if ($request->billing_eu_vat_number) {
             $this->customersService->updateCustomer(
                 request: $request,
                 customer: $customer,
                 data: [
-                    'vat_number' => $request->vat_number,
+                    'vat_number' => $request->billing_eu_vat_number,
                 ],
             );
         }
