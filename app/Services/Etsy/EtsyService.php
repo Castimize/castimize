@@ -509,8 +509,8 @@ class EtsyService
 
         // Also set state to active again
         $data = [
-            'title' => $listingDTO->title,
-            'description' => $listingDTO->description,
+//            'title' => $listingDTO->title,
+//            'description' => $listingDTO->description,
             'taxonomy_id' => $listingDTO->taxonomyId,
             //'shipping_profile_id' => $listingDTO->shippingProfileId,
             'return_policy_id' => $listingDTO->returnPolicyId,
