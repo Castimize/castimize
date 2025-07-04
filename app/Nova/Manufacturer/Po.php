@@ -143,6 +143,11 @@ class Po extends Resource
         return false;
     }
 
+    public function authorizedToDelete(Request $request)
+    {
+        return false;
+    }
+
     /**
      * Get the fields displayed by the resource.
      *
