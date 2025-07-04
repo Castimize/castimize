@@ -50,7 +50,7 @@ class ShopOwnerResource extends JsonResource
             'vat_number' => $this->customer->vat_number,
             'stripe_id' => is_array($this->customer->stripe_data) && array_key_exists('stripe_id', $this->customer->stripe_data) ? $this->customer->stripe_data['stripe_id'] : null,
             'mandate' => $mandate,
-            'shops' => ShopResource::collection($this->shops)->toArray($request),
+            'shops' => ShopResource::collection($this->shops)->keyBy->shop,
             'shops_list' => ShopOwnerShopsEnum::getList(),
         ];
     }
