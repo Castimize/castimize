@@ -73,6 +73,12 @@ class ShopOwnersApiController extends ApiController
             ],
         );
 
+        $this->shopOwnersService->setShopsActiveState(
+            shopOwner: $shopOwner,
+            active: (bool) $request->active,
+        );
+        $shopOwner->refresh();
+
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
         return $response;
@@ -88,7 +94,7 @@ class ShopOwnersApiController extends ApiController
 
         $shopOwner = $customer->shopOwner;
 
-        if ($request->billing_eu_vat_number) {
+        if ($request->billing_eu_vat_number && $request->billing_eu_vat_number !== $customer->vat_numnber) {
             $this->customersService->updateCustomer(
                 request: $request,
                 customer: $customer,
