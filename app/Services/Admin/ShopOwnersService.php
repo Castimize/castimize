@@ -32,4 +32,12 @@ class ShopOwnersService
             'active' => 0,
         ]);
     }
+
+    public function setShopsActiveState(ShopOwner $shopOwner, bool $active): void
+    {
+        foreach ($shopOwner->shops as $shop) {
+            $shop->active = 0;
+            $shop->save();
+        }
+    }
 }
