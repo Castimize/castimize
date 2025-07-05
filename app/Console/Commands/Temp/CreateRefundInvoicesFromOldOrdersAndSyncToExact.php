@@ -28,10 +28,7 @@ class CreateRefundInvoicesFromOldOrdersAndSyncToExact extends Command
     public function handle()
     {
         $orderNumbers = [
-            6167,
-            6209,
-            6246,
-            6270,
+            6213,
         ];
         $orders = Order::whereIn('order_number', $orderNumbers)
             ->orderByDesc('created_at')

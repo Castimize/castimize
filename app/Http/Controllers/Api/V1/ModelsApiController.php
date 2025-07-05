@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class ModelsApiController extends ApiController

@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Stripe\Charge;
 
 class OrdersService
 {
@@ -347,6 +348,21 @@ class OrdersService
         return $refundOrder;
     }
 
+    public function handleStripeRefund(Order $order, Charge $charge): void
+    {
+        if ($order !== null && $charge->status === 'succeeded' && $charge->refunded) {
+            $order->total_refund = ($charge->amount_refunded / 100);
+            if ($order->total === $order->total_refund) {
+                $order->total_refund_tax = $order->total_tax;
+            }
+            $order->save();
+
+            $this->uploadsService->handleStripeRefund($order);
+
+            CreateInvoicesFromOrder::dispatch($order->wp_id);
+        }
+    }
+
     public function handleManualRefund(Order $order, float $refundAmount)
     {
         $order->has_manual_refund = true;
@@ -391,10 +407,10 @@ class OrdersService
             $order->save();
         }
 
-        $refundOrder = (new WoocommerceApiService())->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
+        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
 
         if ($cancelOrder) {
-            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Cancelled->value);
+            $this->woocommerceApiService->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Cancelled->value);
         }
 
         return $refundOrder;
