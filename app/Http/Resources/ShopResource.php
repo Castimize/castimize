@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Crypt;
         $url = null;
         if (
             ! $this->active &&
+            is_array($this->shop_oauth) &&
             ! array_key_exists('access_token', $this->shop_oauth) &&
             $this->shopOwner->customer->vat_number !== null
         ) {

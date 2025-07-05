@@ -22,12 +22,11 @@ class ShopOwnerResource extends JsonResource
                 'id' => null,
                 'is_shop_owner' => false,
                 'active' => false,
-                'customer_id' => null,
                 'vat_number' => null,
                 'stripe_id' => null,
                 'mandate' => [],
                 'shops' => [],
-                'shops_list' => ShopOwnerShopsEnum::cases(),
+                'shops_list' => ShopOwnerShopsEnum::getList(),
             ];
         }
 

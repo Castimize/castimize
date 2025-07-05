@@ -29,6 +29,7 @@ class ShopOwnersService
     {
         return $shopOwner->shops()->create([
             'shop' => ShopOwnerShopsEnum::tryFrom($request->shop)->value,
+            'shop_oauth' => [],
             'active' => 0,
         ]);
     }
