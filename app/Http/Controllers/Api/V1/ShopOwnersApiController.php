@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Resources\ShopOwnerResource;
+use App\Http\Resources\ShopResource;
 use App\Models\Customer;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
@@ -31,6 +32,27 @@ class ShopOwnersApiController extends ApiController
         $response = new ShopOwnerResource($customer->shopOwner);
         LogRequestService::addResponse(request(), $response);
         return $response;
+    }
+
+    public function showShop(int $customerId, string $shop): ShopResource
+    {
+        abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
+        if (! $customer || ! $customer->shopOwner) {
+            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+
+        foreach ($customer->shopOwner->shops as $s) {
+            if ($s->name === $shop) {
+                $response = new ShopResource($s);
+                LogRequestService::addResponse(request(), $response);
+                return $response;
+            }
+        }
+
+        LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+        abort(Response::HTTP_NOT_FOUND, '404 Not found');
     }
 
     public function store(Request $request, int $customerId): ShopOwnerResource

@@ -27,6 +27,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
 
             // Shop owners
             Route::get('customers/{customerId}/shop-owner', 'ShopOwnersApiController@show')->name('api.customers.shop-owners.show');
+            Route::get('customers/{customerId}/shop-owner/{shop}', 'ShopOwnersApiController@showShop')->name('api.customers.shop-owners.show-shop');
             Route::post('customers/{customerId}/shop-owner', 'ShopOwnersApiController@store')->name('api.customers.shop-owners.store');
             Route::put('customers/{customerId}/shop-owner', 'ShopOwnersApiController@update')->name('api.customers.shop-owners.update');
             Route::put('customers/{customerId}/shop-owner/update-active', 'ShopOwnersApiController@updateActive')->name('api.customers.shop-owners.update-active');
