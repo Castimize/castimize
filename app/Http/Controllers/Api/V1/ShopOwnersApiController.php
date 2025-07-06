@@ -80,32 +80,6 @@ class ShopOwnersApiController extends ApiController
         return $response;
     }
 
-    public function updateActive(Request $request, int $customerId): ShopOwnerResource
-    {
-        $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
-        if ($customer && ! $customer->shopOwner) {
-            LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop owner doesn\'t exist, use the store method'], Response::HTTP_BAD_REQUEST);
-            abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop owner doesn\'t exist, use the store method');
-        }
-
-        $shopOwner = $this->shopOwnersService->update(
-            shopOwner: $customer->shopOwner,
-            data: [
-                'active' => $request->active === "1" ? 1 : 0,
-            ],
-        );
-
-        $this->shopOwnersService->setShopsActiveState(
-            shopOwner: $shopOwner,
-            active: (bool) ($request->active === "1" ? 1 : 0),
-        );
-        $shopOwner->refresh();
-
-        $response = new ShopOwnerResource($shopOwner);
-        LogRequestService::addResponse(request(), $response);
-        return $response;
-    }
-
     public function update(Request $request, int $customerId): ShopOwnerResource
     {
         $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
@@ -137,5 +111,56 @@ class ShopOwnersApiController extends ApiController
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
         return $response;
+    }
+
+    public function updateActive(Request $request, int $customerId): ShopOwnerResource
+    {
+        $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
+        if ($customer && ! $customer->shopOwner) {
+            LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop owner doesn\'t exist, use the store method'], Response::HTTP_BAD_REQUEST);
+            abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop owner doesn\'t exist, use the store method');
+        }
+
+        $shopOwner = $this->shopOwnersService->update(
+            shopOwner: $customer->shopOwner,
+            data: [
+                'active' => $request->active === "1" ? 1 : 0,
+            ],
+        );
+
+        $this->shopOwnersService->setShopsActiveState(
+            shopOwner: $shopOwner,
+            active: (bool) ($request->active === "1" ? 1 : 0),
+        );
+        $shopOwner->refresh();
+
+        $response = new ShopOwnerResource($shopOwner);
+        LogRequestService::addResponse(request(), $response);
+        return $response;
+    }
+
+    public function updateActiveShop(Request $request, int $customerId, string $shop): ShopResource
+    {
+        $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
+        if ($customer && ! $customer->shopOwner) {
+            LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop owner doesn\'t exist, use the store method'], Response::HTTP_BAD_REQUEST);
+            abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop owner doesn\'t exist, use the store method');
+        }
+
+        foreach ($customer->shopOwner->shops as $s) {
+            if ($s->shop === $shop) {
+                $s = $this->shopOwnersService->setShopActiveState(
+                    shop: $s,
+                    active: (bool) ($request->active === "1" ? 1 : 0),
+                );
+
+                $response = new ShopResource($s);
+                LogRequestService::addResponse(request(), $response);
+                return $response;
+            }
+        }
+
+        LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+        abort(Response::HTTP_NOT_FOUND, '404 Not found');
     }
 }
