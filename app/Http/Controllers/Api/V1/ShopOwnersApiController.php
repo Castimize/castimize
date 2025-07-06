@@ -91,7 +91,7 @@ class ShopOwnersApiController extends ApiController
         $shopOwner = $this->shopOwnersService->update(
             shopOwner: $customer->shopOwner,
             data: [
-                'active' => $request->active,
+                'active' => (int) $request->active,
             ],
         );
 
