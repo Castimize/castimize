@@ -82,7 +82,7 @@ class ShopOwnersApiController extends ApiController
 
     public function updateActive(Request $request, int $customerId): ShopOwnerResource
     {
-        $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
+        $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if ($customer && ! $customer->shopOwner) {
             LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop owner doesn\'t exist, use the store method'], Response::HTTP_BAD_REQUEST);
             abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop owner doesn\'t exist, use the store method');
@@ -97,7 +97,7 @@ class ShopOwnersApiController extends ApiController
 
         $this->shopOwnersService->setShopsActiveState(
             shopOwner: $shopOwner,
-            active: $request->active === "1" ? 1 : 0,
+            active: (bool) ($request->active === "1" ? 1 : 0),
         );
         $shopOwner->refresh();
 
