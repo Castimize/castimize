@@ -58,7 +58,7 @@ class GetCurrencyHistoricalRates extends Command
                     'base_currency' => $baseCurrency,
                     'convert_currency' => $convertCurrency,
                     'rate' => $rate,
-                    'historical_date' => now()->format('Y-m-d'),
+                    'historical_date' => $historicalDate->format('Y-m-d'),
                 ]);
                 if ($currencyHistoryRate->convert_currency === 'EUR') {
                     SyncExchangeRateToExact::dispatch($currencyHistoryRate)->onQueue('exact');
