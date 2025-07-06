@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Enums\Shops\ShopOwnerShopsEnum;
 use App\Models\Customer;
+use App\Models\Shop;
 use App\Models\ShopOwner;
 use Illuminate\Http\Request;
 
@@ -37,8 +38,16 @@ class ShopOwnersService
     public function setShopsActiveState(ShopOwner $shopOwner, bool $active): void
     {
         foreach ($shopOwner->shops as $shop) {
-            $shop->active = $active;
-            $shop->save();
+            $this->setShopActiveState($shop, $active);
         }
+    }
+
+    public function setShopActiveState(Shop $shop, bool $active): Shop
+    {
+        $shop->active = $active;
+        $shop->save();
+        $shop->refresh();
+
+        return $shop;
     }
 }
