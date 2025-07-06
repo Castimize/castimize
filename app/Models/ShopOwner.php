@@ -24,6 +24,7 @@ class ShopOwner extends Model
      */
     protected  $fillable = [
         'customer_id',
+        'active',
     ];
 
     /**
