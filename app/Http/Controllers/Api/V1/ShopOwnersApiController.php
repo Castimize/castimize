@@ -91,13 +91,13 @@ class ShopOwnersApiController extends ApiController
         $shopOwner = $this->shopOwnersService->update(
             shopOwner: $customer->shopOwner,
             data: [
-                'active' => $request->active === "1",
+                'active' => $request->active === "1" ? 1 : 0,
             ],
         );
 
         $this->shopOwnersService->setShopsActiveState(
             shopOwner: $shopOwner,
-            active: $request->active === "1",
+            active: $request->active === "1" ? 1 : 0,
         );
         $shopOwner->refresh();
 
