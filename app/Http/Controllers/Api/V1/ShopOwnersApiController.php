@@ -44,7 +44,7 @@ class ShopOwnersApiController extends ApiController
         }
 
         foreach ($customer->shopOwner->shops as $s) {
-            if ($s->name === $shop) {
+            if ($s->shop === $shop) {
                 $response = new ShopResource($s);
                 LogRequestService::addResponse(request(), $response);
                 return $response;
