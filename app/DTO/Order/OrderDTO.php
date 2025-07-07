@@ -3,6 +3,7 @@
 namespace App\DTO\Order;
 
 use App\DTO\Shops\Etsy\ListingDTO;
+use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Woocommerce\WcOrderStatesEnum;
 use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
@@ -302,7 +303,7 @@ class  OrderDTO
             totalRefund: null,
             totalRefundTax: null,
             taxPercentage: $taxPercentage,
-            currencyCode: array_key_exists('shop_currency', $stripeData) ? $stripeData['shop_currency'] : null,
+            currencyCode: array_key_exists('shop_currency', $stripeData) && in_array(CurrencyEnum::from($stripeData['shop_currency']), CurrencyEnum::cases(), true) ? $stripeData['shop_currency'] : 'USD',
             paymentMethod: $receipt->payment_method,
             paymentIssuer: $receipt->payment_method,
             paymentIntentId: null,
