@@ -74,9 +74,17 @@ class WoocommerceApiService
                 ],
             ],
         ];
-//        dd($data);
 
         return Order::create($data);
+    }
+
+    public function updateOrder(OrderDTO $orderDTO)
+    {
+        $data = [
+            'set_paid' => $orderDTO->isPaid,
+            'meta_data' => $orderDTO->metaData,
+        ];
+        return Order::update($orderDTO->orderNumber, $data);
     }
 
     public function deleteOrder(int $wpOrderId)

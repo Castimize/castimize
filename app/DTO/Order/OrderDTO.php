@@ -11,10 +11,12 @@ use Etsy\Resources\Receipt;
 use Illuminate\Support\Collection;
 use TheIconic\NameParser\Parser;
 
-readonly class  OrderDTO
+class  OrderDTO
 {
     public function __construct(
         public int $customerId,
+        public ?int $customerStripeId,
+        public ?int $shopReceiptId,
         public string $source,
         public ?int $wpId,
         public int $orderNumber,
@@ -107,6 +109,8 @@ readonly class  OrderDTO
 
         return new self(
             customerId: $wpOrder['customer_id'],
+            customerStripeId: null,
+            shopReceiptId: null,
             source: 'wp',
             wpId: $wpOrder['id'],
             orderNumber: $wpOrder['number'],
@@ -252,8 +256,12 @@ readonly class  OrderDTO
             ];
         }
 
+        $stripeData = $customer->stripe_data ?? [];
+
         return new self(
             customerId: $customer->wp_id,
+            customerStripeId: array_key_exists('stripe_id', $stripeData) ? $stripeData['stripe_id'] : null,
+            shopReceiptId: (int) $receipt->receipt_id,
             source: 'etsy',
             wpId: null,
             orderNumber: $receipt->receipt_id,
@@ -294,7 +302,7 @@ readonly class  OrderDTO
             totalRefund: null,
             totalRefundTax: null,
             taxPercentage: $taxPercentage,
-            currencyCode: $receipt->grandtotal->currency_code ?? 'USD',
+            currencyCode: array_key_exists('shop_currency', $stripeData) ? $stripeData['shop_currency'] : null,
             paymentMethod: $receipt->payment_method,
             paymentIssuer: $receipt->payment_method,
             paymentIntentId: null,

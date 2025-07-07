@@ -2,6 +2,7 @@
 
 namespace App\Services\Payment\Stripe;
 
+use App\DTO\Order\OrderDTO;
 use App\Models\Customer as CastimizeCustomer;
 use Stripe\Balance;
 use Stripe\Charge;
@@ -56,11 +57,6 @@ class StripeService
         ]);
     }
 
-    public function getPaymentIntent(string $paymentIntentId): PaymentIntent
-    {
-        return PaymentIntent::retrieve($paymentIntentId);
-    }
-
     public function createSetupIntent(CastimizeCustomer $customer): SetupIntent
     {
         $data = [
@@ -72,6 +68,29 @@ class StripeService
             $data['payment_method_types'] = ['card', 'sepa_debit'];
         }
         return SetupIntent::create($data);
+    }
+
+    public function getPaymentIntent(string $paymentIntentId): PaymentIntent
+    {
+        return PaymentIntent::retrieve($paymentIntentId);
+    }
+
+    public function createPaymentIntent(OrderDTO $orderDTO, CastimizeCustomer $customer): PaymentIntent
+    {
+        return PaymentIntent::create([
+            'amount' => $orderDTO->total * 100,
+            'currency' => strtolower($orderDTO->currencyCode),
+            'customer' => $orderDTO->customerStripeId,
+            'payment_method' => $customer->stripe_data['payment_method'],
+            'mandate' => $customer->stripe_data['mandate'],
+            'description' => 'Order 1111 from Castimize',
+            'confirm' => true,
+            'metadata' => [
+                'shop_receipt_id' => $orderDTO->shopReceiptId,
+                'source' => $orderDTO->customerUserAgent,
+                'order_id' => $orderDTO->orderNumber,
+            ],
+        ]);
     }
 
     public function getPaymentMethod(string $paymentMethodId): PaymentMethod
