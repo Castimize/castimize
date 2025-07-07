@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTO\Shops\Etsy;
 
+use App\Enums\Admin\CurrencyEnum;
 use App\Models\Model;
 use App\Models\Shop;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
@@ -67,7 +68,11 @@ readonly class ListingDTO
             }
         }
 
-        if (app()->environment() === 'production' && $shopOauth['shop_currency'] !== config('app.currency')) {
+        if (
+            app()->environment() === 'production' &&
+            $shopOauth['shop_currency'] !== config('app.currency') &&
+            in_array(CurrencyEnum::from($shopOauth['shop_currency']), CurrencyEnum::cases(), true)
+        ) {
             /** @var CurrencyService $currencyService */
             $currencyService = app(CurrencyService::class);
             $price = $currencyService->convertCurrency(config('app.currency'), $shopOauth['shop_currency'], $price);
