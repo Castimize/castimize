@@ -32,7 +32,7 @@ class OrdersService
     public function __construct()
     {
         $this->customersService = new CustomersService();
-        $this->uploadsService = new UploadsService();
+        $this->uploadsService = app(UploadsService::class);
         $this->orderQueuesService = new OrderQueuesService();
         $this->woocommerceApiService = new WoocommerceApiService();
     }
