@@ -143,8 +143,12 @@ class ShopOwnersApiController extends ApiController
     {
         $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if ($customer && ! $customer->shopOwner) {
-            LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop owner doesn\'t exist, use the store method'], Response::HTTP_BAD_REQUEST);
-            abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop owner doesn\'t exist, use the store method');
+            LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop doesn\'t exist, use the store method'], Response::HTTP_BAD_REQUEST);
+            abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop doesn\'t exist, use the store method');
+        }
+        if (! is_array($customer->stripe_data) || ! array_key_exists('mandate_id', $customer->stripe_data)) {
+            LogRequestService::addResponse(request(), ['message' => '400 Bad request, no mandate found'], Response::HTTP_BAD_REQUEST);
+            abort(Response::HTTP_BAD_REQUEST, '400 Bad request, no mandate found');
         }
 
         foreach ($customer->shopOwner->shops as $s) {
