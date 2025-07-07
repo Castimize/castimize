@@ -35,7 +35,7 @@ class UploadToOrderQueueAction extends Action
     public function handle(ActionFields $fields, Collection $models)
     {
         foreach ($models as $model) {
-            (new UploadsService())->setUploadToOrderQueue($model);
+            app(UploadsService::class)->setUploadToOrderQueue($model);
         }
     }
 

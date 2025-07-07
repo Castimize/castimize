@@ -181,7 +181,7 @@ class StripeWebhookController extends WebhookController
         if ($customer) {
             $stripeData = $customer->stripe_data ?? [];
             $stripeData['mandate_id'] = $setupIntent->mandate;
-            $stripeData['payment_method'] = $setupIntent->mandate;
+            $stripeData['payment_method'] = $setupIntent->payment_method;
             $customer->stripe_data = $stripeData;
             $customer->save();
         }

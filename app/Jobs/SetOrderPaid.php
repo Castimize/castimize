@@ -22,12 +22,15 @@ class SetOrderPaid implements ShouldQueue
 
     private OrdersService $ordersService;
 
+    private UploadsService $uploadsService;
+
     /**
      * Create a new job instance.
      */
     public function __construct(public PaymentIntent $paymentIntent, public ?int $logRequestId = null)
     {
         $this->ordersService = new OrdersService();
+        $this->uploadsService = app(UploadsService::class);
     }
 
     /**
@@ -53,11 +56,10 @@ class SetOrderPaid implements ShouldQueue
             $order->paid_at = Carbon::createFromTimestamp($this->paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'))->format('Y-m-d H:i:s');
             $order->save();
 
-            $uploadsService = new UploadsService();
             foreach ($order->uploads as $upload) {
                 // Set upload to order queue
                 if ($upload->orderQueue === null) {
-                    $uploadsService->setUploadToOrderQueue($upload);
+                    $this->uploadsService->setUploadToOrderQueue($upload);
                 }
             }
         } catch (Throwable $e) {
