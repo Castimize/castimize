@@ -55,7 +55,7 @@ class EtsyInventoryService
                     [
                         'price' => $product['price'],
                         'quantity' => $product['quantity'],
-                        'is_enabled' => true,
+                        'is_enabled' => $product['is_enabled'],
                     ],
                 ],
             ];
