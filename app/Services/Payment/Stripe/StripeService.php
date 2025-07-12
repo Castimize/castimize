@@ -100,7 +100,12 @@ class StripeService
 
     public function getPaymentMethods()
     {
-        return PaymentMethod::all();
+        $intent = \Stripe\PaymentIntent::create([
+            'amount' => 1000,
+            'currency' => 'eur',
+            'automatic_payment_methods' => ['enabled' => true],
+        ]);
+        return $intent;
     }
 
     public function getMandate(string $mandateId): Mandate

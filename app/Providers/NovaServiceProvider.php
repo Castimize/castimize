@@ -22,6 +22,7 @@ use App\Nova\MaterialGroup;
 use App\Nova\Model;
 use App\Nova\Order;
 use App\Nova\OrderQueue;
+use App\Nova\PaymentFee;
 use App\Nova\Price;
 use App\Nova\Rejection;
 use App\Nova\RejectionReason;
@@ -94,6 +95,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(OrderQueue::class),
                     MenuItem::resource(Customer::class),
                     MenuItem::resource(ShopOwner::class)
+                        ->canSee(function (NovaRequest $request) {
+                            return $request->user()->isSuperAdmin() || $request->user()->username = 'oknoeff';
+                        }),
+                    MenuItem::resource(PaymentFee::class)
                         ->canSee(function (NovaRequest $request) {
                             return $request->user()->isSuperAdmin() || $request->user()->username = 'oknoeff';
                         }),

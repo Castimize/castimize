@@ -2,7 +2,6 @@
 
 namespace App\DTO\Order;
 
-use App\DTO\Shops\Etsy\ListingDTO;
 use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Woocommerce\WcOrderStatesEnum;
 use App\Models\Shop;
@@ -72,6 +71,7 @@ class  OrderDTO
         public ?Carbon $createdAt,
         public ?Carbon $updatedAt,
         public Collection $uploads,
+        public Collection $paymentFees,
     ) {
     }
 
@@ -166,6 +166,7 @@ class  OrderDTO
             createdAt: $createdAt,
             updatedAt: $updatedAt,
             uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDTO::fromWpRequest($lineItem, $wpOrder['shipping']->country)),
+            paymentFees: collect($wpOrder['fee_lines'])->map(fn ($feeLine) => PaymentFeeDTO::fromWpRequest($wpOrder['payment_method'], $feeLine)),
         );
     }
 
@@ -319,6 +320,13 @@ class  OrderDTO
             createdAt: $createdAt,
             updatedAt: $updatedAt,
             uploads: $uploads,
+            paymentFees: collect([
+                PaymentFeeDTO::fromEtsyReceipt(
+                    customer: $customer,
+                    totalReceipt: $totalItems,
+                    taxPercentage: $taxPercentage,
+                ),
+            ]),
         );
     }
 }
