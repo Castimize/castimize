@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ShopOwnersService;
+use Codexshaper\WooCommerce\Facades\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,6 +23,7 @@ class ShopOwnersApiController extends ApiController
 
     public function show(int $customerId): ShopOwnerResource
     {
+//        dd(Order::find(7444));
         abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
         if (! $customer) {
@@ -124,13 +126,13 @@ class ShopOwnersApiController extends ApiController
         $shopOwner = $this->shopOwnersService->update(
             shopOwner: $customer->shopOwner,
             data: [
-                'active' => $request->active === "1" ? 1 : 0,
+                'active' => $request->active === '1' ? 1 : 0,
             ],
         );
 
         $this->shopOwnersService->setShopsActiveState(
             shopOwner: $shopOwner,
-            active: (bool) ($request->active === "1" ? 1 : 0),
+            active: (bool) ($request->active === '1' ? 1 : 0),
         );
         $shopOwner->refresh();
 

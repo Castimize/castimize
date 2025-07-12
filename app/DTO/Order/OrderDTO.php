@@ -72,6 +72,7 @@ class  OrderDTO
         public ?Carbon $createdAt,
         public ?Carbon $updatedAt,
         public Collection $uploads,
+        public Collection $paymentFees,
     ) {
     }
 
@@ -166,6 +167,7 @@ class  OrderDTO
             createdAt: $createdAt,
             updatedAt: $updatedAt,
             uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDTO::fromWpRequest($lineItem, $wpOrder['shipping']->country)),
+            paymentFees: collect($wpOrder['fee_lines'])->map(fn ($feeLine) => PaymentFeeDTO::fromWpRequest($wpOrder['payment_method'], $feeLine)),
         );
     }
 
@@ -317,6 +319,13 @@ class  OrderDTO
             createdAt: $createdAt,
             updatedAt: $updatedAt,
             uploads: collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage)),
+            paymentFees: collect([
+                PaymentFeeDTO::fromEtsyReceipt(
+                    customer: $customer,
+                    totalReceipt: $totalItems,
+                    taxPercentage: $taxPercentage,
+                ),
+            ])
         );
     }
 }

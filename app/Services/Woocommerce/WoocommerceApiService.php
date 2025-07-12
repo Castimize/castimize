@@ -75,6 +75,21 @@ class WoocommerceApiService
             ],
         ];
 
+        if ($orderDTO->paymentFees->count() > 0) {
+            $data['fee_lines'] = [];
+            foreach ($orderDTO->paymentFees as $paymentFeeDTO) {
+                $data['fee_lines'][] = [
+                    'name' => $paymentFeeDTO->name,
+                    'tax_class' => $paymentFeeDTO->taxClass,
+                    'tax_status' => $paymentFeeDTO->taxStatus,
+                    'total' => (string) $paymentFeeDTO->total,
+                    'total_tax' => (string) $paymentFeeDTO->totalTax,
+                    'taxes' => $paymentFeeDTO->taxes,
+                    'meta_data' => $paymentFeeDTO->metaData,
+                ];
+            }
+        }
+
         return Order::create($data);
     }
 
