@@ -6,6 +6,7 @@ namespace App\Services\Admin;
 
 use App\Models\Customer;
 use App\Services\Payment\Stripe\StripeService;
+use Exception;
 use Stripe\SetupIntent;
 
 class PaymentService
@@ -39,17 +40,27 @@ class PaymentService
 
     public function cancelMandate(Customer $customer): void
     {
-        if (is_array($customer->stripe_date) && array_key_exists('payment_method', $customer->stripe_data)) {
+        if (
+            is_array($customer->stripe_date) &&
+            (array_key_exists('payment_method', $customer->stripe_data) || array_key_exists('mandate_id', $customer->stripe_data))
+        ) {
             $stripeData = $customer->stripe_data;
             $paymentMethod = $this->stripeService->getPaymentMethod($stripeData['payment_method']);
-            if ($paymentMethod) {
-                $this->stripeService->detachPaymentMethod($paymentMethod);
-
-                unset($stripeData['payment_method'], $stripeData['mandate_id'], $stripeData['setup_intent_id']);
-
-                $customer->stripe_data = $stripeData;
-                $customer->save();
+            if (! $paymentMethod) {
+                $mandate = $this->stripeService->getMandate($stripeData['mandate_id']);
+                $paymentMethod = $this->stripeService->getPaymentMethod($mandate->payment_method);
             }
+
+            if (! $paymentMethod) {
+                throw new Exception(__('Payment method not found'));
+            }
+
+            $this->stripeService->detachPaymentMethod($paymentMethod);
+
+            unset($stripeData['payment_method'], $stripeData['mandate_id'], $stripeData['setup_intent_id']);
+
+            $customer->stripe_data = $stripeData;
+            $customer->save();
         }
     }
 }
