@@ -50,6 +50,7 @@ class GetEtsyReceipts extends Command
                 $receipts = $etsyService->getShopReceipts($shop, ['min_created' => $date]);
                 $this->info(sprintf('Found %s receipts for %s', $receipts->count(), $shop->id));
                 foreach ($receipts->data as $receipt) {
+                    $this->info(sprintf('Receipt %s', $receipt->receipt_id));
                     // Check if order already in shop_orders
                     $shopOrder = ShopOrder::where('shop_receipt_id', $receipt->receipt_id)->first();
                     if ($shopOrder === null) {

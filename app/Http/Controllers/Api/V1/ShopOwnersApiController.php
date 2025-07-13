@@ -8,7 +8,6 @@ use App\Models\Customer;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ShopOwnersService;
-use Codexshaper\WooCommerce\Facades\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
