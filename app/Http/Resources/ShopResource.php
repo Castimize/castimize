@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use AllowDynamicProperties;
-use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Shops\ShopOwnerShopsEnum;
 use App\Models\Shop;
 use App\Services\Etsy\EtsyService;
@@ -41,7 +40,7 @@ use Illuminate\Support\Facades\Crypt;
             'shop' => ShopOwnerShopsEnum::from($this->shop)->name,
             'active' => $this->active,
             'shop_id' => array_key_exists('shop_id', $this->shop_oauth) ? $this->shop_oauth['shop_id'] : null,
-            'shop_currency' => array_key_exists('shop_currency', $this->shop_oauth) ? CurrencyEnum::from($this->shop_oauth['shop_currency'])->value : CurrencyEnum::USD->value,
+            'shop_currency' => array_key_exists('shop_currency', $this->shop_oauth) ? $this->shop_oauth['shop_currency'] : null,
             'auth_url' => $url,
         ];
     }

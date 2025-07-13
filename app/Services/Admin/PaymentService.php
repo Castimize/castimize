@@ -35,6 +35,21 @@ class PaymentService
         $customer->save();
 
         return $setupIntent;
+    }
 
+    public function cancelMandate(Customer $customer): void
+    {
+        if (is_array($customer->stripe_date) && array_key_exists('payment_method', $customer->stripe_data)) {
+            $stripeData = $customer->stripe_data;
+            $paymentMethod = $this->stripeService->getPaymentMethod($stripeData['payment_method']);
+            if ($paymentMethod) {
+                $this->stripeService->detachPaymentMethod($paymentMethod);
+
+                unset($stripeData['payment_method'], $stripeData['mandate_id'], $stripeData['setup_intent_id']);
+
+                $customer->stripe_data = $stripeData;
+                $customer->save();
+            }
+        }
     }
 }

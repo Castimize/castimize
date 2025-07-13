@@ -11,7 +11,7 @@ use Etsy\Resources\Receipt;
 use Illuminate\Support\Collection;
 use TheIconic\NameParser\Parser;
 
-class  OrderDTO
+class OrderDTO
 {
     public function __construct(
         public int $customerId,
@@ -326,7 +326,7 @@ class  OrderDTO
                     totalReceipt: $totalItems,
                     taxPercentage: $taxPercentage,
                 ),
-            ]),
+            ])
         );
     }
 }
