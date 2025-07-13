@@ -42,7 +42,6 @@ class PaymentService
     public function cancelMandate(Customer $customer): void
     {
         $stripeData = $customer->stripe_data;
-        Log::info(print_r($stripeData, true));
         if (
             is_array($stripeData) &&
             (array_key_exists('payment_method', $stripeData) || array_key_exists('mandate_id', $stripeData))
@@ -50,17 +49,14 @@ class PaymentService
             $paymentMethod = $this->stripeService->getPaymentMethod($stripeData['payment_method']);
             if (! $paymentMethod) {
                 $mandate = $this->stripeService->getMandate($stripeData['mandate_id']);
-                Log::error(print_r($mandate, true));
                 $paymentMethod = $this->stripeService->getPaymentMethod($mandate->payment_method);
-                Log::error(print_r($paymentMethod, true));
             }
 
             if (! $paymentMethod) {
                 throw new Exception(__('Payment method not found'));
             }
 
-            $pm = $this->stripeService->detachPaymentMethod($paymentMethod);
-            Log::error(print_r($pm, true));
+            $this->stripeService->detachPaymentMethod($paymentMethod);
             $newStripeData = [
                 'stripe_id' => $stripeData['stripe_id'],
             ];
