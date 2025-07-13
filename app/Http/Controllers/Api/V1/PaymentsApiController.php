@@ -15,6 +15,7 @@ class PaymentsApiController extends ApiController
 {
     public function __construct(
         private PaymentService $paymentService,
+        private ShopOwnersService $shopOwnersService,
     ) {
     }
 
@@ -30,7 +31,7 @@ class PaymentsApiController extends ApiController
 
     public function cancelMandate(int $customerId)
     {
-        $customer = Customer::where('wp_id', $customerId)->first();
+        $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if (! $customer) {
             LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
@@ -38,6 +39,20 @@ class PaymentsApiController extends ApiController
 
         try {
             $this->paymentService->cancelMandate($customer);
+
+            $shopOwner = $this->shopOwnersService->update(
+                shopOwner: $customer->shopOwner,
+                data: [
+                    'active' => 0,
+                ],
+            );
+
+            $this->shopOwnersService->setShopsActiveState(
+                shopOwner: $shopOwner,
+                active: 0,
+            );
+            $shopOwner->refresh();
+
         } catch (Exception $exception) {
             LogRequestService::addResponse(request(), ['message' => $exception->getMessage() . PHP_EOL . $exception->getFile()], 500);
             abort(Response::HTTP_BAD_REQUEST, 'Unable to cancel mandate with error: ' . $exception->getMessage());
