@@ -31,9 +31,10 @@ class ShopOwnerResource extends JsonResource
         }
 
         $mandate = [];
-        if (is_array($this->customer->stripe_data) && array_key_exists('mandate_id', $this->customer->stripe_data)) {
+        $stripeData = $this->customer->stripe_data;
+        if (is_array($stripeData) && array_key_exists('mandate_id', $stripeData) && $stripeData['mandate_id']) {
             $stripeService = new StripeService();
-            $stripeMandate = $stripeService->getMandate($this->customer->stripe_data['mandate_id']);
+            $stripeMandate = $stripeService->getMandate($stripeData['mandate_id']);
             $paymentMethod = $stripeService->getPaymentMethod($stripeMandate->payment_method);
             $mandate = [
                 'id' => $this->customer->stripe_data['mandate_id'],
