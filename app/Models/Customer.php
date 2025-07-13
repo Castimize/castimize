@@ -35,6 +35,7 @@ class Customer extends Model
         'country_id',
         'wp_id',
         'exact_online_guid',
+        'stripe_data',
         'first_name',
         'last_name',
         'company',
@@ -61,6 +62,7 @@ class Customer extends Model
             'deleted_at' => 'datetime',
             'last_active' => 'datetime',
             'name' => 'string',
+            'stripe_data' => 'array',
         ];
     }
 

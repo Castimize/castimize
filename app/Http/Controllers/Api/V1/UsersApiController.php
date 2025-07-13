@@ -15,6 +15,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UsersApiController extends ApiController
 {
+    public function __construct(
+        private UsersService $usersService,
+    ) {
+    }
+
     public function show(): UserResource
     {
         abort_if(Gate::denies('viewUser'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -27,7 +32,7 @@ class UsersApiController extends ApiController
     public function storeUserWp(StoreUserRequest $request): JsonResponse
     {
         try {
-            $user = (new UsersService())->storeUserFromApi($request);
+            $user = $this->usersService->storeUserFromApi($request);
         } catch (Exception $e) {
             LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
             abort(Response::HTTP_UNPROCESSABLE_ENTITY, '422 Unable to add user');

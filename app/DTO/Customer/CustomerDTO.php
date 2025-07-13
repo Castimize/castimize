@@ -2,11 +2,13 @@
 
 namespace App\DTO\Customer;
 
+use App\Models\Customer;
 use Illuminate\Http\Request;
 
 readonly class CustomerDTO
 {
     public function __construct(
+        public ?int $id,
         public ?int $wpId,
         public ?int $countryId,
         public ?int $currencyId,
@@ -39,9 +41,40 @@ readonly class CustomerDTO
     ) {
     }
 
-    public static function fromApiRequest()
+    public static function fromApiRequest(Customer $customer, Request $request): self
     {
-
+        return new self(
+            id: $customer->id,
+            wpId: $request->wp_id ?? $customer->wp_id ?? null,
+            countryId: $request->country ?? null,
+            currencyId: $request->currency ?? null,
+            firstName: $request->firstName ?? null,
+            lastName: $request->lastName ?? null,
+            company: $request->company ?? null,
+            email: $request->email ?? null,
+            phone: $request->phone ?? null,
+            vatNumber: $request->vatNumber ?? $customer->vat_number ?? null,
+            billingContactName: $request->billingContactName ?? null,
+            billingCompany: $request->billingCompany ?? null,
+            billingPhone: $request->billingPhone ?? null,
+            billingEmail: $request->billingEmail ?? null,
+            billingAddressLine1: $request->billingAddressLine1 ?? null,
+            billingAddressLine2: $request->billingAddressLine2 ?? null,
+            billingPostalCode: $request->billingPostalCode ?? null,
+            billingCity: $request->billingCity ?? null,
+            billingState: $request->billingState ?? null,
+            billingCountry: $request->billingCountry ?? null,
+            shippingContactName: $request->shippingContactName ?? null,
+            shippingCompany: $request->shippingCompany ?? null,
+            shippingPhone: $request->shippingPhone ?? null,
+            shippingEmail: $request->shippingEmail ?? null,
+            shippingAddressLine1: $request->shippingAddressLine1 ?? null,
+            shippingAddressLine2: $request->shippingAddressLine2 ?? null,
+            shippingPostalCode: $request->shippingPostalCode ?? null,
+            shippingCity: $request->shippingCity ?? null,
+            shippingState: $request->shippingState ?? null,
+            shippingCountry: $request->shippingCountry ?? null,
+        );
     }
 
     public static function fromWpCustomer(int $wpId): CustomerDTO

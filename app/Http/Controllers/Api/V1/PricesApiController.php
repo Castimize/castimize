@@ -60,7 +60,5 @@ class PricesApiController extends ApiController
         }
 
         return new CalculatedShippingFeeResource($shippingFee);
-//        LogRequestService::addResponse($request, $response);
-//        return $response;
     }
 }

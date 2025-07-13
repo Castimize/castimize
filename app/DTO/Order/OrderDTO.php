@@ -3,6 +3,7 @@
 namespace App\DTO\Order;
 
 use App\DTO\Shops\Etsy\ListingDTO;
+use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Woocommerce\WcOrderStatesEnum;
 use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
@@ -11,10 +12,12 @@ use Etsy\Resources\Receipt;
 use Illuminate\Support\Collection;
 use TheIconic\NameParser\Parser;
 
-readonly class OrderDTO
+class OrderDTO
 {
     public function __construct(
         public int $customerId,
+        public ?int $customerStripeId,
+        public ?int $shopReceiptId,
         public string $source,
         public ?int $wpId,
         public int $orderNumber,
@@ -69,6 +72,7 @@ readonly class OrderDTO
         public ?Carbon $createdAt,
         public ?Carbon $updatedAt,
         public Collection $uploads,
+        public Collection $paymentFees,
     ) {
     }
 
@@ -107,6 +111,8 @@ readonly class OrderDTO
 
         return new self(
             customerId: $wpOrder['customer_id'],
+            customerStripeId: null,
+            shopReceiptId: null,
             source: 'wp',
             wpId: $wpOrder['id'],
             orderNumber: $wpOrder['number'],
@@ -161,6 +167,7 @@ readonly class OrderDTO
             createdAt: $createdAt,
             updatedAt: $updatedAt,
             uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDTO::fromWpRequest($lineItem, $wpOrder['shipping']->country)),
+            paymentFees: collect($wpOrder['fee_lines'])->map(fn ($feeLine) => PaymentFeeDTO::fromWpRequest($wpOrder['payment_method'], $feeLine)),
         );
     }
 
@@ -254,8 +261,12 @@ readonly class OrderDTO
             ];
         }
 
+        $stripeData = $customer->stripe_data ?? [];
+
         return new self(
             customerId: $customer->wp_id,
+            customerStripeId: array_key_exists('stripe_id', $stripeData) ? $stripeData['stripe_id'] : null,
+            shopReceiptId: (int) $receipt->receipt_id,
             source: 'etsy',
             wpId: null,
             orderNumber: $receipt->receipt_id,
@@ -296,7 +307,7 @@ readonly class OrderDTO
             totalRefund: null,
             totalRefundTax: null,
             taxPercentage: $taxPercentage,
-            currencyCode: $receipt->grandtotal->currency_code ?? 'USD',
+            currencyCode: array_key_exists('shop_currency', $stripeData) && in_array(CurrencyEnum::from($stripeData['shop_currency']), CurrencyEnum::cases(), true) ? $stripeData['shop_currency'] : 'USD',
             paymentMethod: $receipt->payment_method,
             paymentIssuer: $receipt->payment_method,
             paymentIntentId: null,
@@ -310,6 +321,13 @@ readonly class OrderDTO
             createdAt: $createdAt,
             updatedAt: $updatedAt,
             uploads: $uploads,
+            paymentFees: collect([
+                PaymentFeeDTO::fromEtsyReceipt(
+                    customer: $customer,
+                    totalReceipt: $totalItems,
+                    taxPercentage: $taxPercentage,
+                ),
+            ])
         );
     }
 }

@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 class CustomersApiController extends ApiController
 {
     public function __construct(
-        protected CustomersService $customersService,
+        private CustomersService $customersService,
     ) {
     }
 

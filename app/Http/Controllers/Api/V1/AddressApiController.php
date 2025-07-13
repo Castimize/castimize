@@ -16,11 +16,6 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class AddressApiController extends ApiController
 {
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws JsonException
-     */
     public function validate(Request $request): JsonResponse
     {
         $addressData = [

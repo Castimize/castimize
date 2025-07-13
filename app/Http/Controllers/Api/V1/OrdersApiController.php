@@ -11,8 +11,6 @@ use App\Models\Country;
 use App\Models\Material;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
-use App\Services\Admin\OrdersService;
-use App\Services\Exact\ExactOnlineService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -20,10 +18,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OrdersApiController extends ApiController
 {
-    public function __construct(
-        protected OrdersService $ordersService,
-        protected ExactOnlineService $exactOnlineService,
-    ) {
+    public function __construct()
+    {
     }
 
     public function show(int $orderNumber): OrderResource

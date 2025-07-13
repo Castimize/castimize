@@ -2,11 +2,28 @@
 
 namespace App\Services\Woocommerce;
 
+use App\DTO\Customer\CustomerDTO;
 use App\DTO\Order\OrderDTO;
+use Codexshaper\WooCommerce\Facades\Customer;
 use Codexshaper\WooCommerce\Facades\Order;
 
 class WoocommerceApiService
 {
+    public function updateCustomerVatNumber(CustomerDTO $customerDTO)
+    {
+        $data = [
+            'meta_data' => [
+                [
+                    'key' => 'billing_eu_vat_number',
+                    'value' => $customerDTO->vatNumber,
+                ],
+            ],
+        ];
+
+        return Customer::update($customerDTO->wpId, $data);
+    }
+
+
     public function createOrder(OrderDTO $orderDTO)
     {
         $data = [
@@ -57,9 +74,32 @@ class WoocommerceApiService
                 ],
             ],
         ];
-//        dd($data);
+
+        if ($orderDTO->paymentFees->count() > 0) {
+            $data['fee_lines'] = [];
+            foreach ($orderDTO->paymentFees as $paymentFeeDTO) {
+                $data['fee_lines'][] = [
+                    'name' => $paymentFeeDTO->name,
+                    'tax_class' => $paymentFeeDTO->taxClass,
+                    'tax_status' => $paymentFeeDTO->taxStatus,
+                    'total' => (string) $paymentFeeDTO->total,
+                    'total_tax' => (string) $paymentFeeDTO->totalTax,
+                    'taxes' => $paymentFeeDTO->taxes,
+                    'meta_data' => $paymentFeeDTO->metaData,
+                ];
+            }
+        }
 
         return Order::create($data);
+    }
+
+    public function updateOrder(OrderDTO $orderDTO)
+    {
+        $data = [
+            'set_paid' => $orderDTO->isPaid,
+            'meta_data' => $orderDTO->metaData,
+        ];
+        return Order::update($orderDTO->orderNumber, $data);
     }
 
     public function deleteOrder(int $wpOrderId)

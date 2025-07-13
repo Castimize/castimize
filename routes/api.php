@@ -25,6 +25,17 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::get('customers/wp', 'CustomersApiController@showCustomerWp')->name('api.customers.show-customer-wp');
             Route::get('customers/{customer}', 'CustomersApiController@show')->name('api.customers.show');
 
+            // Shop owners
+            Route::get('customers/{customerId}/shop-owner', 'ShopOwnersApiController@show')->name('api.customers.shop-owners.show');
+            Route::get('customers/{customerId}/shop-owner/{shop}', 'ShopOwnersApiController@showShop')->name('api.customers.shop-owners.show-shop');
+            Route::post('customers/{customerId}/shop-owner/{shop}/update-active', 'ShopOwnersApiController@updateActiveShop')->name('api.customers.shop-owners.update-active-shop');
+            Route::post('customers/{customerId}/shop-owner', 'ShopOwnersApiController@store')->name('api.customers.shop-owners.store');
+            Route::put('customers/{customerId}/shop-owner', 'ShopOwnersApiController@update')->name('api.customers.shop-owners.update');
+            Route::put('customers/{customerId}/shop-owner/update-active', 'ShopOwnersApiController@updateActive')->name('api.customers.shop-owners.update-active');
+
+            // Shop owners Payments
+            Route::get('customers/{customerId}/payments/create-setup-intent', 'PaymentsApiController@createSetupIntent')->name('api.payments.create-setup-intent');
+
             // Orders
             Route::post('orders/calculate-expected-delivery-date', 'OrdersApiController@calculateExpectedDeliveryDate')->name('api.orders.calculate-expected-delivery-date');
             Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');

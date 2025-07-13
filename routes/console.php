@@ -17,3 +17,6 @@ Schedule::command('castimize:sync-invoices-to-exact')
 Schedule::command('castimize:get-etsy-receipts')
     ->timezone('Europe/Amsterdam')
     ->hourly();
+Schedule::command('castimize:sync-customer-stripe-id')
+    ->timezone('Europe/Amsterdam')
+    ->hourly();
