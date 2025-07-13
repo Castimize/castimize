@@ -35,7 +35,7 @@ class GetEtsyReceipts extends Command
      */
     public function handle(EtsyService $etsyService, WoocommerceApiService $woocommerceApiService, ShopOrderService $shopOrderService)
     {
-        $date = now()->subHour();
+        $date = now()->subDays(4);
         $shops = Shop::with(['shopOwner.customer'])->where('active', true)->where('shop', ShopOwnerShopsEnum::Etsy->value)->get();
 
         foreach ($shops as $shop) {
