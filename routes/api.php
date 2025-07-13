@@ -35,7 +35,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
 
             // Shop owners Payments
             Route::get('customers/{customerId}/payments/create-setup-intent', 'PaymentsApiController@createSetupIntent')->name('api.payments.create-setup-intent');
-            Route::get('customers/{customerId}/payments/cancel-mandate', 'PaymentsApiController@cancelMandate')->name('api.payments.cancel-mandate');
+            Route::post('customers/{customerId}/payments/cancel-mandate', 'PaymentsApiController@cancelMandate')->name('api.payments.cancel-mandate');
 
             // Orders
             Route::post('orders/calculate-expected-delivery-date', 'OrdersApiController@calculateExpectedDeliveryDate')->name('api.orders.calculate-expected-delivery-date');
