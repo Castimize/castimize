@@ -56,10 +56,11 @@ class PaymentService
             }
 
             $this->stripeService->detachPaymentMethod($paymentMethod);
+            $newStripeData = [
+                'stripe_id' => $stripeData['stripe_id'],
+            ];
 
-            unset($stripeData['payment_method'], $stripeData['mandate_id'], $stripeData['setup_intent_id']);
-
-            $customer->stripe_data = $stripeData;
+            $customer->stripe_data = $newStripeData;
             $customer->save();
         }
     }
