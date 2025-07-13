@@ -7,6 +7,7 @@ namespace App\Services\Admin;
 use App\Models\Customer;
 use App\Services\Payment\Stripe\StripeService;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Stripe\SetupIntent;
 
 class PaymentService
@@ -48,6 +49,7 @@ class PaymentService
             $paymentMethod = $this->stripeService->getPaymentMethod($stripeData['payment_method']);
             if (! $paymentMethod) {
                 $mandate = $this->stripeService->getMandate($stripeData['mandate_id']);
+                Log::info(print_r($mandate, true));
                 $paymentMethod = $this->stripeService->getPaymentMethod($mandate->payment_method);
             }
 
