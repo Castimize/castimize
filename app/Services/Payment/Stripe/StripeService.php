@@ -4,6 +4,7 @@ namespace App\Services\Payment\Stripe;
 
 use App\DTO\Order\OrderDTO;
 use App\Models\Customer as CastimizeCustomer;
+use Illuminate\Support\Str;
 use Stripe\Balance;
 use Stripe\Charge;
 use Stripe\Collection;
@@ -93,9 +94,12 @@ class StripeService
         ]);
     }
 
-    public function getPaymentMethod(string $paymentMethodId): PaymentMethod
+    public function getPaymentMethod(string $paymentMethodId): ?PaymentMethod
     {
-        return PaymentMethod::retrieve($paymentMethodId);
+        if (Str::startsWith($paymentMethodId, 'pm_')) {
+            return PaymentMethod::retrieve($paymentMethodId);
+        }
+        return null;
     }
 
     public function getPaymentMethods()
