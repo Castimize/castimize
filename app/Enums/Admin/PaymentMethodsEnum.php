@@ -39,6 +39,7 @@ enum PaymentMethodsEnum: string
     case PRZELEWY24 = 'p24';
     case REVOLUT = 'revolut';
     case SEPA = 'sepa';
+    case SEPA_DEBIT = 'sepa_debit';
     case SOFORT = 'sofort';
     case SWISH = 'swish';
     case TWINT = 'twint';
@@ -81,6 +82,7 @@ enum PaymentMethodsEnum: string
             self::PRZELEWY24->value => (string) Nova::__('Przelewy24'),
             self::REVOLUT->value => (string) Nova::__('Revolut'),
             self::SEPA->value => (string) Nova::__('SEPA'),
+            self::SEPA_DEBIT->value => (string) Nova::__('SEPA Debit'),
             self::SOFORT->value => (string) Nova::__('Sofort'),
             self::SWISH->value => (string) Nova::__('Swish'),
             self::TWINT->value => (string) Nova::__('Twint'),

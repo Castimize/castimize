@@ -174,7 +174,7 @@ class OrdersService
             $country = Country::where('alpha2', 'nl')->first();
         }
         $customer = null;
-        if (!empty($orderDto->customerId) && $orderDto->source === 'wp') {
+        if (!empty($orderDto->customerId)) {
             $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($orderDto->customerId);
             $customer = $this->customersService->storeCustomerFromWpCustomer($wpCustomer);
         }
@@ -186,7 +186,7 @@ class OrdersService
 
         $order = Order::create([
             'wp_id' => $orderDto->wpId,
-            'customer_id' => $customer->id,
+            'customer_id' => $customer?->id,
             'currency_id' => $currency->id,
             'country_id' => $country->id,
             'order_number' => $orderDto->orderNumber,

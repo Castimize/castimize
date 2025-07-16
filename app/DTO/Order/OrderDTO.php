@@ -16,7 +16,7 @@ class OrderDTO
 {
     public function __construct(
         public int $customerId,
-        public ?int $customerStripeId,
+        public ?string $customerStripeId,
         public ?int $shopReceiptId,
         public string $source,
         public ?int $wpId,
@@ -203,6 +203,7 @@ class OrderDTO
             $totalItems += $upload->total * $upload->quantity;
         }
 
+        // ToDo: fix vat number with taxes for order
         if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
             $taxPercentage = 21;
             $vatExempt = 'yes';
@@ -284,11 +285,11 @@ class OrderDTO
             billingAddressLine2: $billingAddress->address_line2,
             billingPostalCode: $billingAddress->postal_code,
             billingCity: $billingAddress->city->name,
-            billingState: $billingAddress->state->name,
+            billingState: $billingAddress->state?->name,
             billingCountry: $billingAddress->country->alpha2,
             billingVatNumber: $billingVatNumber,
             shippingFirstName: $name->getFirstname(),
-            shippingLastName: $name->getLastname(),
+            shippingLastName: $name->getMiddlename() !== '' ? $name->getMiddlename() . ' ' . $name->getLastName() : $name->getLastName(),
             shippingCompany: null,
             shippingPhoneNumber: $customer->phone,
             shippingEmail: $shippingEmail,

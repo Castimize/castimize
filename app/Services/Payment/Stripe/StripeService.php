@@ -83,8 +83,8 @@ class StripeService
             'currency' => strtolower($orderDTO->currencyCode),
             'customer' => $orderDTO->customerStripeId,
             'payment_method' => $customer->stripe_data['payment_method'],
-            'mandate' => $customer->stripe_data['mandate'],
-            'description' => 'Order 1111 from Castimize',
+            'mandate' => $customer->stripe_data['mandate_id'],
+            'description' => 'Order ' . $orderDTO->wpId . ' from Castimize',
             'confirm' => true,
             'metadata' => [
                 'shop_receipt_id' => $orderDTO->shopReceiptId,

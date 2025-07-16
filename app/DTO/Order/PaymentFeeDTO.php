@@ -44,7 +44,7 @@ class  PaymentFeeDTO
 
         $paymentMethod = (new StripeService())->getPaymentMethod($customer->stripe_data['payment_method']);
         $paymentMethodEnum = PaymentMethodsEnum::from($paymentMethod->type);
-        $paymentMethodName = PaymentMethodsEnum::options()[$paymentMethod->type] . '  usage & Handling fee';
+        $paymentMethodName = PaymentMethodsEnum::options()[$paymentMethod->type] . ' usage & Handling fee';
 
         $paymentFee = PaymentFee::where('payment_method', $paymentMethodEnum->value)->first();
         if ($paymentFee) {
