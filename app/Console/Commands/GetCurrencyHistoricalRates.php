@@ -50,7 +50,7 @@ class GetCurrencyHistoricalRates extends Command
             $result = $exchangeRates->exchangeRate(
                 from: $baseCurrency,
                 to: $supportedCurrencies,
-                date: $historicalDate,
+                date: $historicalDate->format('Y-m-d'),
             );
 
             foreach ($result as $convertCurrency => $rate) {
