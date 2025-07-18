@@ -32,13 +32,13 @@ class GetCurrencyHistoricalRates extends Command
      */
     public function handle()
     {
-        $historicalDate = now();
+        $historicalDate = Carbon::now();
         if ($this->option('historical-date')) {
             try {
                 $historicalDate = Carbon::parse($this->option('historical-date'));
             } catch (InvalidFormatException $e) {
                 $this->error($e->getMessage());
-                return;
+                $historicalDate = Carbon::now();
             }
         }
 
@@ -50,7 +50,7 @@ class GetCurrencyHistoricalRates extends Command
             $result = $exchangeRates->exchangeRate(
                 from: $baseCurrency,
                 to: $supportedCurrencies,
-                date: $historicalDate->format('Y-m-d'),
+                date: $historicalDate,
             );
 
             foreach ($result as $convertCurrency => $rate) {
