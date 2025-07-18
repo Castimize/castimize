@@ -2,6 +2,7 @@
 
 namespace App\DTO\Order;
 
+use app\Helpers\MonetaryAmount;
 use App\Models\Country;
 use App\Models\Material;
 use App\Models\Shop;
@@ -24,10 +25,11 @@ readonly class UploadDTO
         public float $surfaceArea,
         public int $modelParts,
         public int $quantity,
-        public float $subtotal,
-        public float $subtotalTax,
-        public float $total,
-        public float $totalTax,
+        public bool $inCents,
+        public MonetaryAmount $subtotal,
+        public ?MonetaryAmount $subtotalTax,
+        public MonetaryAmount $total,
+        public ?MonetaryAmount $totalTax,
         public ?array $metaData,
         public int $customerLeadTime,
     ) {
@@ -88,10 +90,11 @@ readonly class UploadDTO
             surfaceArea: $surfaceArea,
             modelParts: 1,
             quantity: $lineItem->quantity ?? 1,
-            subtotal: $lineItem->subtotal,
-            subtotalTax: $lineItem->subtotal_tax,
-            total: $lineItem->total,
-            totalTax: $lineItem->total_tax,
+            inCents: false,
+            subtotal: MonetaryAmount::fromString($lineItem->subtotal),
+            subtotalTax: MonetaryAmount::fromString($lineItem->subtotal_tax),
+            total: MonetaryAmount::fromString($lineItem->total),
+            totalTax: MonetaryAmount::fromString($lineItem->total_tax),
             metaData: $lineItem->meta_data,
             customerLeadTime: $customerLeadTime,
         );
@@ -105,15 +108,15 @@ readonly class UploadDTO
 
         $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
 
-        $total = (new CalculatePricesService())->calculatePriceOfModel(
+        $total = MonetaryAmount::fromFloat((new CalculatePricesService())->calculatePriceOfModel(
             price: $material->prices->first(),
             materialVolume: (float) $model->model_volume_cc,
             surfaceArea: (float) $model->model_surface_area_cm2,
-        );
-//        $total = $line['transaction']->price->amount;
-        $totalTax = 0;
+        ));
+
+        $totalTax = new MonetaryAmount();
         if ($taxPercentage) {
-            $totalTax = ($taxPercentage / 100) * $total;
+            $totalTax = MonetaryAmount::fromFloat(($taxPercentage / 100) * $total->toFloat());
         }
         $metaDataWeight = $model->model_volume_cc * $material->density;
         $metaDataScale = sprintf('&times;%s (%s &times; %s &times; %s cm)', $model->model_scale, round($model->model_x_length, 2), round($model->model_y_length, 2), round($model->model_x_length, 2));
@@ -179,10 +182,11 @@ readonly class UploadDTO
             surfaceArea: $model->model_surface_area_cm2,
             modelParts: 1,
             quantity: $line['transaction']->quantity ?? 1,
-            subtotal: $total / 100,
-            subtotalTax: $totalTax / 100,
-            total: $total / 100,
-            totalTax: $totalTax / 100,
+            inCents: true,
+            subtotal: $total,
+            subtotalTax: $totalTax,
+            total: $total,
+            totalTax: $totalTax,
             metaData: $metaData,
             customerLeadTime: $customerLeadTime,
         );

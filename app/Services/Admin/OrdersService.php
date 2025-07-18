@@ -174,7 +174,7 @@ class OrdersService
             $country = Country::where('alpha2', 'nl')->first();
         }
         $customer = null;
-        if (!empty($orderDto->customerId) && $orderDto->source === 'wp') {
+        if (!empty($orderDto->customerId)) {
             $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($orderDto->customerId);
             $customer = $this->customersService->storeCustomerFromWpCustomer($wpCustomer);
         }
@@ -186,7 +186,7 @@ class OrdersService
 
         $order = Order::create([
             'wp_id' => $orderDto->wpId,
-            'customer_id' => $customer->id,
+            'customer_id' => $customer?->id,
             'currency_id' => $currency->id,
             'country_id' => $country->id,
             'order_number' => $orderDto->orderNumber,
@@ -220,12 +220,12 @@ class OrdersService
             'shipping_country' => $orderDto->shippingCountry,
             'service_fee' => null,
             'service_fee_tax' => null,
-            'shipping_fee' => $orderDto->shippingFee,
-            'shipping_fee_tax' => $orderDto->shippingFeeTax,
-            'discount_fee' => $orderDto->discountFee,
-            'discount_fee_tax' => $orderDto->discountFeeTax,
-            'total' => $orderDto->total,
-            'total_tax' => $orderDto->totalTax,
+            'shipping_fee' => $orderDto->shippingFee->toFloat(),
+            'shipping_fee_tax' => $orderDto->shippingFeeTax?->toFloat(),
+            'discount_fee' => $orderDto->discountFee?->toFloat(),
+            'discount_fee_tax' => $orderDto->discountFeeTax?->toFloat(),
+            'total' => $orderDto->total->toFloat(),
+            'total_tax' => $orderDto->totalTax?->toFloat(),
             'production_cost' => null,
             'production_cost_tax' => null,
             'tax_percentage' => $orderDto->taxPercentage,
@@ -488,10 +488,10 @@ class OrdersService
                 'model_surface_area_cm2' => $uploadDto->surfaceArea,
                 'model_parts' => 1,
                 'quantity' => $uploadDto->quantity,
-                'subtotal' => $uploadDto->subtotal,
-                'subtotal_tax' => $uploadDto->subtotalTax,
-                'total' => $uploadDto->total,
-                'total_tax' => $uploadDto->totalTax,
+                'subtotal' => $uploadDto->subtotal->toFloat(),
+                'subtotal_tax' => $uploadDto->subtotalTax->toFloat(),
+                'total' => $uploadDto->total->toFloat(),
+                'total_tax' => $uploadDto->totalTax->toFloat(),
                 'currency_code' => $order->currency_code,
                 'customer_lead_time' => $uploadDto->customerLeadTime,
                 'meta_data' => $uploadDto->metaData,
@@ -511,10 +511,10 @@ class OrdersService
             if ($upload) {
                 $upload->update([
                     'quantity' => $uploadDto->quantity,
-                    'subtotal' => $uploadDto->subtotal,
-                    'subtotal_tax' => $uploadDto->subtotalTax,
-                    'total' => $uploadDto->total,
-                    'total_tax' => $uploadDto->totalTax,
+                    'subtotal' => $uploadDto->subtotal->toFloat(),
+                    'subtotal_tax' => $uploadDto->subtotalTax->toFloat(),
+                    'total' => $uploadDto->total->toFloat(),
+                    'total_tax' => $uploadDto->totalTax->toFloat(),
                 ]);
             }
         }

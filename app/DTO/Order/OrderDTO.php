@@ -4,6 +4,7 @@ namespace App\DTO\Order;
 
 use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Woocommerce\WcOrderStatesEnum;
+use app\Helpers\MonetaryAmount;
 use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
 use Carbon\Carbon;
@@ -15,7 +16,7 @@ class OrderDTO
 {
     public function __construct(
         public int $customerId,
-        public ?int $customerStripeId,
+        public ?string $customerStripeId,
         public ?int $shopReceiptId,
         public string $source,
         public ?int $wpId,
@@ -48,14 +49,15 @@ class OrderDTO
         public string $shippingCity,
         public ?string $shippingState,
         public string $shippingCountry,
-        public ?float $shippingFee,
-        public ?float $shippingFeeTax,
-        public ?float $discountFee,
-        public ?float $discountFeeTax,
-        public float $total,
-        public ?float $totalTax,
-        public ?float $totalRefund,
-        public ?float $totalRefundTax,
+        public bool $inCents,
+        public ?MonetaryAmount $shippingFee,
+        public ?MonetaryAmount $shippingFeeTax,
+        public ?MonetaryAmount $discountFee,
+        public ?MonetaryAmount $discountFeeTax,
+        public ?MonetaryAmount $total,
+        public ?MonetaryAmount $totalTax,
+        public ?MonetaryAmount $totalRefund,
+        public ?MonetaryAmount $totalRefundTax,
         public ?float $taxPercentage,
         public string $currencyCode,
         public string $paymentMethod,
@@ -143,12 +145,13 @@ class OrderDTO
             shippingCity: $wpOrder['shipping']->city,
             shippingState: $wpOrder['shipping']->state,
             shippingCountry: $wpOrder['shipping']->country,
-            shippingFee: $wpOrder['shipping_total'],
-            shippingFeeTax: $wpOrder['shipping_tax'],
-            discountFee: $wpOrder['discount_total'],
-            discountFeeTax: $wpOrder['discount_tax'],
-            total: $wpOrder['total'],
-            totalTax: $wpOrder['total_tax'],
+            inCents: false,
+            shippingFee: MonetaryAmount::fromFloat((float) $wpOrder['shipping_total']),
+            shippingFeeTax: MonetaryAmount::fromFloat((float) $wpOrder['shipping_tax']),
+            discountFee: MonetaryAmount::fromFloat((float) $wpOrder['discount_total']),
+            discountFeeTax: MonetaryAmount::fromFloat((float) $wpOrder['discount_tax']),
+            total: MonetaryAmount::fromFloat((float) $wpOrder['total']),
+            totalTax: MonetaryAmount::fromFloat((float) $wpOrder['total_tax']),
             totalRefund: null,
             totalRefundTax: null,
             taxPercentage: $taxPercentage,
@@ -188,6 +191,12 @@ class OrderDTO
 
         $taxPercentage = null;
         $vatExempt = 'no';
+        // ToDo: fix vat number with taxes for order
+        if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
+            $taxPercentage = 21;
+            $vatExempt = 'yes';
+        }
+
         $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
             countryIso: $receipt->country_iso,
             uploads: collect($lines)->map(fn ($line) => CalculateShippingFeeUploadDTO::fromEtsyLine($line)),
@@ -199,12 +208,10 @@ class OrderDTO
         $uploads = collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage));
         /** @var UploadDTO $upload */
         foreach ($uploads as $upload) {
-            $totalItems += $upload->total * $upload->quantity;
+            $totalItems += $upload->total->toFloat() * $upload->quantity;
         }
 
-        if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
-            $taxPercentage = 21;
-            $vatExempt = 'yes';
+        if ($taxPercentage) {
             $shippingFeeTax = ($taxPercentage / 100) * $shippingFee;
             $totalItemsTax = ($taxPercentage / 100) * $totalItems;
         }
@@ -262,6 +269,9 @@ class OrderDTO
 
         $stripeData = $customer->stripe_data ?? [];
 
+        $total = $totalItems + $shippingFee;
+        $totalTax = $totalItemsTax + $shippingFeeTax;
+
         return new self(
             customerId: $customer->wp_id,
             customerStripeId: array_key_exists('stripe_id', $stripeData) ? $stripeData['stripe_id'] : null,
@@ -283,11 +293,11 @@ class OrderDTO
             billingAddressLine2: $billingAddress->address_line2,
             billingPostalCode: $billingAddress->postal_code,
             billingCity: $billingAddress->city->name,
-            billingState: $billingAddress->state->name,
+            billingState: $billingAddress->state?->name,
             billingCountry: $billingAddress->country->alpha2,
             billingVatNumber: $billingVatNumber,
             shippingFirstName: $name->getFirstname(),
-            shippingLastName: $name->getLastname(),
+            shippingLastName: $name->getMiddlename() !== '' ? $name->getMiddlename() . ' ' . $name->getLastName() : $name->getLastName(),
             shippingCompany: null,
             shippingPhoneNumber: $customer->phone,
             shippingEmail: $shippingEmail,
@@ -297,16 +307,17 @@ class OrderDTO
             shippingCity: ucfirst($receipt->city),
             shippingState: $receipt->state,
             shippingCountry: $receipt->country_iso,
-            shippingFee: $shippingFee,
-            shippingFeeTax: $shippingFeeTax,
+            inCents: true,
+            shippingFee: MonetaryAmount::fromFloat($shippingFee),
+            shippingFeeTax: MonetaryAmount::fromFloat($shippingFeeTax),
             discountFee: null,
             discountFeeTax: null,
-            total: ($totalItems + $shippingFee) / 100,
-            totalTax: ($totalItemsTax + $shippingFeeTax) / 100,
+            total: MonetaryAmount::fromFloat($total),
+            totalTax: MonetaryAmount::fromFloat($totalTax),
             totalRefund: null,
             totalRefundTax: null,
             taxPercentage: $taxPercentage,
-            currencyCode: array_key_exists('shop_currency', $stripeData) && in_array(CurrencyEnum::from($stripeData['shop_currency']), CurrencyEnum::cases(), true) ? $stripeData['shop_currency'] : 'USD',
+            currencyCode: array_key_exists('shop_currency', $shop->shop_oauth) && in_array(CurrencyEnum::from($shop->shop_oauth), CurrencyEnum::cases(), true) ? $shop->shop_oauth['shop_currency'] : 'USD',
             paymentMethod: $receipt->payment_method,
             paymentIssuer: $receipt->payment_method,
             paymentIntentId: null,

@@ -195,9 +195,9 @@ class EtsyApiController extends ApiController
 
     public function getShopReceipts(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
+        $customer = Customer::with('shopOwner.shops')->find($customerId);
         $shop = $customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
-        $shopReceipts = $this->etsyService->getShopReceipts($shop, ['min_created' => now()->subDays(2)->timestamp]);
+        $shopReceipts = $this->etsyService->getShopReceipts($shop, ['min_created' => now()->subDays(14)->timestamp]);
 
         $response = [];
 

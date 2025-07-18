@@ -78,14 +78,18 @@ class StripeService
 
     public function createPaymentIntent(OrderDTO $orderDTO, CastimizeCustomer $customer): PaymentIntent
     {
+        $paymentMethod = $this->getPaymentMethod($customer->stripe_data['payment_method']);
         return PaymentIntent::create([
-            'amount' => $orderDTO->total * 100,
+            'amount' => $orderDTO->total->getValue(),
             'currency' => strtolower($orderDTO->currencyCode),
             'customer' => $orderDTO->customerStripeId,
             'payment_method' => $customer->stripe_data['payment_method'],
-            'mandate' => $customer->stripe_data['mandate'],
-            'description' => 'Order 1111 from Castimize',
+            'mandate' => $customer->stripe_data['mandate_id'],
+            'description' => 'Order ' . $orderDTO->wpId . ' from Castimize',
             'confirm' => true,
+            'off_session' => true,
+            'return_url' => env('APP_SITE_URL'),
+            'payment_method_types' => [$paymentMethod->type],
             'metadata' => [
                 'shop_receipt_id' => $orderDTO->shopReceiptId,
                 'source' => $orderDTO->customerUserAgent,

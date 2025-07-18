@@ -4,6 +4,7 @@ namespace App\Services\Woocommerce;
 
 use App\DTO\Customer\CustomerDTO;
 use App\DTO\Order\OrderDTO;
+use App\DTO\Order\UploadDTO;
 use Codexshaper\WooCommerce\Facades\Customer;
 use Codexshaper\WooCommerce\Facades\Order;
 
@@ -29,15 +30,20 @@ class WoocommerceApiService
         $data = [
             //'status' => $orderDTO->status,
             'customer_id' => $orderDTO->customerId,
-            'set_paid' => $orderDTO->isPaid,
+            'currency' => $orderDTO->currencyCode,
+            'total' => $orderDTO->total->toString(),
+            'total_tax' => $orderDTO->totalTax->toString(),
+            'shipping_total' => $orderDTO->shippingFee->toString(),
+            'shipping_tax' => $orderDTO->shippingFeeTax->toString(),
+            'set_paid' => true,
             'billing' => [
                 'first_name' => $orderDTO->billingFirstName,
                 'last_name' => $orderDTO->billingLastName,
                 'company' => $orderDTO->billingCompany,
                 'address_1' => $orderDTO->billingAddressLine1,
-                'address_2' => $orderDTO->billingAddressLine2,
+                'address_2' => $orderDTO->billingAddressLine2 ?? '',
                 'city' => $orderDTO->billingCity,
-                'state' => $orderDTO->billingState,
+                'state' => $orderDTO->billingState ?? '',
                 'postcode' => $orderDTO->billingPostalCode,
                 'country' => $orderDTO->billingCountry,
                 'email' => $orderDTO->billingEmail,
@@ -48,29 +54,29 @@ class WoocommerceApiService
                 'last_name' => $orderDTO->shippingLastName,
                 'company' => $orderDTO->shippingCompany ?? '',
                 'address_1' => $orderDTO->shippingAddressLine1,
-                'address_2' => $orderDTO->shippingAddressLine2,
+                'address_2' => $orderDTO->shippingAddressLine2 ?? '',
                 'city' => $orderDTO->shippingCity,
-                'state' => $orderDTO->shippingState,
+                'state' => $orderDTO->shippingState ?? '',
                 'postcode' => $orderDTO->shippingPostalCode,
                 'country' => $orderDTO->shippingCountry,
             ],
             'meta_data' => $orderDTO->metaData,
             // products added to an order
-            'line_items' => $orderDTO->uploads->map(fn ($uploadDTO) => [
+            'line_items' => $orderDTO->uploads->map(fn (UploadDTO $uploadDTO) => [
                 'product_id' => 3228,
                 'quantity' => $uploadDTO->quantity,
-                'subtotal' => (string) $uploadDTO->subtotal,
-                'subtotal_tax' => (string) $uploadDTO->subtotalTax,
-                'total' => (string) $uploadDTO->total,
-                'total_tax' => (string) $uploadDTO->totalTax,
+                'subtotal' => $uploadDTO->subtotal->toString(),
+                'subtotal_tax' => $uploadDTO->subtotalTax?->toString(),
+                'total' => $uploadDTO->total->toString(),
+                'total_tax' => $uploadDTO->totalTax?->toString(),
                 'meta_data' => $uploadDTO->metaData,
             ])->toArray(),
             'shipping_lines' => [
                 [
                     'method_title' => 'Rate',
                     'method_id' => 'flat_rate',
-                    'total' => (string) $orderDTO->shippingFee,
-                    'total_tax' => (string) $orderDTO->shippingFeeTax,
+                    'total' => $orderDTO->shippingFee->toString(),
+                    'total_tax' => $orderDTO->shippingFeeTax?->toString(),
                 ],
             ],
         ];
@@ -82,8 +88,8 @@ class WoocommerceApiService
                     'name' => $paymentFeeDTO->name,
                     'tax_class' => $paymentFeeDTO->taxClass,
                     'tax_status' => $paymentFeeDTO->taxStatus,
-                    'total' => (string) $paymentFeeDTO->total,
-                    'total_tax' => (string) $paymentFeeDTO->totalTax,
+                    'total' => $paymentFeeDTO->total->toString(),
+                    'total_tax' => $paymentFeeDTO->totalTax?->toString(),
                     'taxes' => $paymentFeeDTO->taxes,
                     'meta_data' => $paymentFeeDTO->metaData,
                 ];
