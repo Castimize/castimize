@@ -32,7 +32,8 @@ class PaymentFee extends Resource
      */
     public function title()
     {
-        return PaymentMethodsEnum::options()[$this->payment_method];
+        $paymentMethodsOptions = PaymentMethodsEnum::options();
+        return ! empty($this->payment_method) && array_key_exists($this->payment_method, $paymentMethodsOptions) ? $paymentMethodsOptions[$this->payment_method] : $this->id;
     }
 
     /**
