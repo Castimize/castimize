@@ -11,6 +11,7 @@ use App\Models\Country;
 use App\Models\Material;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
+use App\Services\Admin\OrdersService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -18,7 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OrdersApiController extends ApiController
 {
-    public function __construct()
+    public function __construct(private OrdersService $ordersService)
     {
     }
 
@@ -57,15 +58,7 @@ class OrdersApiController extends ApiController
             $uploads = json_decode($uploads, true, 512, JSON_THROW_ON_ERROR);
         }
 
-        $biggestCustomerLeadTime = null;
-        foreach ($uploads as $upload) {
-            $material = Material::where('wp_id', $upload['material_id'])->first();
-            $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
-            if ($biggestCustomerLeadTime === null || $customerLeadTime > $biggestCustomerLeadTime) {
-                $biggestCustomerLeadTime = $customerLeadTime;
-            }
-        }
-        $expectedDeliveryDate = now()->addBusinessDays($biggestCustomerLeadTime)->toFormattedDateString();
+        $expectedDeliveryDate = $this->ordersService->calculateExpectedDeliveryDate($uploads, $country);
 
         $response = ['success' => true, 'expected_delivery_date' => $expectedDeliveryDate];
         LogRequestService::addResponse($request, $response);

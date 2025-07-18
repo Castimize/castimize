@@ -6,8 +6,10 @@ use App\DTO\Shops\Etsy\ListingDTO;
 use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Woocommerce\WcOrderStatesEnum;
 use app\Helpers\MonetaryAmount;
+use App\Models\Country;
 use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
+use App\Services\Admin\OrdersService;
 use Carbon\Carbon;
 use Etsy\Resources\Receipt;
 use Illuminate\Support\Collection;
@@ -217,6 +219,9 @@ class OrderDTO
             $totalItemsTax = ($taxPercentage / 100) * $totalItems;
         }
 
+        $country = Country::where('alpha2', $receipt->country_iso)->first();
+        $expectedDeliveryDate = (new OrdersService())->calculateExpectedDeliveryDate($uploads, $country);
+
         $metaData = [
             [
                 'key' => '_shipping_email',
@@ -237,6 +242,10 @@ class OrderDTO
             [
                 'key'=> 'wcpdf_order_locale',
                 'value'=> 'en_US',
+            ],
+            [
+                'key'=> '_expected_delivery_date',
+                'value'=> $expectedDeliveryDate,
             ],
         ];
 
