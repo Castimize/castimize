@@ -62,7 +62,7 @@ class GetEtsyReceipts extends Command
                             try {
                                 // Create OrderDTO from Etsy receipt
                                 $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
-                                dd($orderDTO);
+//                                dd($orderDTO);
                                 // Use mandate to pay the order
                                 $wcOrder = $woocommerceApiService->createOrder($orderDTO);
                                 $this->info('Woocommerce order created with id: ' . $wcOrder['id']);

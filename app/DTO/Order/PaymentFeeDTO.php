@@ -5,6 +5,7 @@ namespace App\DTO\Order;
 use App\Enums\Admin\PaymentFeeTypesEnum;
 use App\Enums\Admin\PaymentMethodsEnum;
 use App\Enums\Woocommerce\WcOrderFeeTaxStatesEnum;
+use app\Helpers\MonetaryAmount;
 use App\Models\Customer;
 use App\Models\PaymentFee;
 use App\Services\Payment\Stripe\StripeService;
@@ -16,8 +17,8 @@ class  PaymentFeeDTO
         public string $name,
         public string $taxClass,
         public WcOrderFeeTaxStatesEnum $taxStatus,
-        public float $total,
-        public float $totalTax,
+        public MonetaryAmount $total,
+        public ?MonetaryAmount $totalTax,
         public array $taxes = [],
         public array $metaData = [],
     ) {
@@ -30,8 +31,8 @@ class  PaymentFeeDTO
             name: $feeLine->name,
             taxClass: $feeLine->taxClass,
             taxStatus: $feeLine->taxStatus,
-            total: $feeLine->total,
-            totalTax: $feeLine->totalTax,
+            total: MonetaryAmount::fromFloat((float) $feeLine->total),
+            totalTax: MonetaryAmount::fromFloat((float) $feeLine->totalTax),
             taxes: $feeLine,
             metaData: $feeLine->metaData,
         );
@@ -64,8 +65,8 @@ class  PaymentFeeDTO
             name: $paymentMethodName,
             taxClass: '',
             taxStatus: WcOrderFeeTaxStatesEnum::TAXABLE,
-            total: $total,
-            totalTax: $totalTax,
+            total: MonetaryAmount::fromFloat($total),
+            totalTax: MonetaryAmount::fromFloat($totalTax),
             taxes: [],
             metaData: [
                 [
