@@ -327,7 +327,7 @@ class OrderDTO
             totalRefund: null,
             totalRefundTax: null,
             taxPercentage: $taxPercentage,
-            currencyCode: array_key_exists('shop_currency', $shop->shop_oauth) && in_array(CurrencyEnum::from($shop->shop_oauth), CurrencyEnum::cases(), true) ? $shop->shop_oauth['shop_currency'] : 'USD',
+            currencyCode: array_key_exists('shop_currency', $shop->shop_oauth) && in_array(CurrencyEnum::from($shop->shop_oauth['shop_currency']), CurrencyEnum::cases(), true) ? $shop->shop_oauth['shop_currency'] : 'USD',
             paymentMethod: $receipt->payment_method,
             paymentIssuer: $receipt->payment_method,
             paymentIntentId: null,
