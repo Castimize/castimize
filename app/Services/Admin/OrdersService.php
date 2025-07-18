@@ -648,7 +648,8 @@ class OrdersService
     {
         $biggestCustomerLeadTime = null;
         foreach ($uploads as $upload) {
-            $material = Material::where('wp_id', $upload['material_id'])->first();
+            $materialId = $upload instanceof UploadDTO ? $upload->materialId : $upload['material_id'];
+            $material = Material::where('wp_id', $materialId)->first();
             $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
             if ($biggestCustomerLeadTime === null || $customerLeadTime > $biggestCustomerLeadTime) {
                 $biggestCustomerLeadTime = $customerLeadTime;
