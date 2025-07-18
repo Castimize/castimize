@@ -70,6 +70,11 @@ class WoocommerceApiService
                 'total' => $uploadDTO->total->toString(),
                 'total_tax' => $uploadDTO->totalTax?->toString(),
                 'meta_data' => $uploadDTO->metaData,
+                'taxes' => $uploadDTO->totalTax && $uploadDTO->totalTax?->toFloat() > 0.00 ? [
+                    'id' => 1,
+                    'total' => $uploadDTO->totalTax->toString(),
+                    'subtotal' => $uploadDTO->subtotalTax->toString(),
+                ] : [],
             ])->toArray(),
             'shipping_lines' => [
                 [
@@ -77,9 +82,52 @@ class WoocommerceApiService
                     'method_id' => 'flat_rate',
                     'total' => $orderDTO->shippingFee?->toString(),
                     'total_tax' => $orderDTO->shippingFeeTax?->toString(),
+                    'taxes' => $orderDTO->shippingFeeTax && $orderDTO->shippingFeeTax->toFloat() > 0.00 ? [
+                        'id' => 1,
+                        'total' => $orderDTO->shippingFeeTax->toString(),
+                        'subtotal' => "",
+                    ] : [],
                 ],
             ],
         ];
+
+        if ($orderDTO->totalTax && $orderDTO->totalTax->toFloat() > 0.00) {
+            $data['tax_lines'][] = [
+                'rate_code' => 'NL-VAT-1',
+                'rate_id' => 1,
+                'label' => 'VAT',
+                'compound' => false,
+                'tax_total' => $orderDTO->totalTax->toString(),
+                'shipping_tax_total' => $orderDTO->shippingFeeTax?->toString(),
+                'rate_percent' => 21,
+                'meta_data' => [
+                    [
+                        'key' => '_wcpdf_rate_percentage',
+                        'value' => '21.0000',
+                        'display_key' => '_wcpdf_rate_percentage',
+                        'display_value' => '21.0000',
+                    ],
+                    [
+                        'key' => '_wcpdf_ubl_tax_category',
+                        'value' => '',
+                        'display_key' => '_wcpdf_ubl_tax_category',
+                        'display_value' => '',
+                    ],
+                    [
+                        'key' => '_wcpdf_ubl_tax_scheme',
+                        'value' => '',
+                        'display_key' => '_wcpdf_ubl_tax_scheme',
+                        'display_value' => '',
+                    ],
+                    [
+                        'key' => '_wcpdf_ubl_tax_reason',
+                        'value' => '',
+                        'display_key' => '_wcpdf_ubl_tax_reason',
+                        'display_value' => '',
+                    ],
+                ],
+            ];
+        }
 
         if ($orderDTO->paymentFees->count() > 0) {
             $data['fee_lines'] = [];

@@ -2,11 +2,13 @@
 
 namespace App\DTO\Order;
 
+use App\Enums\Admin\CurrencyEnum;
 use app\Helpers\MonetaryAmount;
 use App\Models\Country;
 use App\Models\Material;
 use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
+use App\Services\Admin\CurrencyService;
 use Etsy\Resources\Receipt;
 
 readonly class UploadDTO
@@ -108,11 +110,24 @@ readonly class UploadDTO
 
         $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
 
-        $total = MonetaryAmount::fromFloat((new CalculatePricesService())->calculatePriceOfModel(
+        $total = (new CalculatePricesService())->calculatePriceOfModel(
             price: $material->prices->first(),
             materialVolume: (float) $model->model_volume_cc,
             surfaceArea: (float) $model->model_surface_area_cm2,
-        ));
+        );
+
+        if (
+            app()->environment() === 'production' &&
+            array_key_exists('shop_currency', $shop->shop_oauth) &&
+            $shop->shop_oauth['shop_currency'] !== config('app.currency') &&
+            in_array(CurrencyEnum::from($shop->shop_oauth['shop_currency']), CurrencyEnum::cases(), true)
+        ) {
+            /** @var CurrencyService $currencyService */
+            $currencyService = app(CurrencyService::class);
+            $total = $currencyService->convertCurrency(config('app.currency'), $shop->shop_oauth['shop_currency'], $total);
+        }
+
+        $total = MonetaryAmount::fromFloat($total)->multiply($line['transaction']->quantity ?? 1);
 
         $totalTax = new MonetaryAmount();
         if ($taxPercentage) {
