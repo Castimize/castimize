@@ -75,7 +75,7 @@ class WoocommerceApiService
                 [
                     'method_title' => 'Rate',
                     'method_id' => 'flat_rate',
-                    'total' => $orderDTO->shippingFee->toString(),
+                    'total' => $orderDTO->shippingFee?->toString(),
                     'total_tax' => $orderDTO->shippingFeeTax?->toString(),
                 ],
             ],

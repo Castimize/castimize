@@ -512,9 +512,9 @@ class OrdersService
                 $upload->update([
                     'quantity' => $uploadDto->quantity,
                     'subtotal' => $uploadDto->subtotal->toFloat(),
-                    'subtotal_tax' => $uploadDto->subtotalTax->toFloat(),
+                    'subtotal_tax' => $uploadDto->subtotalTax?->toFloat(),
                     'total' => $uploadDto->total->toFloat(),
-                    'total_tax' => $uploadDto->totalTax->toFloat(),
+                    'total_tax' => $uploadDto->totalTax?->toFloat(),
                 ]);
             }
         }
@@ -637,5 +637,23 @@ class OrdersService
         }
 
         return $biggestCustomerLeadTime;
+    }
+
+    /**
+     * @param mixed $uploads
+     * @param Country|null $country
+     * @return string
+     */
+    public function calculateExpectedDeliveryDate(mixed $uploads, ?Country $country): string
+    {
+        $biggestCustomerLeadTime = null;
+        foreach ($uploads as $upload) {
+            $material = Material::where('wp_id', $upload['material_id'])->first();
+            $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
+            if ($biggestCustomerLeadTime === null || $customerLeadTime > $biggestCustomerLeadTime) {
+                $biggestCustomerLeadTime = $customerLeadTime;
+            }
+        }
+        return now()->addBusinessDays($biggestCustomerLeadTime)->toFormattedDateString();
     }
 }
