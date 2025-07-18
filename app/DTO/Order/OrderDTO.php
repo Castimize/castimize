@@ -9,6 +9,7 @@ use app\Helpers\MonetaryAmount;
 use App\Models\Country;
 use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
+use App\Services\Admin\CurrencyService;
 use App\Services\Admin\OrdersService;
 use Carbon\Carbon;
 use Etsy\Resources\Receipt;
@@ -184,6 +185,7 @@ class OrderDTO
         $billingAddress = $customer->addresses()->wherePivot('default_billing', 1)->first();
 
         $name = $parser->parse($receipt->name);
+
         $billingVatNumber = $customer->vat_number;
         $billingEmail = $receipt->buyer_email ?? $customer->email;
         $shippingEmail = $receipt->buyer_email ?? $receipt->seller_email;
@@ -194,7 +196,6 @@ class OrderDTO
 
         $taxPercentage = null;
         $vatExempt = 'no';
-        // ToDo: fix vat number with taxes for order
         if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
             $taxPercentage = 21;
             $vatExempt = 'yes';
@@ -204,6 +205,17 @@ class OrderDTO
             countryIso: $receipt->country_iso,
             uploads: collect($lines)->map(fn ($line) => CalculateShippingFeeUploadDTO::fromEtsyLine($line)),
         )->calculated_total;
+
+        if (
+            app()->environment() === 'production' &&
+            array_key_exists('shop_currency', $shop->shop_oauth) &&
+            $shop->shop_oauth['shop_currency'] !== config('app.currency') &&
+            in_array(CurrencyEnum::from($shop->shop_oauth['shop_currency']), CurrencyEnum::cases(), true)
+        ) {
+            /** @var CurrencyService $currencyService */
+            $currencyService = app(CurrencyService::class);
+            $shippingFee = $currencyService->convertCurrency(config('app.currency'), $shop->shop_oauth['shop_currency'], $shippingFee);
+        }
 
         $shippingFeeTax = 0;
         $totalItems = 0;
