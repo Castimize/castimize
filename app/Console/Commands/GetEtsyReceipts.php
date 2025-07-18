@@ -62,6 +62,7 @@ class GetEtsyReceipts extends Command
                             try {
                                 // Create OrderDTO from Etsy receipt
                                 $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
+                                dd($orderDTO);
                                 // Use mandate to pay the order
                                 $wcOrder = $woocommerceApiService->createOrder($orderDTO);
                                 $this->info('Woocommerce order created with id: ' . $wcOrder['id']);
@@ -95,7 +96,7 @@ class GetEtsyReceipts extends Command
 
                                 $this->info(sprintf('Processed Receipt %s', $receipt->receipt_id));
                             } catch (Exception $e) {
-                                if ($wcOrder->first() !== null) {
+                                if ($wcOrder !== null) {
                                     $woocommerceApiService->deleteOrder((int) $wcOrder['id']);
                                 }
 

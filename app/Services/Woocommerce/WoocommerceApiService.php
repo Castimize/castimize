@@ -4,6 +4,7 @@ namespace App\Services\Woocommerce;
 
 use App\DTO\Customer\CustomerDTO;
 use App\DTO\Order\OrderDTO;
+use App\DTO\Order\UploadDTO;
 use Codexshaper\WooCommerce\Facades\Customer;
 use Codexshaper\WooCommerce\Facades\Order;
 
@@ -29,6 +30,11 @@ class WoocommerceApiService
         $data = [
             //'status' => $orderDTO->status,
             'customer_id' => $orderDTO->customerId,
+            'currency' => $orderDTO->currencyCode,
+            'total' => (string) $orderDTO->getTotal(),
+            'total_tax' => (string) $orderDTO->getTotalTax(),
+            'shipping_total' => (string) $orderDTO->getShippingFee(),
+            'shipping_tax' => (string) $orderDTO->getShippingFeeTax(),
             'set_paid' => true,
             'billing' => [
                 'first_name' => $orderDTO->billingFirstName,
@@ -56,13 +62,13 @@ class WoocommerceApiService
             ],
             'meta_data' => $orderDTO->metaData,
             // products added to an order
-            'line_items' => $orderDTO->uploads->map(fn ($uploadDTO) => [
+            'line_items' => $orderDTO->uploads->map(fn (UploadDTO $uploadDTO) => [
                 'product_id' => 3228,
                 'quantity' => $uploadDTO->quantity,
-                'subtotal' => (string) $uploadDTO->subtotal,
-                'subtotal_tax' => (string) $uploadDTO->subtotalTax,
-                'total' => (string) $uploadDTO->total,
-                'total_tax' => (string) $uploadDTO->totalTax,
+                'subtotal' => (string) $uploadDTO->getSubtotal(),
+                'subtotal_tax' => (string) $uploadDTO->getSubtotalTax(),
+                'total' => (string) $uploadDTO->getTotal(),
+                'total_tax' => (string) $uploadDTO->getTotalTax(),
                 'meta_data' => $uploadDTO->metaData,
             ])->toArray(),
             'shipping_lines' => [

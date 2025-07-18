@@ -5,6 +5,7 @@ namespace App\DTO\Order;
 use App\DTO\Shops\Etsy\ListingDTO;
 use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Woocommerce\WcOrderStatesEnum;
+use app\Helpers\MonetaryAmount;
 use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
 use Carbon\Carbon;
@@ -49,14 +50,15 @@ class OrderDTO
         public string $shippingCity,
         public ?string $shippingState,
         public string $shippingCountry,
-        public ?float $shippingFee,
-        public ?float $shippingFeeTax,
-        public ?float $discountFee,
-        public ?float $discountFeeTax,
-        public float $total,
-        public ?float $totalTax,
-        public ?float $totalRefund,
-        public ?float $totalRefundTax,
+        public bool $inCents,
+        public ?MonetaryAmount $shippingFee,
+        public ?MonetaryAmount $shippingFeeTax,
+        public ?MonetaryAmount $discountFee,
+        public ?MonetaryAmount $discountFeeTax,
+        public ?MonetaryAmount $total,
+        public ?MonetaryAmount $totalTax,
+        public ?MonetaryAmount $totalRefund,
+        public ?MonetaryAmount $totalRefundTax,
         public ?float $taxPercentage,
         public string $currencyCode,
         public string $paymentMethod,
@@ -144,6 +146,7 @@ class OrderDTO
             shippingCity: $wpOrder['shipping']->city,
             shippingState: $wpOrder['shipping']->state,
             shippingCountry: $wpOrder['shipping']->country,
+            inCents: false,
             shippingFee: $wpOrder['shipping_total'],
             shippingFeeTax: $wpOrder['shipping_tax'],
             discountFee: $wpOrder['discount_total'],
@@ -189,6 +192,12 @@ class OrderDTO
 
         $taxPercentage = null;
         $vatExempt = 'no';
+        // ToDo: fix vat number with taxes for order
+        if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
+            $taxPercentage = 21;
+            $vatExempt = 'yes';
+        }
+
         $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
             countryIso: $receipt->country_iso,
             uploads: collect($lines)->map(fn ($line) => CalculateShippingFeeUploadDTO::fromEtsyLine($line)),
@@ -200,13 +209,10 @@ class OrderDTO
         $uploads = collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage));
         /** @var UploadDTO $upload */
         foreach ($uploads as $upload) {
-            $totalItems += $upload->total * $upload->quantity;
+            $totalItems += $upload->total->toFloat() * $upload->quantity;
         }
 
-        // ToDo: fix vat number with taxes for order
-        if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
-            $taxPercentage = 21;
-            $vatExempt = 'yes';
+        if ($taxPercentage) {
             $shippingFeeTax = ($taxPercentage / 100) * $shippingFee;
             $totalItemsTax = ($taxPercentage / 100) * $totalItems;
         }
@@ -264,6 +270,9 @@ class OrderDTO
 
         $stripeData = $customer->stripe_data ?? [];
 
+        $total = $totalItems + $shippingFee;
+        $totalTax = $totalItemsTax + $shippingFeeTax;
+
         return new self(
             customerId: $customer->wp_id,
             customerStripeId: array_key_exists('stripe_id', $stripeData) ? $stripeData['stripe_id'] : null,
@@ -299,12 +308,13 @@ class OrderDTO
             shippingCity: ucfirst($receipt->city),
             shippingState: $receipt->state,
             shippingCountry: $receipt->country_iso,
-            shippingFee: $shippingFee,
-            shippingFeeTax: $shippingFeeTax,
+            inCents: true,
+            shippingFee: MonetaryAmount::fromFloat($shippingFee),
+            shippingFeeTax: MonetaryAmount::fromFloat($shippingFeeTax),
             discountFee: null,
             discountFeeTax: null,
-            total: ($totalItems + $shippingFee) / 100,
-            totalTax: ($totalItemsTax + $shippingFeeTax) / 100,
+            total: MonetaryAmount::fromFloat($total),
+            totalTax: MonetaryAmount::fromFloat($totalTax),
             totalRefund: null,
             totalRefundTax: null,
             taxPercentage: $taxPercentage,
