@@ -117,7 +117,7 @@ readonly class UploadDTO
         );
 
         if (
-            app()->environment() === 'production' &&
+            //app()->environment() === 'production' &&
             array_key_exists('shop_currency', $shop->shop_oauth) &&
             $shop->shop_oauth['shop_currency'] !== config('app.currency') &&
             in_array(CurrencyEnum::from($shop->shop_oauth['shop_currency']), CurrencyEnum::cases(), true)
