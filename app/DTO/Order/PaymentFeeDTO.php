@@ -48,6 +48,7 @@ class  PaymentFeeDTO
         $paymentMethodName = PaymentMethodsEnum::options()[$paymentMethod->type] . ' usage & Handling fee';
 
         $paymentFee = PaymentFee::where('payment_method', $paymentMethodEnum->value)->first();
+        $taxes = [];
         if ($paymentFee) {
             if (PaymentFeeTypesEnum::from($paymentFee->type) === PaymentFeeTypesEnum::FIXED) {
                 $total = $paymentFee->fee;
@@ -57,6 +58,10 @@ class  PaymentFeeDTO
 
             if ($taxPercentage) {
                 $totalTax = ($taxPercentage / 100) * $total;
+                $taxes = [
+                    'total' => $totalTax,
+                    'subtotal' => '',
+                ];
             }
         }
 
@@ -67,7 +72,7 @@ class  PaymentFeeDTO
             taxStatus: WcOrderFeeTaxStatesEnum::TAXABLE,
             total: MonetaryAmount::fromFloat($total),
             totalTax: MonetaryAmount::fromFloat($totalTax),
-            taxes: [],
+            taxes: $taxes,
             metaData: [
                 [
                     'key' => '_last_added_fee',
