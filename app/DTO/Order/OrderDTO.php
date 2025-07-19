@@ -195,10 +195,10 @@ class OrderDTO
         $updatedAt = Carbon::createFromTimestamp($receipt->updated_timestamp);
 
         $taxPercentage = null;
-        $vatExempt = 'no';
+        $vatExempt = 'yes';
         if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
             $taxPercentage = 21;
-            $vatExempt = 'yes';
+            $vatExempt = 'no';
         }
 
         $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
