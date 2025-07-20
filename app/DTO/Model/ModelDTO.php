@@ -2,17 +2,19 @@
 
 namespace App\DTO\Model;
 
+use App\Models\Material;
 use App\Models\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-readonly class  ModelDTO
+readonly class ModelDTO
 {
     public function __construct(
         public string $wpId,
         public ?int $customerId,
         public ?int $shopListingId,
-        public ?int $materialId,
+        public ?int $shopTaxonomyId,
+        public array $materials,
         public ?int $printerId,
         public ?int $coatingId,
         public ?string $unit,
@@ -34,13 +36,10 @@ readonly class  ModelDTO
     ) {
     }
 
-    public static function fromApiRequest()
-    {
-
-    }
-
     public static function fromWpRequest(Request $request, int $customerId): ModelDTO
     {
+        $material = Material::where('wp_id', $request->wp_id)->first();
+
         $categories = null;
         if ($request->categories) {
             $categories = [];
@@ -100,11 +99,12 @@ readonly class  ModelDTO
             wpId: (string) $request->wp_id,
             customerId: $customerId,
             shopListingId: null,
-            materialId: null,
+            shopTaxonomyId: null,
+            materials: [$material],
             printerId: $request->printer_id ?? 3,
             coatingId: $request->coating_id ?? null,
             unit: 'mm',
-            name: $request->original_file_name,
+            name: $request->original_file_name ?? $request->file_name ?? '',
             modelName: $request->model_name ?? null,
             fileName: $request->file_name,
             thumbName: $thumbName,
@@ -146,10 +146,11 @@ readonly class  ModelDTO
         }
 
         return new self(
-            wpId: $model->material?->wp_id,
+            wpId: (string) $model->materials->first()->wp_id,
             customerId: $customerId,
             shopListingId: $request->shop_listing_id ?? null,
-            materialId: $model->material_id,
+            shopTaxonomyId: $request->shop_taxonomy_id ?? null,
+            materials: $request->materials,
             printerId: 3,
             coatingId: null,
             unit: 'mm',

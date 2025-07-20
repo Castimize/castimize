@@ -19,7 +19,6 @@ use Etsy\Etsy;
 use Etsy\OAuth\Client;
 use Etsy\Resources\LedgerEntry;
 use Etsy\Resources\ListingImage;
-use Etsy\Resources\Payment;
 use Etsy\Resources\Receipt;
 use Etsy\Resources\ReturnPolicy;
 use Etsy\Resources\SellerTaxonomy;
@@ -37,6 +36,8 @@ use Illuminate\Support\Facades\URL;
 
 class EtsyService
 {
+    private $client;
+
     public function getRedirectUri(): string
     {
         return URL::route(
@@ -46,12 +47,12 @@ class EtsyService
 
     public function getAuthorizationUrl(Shop $shop): string
     {
-        $client = new Client(client_id: $shop->shop_oauth['client_id']);
+        $this->client = new Client(client_id: $shop->shop_oauth['client_id']);
         $scopes = PermissionScopes::ALL_SCOPES;
 //        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
 
-        [$verifier, $code_challenge] = $client->generateChallengeCode();
-        $nonce = $client->createNonce();
+        [$verifier, $code_challenge] = $this->client->generateChallengeCode();
+        $nonce = $this->client->createNonce();
 
         $shopOauth = $shop->shop_oauth;
         $shopOauth['verifier'] = $verifier;
@@ -60,7 +61,7 @@ class EtsyService
         $shop->shop_oauth = $shopOauth;
         $shop->save();
 
-        return $client->getAuthorizationUrl(
+        return $this->client->getAuthorizationUrl(
             redirect_uri: $this->getRedirectUri(),
             scope: $scopes,
             code_challenge: $code_challenge,
@@ -78,9 +79,9 @@ class EtsyService
             throw new Exception(__('Shop not found'));
         }
 
-        $client = new Client(client_id: $shop->shop_oauth['client_id']);
+        $this->client = new Client(client_id: $shop->shop_oauth['client_id']);
 
-        $response = $client->requestAccessToken(
+        $response = $this->client->requestAccessToken(
             redirect_uri: $this->getRedirectUri(),
             code: $code,
             verifier: $shop->shop_oauth['verifier'],
@@ -88,39 +89,26 @@ class EtsyService
 
         $shop = $this->storeAccessToken($shop, $response);
 
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         $etsyShop = $this->addShopToShopOwnerShop($shop);
 
-        $shippingProfileDTO = ShippingProfileDTO::fromShop($etsyShop->shop_id);
-        $shippingProfiles = $this->getShippingProfiles($shop);
-        $createShippingProfile = true;
-        foreach ($shippingProfiles->data as $shippingProfile) {
-            if ($shippingProfile->title === $shippingProfileDTO->title) {
-                $createShippingProfile = false;
-
-                $shippingProfileDTO->shippingProfileId = $shippingProfile->shipping_profile_id;
-
-                $this->addShippingProfileToShopOwnerShop($shop, $shippingProfile);
-            }
-        }
-
-        if ($createShippingProfile) {
-            $this->createShippingProfile($shop, $shippingProfileDTO);
-        }
+        $this->checkExistingShippingProfile(
+            shopId: $etsyShop->shop_id,
+            shop: $shop,
+        );
         $this->createShopReturnPolicy($shop);
     }
 
     public function refreshAccessToken(Shop $shop): void
     {
-        if (!array_key_exists('refresh_token', $shop->shop_oauth) || !array_key_exists('access_token', $shop->shop_oauth)) {
+        if (! array_key_exists('refresh_token', $shop->shop_oauth) || ! array_key_exists('access_token', $shop->shop_oauth)) {
             $shop->active = 0;
             $shop->save();
             throw new Exception(__('Shop is unauthenticated :shopOwner', ['shopOwner' => $shop->shop_owner_id]));
         }
-        $client = new Client(client_id: $shop->shop_oauth['client_id']);
-        $response = $client->refreshAccessToken($shop->shop_oauth['refresh_token']);
-        //Log::info(print_r($response, true));
+        $this->client = new Client(client_id: $shop->shop_oauth['client_id']);
+        $response = $this->client->refreshAccessToken($shop->shop_oauth['refresh_token']);
 
         $this->storeAccessToken($shop, $response);
     }
@@ -210,101 +198,134 @@ class EtsyService
         return SellerTaxonomy::all();
     }
 
+    public function checkExistingShippingProfile(int $shopId, Shop $shop)
+    {
+        $shippingProfileDTO = ShippingProfileDTO::fromShop($shopId);
+        $shippingProfiles = $this->getShippingProfiles($shop);
+        $createShippingProfile = true;
+        foreach ($shippingProfiles->data as $shippingProfile) {
+            if ($shippingProfile->title === $shippingProfileDTO->title || $shippingProfile->shipping_profile_id === $shippingProfileDTO->shippingProfileId) {
+                $createShippingProfile = false;
+
+                $shippingProfileDTO->shippingProfileId = $shippingProfile->shipping_profile_id;
+
+                $this->addShippingProfileToShopOwnerShop($shop, $shippingProfile);
+                $shop->refresh();
+            }
+        }
+
+        if ($createShippingProfile) {
+            $this->createShippingProfile($shop, $shippingProfileDTO);
+        }
+    }
+
     public function getShippingProfile(Shop $shop)
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
-        return ShippingProfile::get(
-            shop_id: $shop->shop_oauth['shop_id'],
-            profile_id: $shop->shop_oauth['shipping_profile_id'],
-        );
+        return (new EtsyShippingProfileService(
+            shop: $shop,
+        ))->getShippingProfile();
     }
 
-    public function getShippingProfiles(Shop $shop): Collection
+    public function getShippingProfiles(Shop $shop)
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
-        return ShippingProfile::all(
-            shop_id: $shop->shop_oauth['shop_id'],
-        );
+        return (new EtsyShippingProfileService(
+            shop: $shop,
+        ))->getShippingProfiles();
     }
 
     public function createShippingProfile(Shop $shop, ShippingProfileDTO $shippingProfileDTO): ShippingProfileDTO
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
-        $shippingProfile = ShippingProfile::create(
-            shop_id: $shop->shop_oauth['shop_id'],
-            data: [
-                'title' => $shippingProfileDTO->title,
-                'origin_country_iso' => $shippingProfileDTO->originCountryIso,
-                'primary_cost' => $shippingProfileDTO->primaryCost,
-                'secondary_cost' => $shippingProfileDTO->secondaryCost,
-                'destination_country_iso' => $shippingProfileDTO->destinationCountryIso,
-                'origin_postal_code' => $shippingProfileDTO->originPostalCode,
-                'min_processing_time' => $shippingProfileDTO->minProcessingTime,
-                'max_processing_time' => $shippingProfileDTO->maxProcessingTime,
-                'processing_time_unit' => $shippingProfileDTO->processingTimeUnit,
-                'min_delivery_days' => $shippingProfileDTO->minDeliveryDays,
-                'max_delivery_days' => $shippingProfileDTO->maxDeliveryDays,
-            ],
-        );
-
-        $shippingProfileDTO->shippingProfileId = $shippingProfile?->shipping_profile_id;
-
-        $this->addShippingProfileToShopOwnerShop($shop, $shippingProfile);
-
-        return $shippingProfileDTO;
+        return (new EtsyShippingProfileService(
+            shop: $shop,
+        ))->createShippingProfile($shippingProfileDTO);
     }
 
     public function createShippingProfileDestination(Shop $shop, ShippingProfileDestinationDTO $shippingProfileDestinationDTO): ShippingProfileDestinationDTO
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
-        $shippingDestination = ShippingDestination::create(
-            shop_id: $shop->shop_oauth['shop_id'],
-            profile_id: $shippingProfileDestinationDTO->shippingProfileId,
-            data: [
-                'primary_cost' => $shippingProfileDestinationDTO->primaryCost,
-                'secondary_cost' => $shippingProfileDestinationDTO->secondaryCost,
-                'destination_country_iso' => $shippingProfileDestinationDTO->destinationCountryIso,
-                'min_delivery_days' => $shippingProfileDestinationDTO->minDeliveryDays,
-                'max_delivery_days' => $shippingProfileDestinationDTO->maxDeliveryDays,
-            ]
-        );
-
-        $shippingProfileDestinationDTO->shippingProfileDestinationId = $shippingDestination->shipping_profile_destination_id;
-
-        return $shippingProfileDestinationDTO;
+        return (new EtsyShippingProfileService(
+            shop: $shop,
+        ))->createShippingProfileDestination($shippingProfileDestinationDTO);
     }
 
     public function getListing(Shop $shop, int $listingId)
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
-
-        return Listing::get(listing_id: $listingId);
+        return (new EtsyListingService(
+            shop: $shop,
+        ))->getListing(
+            listingId: $listingId,
+        );
     }
 
     public function getListings(Shop $shop): Collection
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        return (new EtsyListingService(
+            shop: $shop,
+        ))->getListings();
+    }
 
-        return Listing::allByShop(shop_id: $shop->shop_oauth['shop_id']);
+    public function getListingProperty(Shop $shop, int $listingId)
+    {
+        $this->refreshAccessToken($shop);
+        $properties = $this->client->get("/application/listings/{$listingId}/properties/6231");
+
+        Log::info('Listing properties: ' . print_r($properties, true));
+
+        return $properties;
+    }
+
+    public function getListingProperties(Shop $shop, int $listingId)
+    {
+        $this->refreshAccessToken($shop);
+        $properties = $this->client->get("/application/shops/{$shop->shop_oauth['shop_id']}/listings/{$listingId}/properties");
+
+        Log::info('Listing properties: ' . print_r($properties, true));
+
+        return $properties;
+    }
+
+    public function getTaxonomyProperties(Shop $shop)
+    {
+        $this->refreshAccessToken($shop);
+        $properties = $this->client->get("/application/seller-taxonomy/nodes/{$shop->shop_oauth['default_taxonomy_id']}/properties");
+
+        Log::info('Taxonomy properties: ' . print_r($properties, true));
+
+        return $properties;
+    }
+
+    public function getListingInventory(Shop $shop, int $listingId)
+    {
+        $this->refreshAccessToken($shop);
+        $shop->refresh();
+
+        $data = (new EtsyInventoryService(
+            shop: $shop,
+        ))->getInventory(
+            listingId: $listingId,
+        );
+
+        //Log::info('Listing inventory: ' . print_r($data, true));
+
+        return $data;
     }
 
     public function syncListings(Shop $shop, $models): \Illuminate\Support\Collection
     {
         $listingDTOs = collect();
-        $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         try {
+            $this->refreshAccessToken($shop);
+
             foreach ($models as $model) {
                 if ($model->shopListingModel) {
                     $listingDTO =  $this->updateListing($shop, $model);
@@ -324,7 +345,6 @@ class EtsyService
     {
         try {
             $this->refreshAccessToken($shop);
-            $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
             if ($model->shopListingModel) {
                 return $this->updateListing($shop, $model);
@@ -340,7 +360,11 @@ class EtsyService
 
     public function deleteListing(Shop $shop, int $listingId): bool
     {
-        return Listing::delete(listing_id: $listingId);
+        return (new EtsyListingService(
+            shop: $shop,
+        ))->deleteListing(
+            listingId: $listingId,
+        );
     }
 
     public function getListingImages(Shop $shop, int $listingId): Collection
@@ -378,7 +402,9 @@ class EtsyService
     private function addShippingProfileToShopOwnerShop(Shop $shop, ?ShippingProfile $shippingProfile): void
     {
         $shopOauth = $shop->shop_oauth;
-        if (! array_key_exists('shop_return_policy_id', $shopOauth) && $shippingProfile) {
+        if ((! array_key_exists('shop_shipping_profile_id', $shopOauth) && $shippingProfile) ||
+            (array_key_exists('shop_shipping_profile_id', $shopOauth) && $shopOauth['shop_shipping_profile_id'] !== $shippingProfile->shipping_profile_id)
+        ) {
             $shopOauth['shop_shipping_profile_id'] = $shippingProfile->shipping_profile_id;
 
             $shop->shop_oauth = $shopOauth;
@@ -399,14 +425,28 @@ class EtsyService
 
     private function createListing(Shop $shop, Model $model): ListingDTO
     {
+        $this->checkExistingShippingProfile(
+            shopId: $shop->shop_oauth['shop_id'],
+            shop: $shop,
+        );
+        $shop->refresh();
+
+        $etsyListingService = new EtsyListingService(
+            shop: $shop,
+        );
         $listingDTO = ListingDTO::fromModel($shop, $model);
-        $listing = $this->handleCreateDraftListing($shop, $listingDTO);
+        try {
+            $listing = $etsyListingService->createDraftListing($listingDTO);
+        } catch (Exception $exception) {
+            dd($exception);
+        }
 
         if ($listing) {
             $listingDTO->listingId = $listing->listing_id;
             $listingDTO->state = $listing->state;
             $shopListingModel = (new ShopListingModelService())->createShopListingModel($shop, $model, $listingDTO);
 
+            // Create imageDTO because needed to set listing active
             $listingImageDTO = ListingImageDTO::fromModel($shop->shop_oauth['shop_id'], $model);
             if ($listingImageDTO->image !== '') {
                 $listingImageDTO->listingId = $listing->listing_id;
@@ -422,9 +462,11 @@ class EtsyService
                     throw new Exception('Listing image not created: ' . print_r($listingImageDTO, true));
                 }
 
-                $this->handleUpdateListing(
-                    shop: $shop,
-                    listingDTO: $listingDTO,
+                // Create variations for materials for listing and add inventory
+                $this->updateListingInventory($shop, $listingDTO, []);
+
+                $etsyListingService->updateListing(
+                    listingId: $listing->listing_id,
                     data: [
                         'state' => EtsyListingStatesEnum::Active->value,
                     ],
@@ -444,25 +486,43 @@ class EtsyService
 
     private function updateListing(Shop $shop, Model $model): ListingDTO
     {
+        $etsyListingService = new EtsyListingService(
+            shop: $shop,
+        );
         $listingDTO = ListingDTO::fromModel($shop, $model);
+        $listing = $etsyListingService->getListing(
+            listingId: $listingDTO->listingId,
+        );
 
+        Log::info('Update listing: ' . $listingDTO->listingId);
+
+        // Update inventory with variations, first get existing inventory so we can keep the existing intact
+        $inventory = $this->getListingInventory($shop, $listingDTO->listingId);
+        $this->updateListingInventory($shop, $listingDTO, $inventory);
+
+        $materials = [];
+        if ($listingDTO->materials) {
+            foreach ($listingDTO->materials as $material) {
+                $materials[] = str_replace('(1µm)', '(1 micron)', $material->name);
+            }
+        }
+
+        // Also set state to active again
         $data = [
-            'title' => $listingDTO->title,
-            'description' => $listingDTO->description,
-            'price' => $listingDTO->price,
+//            'title' => $listingDTO->title,
+//            'description' => $listingDTO->description,
             'taxonomy_id' => $listingDTO->taxonomyId,
-            'shipping_profile_id' => $listingDTO->shippingProfileId,
+            //'shipping_profile_id' => $listingDTO->shippingProfileId,
             'return_policy_id' => $listingDTO->returnPolicyId,
-            'materials' => $listingDTO->materials,
+            'materials' => $materials,
             'item_weight' => $listingDTO->itemWeight,
             'item_length' => $listingDTO->itemLength,
             'item_width' => $listingDTO->itemWidth,
             'item_height' => $listingDTO->itemHeight,
         ];
 
-        $this->handleUpdateListing(
-            shop: $shop,
-            listingDTO: $listingDTO,
+        $etsyListingService->updateListing(
+            listingId: $listing->listing_id,
             data: $data,
         );
 
@@ -471,43 +531,52 @@ class EtsyService
         return $listingDTO;
     }
 
-    private function handleCreateDraftListing(Shop $shop, ListingDTO $listingDTO)
+    public function updateListingInventory(Shop $shop, ListingDTO $listingDTO, array $existingInventory): void
     {
-        return Listing::create(
-            shop_id: $shop->shop_oauth['shop_id'],
-            data: [
-                'quantity' => $listingDTO->quantity,
-                'title' => $listingDTO->title,
-                'description' => $listingDTO->description,
-                'price' => $listingDTO->price,
-                'who_made' => $listingDTO->whoMade,
-                'when_made' => $listingDTO->whenMade,
-                'taxonomy_id' => $listingDTO->taxonomyId,
-                'shipping_profile_id' => $listingDTO->shippingProfileId,
-                'return_policy_id' => $listingDTO->returnPolicyId,
-                'materials' => $listingDTO->materials,
-                'item_weight' => $listingDTO->itemWeight,
-                'item_length' => $listingDTO->itemLength,
-                'item_width' => $listingDTO->itemWidth,
-                'item_height' => $listingDTO->itemHeight,
-                'type' => 'physical',
-//                'image_ids' => null,
-            ],
-        );
-    }
+        Log::info('Listing inventory creating: ' . $listingDTO->listingId);
+        $listingId = $listingDTO->listingId;
 
-    private function saveListing(Listing $listing, array $data): Listing
-    {
-        return $listing->save($data);
-    }
-
-    private function handleUpdateListing(Shop $shop, ListingDTO $listingDTO, array $data)
-    {
-        return Listing::update(
-            shop_id: $shop->shop_oauth['shop_id'],
-            listing_id: $listingDTO->listingId,
-            data: $data,
-        );
+        $variations = [];
+        foreach ($listingDTO->listingInventory as $listingInventory) {
+            $sku = $listingInventory->sku;
+            $price = $listingInventory->price;
+            $currency = $listingInventory->currency;
+            $quantity = $listingInventory->quantity;
+            $isEnabled = $listingInventory->isEnabled;
+            if (array_key_exists('products', $existingInventory)) {
+                foreach ($existingInventory['products'] as $product) {
+                    foreach ($product['property_values'] as $propertyValue) {
+                        if ($propertyValue['property_name'] === 'Material' && $propertyValue['values'][0] === $listingInventory->name) {
+                            $offering = $product['offerings'][0];
+                            $sku = $product['sku'];
+                            $price = $offering['price']['amount'] / $offering['price']['divisor'];
+                            $quantity = $offering['quantity'];
+                            $isEnabled = $offering['is_enabled'];
+                        }
+                    }
+                }
+            }
+            $variations[] = [
+                'sku' => $sku,
+                'material' => str_replace('(1µm)', '(1 micron)', $listingInventory->name),
+                'price' => $price,
+                'quantity' => $quantity,
+                'currency_code' => $currency->value,
+                'is_enabled' => $isEnabled,
+            ];
+        }
+//        dd($variations);
+        try {
+            $inventoryResponse = (new EtsyInventoryService(
+                shop: $shop,
+            ))->updateInventory(
+                listingId: $listingId,
+                products: $variations,
+            );
+            Log::info('Listing inventory created: ' . print_r($inventoryResponse, true));
+        } catch (Exception $e) {
+            Log::error($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString());
+        }
     }
 
     public function uploadListingImage(Shop $shop, ListingImageDTO $listingImageDTO): ?ListingImage
@@ -528,7 +597,7 @@ class EtsyService
     public function getShopPaymentAccountLedgerEntries(Shop $shop)
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return LedgerEntry::all(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -538,7 +607,7 @@ class EtsyService
     public function getShopReceipts(Shop $shop, array $params = [])
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return Receipt::all(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -552,10 +621,15 @@ class EtsyService
         foreach ($receipt->transactions->data as $transaction) {
             $shopListingModel = ShopListingModel::with('model')->where('shop_id', $shop->id)->where('shop_listing_id', $transaction->listing_id)->first();
             if ($shopListingModel) {
-                $lines[] = [
-                    'transaction' => $transaction,
-                    'shop_listing_model' => $shopListingModel,
-                ];
+                foreach ($transaction->variations as $variation) {
+                    if ($variation->formatted_name === 'Material') {
+                        $lines[] = [
+                            'transaction' => $transaction,
+                            'shop_listing_model' => $shopListingModel,
+                            'material' => $variation->formatted_value,
+                        ];
+                    }
+                }
             }
         }
 
@@ -565,7 +639,7 @@ class EtsyService
     public function getTransactions(Shop $shop, int $listingId)
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return Transaction::allByListing(
             shop_id: $shop->shop_oauth['shop_id'],

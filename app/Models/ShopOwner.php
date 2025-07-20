@@ -24,6 +24,7 @@ class ShopOwner extends Model
      */
     protected  $fillable = [
         'customer_id',
+        'active',
     ];
 
     /**
@@ -37,6 +38,7 @@ class ShopOwner extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'active' => 'boolean',
         ];
     }
 

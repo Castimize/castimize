@@ -34,11 +34,6 @@ class EtsyApiController extends ApiController
         $shop = $customer->shopOwner->shops->first();
         $taxonomy = $this->etsyService->getTaxonomyAsSelect($shop);
 
-//        $data = [];
-//        foreach ($taxonomy->data as $item) {
-//            $data[] = $item->toArray();
-//        }
-
         return response()->json($taxonomy);
     }
 
@@ -100,30 +95,34 @@ class EtsyApiController extends ApiController
         return response()->json($listings->toJson());
     }
 
+    public function getListingProperties(int $customerId, int $listingId): JsonResponse
+    {
+        $customer = Customer::find($customerId);
+        $shop = $customer->shopOwner->shops->first();
+        $properties = $this->etsyService->getTaxonomyProperties($shop);
+
+        return response()->json($properties);
+    }
+
+    public function getListingInventory(int $customerId, int $listingId): JsonResponse
+    {
+        $customer = Customer::find($customerId);
+        $shop = $customer->shopOwner->shops->first();
+        $inventory = $this->etsyService->getListingInventory($shop, $listingId);
+
+        return response()->json($inventory);
+    }
+
     public function syncListings(int $customerId): JsonResponse
     {
         $customer = Customer::find($customerId);
         $shop = $customer->shopOwner->shops->first();
-//        $this->etsyService->refreshAccessToken($shop);
-//        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
         $models = Model::whereDoesntHave('shopListingModel')->where('customer_id', $customerId)->get();
-
-//        $listingImageDTO = ListingImageDTO::fromModel($shop->shop_oauth['shop_id'], $models->first());
-//        if ($listingImageDTO->image !== '') {
-//            $listingImageDTO->listingId = 1882130223;
-//            try {
-//                $listingImage = $this->etsyService->uploadListingImage($shop, $listingImageDTO);
-//            } catch (\Exception $exception) {
-//                dd($exception->getMessage());
-//            }
-//            dd($listingImage);
-//        }
-
 
         $listings = $this->etsyService->syncListings($shop, $models);
 
-        return response()->json(['no']);
-//        return response()->json($listings->toArray());
+//        return response()->json(['no']);
+        return response()->json($listings->toArray());
     }
 
     public function deleteListing(int $customerId, int $listingId)
@@ -164,7 +163,7 @@ class EtsyApiController extends ApiController
 
         $shippingProfileDTO = $this->etsyService->createShippingProfile(
             shop: $shop,
-            shippingProfileDTO: ShippingProfileDTO::fromShop($shopId)
+            shippingProfileDTO: ShippingProfileDTO::fromShop($shopId),
         );
 
         foreach ($countries as $country) {
@@ -196,26 +195,9 @@ class EtsyApiController extends ApiController
 
     public function getShopReceipts(int $customerId): JsonResponse
     {
-//        $etsyService = app(EtsyService::class);
-//        $woocommerceApiService = app(WoocommerceApiService::class);
-//
-//        $shops = Shop::with(['shopOwner.customer'])->where('active', true)->where('shop', ShopOwnerShopsEnum::Etsy->value)->get();
-//
-//        foreach ($shops as $shop) {
-//            $receipts = $etsyService->getShopReceipts($shop);
-//            foreach ($receipts->data as $receipt) {
-//                dd($receipt);
-//                $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
-//                if (count($lines) > 0) {
-//                    $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
-//                    dd($orderDTO);
-//                    $woocommerceApiService->createOrder($orderDTO);
-//                }
-//            }
-//        }
-        $customer = Customer::find($customerId);
+        $customer = Customer::with('shopOwner.shops')->find($customerId);
         $shop = $customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
-        $shopReceipts = $this->etsyService->getShopReceipts($shop, ['min_created' => now()->subDays(2)->timestamp]);
+        $shopReceipts = $this->etsyService->getShopReceipts($shop, ['min_created' => now()->subDays(14)->timestamp]);
 
         $response = [];
 

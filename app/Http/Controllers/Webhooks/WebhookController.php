@@ -15,9 +15,6 @@ use UnexpectedValueException;
 
 class WebhookController extends Controller
 {
-    /**
-     * WebhookController constructor.
-     */
     public function __construct()
     {
     }
@@ -49,7 +46,7 @@ class WebhookController extends Controller
      *
      * @return Response
      */
-    protected function invalidMethod(): Response
+    protected function badRequestMethod(): Response
     {
         return new Response('', Response::HTTP_BAD_REQUEST);
     }

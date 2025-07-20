@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\DTO\Customer\CustomerDTO;
 use App\Models\Address;
 use App\Models\City;
 use App\Models\Country;
@@ -9,6 +10,8 @@ use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\State;
 use App\Models\User;
+use App\Services\Woocommerce\WoocommerceApiService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class CustomersService
@@ -134,6 +137,22 @@ class CustomersService
         ]);
 
         $this->attachAddressesFromWpCustomer($wpCustomer, $customer);
+
+        return $customer;
+    }
+
+    public function updateCustomer(Request $request, Customer $customer, array $data): Customer
+    {
+        $customer->update($data);
+
+        if (array_key_exists('vat_number', $data)) {
+            app(WoocommerceApiService::class)->updateCustomerVatNumber(
+                customerDTO: CustomerDTO::fromApiRequest(
+                    customer: $customer,
+                    request: $request,
+                ),
+            );
+        }
 
         return $customer;
     }

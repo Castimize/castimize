@@ -6,7 +6,7 @@ namespace App\DTO\Shops\Etsy;
 
 use App\Models\Country;
 
-class ShippingProfileDestinationDTO
+readonly class ShippingProfileDestinationDTO
 {
     public function __construct(
         public int $shopId,

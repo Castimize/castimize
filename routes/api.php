@@ -25,6 +25,18 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::get('customers/wp', 'CustomersApiController@showCustomerWp')->name('api.customers.show-customer-wp');
             Route::get('customers/{customer}', 'CustomersApiController@show')->name('api.customers.show');
 
+            // Shop owners
+            Route::get('customers/{customerId}/shop-owner', 'ShopOwnersApiController@show')->name('api.customers.shop-owners.show');
+            Route::get('customers/{customerId}/shop-owner/{shop}', 'ShopOwnersApiController@showShop')->name('api.customers.shop-owners.show-shop');
+            Route::post('customers/{customerId}/shop-owner/{shop}/update-active', 'ShopOwnersApiController@updateActiveShop')->name('api.customers.shop-owners.update-active-shop');
+            Route::post('customers/{customerId}/shop-owner', 'ShopOwnersApiController@store')->name('api.customers.shop-owners.store');
+            Route::put('customers/{customerId}/shop-owner', 'ShopOwnersApiController@update')->name('api.customers.shop-owners.update');
+            Route::put('customers/{customerId}/shop-owner/update-active', 'ShopOwnersApiController@updateActive')->name('api.customers.shop-owners.update-active');
+
+            // Shop owners Payments
+            Route::get('customers/{customerId}/payments/create-setup-intent', 'PaymentsApiController@createSetupIntent')->name('api.payments.create-setup-intent');
+            Route::post('customers/{customerId}/payments/cancel-mandate', 'PaymentsApiController@cancelMandate')->name('api.payments.cancel-mandate');
+
             // Orders
             Route::post('orders/calculate-expected-delivery-date', 'OrdersApiController@calculateExpectedDeliveryDate')->name('api.orders.calculate-expected-delivery-date');
             Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');
@@ -33,6 +45,10 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             // Prices
             Route::post('prices/calculate', 'PricesApiController@calculatePrice')->name('api.prices.calculate');
             Route::post('prices/calculate/shipping', 'PricesApiController@calculateShipping')->name('api.prices.calculate.shipping');
+
+            // Materials
+            Route::get('materials', 'MaterialsApiController@index')->name('api.materials.index');
+            Route::get('materials/{material}', 'MaterialsApiController@show')->name('api.materials.show');
 
             // Models
             Route::get('models/wp/{customerId}/{model}', 'ModelsApiController@show')->name('api.models.show');
@@ -60,6 +76,8 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             Route::get('etsy/{customerId}/listings', 'EtsyApiController@getListings')->name('api.etsy.get-listings');
             Route::get('etsy/{customerId}/listings/sync', 'EtsyApiController@syncListings')->name('api.etsy.sync-listings');
             Route::get('etsy/{customerId}/listings/{listingId}', 'EtsyApiController@dgetListing')->name('api.etsy.get-listing');
+            Route::get('etsy/{customerId}/listings/{listingId}/inventory', 'EtsyApiController@getListingInventory')->name('api.etsy.get-listing-inventory');
+            Route::get('etsy/{customerId}/listings/{listingId}/properties', 'EtsyApiController@getListingProperties')->name('api.etsy.get-listing-properties');
             Route::get('etsy/{customerId}/listings/{listingId}/delete', 'EtsyApiController@deleteListing')->name('api.etsy.delete-listing');
             Route::get('etsy/{customerId}/shipping-carriers', 'EtsyApiController@getShippingCarriers')->name('api.etsy.get-shipping-carriers');
             Route::get('etsy/{customerId}/shipping-profile', 'EtsyApiController@getShippingProfile')->name('api.etsy.get-shipping-profile');

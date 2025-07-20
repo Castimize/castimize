@@ -70,7 +70,8 @@
         "wamesk/laravel-nova-tel-input": "^1.0",
         "wesselperik/nova-status-field": "^2.1",
         "whitecube/nova-flexible-content": "^1.1",
-        "wildside/userstamps": "^2.4"
+        "wildside/userstamps": "^2.4",
+        "ext-bcmath": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -87,7 +88,7 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Services/Helpers/Helpers.php"
+            "app/Helpers/Helpers.php"
         ]
     },
     "autoload-dev": {

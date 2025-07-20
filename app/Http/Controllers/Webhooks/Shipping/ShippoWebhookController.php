@@ -17,12 +17,6 @@ use UnexpectedValueException;
 
 class ShippoWebhookController extends WebhookController
 {
-    /**
-     * Handle a Shippo webhook call.
-     *
-     * @param Request $request
-     * @return Response
-     */
     public function __invoke(Request $request): Response
     {
         try {
@@ -31,10 +25,10 @@ class ShippoWebhookController extends WebhookController
         } catch(UnexpectedValueException $e) {
             Log::error($e->getMessage());
             // Invalid payload
-            return $this->invalidMethod();
+            return $this->badRequestMethod();
         } catch (Exception $e) {
             Log::error($e->getMessage());
-            return $this->invalidMethod();
+            return $this->badRequestMethod();
         }
 
         // Handle the event
@@ -52,10 +46,6 @@ class ShippoWebhookController extends WebhookController
         return $this->missingMethod();
     }
 
-    /**
-     * @param $data
-     * @return void
-     */
     protected function handleTrackCreated($data): void
     {
         Log::info('Shippo track created');
@@ -84,10 +74,6 @@ class ShippoWebhookController extends WebhookController
         }
     }
 
-    /**
-     * @param $data
-     * @return void
-     */
     protected function handleTrackUpdated($data): void
     {
         Log::info('Shippo track updated');

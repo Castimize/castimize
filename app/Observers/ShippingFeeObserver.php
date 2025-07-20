@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\Admin\CurrencyEnum;
 use App\Models\Currency;
 use App\Models\ShippingFee;
 
@@ -12,6 +13,9 @@ class ShippingFeeObserver
      */
     public function creating(ShippingFee $shippingFee): void
     {
+        if (! $shippingFee->currency_code) {
+            $shippingFee->currency_code = CurrencyEnum::USD->value;
+        }
         if ($shippingFee->currency_code && $shippingFee->currency === null) {
             $currency = Currency::where('code', $shippingFee->currency_code)->first();
             if ($currency) {
@@ -25,6 +29,9 @@ class ShippingFeeObserver
      */
     public function updating(ShippingFee $shippingFee): void
     {
+        if (! $shippingFee->currency_code) {
+            $shippingFee->currency_code = CurrencyEnum::USD->value;
+        }
         if ($shippingFee->currency_code && $shippingFee->currency === null) {
             $currency = Currency::where('code', $shippingFee->currency_code)->first();
             if ($currency) {

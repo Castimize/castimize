@@ -10,18 +10,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CalculatedShippingFeeResource extends JsonResource
 {
-    /**
-     * The resource that this resource collects.
-     *
-     * @var string
-     */
     public $collects = ShippingFee::class;
 
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         $currencyService = app(CurrencyService::class);

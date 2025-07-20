@@ -3,18 +3,25 @@
 namespace App\DTO\Order;
 
 use App\DTO\Shops\Etsy\ListingDTO;
+use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Woocommerce\WcOrderStatesEnum;
+use app\Helpers\MonetaryAmount;
+use App\Models\Country;
 use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
+use App\Services\Admin\CurrencyService;
+use App\Services\Admin\OrdersService;
 use Carbon\Carbon;
 use Etsy\Resources\Receipt;
 use Illuminate\Support\Collection;
 use TheIconic\NameParser\Parser;
 
-readonly class  OrderDTO
+class OrderDTO
 {
     public function __construct(
         public int $customerId,
+        public ?string $customerStripeId,
+        public ?int $shopReceiptId,
         public string $source,
         public ?int $wpId,
         public int $orderNumber,
@@ -46,14 +53,15 @@ readonly class  OrderDTO
         public string $shippingCity,
         public ?string $shippingState,
         public string $shippingCountry,
-        public ?float $shippingFee,
-        public ?float $shippingFeeTax,
-        public ?float $discountFee,
-        public ?float $discountFeeTax,
-        public float $total,
-        public ?float $totalTax,
-        public ?float $totalRefund,
-        public ?float $totalRefundTax,
+        public bool $inCents,
+        public ?MonetaryAmount $shippingFee,
+        public ?MonetaryAmount $shippingFeeTax,
+        public ?MonetaryAmount $discountFee,
+        public ?MonetaryAmount $discountFeeTax,
+        public ?MonetaryAmount $total,
+        public ?MonetaryAmount $totalTax,
+        public ?MonetaryAmount $totalRefund,
+        public ?MonetaryAmount $totalRefundTax,
         public ?float $taxPercentage,
         public string $currencyCode,
         public string $paymentMethod,
@@ -69,6 +77,7 @@ readonly class  OrderDTO
         public ?Carbon $createdAt,
         public ?Carbon $updatedAt,
         public Collection $uploads,
+        public Collection $paymentFees,
     ) {
     }
 
@@ -107,6 +116,8 @@ readonly class  OrderDTO
 
         return new self(
             customerId: $wpOrder['customer_id'],
+            customerStripeId: null,
+            shopReceiptId: null,
             source: 'wp',
             wpId: $wpOrder['id'],
             orderNumber: $wpOrder['number'],
@@ -138,12 +149,13 @@ readonly class  OrderDTO
             shippingCity: $wpOrder['shipping']->city,
             shippingState: $wpOrder['shipping']->state,
             shippingCountry: $wpOrder['shipping']->country,
-            shippingFee: $wpOrder['shipping_total'],
-            shippingFeeTax: $wpOrder['shipping_tax'],
-            discountFee: $wpOrder['discount_total'],
-            discountFeeTax: $wpOrder['discount_tax'],
-            total: $wpOrder['total'],
-            totalTax: $wpOrder['total_tax'],
+            inCents: false,
+            shippingFee: MonetaryAmount::fromFloat((float) $wpOrder['shipping_total']),
+            shippingFeeTax: MonetaryAmount::fromFloat((float) $wpOrder['shipping_tax']),
+            discountFee: MonetaryAmount::fromFloat((float) $wpOrder['discount_total']),
+            discountFeeTax: MonetaryAmount::fromFloat((float) $wpOrder['discount_tax']),
+            total: MonetaryAmount::fromFloat((float) $wpOrder['total']),
+            totalTax: MonetaryAmount::fromFloat((float) $wpOrder['total_tax']),
             totalRefund: null,
             totalRefundTax: null,
             taxPercentage: $taxPercentage,
@@ -161,6 +173,7 @@ readonly class  OrderDTO
             createdAt: $createdAt,
             updatedAt: $updatedAt,
             uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDTO::fromWpRequest($lineItem, $wpOrder['shipping']->country)),
+            paymentFees: collect($wpOrder['fee_lines'])->map(fn ($feeLine) => PaymentFeeDTO::fromWpRequest($wpOrder['payment_method'], $feeLine)),
         );
     }
 
@@ -172,6 +185,7 @@ readonly class  OrderDTO
         $billingAddress = $customer->addresses()->wherePivot('default_billing', 1)->first();
 
         $name = $parser->parse($receipt->name);
+
         $billingVatNumber = $customer->vat_number;
         $billingEmail = $receipt->buyer_email ?? $customer->email;
         $shippingEmail = $receipt->buyer_email ?? $receipt->seller_email;
@@ -181,25 +195,44 @@ readonly class  OrderDTO
         $updatedAt = Carbon::createFromTimestamp($receipt->updated_timestamp);
 
         $taxPercentage = null;
-        $vatExempt = 'no';
+        $vatExempt = 'yes';
+        if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
+            $taxPercentage = 21;
+            $vatExempt = 'no';
+        }
+
         $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
             countryIso: $receipt->country_iso,
             uploads: collect($lines)->map(fn ($line) => CalculateShippingFeeUploadDTO::fromEtsyLine($line)),
         )->calculated_total;
 
+        if (
+            app()->environment() === 'production' &&
+            array_key_exists('shop_currency', $shop->shop_oauth) &&
+            $shop->shop_oauth['shop_currency'] !== config('app.currency') &&
+            in_array(CurrencyEnum::from($shop->shop_oauth['shop_currency']), CurrencyEnum::cases(), true)
+        ) {
+            /** @var CurrencyService $currencyService */
+            $currencyService = app(CurrencyService::class);
+            $shippingFee = $currencyService->convertCurrency(config('app.currency'), $shop->shop_oauth['shop_currency'], $shippingFee);
+        }
+
         $shippingFeeTax = 0;
         $totalItems = 0;
         $totalItemsTax = 0;
-        foreach ($lines as $line) {
-            $listingDTO = ListingDTO::fromModel($shop, $line['shop_listing_model']->model);
-            $totalItems += $listingDTO->price * $line['transaction']->quantity;
+        $uploads = collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage));
+        /** @var UploadDTO $upload */
+        foreach ($uploads as $upload) {
+            $totalItems += $upload->total->toFloat() * $upload->quantity;
         }
-        if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
-            $taxPercentage = 21;
-            $vatExempt = 'yes';
+
+        if ($taxPercentage) {
             $shippingFeeTax = ($taxPercentage / 100) * $shippingFee;
             $totalItemsTax = ($taxPercentage / 100) * $totalItems;
         }
+
+        $country = Country::where('alpha2', $receipt->country_iso)->first();
+        $expectedDeliveryDate = (new OrdersService())->calculateExpectedDeliveryDate($uploads, $country);
 
         $metaData = [
             [
@@ -221,6 +254,10 @@ readonly class  OrderDTO
             [
                 'key'=> 'wcpdf_order_locale',
                 'value'=> 'en_US',
+            ],
+            [
+                'key'=> '_expected_delivery_date',
+                'value'=> $expectedDeliveryDate,
             ],
         ];
 
@@ -252,8 +289,15 @@ readonly class  OrderDTO
             ];
         }
 
+        $stripeData = $customer->stripe_data ?? [];
+
+        $total = $totalItems + $shippingFee;
+        $totalTax = $totalItemsTax + $shippingFeeTax;
+
         return new self(
             customerId: $customer->wp_id,
+            customerStripeId: array_key_exists('stripe_id', $stripeData) ? $stripeData['stripe_id'] : null,
+            shopReceiptId: (int) $receipt->receipt_id,
             source: 'etsy',
             wpId: null,
             orderNumber: $receipt->receipt_id,
@@ -271,11 +315,11 @@ readonly class  OrderDTO
             billingAddressLine2: $billingAddress->address_line2,
             billingPostalCode: $billingAddress->postal_code,
             billingCity: $billingAddress->city->name,
-            billingState: $billingAddress->state->name,
+            billingState: $billingAddress->state?->name,
             billingCountry: $billingAddress->country->alpha2,
             billingVatNumber: $billingVatNumber,
             shippingFirstName: $name->getFirstname(),
-            shippingLastName: $name->getLastname(),
+            shippingLastName: $name->getMiddlename() !== '' ? $name->getMiddlename() . ' ' . $name->getLastName() : $name->getLastName(),
             shippingCompany: null,
             shippingPhoneNumber: $customer->phone,
             shippingEmail: $shippingEmail,
@@ -285,16 +329,17 @@ readonly class  OrderDTO
             shippingCity: ucfirst($receipt->city),
             shippingState: $receipt->state,
             shippingCountry: $receipt->country_iso,
-            shippingFee: $shippingFee,
-            shippingFeeTax: $shippingFeeTax,
+            inCents: true,
+            shippingFee: MonetaryAmount::fromFloat($shippingFee),
+            shippingFeeTax: MonetaryAmount::fromFloat($shippingFeeTax),
             discountFee: null,
             discountFeeTax: null,
-            total: ($totalItems + $shippingFee) / 100,
-            totalTax: ($totalItemsTax + $shippingFeeTax) / 100,
+            total: MonetaryAmount::fromFloat($total),
+            totalTax: MonetaryAmount::fromFloat($totalTax),
             totalRefund: null,
             totalRefundTax: null,
             taxPercentage: $taxPercentage,
-            currencyCode: $receipt->grandtotal->currency_code ?? 'USD',
+            currencyCode: array_key_exists('shop_currency', $shop->shop_oauth) && in_array(CurrencyEnum::from($shop->shop_oauth['shop_currency']), CurrencyEnum::cases(), true) ? $shop->shop_oauth['shop_currency'] : 'USD',
             paymentMethod: $receipt->payment_method,
             paymentIssuer: $receipt->payment_method,
             paymentIntentId: null,
@@ -307,7 +352,14 @@ readonly class  OrderDTO
             paidAt: null,
             createdAt: $createdAt,
             updatedAt: $updatedAt,
-            uploads: collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage)),
+            uploads: $uploads,
+            paymentFees: collect([
+                PaymentFeeDTO::fromEtsyReceipt(
+                    customer: $customer,
+                    totalReceipt: $totalItems,
+                    taxPercentage: $taxPercentage,
+                ),
+            ])
         );
     }
 }

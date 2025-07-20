@@ -9,6 +9,7 @@ use App\Http\Resources\ModelResource;
 use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Model;
+use App\Models\User;
 use App\Services\Etsy\EtsyService;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -18,9 +19,7 @@ class ModelsService
 {
     public function getModelsPaginated($request, Customer $customer): array
     {
-        $customerModels = Model::with(['material'])
-            ->where('customer_id', $customer->id);
-
+        $customerModels = $customer->models()->with('materials');
         $total = $customerModels->count();
 
         if ($request->search_value) {
@@ -34,7 +33,7 @@ class ModelsService
                         ->orWhere('model_z_length', 'like', '%' . $request->search_value . '%')
                         ->orWhere('model_surface_area_cm2', 'like', '%' . $request->search_value . '%')
                         ->orWhere('categories', 'like', '%' . $request->search_value . '%');
-                })->orWhereHas('material', function ($query) use ($request) {
+                })->orWhereHas('materials', function ($query) use ($request) {
                     $query->where('name', 'like', '%' . $request->search_value . '%');
                 });
         }
@@ -56,8 +55,8 @@ class ModelsService
                 $customerModels->orderBy('model_name', $request->order_dir)
                     ->orderBy('name', $request->order_dir);
             } elseif ($mapper[$request->order_column] === 'material_name') {
-                $customerModels->join('materials', 'models.material_id', '=', 'materials.id')
-                    ->orderBy('materials.name', $request->order_dir);
+//                $customerModels->join('materials', 'models.material_id', '=', 'materials.id')
+//                    ->orderBy('materials.name', $request->order_dir);
             } else {
                 $customerModels->orderBy($mapper[$request->order_column], $request->order_dir);
             }
@@ -66,7 +65,7 @@ class ModelsService
         $customerModels->distinct([
                 'model_name',
                 'models.name',
-                'material_id',
+//                'material_id',
                 'model_volume_cc',
                 'model_surface_area_cm2',
                 'model_box_volume',
@@ -75,8 +74,9 @@ class ModelsService
                 'model_z_length',
             ]);
 
-        $models = $customerModels->offset($request->start)
-            ->limit($request->length)
+        $models = $customerModels
+            ->offset($request->start ?? 0)
+            ->limit($request->length ?? 10)
             ->get();
 
         return ['items' => ModelResource::collection($models), 'total' => $total];
@@ -84,6 +84,8 @@ class ModelsService
 
     public function storeModelFromApi($request, ?Customer $customer = null): Model|null
     {
+        $systemUser = User::find(1);
+
         $material = Material::where('wp_id', $request->wp_id)->first();
         $fileName = $request->file_name;
         $categories = null;
@@ -99,7 +101,7 @@ class ModelsService
         if ($customer) {
             $model = $customer->models->where('name', $request->original_file_name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
-                ->where('material_id', $material->id)
+//                ->where('material_id', $material->id)
                 ->where('model_volume_cc', $request->material_volume)
                 ->first();
 
@@ -109,7 +111,7 @@ class ModelsService
         } else {
             $model = Model::where('name', $request->original_file_name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
-                ->where('material_id', $material->id)
+//                ->where('material_id', $material->id)
                 ->where('model_volume_cc', $request->material_volume)
                 ->first();
         }
@@ -143,12 +145,15 @@ class ModelsService
                 $model->thumb_name = $fileNameThumb;
                 $model->save();
             }
+
+            $model->materials()->sync($material->id);
+
             return $model;
         }
 
-        return Model::create([
+        $model = Model::create([
             'customer_id' => $customer?->id,
-            'material_id' => $material->id,
+//            'material_id' => $material->id,
             'model_name' => $request->model_name ?? null,
             'name' => $request->original_file_name,
             'file_name' => $fileName,
@@ -164,6 +169,10 @@ class ModelsService
             'meta_data' => $request->meta_data ?? null,
             'categories' => $categories,
         ]);
+
+        $model->materials()->attach($material->id);
+
+        return $model;
     }
 
     public function storeModelFromModelDTO(ModelDTO $modelDTO, ?Customer $customer = null): Model|null
@@ -172,19 +181,24 @@ class ModelsService
 
         if ($customer) {
             $model = $customer->models->where('name', $modelDTO->name)
-                ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
-                ->where('material_id', $material->id)
-                ->where('model_volume_cc', $modelDTO->modelVolumeCc)
+//                ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
+//                ->where('material_id', $material->id)
+                ->where('model_scale', $modelDTO->modelScale)
                 ->first();
 
             if ($model && $model->model_name === $modelDTO->modelName) {
-                return $model;
+                $model->materials()->syncWithoutDetaching([$material->id]);
+                $model->refresh();
+
+                return $this->isShopOwnerModel(
+                    model: $model,
+                    modelDTO: $modelDTO,
+                );
             }
         } else {
             $model = Model::where('name', $modelDTO->name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
-                ->where('material_id', $material->id)
-                ->where('model_volume_cc', $modelDTO->modelVolumeCc)
+                ->where('model_scale', $modelDTO->modelScale)
                 ->first();
         }
 
@@ -216,12 +230,16 @@ class ModelsService
             $model->thumb_name = $fileNameThumb;
             $model->save();
 
-            return $model;
+            $model->materials()->syncWithoutDetaching([$material->id]);
+
+            return $this->isShopOwnerModel(
+                model: $model,
+                modelDTO: $modelDTO,
+            );
         }
 
-        return Model::create([
-            'customer_id' => $modelDTO->customerId,
-            'material_id' => $material->id,
+        $model = Model::create([
+            'customer_id' => $customer->id,
             'model_name' => $modelDTO->modelName,
             'name' => $modelDTO->name,
             'file_name' => $fileName,
@@ -237,6 +255,13 @@ class ModelsService
             'meta_data' => $modelDTO->metaData,
             'categories' => $modelDTO->categories,
         ]);
+
+        $model->materials()->syncWithoutDetaching([$material->id]);
+
+        return $this->isShopOwnerModel(
+            model: $model,
+            modelDTO: $modelDTO,
+        );
     }
 
     public function updateModelFromApi($request, Model $model, ?int $customerId = null): Model
@@ -274,45 +299,95 @@ class ModelsService
 
         $model->save();
 
-        if ($modelDTO->shopListingId && $model->customer->shopOwner) {
-            $shops = $model->customer->shopOwner->shops;
-            $shop = $shops->where('shop', ShopOwnerShopsEnum::Etsy->value)
+        $model->materials()->sync($modelDTO->materials);
+
+        $model = $this->isShopOwnerModel(
+            model: $model,
+            modelDTO: $modelDTO,
+        );
+
+        return $model;
+    }
+
+    private function isShopOwnerModel(Model $model, ModelDTO $modelDTO)
+    {
+        $etsyService = (new EtsyService());
+
+        if (($modelDTO->shopListingId || $model->shopListingModel) && $model->customer->shopOwner) {
+            $shop = $model->customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)
                 ->where('active', true)
                 ->first();
             if ($shop) {
-                $listing = $etsyService->getListing($shop, $modelDTO->shopListingId);
-                if (! $listing) {
-                    throw new Exception('Listing not found');
-                }
-                $listingImages = $etsyService->getListingImages($shop, $listing->listing_id);
+                $shopListingId = $modelDTO->shopListingId ?? $model->shopListingModel->shop_listing_id ?? null;
+                if ($shopListingId && ! empty($shopListingId)) {
+                    $listing = $etsyService->getListing($shop, $shopListingId);
+                    if (! $listing) {
+                        Log::error('Lsting not found');
+                        $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
+                        return $model;
+                    }
+                    $listingImages = $etsyService->getListingImages($shop, $listing->listing_id);
 
-                if ($model->shopListingModel) {
-                    (new ShopListingModelService())->updateShopListingModel(
-                        shopListingModel: $model->shopListingModel,
-                        listingDTO: ListingDTO::fromModel(
-                            shop: $shop,
-                            model: $model,
-                            listingId: $modelDTO->shopListingId,
-                            listing: $listing,
-                            listingImages: $listingImages ? collect($listingImages->data) : null,
-                        ),
-                    );
-                } else {
-                    (new ShopListingModelService())->createShopListingModel(
+                    $listingDTO = ListingDTO::fromModel(
                         shop: $shop,
                         model: $model,
-                        listingDTO: ListingDTO::fromModel(
+                        listingId: $listing->listing_id,
+                        taxonomyId: $modelDTO->shopTaxonomyId ?? $listing->taxonomy_id,
+                        listing: $listing,
+                        listingImages: $listingImages ? collect($listingImages->data) : null,
+                    );
+                    if ($model->shopListingModel) {
+                        (new ShopListingModelService())->updateShopListingModel(
+                            shopListingModel: $model->shopListingModel,
+                            listingDTO: $listingDTO,
+                        );
+                    } else {
+                        (new ShopListingModelService())->createShopListingModel(
                             shop: $shop,
                             model: $model,
-                            listingId: $modelDTO->shopListingId,
-                            listing: $listing,
-                            listingImages: $listingImages ? collect($listingImages->data) : null,
-                        ),
-                    );
+                            listingDTO: $listingDTO,
+                        );
+                    }
+
+                    $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
+
+                    $this->syncModelToShop($model);
                 }
             }
         }
 
         return $model;
+    }
+
+    public function syncModelToShop(Model $model): void
+    {
+        $shops = $model->customer?->shopOwner?->shops;
+        if ($shops) {
+            foreach ($shops as $shop) {
+                if ($shop->active && $shop->shop === ShopOwnerShopsEnum::Etsy->value) {
+                    try {
+                        (new EtsyService())->syncListing($shop, $model);
+                    } catch (Exception $e) {
+                        Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                    }
+                }
+            }
+        }
+    }
+
+    public function deleteModelFromShop(Model $model): void
+    {
+        $shops = $model->customer?->shopOwner?->shops;
+        if ($shops) {
+            foreach ($shops as $shop) {
+                if ($shop->active && $shop->shop === ShopOwnerShopsEnum::Etsy->value && $model->has('shopListingModel')) {
+                    try {
+                        (new EtsyService())->deleteListing($shop, $model->shopListingModel->shop_listing_id);
+                    } catch (Exception $e) {
+                        Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                    }
+                }
+            }
+        }
     }
 }

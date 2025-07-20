@@ -2,20 +2,14 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Material;
 use App\Services\Admin\CalculatePricesService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
-use function Aws\map;
+use stdClass;
 
 class ModelResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         $thumb = $this->thumb_name ?? sprintf('%s.thumb.png', str_replace('_resized', '', $this->file_name));
@@ -36,7 +30,8 @@ class ModelResource extends JsonResource
         }
 
         $calculatedTotal = null;
-        $price = $this->material->prices->first();
+        $material = $this->materials->where('wp_id', $request->wp_id)->first();
+        $price = $material?->prices->first();
         if ($price) {
             $calculatedTotal = (new CalculatePricesService())->calculatePriceOfModel($price, $this->model_volume_cc, $this->model_surface_area_cm2);
         }
@@ -52,7 +47,7 @@ class ModelResource extends JsonResource
 //            }
         }
 
-        $thumbnailKey = '3'. $this->material->wp_id . $this->model_scale . 'mm';
+        $thumbnailKey = '3'. $request->wp_id . $this->model_scale . 'mm';
 
         $isShopOwner = 0;
         if ($this->customer && $this->customer->shopOwner) {
@@ -64,9 +59,7 @@ class ModelResource extends JsonResource
             'customer_id' => $this->customer_id,
             'is_shop_owner' => $isShopOwner,
             'shop_listing_id' => $this->shopListingModel?->shop_listing_id ?? null,
-            'material_name' => $this->material->name,
-            'material_id' => $this->material->id,
-            'material_wp_id' => $this->material->wp_id,
+            'materials' => MaterialResource::collection($this->materials)->toArray($request),
             'model_name' => $this->model_name,
             'name' => $this->name,
             'file_name' => $this->file_name,

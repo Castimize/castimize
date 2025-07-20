@@ -71,7 +71,7 @@ class CalculatePricesService
             }
         }
 
-        return (float)$total;
+        return (float) $total;
     }
 
     /**
