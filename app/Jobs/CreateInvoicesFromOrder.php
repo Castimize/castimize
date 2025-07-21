@@ -33,11 +33,11 @@ class CreateInvoicesFromOrder implements ShouldQueue
     public function handle(InvoicesService $invoicesService): void
     {
         $order = Order::with('customer')->where('wp_id', $this->wpOrderId)->first();
-        $customer = $order->customer;
-
         if ($order === null) {
             return;
         }
+        $customer = $order->customer;
+
 
         try {
             $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($this->wpOrderId);

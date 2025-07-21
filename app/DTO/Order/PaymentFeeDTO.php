@@ -16,7 +16,7 @@ class  PaymentFeeDTO
         public string $paymentMethod,
         public string $name,
         public string $taxClass,
-        public WcOrderFeeTaxStatesEnum $taxStatus,
+        public ?WcOrderFeeTaxStatesEnum $taxStatus,
         public MonetaryAmount $total,
         public ?MonetaryAmount $totalTax,
         public array $taxes = [],
@@ -29,12 +29,12 @@ class  PaymentFeeDTO
         return new self(
             paymentMethod: $paymentMethod,
             name: $feeLine->name,
-            taxClass: $feeLine->taxClass,
-            taxStatus: $feeLine->taxStatus,
+            taxClass: $feeLine->tax_class ?? '',
+            taxStatus: $feeLine->tax_status ? WcOrderFeeTaxStatesEnum::from($feeLine->tax_status) : null,
             total: MonetaryAmount::fromFloat((float) $feeLine->total),
-            totalTax: MonetaryAmount::fromFloat((float) $feeLine->totalTax),
+            totalTax: $feeLine->total_tax ? MonetaryAmount::fromFloat((float) $feeLine->total_tax) : null,
             taxes: $feeLine,
-            metaData: $feeLine->metaData,
+            metaData: $feeLine->meta_data ?? [],
         );
     }
 

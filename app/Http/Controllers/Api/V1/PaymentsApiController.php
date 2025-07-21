@@ -22,6 +22,10 @@ class PaymentsApiController extends ApiController
     public function createSetupIntent(int $customerId): JsonResponse
     {
         $customer = Customer::where('wp_id', $customerId)->first();
+        if (! $customer) {
+            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
         $setupIntent = $this->paymentService->createStripeSetupIntent($customer);
 
         return response()->json([
