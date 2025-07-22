@@ -3,6 +3,7 @@
 namespace App\Services\Payment\Stripe;
 
 use App\DTO\Order\OrderDTO;
+use App\Enums\Admin\PaymentMethodsEnum;
 use App\Models\Customer as CastimizeCustomer;
 use Illuminate\Support\Str;
 use Stripe\Balance;
@@ -62,12 +63,10 @@ class StripeService
     {
         $data = [
             'customer' => $customer->stripe_data['stripe_id'],
+            'payment_method_types' => PaymentMethodsEnum::mandateOptions(),
             'usage' => 'off_session',
         ];
 
-        if (! app()->environment('production')) {
-            $data['payment_method_types'] = ['card', 'sepa_debit'];
-        }
         return SetupIntent::create($data);
     }
 
