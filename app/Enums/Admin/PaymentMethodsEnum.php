@@ -7,16 +7,13 @@ use Laravel\Nova\Nova;
 enum PaymentMethodsEnum: string
 {
     case ACH_PAYMENT = 'ach';
-    case ACH_BEDIT = 'ach_debit';
     case AFFIRM = 'affirm';
     case AFTERPAY = 'afterpay';
     case ALIPAY = 'alipay';
     case AMAZON_PAY = 'amazonpay';
     case APPLE_PAY = 'apple_pay';
     case BANCONTACT = 'bancontact';
-    case BACS_DEBIT = 'bacs_debit';
     case BECS = 'becs';
-    case BECS_DEBIT = 'becs_debit';
     case BLIK = 'blik';
     case BOLETO = 'boleto';
     case CARTES_BANCAIRES = 'cartes_bancaires';
@@ -101,9 +98,6 @@ enum PaymentMethodsEnum: string
     public static function mandateOptions(): array
     {
         return [
-            self::ACH_BEDIT->value,
-            self::BACS_DEBIT->value,
-            self::BECS_DEBIT->value,
             self::SEPA_DEBIT->value,
             self::CREDIT_CARD->value,
         ];
