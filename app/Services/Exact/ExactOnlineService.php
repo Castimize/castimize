@@ -182,13 +182,15 @@ class ExactOnlineService
             $salesEntryLines[] = $revenueLine;
         }
 
-        $this->createSalesEntryFromInvoice(
-            invoice: $invoice,
-            salesEntryLines: $salesEntryLines,
-            diary: self::DIARY_SALES,
-            type: ($invoice->debit ? 20 : 21),
-            entryDate: Carbon::parse($invoice->invoice_date)->format('Y-m-d'),
-        );
+        if (count($salesEntryLines) > 0) {
+            $this->createSalesEntryFromInvoice(
+                invoice: $invoice,
+                salesEntryLines: $salesEntryLines,
+                diary: self::DIARY_SALES,
+                type: ($invoice->debit ? 20 : 21),
+                entryDate: Carbon::parse($invoice->invoice_date)->format('Y-m-d'),
+            );
+        }
     }
 
     public function syncInvoicePaid(Invoice $invoice): void
@@ -211,13 +213,15 @@ class ExactOnlineService
             ];
         }
 
-        $this->createSalesEntryFromInvoice(
-            invoice: $invoice,
-            salesEntryLines: $salesEntryLines,
-            diary: self::DIARY_MEMORIAL,
-            type: ($invoice->debit ? 20 : 21),
-            entryDate: Carbon::parse($invoice->paid_at)->format('Y-m-d'),
-        );
+        if (count($salesEntryLines) > 0) {
+            $this->createSalesEntryFromInvoice(
+                invoice: $invoice,
+                salesEntryLines: $salesEntryLines,
+                diary: self::DIARY_MEMORIAL,
+                type: ($invoice->debit ? 20 : 21),
+                entryDate: Carbon::parse($invoice->paid_at)->format('Y-m-d'),
+            );
+        }
     }
 
     public function deleteSyncedInvoice(Invoice $invoice): void
