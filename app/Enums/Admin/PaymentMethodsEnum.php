@@ -6,7 +6,6 @@ use Laravel\Nova\Nova;
 
 enum PaymentMethodsEnum: string
 {
-    case ACCS_DEBIT = 'accs_debit';
     case ACH_PAYMENT = 'ach';
     case ACH_BEDIT = 'ach_debit';
     case AFFIRM = 'affirm';
@@ -102,7 +101,6 @@ enum PaymentMethodsEnum: string
     public static function mandateOptions(): array
     {
         return [
-            self::ACCS_DEBIT->value,
             self::ACH_BEDIT->value,
             self::BACS_DEBIT->value,
             self::BECS_DEBIT->value,
