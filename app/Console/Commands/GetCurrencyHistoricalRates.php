@@ -45,6 +45,7 @@ class GetCurrencyHistoricalRates extends Command
                     date: $historicalDate,
                 );
             } else {
+                $historicalDate = Carbon::now();
                 $result = $exchangeRates->exchangeRate(
                     from: $baseCurrency,
                     to: $supportedCurrencies,

@@ -33,7 +33,7 @@ class  PaymentFeeDTO
             taxStatus: $feeLine->tax_status ? WcOrderFeeTaxStatesEnum::from($feeLine->tax_status) : null,
             total: MonetaryAmount::fromFloat((float) $feeLine->total),
             totalTax: $feeLine->total_tax ? MonetaryAmount::fromFloat((float) $feeLine->total_tax) : null,
-            taxes: $feeLine,
+            taxes: [],
             metaData: $feeLine->meta_data ?? [],
         );
     }
