@@ -65,6 +65,10 @@ class StripeService
             'customer' => $customer->stripe_data['stripe_id'],
             'payment_method_types' => PaymentMethodsEnum::mandateOptions(),
             'usage' => 'off_session',
+            'metadata' => [
+                'customer_id' => $customer->id,
+                'wp_id' => $customer->wp_id,
+            ],
         ];
 
         return SetupIntent::create($data);
