@@ -163,7 +163,12 @@ class StripeWebhookController extends WebhookController
     protected function handleSetupIntentCreated(SetupIntent $setupIntent): Response
     {
         try {
-            $customer = Customer::whereJsonContains('stripe_data->stripe_id', $setupIntent->customer)->first();
+            $customerId = $setupIntent->metadata->customer_id ?? null;
+            if ($customerId) {
+                $customer = Customer::find($customerId);
+            } else {
+                $customer = Customer::whereJsonContains('stripe_data->stripe_id', $setupIntent->customer)->first();
+            }
 
             LogRequestService::addResponse(request(), $setupIntent);
 
