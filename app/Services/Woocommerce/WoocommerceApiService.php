@@ -8,7 +8,6 @@ use App\DTO\Order\PaymentFeeDTO;
 use App\DTO\Order\UploadDTO;
 use Codexshaper\WooCommerce\Facades\Customer;
 use Codexshaper\WooCommerce\Facades\Order;
-use Codexshaper\WooCommerce\Facades\Tax;
 
 class WoocommerceApiService
 {

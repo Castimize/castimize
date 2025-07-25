@@ -76,7 +76,7 @@ class OrderDTO
         public ?Carbon $createdAt,
         public ?Carbon $updatedAt,
         public Collection $uploads,
-        public Collection $paymentFees,
+        public ?Collection $paymentFees,
     ) {
     }
 
@@ -172,7 +172,8 @@ class OrderDTO
             createdAt: $createdAt,
             updatedAt: $updatedAt,
             uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDTO::fromWpRequest($lineItem, $wpOrder['shipping']->country)),
-            paymentFees: collect($wpOrder['fee_lines'])->map(fn ($feeLine) => PaymentFeeDTO::fromWpRequest($wpOrder['payment_method'], $feeLine)),
+//            paymentFees: collect($wpOrder['fee_lines'])->map(fn ($feeLine) => PaymentFeeDTO::fromWpRequest($wpOrder['payment_method'], $feeLine)),
+            paymentFees: null,
         );
     }
 

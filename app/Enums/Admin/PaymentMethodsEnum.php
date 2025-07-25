@@ -49,15 +49,19 @@ enum PaymentMethodsEnum: string
     public static function options(): array
     {
         return [
+            self::ACCS_DEBIT->value => (string) Nova::__('Ach Debit'),
             self::ACH_PAYMENT->value => (string) Nova::__('Ach'),
+            self::ACH_BEDIT->value => (string) Nova::__('Ach Debit'),
             self::AFFIRM->value => (string) Nova::__('Affirm'),
             self::AFTERPAY->value => (string) Nova::__('Afterpay'),
             self::ALIPAY->value => (string) Nova::__('Ali pay'),
             self::AMAZON_PAY->value => (string) Nova::__('Amazon pay'),
             self::APPLE_PAY->value => (string) Nova::__('Apple pay'),
             self::BOLETO->value => (string) Nova::__('Boleto'),
+            self::BACS_DEBIT->value => (string) Nova::__('Bacs Debit'),
             self::BANCONTACT->value => (string) Nova::__('Bancontact'),
             self::BECS->value => (string) Nova::__('BECS'),
+            self::BECS_DEBIT->value => (string) Nova::__('BECS Debit'),
             self::BLIK->value => (string) Nova::__('Blik'),
             self::CARTES_BANCAIRES->value => (string) Nova::__('Cartes bancaires'),
             self::CASH_ON_DELIVERY->value => (string) Nova::__('Cash on delivery'),
@@ -88,6 +92,14 @@ enum PaymentMethodsEnum: string
             self::TWINT->value => (string) Nova::__('Twint'),
             self::WECHAT->value => (string) Nova::__('WeChat'),
             self::ZIP->value => (string) Nova::__('Zip'),
+        ];
+    }
+
+    public static function mandateOptions(): array
+    {
+        return [
+            self::SEPA_DEBIT->value,
+            self::CREDIT_CARD->value,
         ];
     }
 }

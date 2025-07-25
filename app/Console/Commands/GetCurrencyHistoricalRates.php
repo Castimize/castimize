@@ -32,26 +32,25 @@ class GetCurrencyHistoricalRates extends Command
      */
     public function handle()
     {
-        $historicalDate = now();
-        if ($this->option('historical-date')) {
-            try {
-                $historicalDate = Carbon::parse($this->option('historical-date'));
-            } catch (InvalidFormatException $e) {
-                $this->error($e->getMessage());
-                return;
-            }
-        }
-
         $baseCurrency = config('app.currency');
         $supportedCurrencies = config('app.supported_currencies');
         try {
             $exchangeRates = app(ExchangeRate::class);
 
-            $result = $exchangeRates->exchangeRate(
-                from: $baseCurrency,
-                to: $supportedCurrencies,
-                date: $historicalDate->format('Y-m-d'),
-            );
+            if ($this->option('historical-date')) {
+                $historicalDate = Carbon::parse($this->option('historical-date'));
+                $result = $exchangeRates->exchangeRate(
+                    from: $baseCurrency,
+                    to: $supportedCurrencies,
+                    date: $historicalDate,
+                );
+            } else {
+                $historicalDate = Carbon::now();
+                $result = $exchangeRates->exchangeRate(
+                    from: $baseCurrency,
+                    to: $supportedCurrencies,
+                );
+            }
 
             foreach ($result as $convertCurrency => $rate) {
                 $currencyHistoryRate = CurrencyHistoryRate::create([
@@ -64,8 +63,9 @@ class GetCurrencyHistoricalRates extends Command
                     SyncExchangeRateToExact::dispatch($currencyHistoryRate)->onQueue('exact');
                 }
             }
-        } catch (Exception $e) {
+        } catch (InvalidFormatException|Exception $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            $this->error($e->getMessage());
         }
     }
 }
