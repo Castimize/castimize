@@ -12,7 +12,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class SyncInvoiceToExact implements ShouldQueue
+class SyncInvoicePaidToExact implements ShouldQueue
 {
     use Queueable;
 
@@ -42,11 +42,7 @@ class SyncInvoiceToExact implements ShouldQueue
                 throw new Exception('Customer exact_online_guid is null');
             }
 
-            $exactOnlineService->syncInvoice($this->invoice);
-            if ($this->invoice->paid) {
-                sleep(2);
-                $exactOnlineService->syncInvoicePaid($this->invoice);
-            }
+            $exactOnlineService->syncInvoicePaid($this->invoice);
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }

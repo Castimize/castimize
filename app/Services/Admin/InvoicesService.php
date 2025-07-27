@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Enums\Woocommerce\WcOrderDocumentTypesEnum;
 use App\Jobs\SyncCustomerToExact;
+use App\Jobs\SyncInvoicePaidToExact;
 use App\Jobs\SyncInvoiceToExact;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -130,5 +131,12 @@ class InvoicesService
             ->dispatch();
 
         return $invoice;
+    }
+
+    public function updatePaid(Invoice $invoice)
+    {
+        $invoice->paid = true;
+
+        SyncInvoicePaidToExact::dispatch($invoice, $invoice->customer->wp_id);
     }
 }

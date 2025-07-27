@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Console\Commands\Temp;
+
+use App\Jobs\SetOrderPaid;
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\Order;
+use App\Services\Admin\InvoicesService;
+use App\Services\Payment\Stripe\StripeService;
+use Illuminate\Console\Command;
+use Stripe\PaymentIntent;
+use Stripe\Stripe;
+
+class FixInvoiceNotPaidAndCreateMemorialInExact extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'castimize:temp-fix-invoice-not-paid-and-create-memorial-in-exact';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Temp command to set invoice paid if order is paid and create the memorial booking in Exact';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle(InvoicesService  $invoicesService)
+    {
+        $invoices = Invoice::with(['customer', 'lines.order'])
+            ->whereHas('lines.order', function ($query) {
+                $query->where('is_paid', 1);
+            })
+            ->where('paid', 0)
+            ->get();
+
+        foreach ($invoices as $invoice) {
+            $invoicesService->updatePaid($invoice);
+        }
+
+        return true;
+    }
+}
