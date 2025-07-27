@@ -43,7 +43,7 @@ class SyncInvoiceToExact implements ShouldQueue
             }
 
             $exactOnlineService->syncInvoice($this->invoice);
-            if ($this->invoice->paid) {
+            if ($this->invoice->paid && $this->invoice->lines->first()?->order?->payment_issuer !== 'bacs') {
                 sleep(2);
                 $exactOnlineService->syncInvoicePaid($this->invoice);
             }
