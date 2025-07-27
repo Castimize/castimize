@@ -33,16 +33,27 @@ class FixInvoiceNotPaidAndCreateMemorialInExact extends Command
      */
     public function handle(InvoicesService  $invoicesService)
     {
-        $invoices = Invoice::with(['customer', 'lines.order'])
+        $invoicesQuery = Invoice::with(['customer', 'lines.order'])
             ->whereHas('lines.order', function ($query) {
                 $query->where('is_paid', 1);
             })
-            ->where('paid', 0)
-            ->get();
+            ->where('paid', 0);
+
+        $count = $invoicesQuery->count();
+        $invoices = $invoicesQuery->get();
+
+        $progressBar = $this->output->createProgressBar();
+        $this->info("Updating $count invoices");
+        $progressBar->start();
 
         foreach ($invoices as $invoice) {
+            $this->info("Handle invoice $invoice->id");
             $invoicesService->updatePaid($invoice);
+
+            $progressBar->advance();
         }
+
+        $progressBar->finish();
 
         return true;
     }
