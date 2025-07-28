@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Temp;
 
+use App\Enums\Admin\PaymentMethodsEnum;
 use App\Jobs\SetOrderPaid;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -35,7 +36,8 @@ class FixInvoiceNotPaidAndCreateMemorialInExact extends Command
     {
         $invoicesQuery = Invoice::with(['customer', 'lines.order'])
             ->whereHas('lines.order', function ($query) {
-                $query->where('is_paid', 1);
+                $query->where('is_paid', 1)
+                    ->where('payment_issuer', '!=', PaymentMethodsEnum::DIRECT_BANK_TRANSFER->value);
             })
             ->where('paid', 0);
 
