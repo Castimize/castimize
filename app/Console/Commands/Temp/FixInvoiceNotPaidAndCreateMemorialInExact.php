@@ -20,7 +20,7 @@ class FixInvoiceNotPaidAndCreateMemorialInExact extends Command
      *
      * @var string
      */
-    protected $signature = 'castimize:temp-fix-invoice-not-paid-and-create-memorial-in-exact';
+    protected $signature = 'castimize:temp-fix-invoice-not-paid-and-create-memorial-in-exact {--invoice-id=}';
 
     /**
      * The console command description.
@@ -34,12 +34,17 @@ class FixInvoiceNotPaidAndCreateMemorialInExact extends Command
      */
     public function handle(InvoicesService  $invoicesService)
     {
-        $invoicesQuery = Invoice::with(['customer', 'lines.order'])
-            ->whereHas('lines.order', function ($query) {
-                $query->where('is_paid', 1)
-                    ->where('payment_issuer', '!=', PaymentMethodsEnum::DIRECT_BANK_TRANSFER->value);
-            })
-            ->where('paid', 0);
+        if ($this->option('invoice-id')) {
+            $invoicesQuery = Invoice::with(['customer', 'lines.order'])
+                ->where('id', $this->option('invoice-id'));
+        } else {
+            $invoicesQuery = Invoice::with(['customer', 'lines.order'])
+                ->whereHas('lines.order', function ($query) {
+                    $query->where('is_paid', 1)
+                        ->where('payment_issuer', '!=', PaymentMethodsEnum::DIRECT_BANK_TRANSFER->value);
+                })
+                ->where('paid', 0);
+        }
 
         $count = $invoicesQuery->count();
         $invoices = $invoicesQuery->get();
