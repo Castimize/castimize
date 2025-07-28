@@ -19,6 +19,7 @@ enum PaymentIssuersEnum: string
     {
         return [
             self::StripeOld->value,
+            self::StripeBancontact->value,
             self::StripeCreditCard->value,
             self::StripeIdeal->value,
             self::StripeSepa->value,
