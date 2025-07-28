@@ -7,6 +7,7 @@ namespace App\Enums\Admin;
 enum PaymentIssuersEnum: string
 {
     case StripeOld = 'stripe';
+    case StripeBancontact = 'stripe_bancontact';
     case StripeCreditCard = 'stripe_cc';
     case StripeIdeal = 'stripe_ideal';
     case StripeSepa = 'stripe_sepa';

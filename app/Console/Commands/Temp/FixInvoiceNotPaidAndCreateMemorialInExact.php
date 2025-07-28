@@ -3,15 +3,9 @@
 namespace App\Console\Commands\Temp;
 
 use App\Enums\Admin\PaymentMethodsEnum;
-use App\Jobs\SetOrderPaid;
-use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\Order;
 use App\Services\Admin\InvoicesService;
-use App\Services\Payment\Stripe\StripeService;
 use Illuminate\Console\Command;
-use Stripe\PaymentIntent;
-use Stripe\Stripe;
 
 class FixInvoiceNotPaidAndCreateMemorialInExact extends Command
 {
