@@ -37,6 +37,7 @@ class ModelsService
                     $query->where('name', 'like', '%' . $request->search_value . '%');
                 });
         }
+        $customerModels->where('customer_id', $customer->id);
 
         if ($request->order_column) {
             $mapper = [
