@@ -74,12 +74,14 @@ class ModelsService
                 'model_z_length',
             ]);
 
+        $filtered = $customerModels->count();
+
         $models = $customerModels
             ->offset($request->start ?? 0)
             ->limit($request->length ?? 10)
             ->get();
 
-        return ['items' => ModelResource::collection($models), 'total' => $total];
+        return ['items' => ModelResource::collection($models), 'filtered' => $filtered, 'total' => $total];
     }
 
     public function storeModelFromApi($request, ?Customer $customer = null): Model|null
