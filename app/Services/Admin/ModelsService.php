@@ -186,7 +186,12 @@ class ModelsService
                 ->where('model_scale', $modelDTO->modelScale)
                 ->first();
 
-            if ($model && $model->model_name === $modelDTO->modelName) {
+            if ($model) {
+                if (empty($model->model_name)) {
+                    $model->model_name = $modelDTO->modelName;
+                    $model->save();
+                }
+
                 $model->materials()->syncWithoutDetaching([$material->id]);
                 $model->refresh();
 
