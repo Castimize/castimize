@@ -106,9 +106,7 @@ class ModelsService
 
         if ($customer) {
             $model = $customer->models->where('name', $request->original_file_name)
-                ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
-//                ->where('material_id', $material->id)
-                ->where('model_volume_cc', $request->material_volume)
+                ->where('model_scale', $request->scale ?? 1)
                 ->first();
 
             if ($model && $model->model_name === $request->model_name) {
@@ -117,8 +115,7 @@ class ModelsService
         } else {
             $model = Model::where('name', $request->original_file_name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
-//                ->where('material_id', $material->id)
-                ->where('model_volume_cc', $request->material_volume)
+                ->where('model_scale', $request->scale ?? 1)
                 ->first();
         }
 
@@ -159,7 +156,6 @@ class ModelsService
 
         $model = Model::create([
             'customer_id' => $customer?->id,
-//            'material_id' => $material->id,
             'model_name' => $request->model_name ?? null,
             'name' => $request->original_file_name,
             'file_name' => $fileName,
@@ -187,8 +183,6 @@ class ModelsService
 
         if ($customer) {
             $model = $customer->models->where('name', $modelDTO->name)
-//                ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
-//                ->where('material_id', $material->id)
                 ->where('model_scale', $modelDTO->modelScale)
                 ->first();
 
