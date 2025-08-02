@@ -95,10 +95,9 @@ class ModelsApiController extends ApiController
         $upload = json_decode($request->upload, true, 512, JSON_THROW_ON_ERROR);
         [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
 
-        $model = $customer->models->where('name', $upload['3dp_options']['filename'])
-            ->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
-//            ->where('material_id', $materialId)
-            ->where('model_scale', $upload['3dp_options']['scale'])
+        $model = $customer->models->where('name', $upload['3dp_options']['model_name_original'])
+//            ->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
+            ->where('model_scale', $upload['3dp_options']['scale'] ?? 1)
             ->first();
 
         $modelName = $model ? $model->model_name : null;
@@ -117,14 +116,14 @@ class ModelsApiController extends ApiController
 
         $newUploads = [];
         foreach (json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR) as $itemKey => $upload) {
-            if (array_key_exists('3dp_options', $upload)) {
+//            dd($upload);
+            if (isset($upload['3dp_options'])) {
                 [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
                 $material = Material::where('wp_id', ($upload['3dp_options']['material_id'] ?? $materialId))->first();
                 $model = null;
                 if ($material) {
-                    $model = $customer->models->where('file_name', 'wp-content/uploads/p3d/' . str_replace('_resized', '', $upload['3dp_options']['model_name']))
-//                        ->where('material_id', $material->id)
-                        ->where('model_scale', $upload['3dp_options']['scale'])
+                    $model = $customer->models->where('name', $upload['3dp_options']['model_name_original'])
+                        ->where('model_scale', $upload['3dp_options']['scale'] ?? 1)
                         ->first();
                 }
 
