@@ -26,7 +26,6 @@ class ModelsService
         $skip = (int) (($pageNumber - 1) * $pageLength);
 
         $builder = $customer->models();
-        $recordsTotal = $builder->count();
 
         $builder->distinct([
             'model_name',
@@ -40,7 +39,9 @@ class ModelsService
 //            'model_z_length',
         ]);
 
-        if (!empty($request->search_value)) {
+        $recordsTotal = $builder->count();
+
+        if (! empty($request->search_value)) {
             $builder
                 ->where(function ($query) use ($request) {
                     $query->where('models.name', 'like', '%' . $request->search_value . '%')
@@ -68,7 +69,7 @@ class ModelsService
                 'categories' => 'categories',
             ];
 
-            if (! array_key_exists($request->order_column, $mapper)) {
+            if (! isset($mapper, $request->order_column)) {
                 $builder->orderBy('id');
             } elseif ($mapper[$request->order_column] === 'name') {
                 $builder->orderBy('model_name', $request->order_dir)
