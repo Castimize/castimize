@@ -23,23 +23,24 @@ class ModelsService
         // Page Length
         $pageNumber = ( $request->start / $request->length ) + 1;
         $pageLength = (int) $request->length;
-        $skip = (int) (($pageNumber - 1) * $pageLength) + 1;
+        $skip = (int) (($pageNumber - 1) * $pageLength);
 
         $builder = $customer->models();
+        $recordsTotal = $builder->count();
 
         $builder->distinct([
             'model_name',
             'models.name',
-            'model_volume_cc',
-            'model_surface_area_cm2',
-            'model_box_volume',
-            'model_x_length',
-            'model_y_length',
-            'model_z_length',
+            'model_scale',
+//            'model_volume_cc',
+//            'model_surface_area_cm2',
+//            'model_box_volume',
+//            'model_x_length',
+//            'model_y_length',
+//            'model_z_length',
         ]);
-        $recordsTotal = $builder->count();
 
-        if ($request->search_value) {
+        if (!empty($request->search_value)) {
             $builder
                 ->where(function ($query) use ($request) {
                     $query->where('models.name', 'like', '%' . $request->search_value . '%')
@@ -82,6 +83,7 @@ class ModelsService
             ->skip($skip)
             ->take($pageLength)
             ->get();
+//        dd($skip, $pageLength, $recordsTotal, $recordsFiltered, $models);
         return ['items' => ModelResource::collection($models), 'filtered' => $recordsFiltered, 'total' => $recordsTotal];
     }
 
