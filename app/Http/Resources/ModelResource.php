@@ -36,7 +36,7 @@ class ModelResource extends JsonResource
             $calculatedTotal = (new CalculatePricesService())->calculatePriceOfModel($price, $this->model_volume_cc, $this->model_surface_area_cm2);
         }
 
-        $fileThumbnail = null;
+//        $fileThumbnail = null;
         $siteThumb = sprintf('%s/%s', env('APP_SITE_URL'), $thumb);
         if (Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb)) {
             $fileThumbnail = sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $thumb);

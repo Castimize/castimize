@@ -23,23 +23,25 @@ class ModelsService
         // Page Length
         $pageNumber = ( $request->start / $request->length ) + 1;
         $pageLength = (int) $request->length;
-        $skip = (int) (($pageNumber - 1) * $pageLength) + 1;
+        $skip = (int) (($pageNumber - 1) * $pageLength);
 
         $builder = $customer->models();
 
         $builder->distinct([
             'model_name',
             'models.name',
-            'model_volume_cc',
-            'model_surface_area_cm2',
-            'model_box_volume',
-            'model_x_length',
-            'model_y_length',
-            'model_z_length',
+            'model_scale',
+//            'model_volume_cc',
+//            'model_surface_area_cm2',
+//            'model_box_volume',
+//            'model_x_length',
+//            'model_y_length',
+//            'model_z_length',
         ]);
+
         $recordsTotal = $builder->count();
 
-        if ($request->search_value) {
+        if (! empty($request->search_value)) {
             $builder
                 ->where(function ($query) use ($request) {
                     $query->where('models.name', 'like', '%' . $request->search_value . '%')
@@ -67,7 +69,7 @@ class ModelsService
                 'categories' => 'categories',
             ];
 
-            if (! array_key_exists($request->order_column, $mapper)) {
+            if (! isset($mapper, $request->order_column)) {
                 $builder->orderBy('id');
             } elseif ($mapper[$request->order_column] === 'name') {
                 $builder->orderBy('model_name', $request->order_dir)
@@ -82,6 +84,7 @@ class ModelsService
             ->skip($skip)
             ->take($pageLength)
             ->get();
+//        dd($skip, $pageLength, $recordsTotal, $recordsFiltered, $models);
         return ['items' => ModelResource::collection($models), 'filtered' => $recordsFiltered, 'total' => $recordsTotal];
     }
 
@@ -103,9 +106,7 @@ class ModelsService
 
         if ($customer) {
             $model = $customer->models->where('name', $request->original_file_name)
-                ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
-//                ->where('material_id', $material->id)
-                ->where('model_volume_cc', $request->material_volume)
+                ->where('model_scale', $request->scale ?? 1)
                 ->first();
 
             if ($model && $model->model_name === $request->model_name) {
@@ -114,8 +115,7 @@ class ModelsService
         } else {
             $model = Model::where('name', $request->original_file_name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
-//                ->where('material_id', $material->id)
-                ->where('model_volume_cc', $request->material_volume)
+                ->where('model_scale', $request->scale ?? 1)
                 ->first();
         }
 
@@ -156,7 +156,6 @@ class ModelsService
 
         $model = Model::create([
             'customer_id' => $customer?->id,
-//            'material_id' => $material->id,
             'model_name' => $request->model_name ?? null,
             'name' => $request->original_file_name,
             'file_name' => $fileName,
@@ -184,8 +183,6 @@ class ModelsService
 
         if ($customer) {
             $model = $customer->models->where('name', $modelDTO->name)
-//                ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
-//                ->where('material_id', $material->id)
                 ->where('model_scale', $modelDTO->modelScale)
                 ->first();
 
