@@ -12,6 +12,7 @@ use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrdersService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Stripe\Charge;
 use Stripe\Customer as StripeCustomer;
@@ -136,13 +137,17 @@ class StripeWebhookController extends WebhookController
             $logRequestId = request()->log_request_id;
         }
 
-        SetOrderPaid::dispatch($paymentIntent, $logRequestId)
-            ->onQueue('stripe')
-            ->delay(now()->addMinute());
-
-        CreateInvoicesFromOrder::dispatch($paymentIntent->metadata->order_id)
-            ->onQueue('exact')
-            ->delay(now()->addMinute());
+        Bus::chain([
+            new SetOrderPaid($paymentIntent, $logRequestId),
+            new CreateInvoicesFromOrder($paymentIntent->metadata->order_id),
+        ])->onQueue('stripe')->dispatch();
+//        SetOrderPaid::dispatch($paymentIntent, $logRequestId)
+//            ->onQueue('stripe')
+//            ->delay(now()->addMinute());
+//
+//        CreateInvoicesFromOrder::dispatch($paymentIntent->metadata->order_id)
+//            ->onQueue('exact')
+//            ->delay(now()->addMinute());
 
         return $this->successMethod();
     }

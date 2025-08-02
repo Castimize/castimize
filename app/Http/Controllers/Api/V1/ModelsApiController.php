@@ -80,7 +80,7 @@ class ModelsApiController extends ApiController
         return response()->json([
             'items' => $response['items'],
             'total' => $response['total'],
-            'filtered' => $response['items']->count(),
+            'filtered' => $response['filtered'] ?? $response['items']->count(),
         ]);
     }
 

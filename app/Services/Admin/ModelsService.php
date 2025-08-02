@@ -12,18 +12,35 @@ use App\Models\Model;
 use App\Models\User;
 use App\Services\Etsy\EtsyService;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ModelsService
 {
-    public function getModelsPaginated($request, Customer $customer): array
+    public function getModelsPaginated($request, Customer $customer)
     {
-        $customerModels = $customer->models()->with('materials');
-        $total = $customerModels->count();
+        // Page Length
+        $pageNumber = ( $request->start / $request->length ) + 1;
+        $pageLength = (int) $request->length;
+        $skip = (int) (($pageNumber - 1) * $pageLength) + 1;
+
+        $builder = $customer->models();
+
+        $builder->distinct([
+            'model_name',
+            'models.name',
+            'model_volume_cc',
+            'model_surface_area_cm2',
+            'model_box_volume',
+            'model_x_length',
+            'model_y_length',
+            'model_z_length',
+        ]);
+        $recordsTotal = $builder->count();
 
         if ($request->search_value) {
-            $customerModels
+            $builder
                 ->where(function ($query) use ($request) {
                     $query->where('models.name', 'like', '%' . $request->search_value . '%')
                         ->orWhere('model_name', 'like', '%' . $request->search_value . '%')
@@ -32,9 +49,10 @@ class ModelsService
                         ->orWhere('model_y_length', 'like', '%' . $request->search_value . '%')
                         ->orWhere('model_z_length', 'like', '%' . $request->search_value . '%')
                         ->orWhere('model_surface_area_cm2', 'like', '%' . $request->search_value . '%')
-                        ->orWhere('categories', 'like', '%' . $request->search_value . '%');
-                })->orWhereHas('materials', function ($query) use ($request) {
-                    $query->where('name', 'like', '%' . $request->search_value . '%');
+                        ->orWhere('categories', 'like', '%' . $request->search_value . '%')
+                        ->orWhereHas('materials', function ($query) use ($request) {
+                            $query->where('name', 'like', '%' . $request->search_value . '%');
+                        });
                 });
         }
 
@@ -44,42 +62,27 @@ class ModelsService
                 'name' => 'name',
                 'material' => 'material_name',
                 'material_volume' => 'model_volume_cc',
-                'surface_area' =>'model_surface_area_cm2',
+                'surface_area' => 'model_surface_area_cm2',
                 'scale' => 'model_scale',
                 'categories' => 'categories',
             ];
 
             if (! array_key_exists($request->order_column, $mapper)) {
-                $customerModels->orderBy('id');
+                $builder->orderBy('id');
             } elseif ($mapper[$request->order_column] === 'name') {
-                $customerModels->orderBy('model_name', $request->order_dir)
+                $builder->orderBy('model_name', $request->order_dir)
                     ->orderBy('name', $request->order_dir);
-            } elseif ($mapper[$request->order_column] === 'material_name') {
-//                $customerModels->join('materials', 'models.material_id', '=', 'materials.id')
-//                    ->orderBy('materials.name', $request->order_dir);
             } else {
-                $customerModels->orderBy($mapper[$request->order_column], $request->order_dir);
+                $builder->orderBy($mapper[$request->order_column], $request->order_dir);
             }
         }
 
-        $customerModels->distinct([
-                'model_name',
-                'models.name',
-//                'material_id',
-                'model_volume_cc',
-                'model_surface_area_cm2',
-                'model_box_volume',
-                'model_x_length',
-                'model_y_length',
-                'model_z_length',
-            ]);
-
-        $models = $customerModels
-            ->offset($request->start ?? 0)
-            ->limit($request->length ?? 10)
+        $recordsFiltered = $builder->count();
+        $models = $builder
+            ->skip($skip)
+            ->take($pageLength)
             ->get();
-
-        return ['items' => ModelResource::collection($models), 'total' => $total];
+        return ['items' => ModelResource::collection($models), 'filtered' => $recordsFiltered, 'total' => $recordsTotal];
     }
 
     public function storeModelFromApi($request, ?Customer $customer = null): Model|null
@@ -125,16 +128,16 @@ class ModelsService
 
         try {
             // Check files exists on local storage of site and not on R2
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileName)) {
-                Storage::disk('r2')->put($fileName, file_get_contents($fileUrl));
+            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
+                Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
             }
             // Check files exists on local storage of site and not on R2 (without resized
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($withoutResizedFileName)) {
-                Storage::disk('r2')->put($withoutResizedFileName, file_get_contents($fileUrl));
+            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
+                Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
             }
             // Check file thumb exists on local storage of site and not on R2
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileNameThumb)) {
-                Storage::disk('r2')->put($fileNameThumb, file_get_contents($fileThumb));
+            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
+                Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
             }
         } catch (Exception $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
@@ -211,16 +214,16 @@ class ModelsService
 
         try {
             // Check files exists on local storage of site and not on R2
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileName)) {
-                Storage::disk('r2')->put($fileName, file_get_contents($fileUrl));
+            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
+                Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
             }
             // Check files exists on local storage of site and not on R2 (without resized
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($withoutResizedFileName)) {
-                Storage::disk('r2')->put($withoutResizedFileName, file_get_contents($fileUrl));
+            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
+                Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
             }
             // Check file thumb exists on local storage of site and not on R2
-            if (! $modelDTO->uploadedThumb && !str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileNameThumb)) {
-                Storage::disk('r2')->put($fileNameThumb, file_get_contents($fileThumb));
+            if (! $modelDTO->uploadedThumb && !str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
+                Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
             }
         } catch (Exception $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());

@@ -7,7 +7,7 @@ namespace App\DTO\Shops\Etsy;
 use App\Nova\Settings\Shipping\DcSettings;
 use Illuminate\Support\Collection;
 
-readonly class ShippingProfileDTO
+class ShippingProfileDTO
 {
     public function __construct(
         public int $shopId,

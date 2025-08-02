@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Enums\Admin\PaymentMethodsEnum;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Services\Admin\LogRequestService;
@@ -13,7 +12,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class SyncInvoiceToExact implements ShouldQueue
+class SyncInvoicePaidToExact implements ShouldQueue
 {
     use Queueable;
 
@@ -43,11 +42,7 @@ class SyncInvoiceToExact implements ShouldQueue
                 throw new Exception('Customer exact_online_guid is null');
             }
 
-            $exactOnlineService->syncInvoice($this->invoice);
-            if ($this->invoice->paid && $this->invoice->lines->first()?->order?->payment_issuer !== PaymentMethodsEnum::DIRECT_BANK_TRANSFER->value) {
-                sleep(2);
-                $exactOnlineService->syncInvoicePaid($this->invoice);
-            }
+            $exactOnlineService->syncInvoicePaid($this->invoice);
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
