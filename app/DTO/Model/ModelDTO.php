@@ -57,7 +57,7 @@ readonly class ModelDTO
             $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
             $thumbFileExtension = $file->getClientOriginalExtension();
             $thumbName = time().'_'.str_replace(' ','_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
-            Storage::disk('r2')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
+            Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
         } else {
             $uploadedThumb = false;
             //printer_id.material_id.coating_id.scale.unit
@@ -142,7 +142,7 @@ readonly class ModelDTO
             $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
             $thumbFileExtension = $file->getClientOriginalExtension();
             $thumbName = time().'_'.str_replace(' ','_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
-            Storage::disk('r2')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
+            Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
         }
 
         return new self(

@@ -92,7 +92,7 @@ class Complaint extends Resource
                 ->hideFromIndex(),
 
             Image::make(__('Image'), 'image')
-                ->disk('r2_private')
+                ->disk('s3_private')
                 ->path('admin/complaints'),
         ];
     }

@@ -72,7 +72,7 @@ class Model extends Resource
                 ->sortable(),
 
             File::make(__('Stl file'), 'file_name')
-                ->disk('r2')
+                ->disk('s3')
                 ->path('wp-content/uploads/p3d/')
                 ->acceptedTypes('.stl,.obj,.3ds'),
 
