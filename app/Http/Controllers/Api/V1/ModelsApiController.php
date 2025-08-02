@@ -97,8 +97,8 @@ class ModelsApiController extends ApiController
 
         $model = $customer->models->where('name', $upload['3dp_options']['filename'])
             ->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
-            ->where('material_id', $materialId)
-            ->where('model_volume_cc', $upload['3dp_options']['model_stats_raw']['model']['material_volume'])
+//            ->where('material_id', $materialId)
+            ->where('model_scale', $upload['3dp_options']['scale'])
             ->first();
 
         $modelName = $model ? $model->model_name : null;
@@ -123,7 +123,7 @@ class ModelsApiController extends ApiController
                 $model = null;
                 if ($material) {
                     $model = $customer->models->where('file_name', 'wp-content/uploads/p3d/' . str_replace('_resized', '', $upload['3dp_options']['model_name']))
-                        ->where('material_id', $material->id)
+//                        ->where('material_id', $material->id)
                         ->where('model_scale', $upload['3dp_options']['scale'])
                         ->first();
                 }
