@@ -21,7 +21,7 @@ class ModelsService
     public function getModelsPaginated($request, Customer $customer)
     {
         // Page Length
-        $pageNumber = (int) $request->start + 1;
+        $pageNumber = ( $request->start / $request->length ) + 1;
         $pageLength = (int) $request->length;
         $skip = (int) (($pageNumber - 1) * $pageLength);
 
