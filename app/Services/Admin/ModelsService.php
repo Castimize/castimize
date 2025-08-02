@@ -23,7 +23,7 @@ class ModelsService
         // Page Length
         $pageNumber = ( $request->start / $request->length ) + 1;
         $pageLength = (int) $request->length;
-        $skip = (int) (($pageNumber - 1) * $pageLength);
+        $skip = (int) (($pageNumber - 1) * $pageLength) + 1;
 
         $builder = $customer->models();
 
