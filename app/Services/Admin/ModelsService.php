@@ -159,22 +159,22 @@ class ModelsService
         $fileHeaders = get_headers($fileUrl);
         $withoutResizedFileName = str_replace('_resized', '', $fileName);
 
-        try {
-            // Check files exists on local storage of site and not on R2
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
-                Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
-            }
-            // Check files exists on local storage of site and not on R2 (without resized
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
-                Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
-            }
-            // Check file thumb exists on local storage of site and not on R2
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
-                Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
-            }
-        } catch (Exception $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
-        }
+//        try {
+//            // Check files exists on local storage of site and not on R2
+//            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
+//                Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
+//            }
+//            // Check files exists on local storage of site and not on R2 (without resized
+//            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
+//                Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
+//            }
+//            // Check file thumb exists on local storage of site and not on R2
+//            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
+//                Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
+//            }
+//        } catch (Exception $e) {
+//            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+//        }
 
         if ($model) {
             if (empty($model->thumb_name)) {
@@ -247,22 +247,22 @@ class ModelsService
         $fileHeaders = get_headers($fileUrl);
         $withoutResizedFileName = str_replace('_resized', '', $fileName);
 
-        try {
-            // Check files exists on local storage of site and not on R2
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
-                Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
-            }
-            // Check files exists on local storage of site and not on R2 (without resized
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
-                Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
-            }
-            // Check file thumb exists on local storage of site and not on R2
-            if (! $modelDTO->uploadedThumb && !str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
-                Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
-            }
-        } catch (Exception $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
-        }
+//        try {
+//            // Check files exists on local storage of site and not on R2
+//            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
+//                Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
+//            }
+//            // Check files exists on local storage of site and not on R2 (without resized
+//            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
+//                Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
+//            }
+//            // Check file thumb exists on local storage of site and not on R2
+//            if (! $modelDTO->uploadedThumb && !str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
+//                Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
+//            }
+//        } catch (Exception $e) {
+//            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+//        }
 
         if ($model) {
             $model->thumb_name = $fileNameThumb;

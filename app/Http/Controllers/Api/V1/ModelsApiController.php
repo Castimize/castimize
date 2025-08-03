@@ -140,6 +140,7 @@ class ModelsApiController extends ApiController
         LogRequestService::addResponse($request, $newUploads);
         return response()->json($newUploads);
     }
+
     public function store(int $customerId, Request $request): JsonResponse
     {
         ini_set('precision', 17);
