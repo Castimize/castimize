@@ -119,7 +119,40 @@ class ModelsService
                 ->first();
         }
 
-        $fileNameThumb = sprintf('%s%s.thumb.png', env('APP_SITE_STL_UPLOAD_DIR'), str_replace('_resized', '', $fileName));
+        $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
+            str_replace('_resized', '', $request->file_name),
+            $request->printer_id ?? 3,
+            $request->wp_id ?? 1,
+            $request->coating_id ?? null,
+            $request->scale ?? 1,
+            'mm',
+        );
+
+        $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
+        $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
+        $fileHeaders = get_headers($fileThumb);
+        if (str_contains($fileHeaders[0], '404')) {
+            $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
+                str_replace('_resized', '', $request->file_name),
+                $request->printer_id ?? 3,
+                1,
+                $request->coating_id ?? null,
+                1,
+                'mm',
+            );
+
+            $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
+            $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
+            $fileHeaders = get_headers($fileThumb);
+            if (str_contains($fileHeaders[0], '404')) {
+                $model = Model::where('file_name', 'like', '%' . str_replace('_resized', '', $request->file_name) . '%')->first();
+                if ($model) {
+                    $thumbName = str_replace(env('APP_SITE_STL_UPLOAD_DIR'), '', $model->thumb_name);
+                }
+            }
+        }
+
+        $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
         $fileName = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $fileName);
         $fileUrl = sprintf('%s/%s', env('APP_SITE_URL'), $fileName);
         $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);

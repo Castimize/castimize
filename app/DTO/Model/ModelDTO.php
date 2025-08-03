@@ -66,7 +66,7 @@ readonly class ModelDTO
                 $request->printer_id ?? 3,
                 $request->wp_id ?? 1,
                 $request->coating_id ?? null,
-                1,
+                $request->scale ?? 1,
                 'mm',
             );
 
