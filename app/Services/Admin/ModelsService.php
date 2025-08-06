@@ -181,6 +181,10 @@ class ModelsService
                 $model->thumb_name = $fileNameThumb;
                 $model->save();
             }
+            if (empty($model->customer_id) && $customer) {
+                $model->customer_id = $customer->id;
+                $model->save();
+            }
 
             $model->materials()->sync($material->id);
 
@@ -267,6 +271,11 @@ class ModelsService
         if ($model) {
             $model->thumb_name = $fileNameThumb;
             $model->save();
+
+            if (empty($model->customer_id) && $customer) {
+                $model->customer_id = $customer->id;
+                $model->save();
+            }
 
             $model->materials()->syncWithoutDetaching([$material->id]);
 
