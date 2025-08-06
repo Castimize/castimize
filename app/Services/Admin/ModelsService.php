@@ -109,7 +109,7 @@ class ModelsService
                 ->where('model_scale', $request->scale ?? 1)
                 ->first();
 
-            if ($model && $model->model_name === $request->model_name) {
+            if ($model) {
                 return $model;
             }
         } else {
