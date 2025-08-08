@@ -12,6 +12,7 @@ use App\Models\Model;
 use App\Models\User;
 use App\Services\Etsy\EtsyService;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +25,85 @@ class ModelsService
         $pageNumber = ( $request->start / $request->length ) + 1;
         $pageLength = (int) $request->length;
         $skip = (int) (($pageNumber - 1) * $pageLength);
+        $orderColumn = $request->order_column;
+        $orderDir = $request->order_dir;
+        $searchValue = $request->search_value;
+        $key = sprintf('%s-%s-%s-%s-%s-%s', $pageNumber, $pageLength, $skip, $orderColumn, $orderDir, $searchValue);
+
+        return Cache::remember($key, 60, function () use ($customer, $pageLength, $skip, $orderColumn, $orderDir, $searchValue) {
+            $query = "SELECT models.id
+                      FROM models
+                      LEFT JOIN material_model ON models.id = material_model.model_id
+                      LEFT JOIN materials ON material_model.material_id = materials.id
+                      WHERE customer_id = {$customer->id}
+                      {{{search}}}
+                      GROUP BY models.name, model_name, model_scale
+                      {{{order}}}
+                      {{{limit}}}";
+
+            if ($orderColumn) {
+                $mapper = [
+                    'id' => 'id',
+                    'name' => 'name',
+                    'material' => 'material_name',
+                    'material_volume' => 'model_volume_cc',
+                    'surface_area' => 'model_surface_area_cm2',
+                    'scale' => 'model_scale',
+                    'categories' => 'categories',
+                ];
+
+                if (! isset($mapper, $orderColumn)) {
+                    $query = str_replace(['{{{order}}}'], [' ORDER BY id DESC '], $query);
+                } elseif ($mapper[$orderColumn] === 'name') {
+                    $query = str_replace(['{{{order}}}'], [" ORDER BY model_name {$orderDir}, models.name  {$orderDir} "], $query);
+                } else {
+                    $query = str_replace(['{{{order}}}'], [" ORDER BY {$mapper[$orderColumn]} {$orderDir} "], $query);
+                }
+            }
+
+            $countTotalQuery = str_replace(['{{{search}}}', '{{{limit}}}'], ['', ''], $query);
+            $recordsTotal = count(DB::select($countTotalQuery));
+            $recordsFiltered = $recordsTotal;
+
+            if (! empty($searchValue)) {
+                $searchQuery = " AND (
+                    models.name LIKE '%{$searchValue}%'
+                    OR model_name LIKE '%{$searchValue}%'
+                    OR model_volume_cc LIKE '%{$searchValue}%'
+                    OR model_x_length LIKE '%{$searchValue}%'
+                    OR model_y_length LIKE '%{$searchValue}%'
+                    OR model_z_length LIKE '%{$searchValue}%'
+                    OR model_surface_area_cm2 LIKE '%{$searchValue}%'
+                    OR categories LIKE '%{$searchValue}%'
+                    OR materials.name LIKE '%{$searchValue}%'
+                ) ";
+
+                $query = str_replace(['{{{search}}}'], [$searchQuery], $query);
+                $countFilteredQuery = str_replace(['{{{limit}}}'], [''], $query);
+                $recordsFiltered = count(DB::select($countFilteredQuery));
+            } else {
+                $query = str_replace(['{{{search}}}'], [''], $query);
+            }
+
+            $query = str_replace(['{{{limit}}}'], [" LIMIT {$pageLength} OFFSET {$skip}"], $query);
+            $modelsToShow = array_column(DB::select($query), 'id');
+    //        dd($recordsTotal, $recordsFiltered, DB::select($query));
+
+            $models = Model::with(['materials.prices', 'customer.shopOwner', 'shopListingModel'])
+                ->whereIn('id', $modelsToShow)
+                ->get();
+    //        dd($skip, $pageLength, $recordsTotal, $recordsFiltered, $models);
+            return ['items' => ModelResource::collection($models), 'filtered' => $recordsFiltered, 'total' => $recordsTotal];
+        });
+    }
+
+    public function getModelsPaginatedOld($request, Customer $customer)
+    {
+        // Page Length
+        $pageNumber = ( $request->start / $request->length ) + 1;
+        $pageLength = (int) $request->length;
+        $skip = (int) (($pageNumber - 1) * $pageLength);
+
 
         $builder = $customer->models();
 
