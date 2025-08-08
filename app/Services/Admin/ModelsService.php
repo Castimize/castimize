@@ -53,7 +53,7 @@ class ModelsService
                 ];
 
                 if (! isset($mapper, $orderColumn)) {
-                    $query = str_replace(['{{{order}}}'], [' ORDER BY id DESC '], $query);
+                    $query = str_replace(['{{{order}}}'], [' ORDER BY models.name ASC '], $query);
                 } elseif ($mapper[$orderColumn] === 'name') {
                     $query = str_replace(['{{{order}}}'], [" ORDER BY model_name {$orderDir}, models.name  {$orderDir} "], $query);
                 } else {
