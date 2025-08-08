@@ -172,6 +172,8 @@ class ModelsService
     {
         $systemUser = User::find(1);
 
+        $scale = $request->scale ? number_format(round((float) $request->scale, 4), 4) : 1;
+
         $material = Material::where('wp_id', $request->wp_id)->first();
         $fileName = $request->file_name;
         $categories = null;
@@ -186,7 +188,7 @@ class ModelsService
 
         if ($customer) {
             $model = $customer->models->where('name', $request->original_file_name)
-                ->where('model_scale', $request->scale ?? 1)
+                ->where('model_scale', $scale ?? 1)
                 ->first();
 
             if ($model) {
@@ -195,7 +197,7 @@ class ModelsService
         } else {
             $model = Model::where('name', $request->original_file_name)
                 ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
-                ->where('model_scale', $request->scale ?? 1)
+                ->where('model_scale', $scale ?? 1)
                 ->first();
         }
 
@@ -284,7 +286,7 @@ class ModelsService
             'model_surface_area_cm2' => $request->surface_area,
             'model_parts' => $request->model_parts ?? 1,
             'model_box_volume' => $request->box_volume,
-            'model_scale' => $request->scale ?? 1,
+            'model_scale' => $scale,
             'meta_data' => $request->meta_data ?? null,
             'categories' => $categories,
         ]);
@@ -306,6 +308,10 @@ class ModelsService
             if ($model) {
                 if (empty($model->model_name)) {
                     $model->model_name = $modelDTO->modelName;
+                    $model->save();
+                }
+                if (empty($model->categories) && $modelDTO->categories !== null) {
+                    $model->categories = $modelDTO->categories;
                     $model->save();
                 }
 
