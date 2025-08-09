@@ -60,6 +60,7 @@ class ModelResource extends JsonResource
             'is_shop_owner' => $isShopOwner,
             'shop_listing_id' => $this->shopListingModel?->shop_listing_id ?? null,
             'materials' => MaterialResource::collection($this->materials)->toArray($request),
+            'display_model_name' => $this->model_name ?? $this->name,
             'model_name' => $this->model_name,
             'name' => $this->name,
             'file_name' => $this->file_name,

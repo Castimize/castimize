@@ -44,7 +44,7 @@ class ModelsService
             if ($orderColumn) {
                 $mapper = [
                     'id' => 'id',
-                    'name' => 'name',
+                    'name' => 'order_model_name',
                     'material' => 'material_name',
                     'material_volume' => 'model_volume_cc',
                     'surface_area' => 'model_surface_area_cm2',
@@ -86,11 +86,15 @@ class ModelsService
             }
 
             $query = str_replace(['{{{limit}}}'], [" LIMIT {$pageLength} OFFSET {$skip}"], $query);
+//            dd(DB::select($query));
             $modelsToShow = array_column(DB::select($query), 'id');
+            $modelsToShowAsString = implode(',', $modelsToShow);
     //        dd($recordsTotal, $recordsFiltered, DB::select($query));
 
             $models = Model::with(['materials.prices', 'customer.shopOwner', 'shopListingModel'])
+//                ->selectRaw("*, IFNULL(model_name, models.name) as order_model_name")
                 ->whereIn('id', $modelsToShow)
+                ->orderByRaw("FIELD(id, $modelsToShowAsString)")
                 ->get();
     //        dd($skip, $pageLength, $recordsTotal, $recordsFiltered, $models);
             return ['items' => ModelResource::collection($models), 'filtered' => $recordsFiltered, 'total' => $recordsTotal];
