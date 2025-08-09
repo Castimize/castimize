@@ -31,7 +31,7 @@ class ModelsService
         $key = sprintf('%s-%s-%s-%s-%s-%s', $pageNumber, $pageLength, $skip, $orderColumn, $orderDir, $searchValue);
 
         return Cache::remember($key, 60, function () use ($customer, $pageLength, $skip, $orderColumn, $orderDir, $searchValue) {
-            $query = "SELECT models.id
+            $query = "SELECT models.id, IFNULL(model_name, models.name) as order_model_name
                       FROM models
                       LEFT JOIN material_model ON models.id = material_model.model_id
                       LEFT JOIN materials ON material_model.material_id = materials.id
@@ -53,9 +53,9 @@ class ModelsService
                 ];
 
                 if (! isset($mapper, $orderColumn)) {
-                    $query = str_replace(['{{{order}}}'], [' ORDER BY models.name ASC '], $query);
+                    $query = str_replace(['{{{order}}}'], [' ORDER BY order_model_name ASC '], $query);
                 } elseif ($mapper[$orderColumn] === 'name') {
-                    $query = str_replace(['{{{order}}}'], [" ORDER BY model_name {$orderDir}, models.name  {$orderDir} "], $query);
+                    $query = str_replace(['{{{order}}}'], [" ORDER BY order_model_name {$orderDir} "], $query);
                 } else {
                     $query = str_replace(['{{{order}}}'], [" ORDER BY {$mapper[$orderColumn]} {$orderDir} "], $query);
                 }
