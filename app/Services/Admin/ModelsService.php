@@ -86,17 +86,17 @@ class ModelsService
             }
 
             $query = str_replace(['{{{limit}}}'], [" LIMIT {$pageLength} OFFSET {$skip}"], $query);
-//            dd(DB::select($query));
             $modelsToShow = array_column(DB::select($query), 'id');
             $modelsToShowAsString = implode(',', $modelsToShow);
-    //        dd($recordsTotal, $recordsFiltered, DB::select($query));
 
-            $models = Model::with(['materials.prices', 'customer.shopOwner', 'shopListingModel'])
-//                ->selectRaw("*, IFNULL(model_name, models.name) as order_model_name")
-                ->whereIn('id', $modelsToShow)
-                ->orderByRaw("FIELD(id, $modelsToShowAsString)")
-                ->get();
-    //        dd($skip, $pageLength, $recordsTotal, $recordsFiltered, $models);
+            $modelsQuery = Model::with(['materials.prices', 'customer.shopOwner', 'shopListingModel'])
+                ->whereIn('id', $modelsToShow);
+
+            if ($modelsToShowAsString) {
+                $modelsQuery->orderByRaw("FIELD(id, $modelsToShowAsString)");
+            }
+
+            $models = $modelsQuery->get();
             return ['items' => ModelResource::collection($models), 'filtered' => $recordsFiltered, 'total' => $recordsTotal];
         });
     }
