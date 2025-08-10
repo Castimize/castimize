@@ -131,7 +131,7 @@ class ModelsApiController extends ApiController
                 $newUploads[$itemKey] = $upload;
                 if ($model) {
                     if ($model->thumb_name) {
-                        $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(env('FILESYSTEM_DISK'))->exists($model->thumb_name) ? sprintf('%s%s', env('AWS_URL'), $model->thumb_name) : '/' . $model->thumb_name;
+                        $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(env('FILESYSTEM_DISK'))->exists($model->thumb_name) ? sprintf('%s/%s', env('AWS_URL'), $model->thumb_name) : '/' . $model->thumb_name;
                     }
                     $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
                 }
