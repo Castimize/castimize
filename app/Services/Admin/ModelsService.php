@@ -36,6 +36,7 @@ class ModelsService
                       LEFT JOIN material_model ON models.id = material_model.model_id
                       LEFT JOIN materials ON material_model.material_id = materials.id
                       WHERE customer_id = {$customer->id}
+                      and models.deleted_at IS NULL
                       {{{search}}}
                       GROUP BY models.name, model_name, model_scale
                       {{{order}}}
@@ -174,8 +175,6 @@ class ModelsService
 
     public function storeModelFromApi($request, ?Customer $customer = null): Model|null
     {
-        $systemUser = User::find(1);
-
         $scale = $request->scale ? number_format(round((float) $request->scale, 4), 4) : 1;
 
         $material = Material::where('wp_id', $request->wp_id)->first();
