@@ -303,6 +303,13 @@ class ModelsService
     {
         $material = Material::where('wp_id', $modelDTO->wpId)->first();
 
+        $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $modelDTO->thumbName);
+        $fileName = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $modelDTO->fileName);
+        $fileUrl = sprintf('%s/%s', env('APP_SITE_URL'), $fileName);
+        $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
+        $fileHeaders = get_headers($fileUrl);
+        $withoutResizedFileName = str_replace('_resized', '', $fileName);
+
         if ($customer) {
             $model = $customer->models->where('name', $modelDTO->name)
                 ->where('model_scale', $modelDTO->modelScale)
@@ -315,6 +322,11 @@ class ModelsService
                 }
                 if (empty($model->categories) && $modelDTO->categories !== null) {
                     $model->categories = $modelDTO->categories;
+                    $model->save();
+                }
+
+                if ($modelDTO->uploadedThumb) {
+                    $model->thumb_name = $fileNameThumb;
                     $model->save();
                 }
 
@@ -332,13 +344,6 @@ class ModelsService
                 ->where('model_scale', $modelDTO->modelScale)
                 ->first();
         }
-
-        $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $modelDTO->thumbName);
-        $fileName = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $modelDTO->fileName);
-        $fileUrl = sprintf('%s/%s', env('APP_SITE_URL'), $fileName);
-        $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
-        $fileHeaders = get_headers($fileUrl);
-        $withoutResizedFileName = str_replace('_resized', '', $fileName);
 
 //        try {
 //            // Check files exists on local storage of site and not on R2
