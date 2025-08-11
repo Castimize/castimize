@@ -320,7 +320,7 @@ class ModelsService
                     $model->model_name = $modelDTO->modelName;
                     $model->save();
                 }
-                if (empty($model->categories) && $modelDTO->categories !== null) {
+                if ($modelDTO->categories !== null) {
                     $model->categories = $modelDTO->categories;
                     $model->save();
                 }
