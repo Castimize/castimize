@@ -315,7 +315,7 @@ class ModelsService
                 ->where('model_scale', $modelDTO->modelScale)
                 ->first();
 
-            if ($model) {
+            if ($model && empty($model->model_name)) {
                 if (empty($model->model_name)) {
                     $model->model_name = $modelDTO->modelName;
                     $model->save();
@@ -363,13 +363,14 @@ class ModelsService
         }
 
         if ($model) {
+            $model->model_name = $modelDTO->modelName;
+            $model->categories = $modelDTO->categories;
             $model->thumb_name = $fileNameThumb;
-            $model->save();
 
             if (empty($model->customer_id) && $customer) {
                 $model->customer_id = $customer->id;
-                $model->save();
             }
+            $model->save();
 
             $model->materials()->syncWithoutDetaching([$material->id]);
 
