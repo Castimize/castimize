@@ -122,7 +122,7 @@ class ModelsApiController extends ApiController
                 $material = Material::where('wp_id', ($upload['3dp_options']['material_id'] ?? $materialId))->first();
                 $model = null;
                 if ($material) {
-                    $model = $customer->models
+                    $model = $customer->models()
                         ->whereHas('materials', function ($query) use ($upload, $materialId) {
                             $query->where('id', ($upload['3dp_options']['material_id'] ?? $materialId));
                         })
