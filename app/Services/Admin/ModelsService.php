@@ -277,41 +277,6 @@ class ModelsService
         $fileHeaders = get_headers($fileUrl);
         $withoutResizedFileName = str_replace('_resized', '', $fileName);
 
-        if ($customer) {
-            $model = $customer->models->where('name', $modelDTO->name)
-                ->where('model_scale', $modelDTO->modelScale)
-                ->first();
-
-            if ($model && empty($model->model_name)) {
-                if (empty($model->model_name)) {
-                    $model->model_name = $modelDTO->modelName;
-                    $model->save();
-                }
-                if ($modelDTO->categories !== null) {
-                    $model->categories = $modelDTO->categories;
-                    $model->save();
-                }
-
-                if ($modelDTO->uploadedThumb) {
-                    $model->thumb_name = $fileNameThumb;
-                    $model->save();
-                }
-
-                $model->materials()->syncWithoutDetaching([$material->id]);
-                $model->refresh();
-
-                return $this->isShopOwnerModel(
-                    model: $model,
-                    modelDTO: $modelDTO,
-                );
-            }
-        } else {
-            $model = Model::where('name', $modelDTO->name)
-                ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
-                ->where('model_scale', $modelDTO->modelScale)
-                ->first();
-        }
-
         try {
             // Check files exists on local storage of site and not on R2
             if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileName)) {
@@ -329,22 +294,55 @@ class ModelsService
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
 
-        if ($model) {
-            $model->model_name = $modelDTO->modelName;
-            $model->categories = $modelDTO->categories;
-            $model->thumb_name = $fileNameThumb;
+        if ($customer) {
+            $model = $customer->models->where('name', $modelDTO->name)
+                ->where('model_scale', $modelDTO->modelScale)
+                ->first();
 
-            if (empty($model->customer_id) && $customer) {
-                $model->customer_id = $customer->id;
+            if ($model && ($model->model_name === $modelDTO->modelName || empty($model->model_name))) {
+                if (empty($model->model_name)) {
+                    $model->model_name = $modelDTO->modelName;
+                }
+                if ($modelDTO->categories !== null) {
+                    $model->categories = $modelDTO->categories;
+                }
+
+                if ($modelDTO->uploadedThumb) {
+                    $model->thumb_name = $fileNameThumb;
+                }
+                $model->save();
+
+                $model->materials()->syncWithoutDetaching([$material->id]);
+                $model->refresh();
+
+                return $this->isShopOwnerModel(
+                    model: $model,
+                    modelDTO: $modelDTO,
+                );
             }
-            $model->save();
+        } else {
+            $model = Model::where('name', $modelDTO->name)
+                ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
+                ->where('model_scale', $modelDTO->modelScale)
+                ->first();
 
-            $model->materials()->syncWithoutDetaching([$material->id]);
+            if ($model) {
+                $model->model_name = $modelDTO->modelName;
+                $model->categories = $modelDTO->categories;
+                $model->thumb_name = $fileNameThumb;
 
-            return $this->isShopOwnerModel(
-                model: $model,
-                modelDTO: $modelDTO,
-            );
+                if (empty($model->customer_id) && $customer) {
+                    $model->customer_id = $customer->id;
+                }
+                $model->save();
+
+                $model->materials()->syncWithoutDetaching([$material->id]);
+
+                return $this->isShopOwnerModel(
+                    model: $model,
+                    modelDTO: $modelDTO,
+                );
+            }
         }
 
         $model = Model::create([
