@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTO\Model\ModelDTO;
 use App\DTO\Order\CalculateShippingFeeUploadDTO;
 use App\Http\Resources\CalculatedPriceResource;
 use App\Http\Resources\CalculatedShippingFeeResource;
@@ -46,7 +47,7 @@ class PricesApiController extends ApiController
             $request->get('original_file_name') !== null &&
             $request->get('file_name') !== $request->get('original_file_name')
         ) {
-            $this->modelsService->storeModelFromApi($request, $customer);
+            $this->modelsService->storeModelFromModelDTO(ModelDTO::fromApiRequest($request, $customer?->id), $customer);
         }
 
         $response = new CalculatedPriceResource($price);

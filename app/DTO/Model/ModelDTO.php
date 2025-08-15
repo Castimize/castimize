@@ -36,6 +36,48 @@ readonly class ModelDTO
     ) {
     }
 
+    public static function fromApiRequest(Request $request, ?int $customerId = null): ModelDTO
+    {
+        $material = Material::where('wp_id', $request->wp_id)->first();
+        $categories = null;
+        if ($request->categories) {
+            $categories = [];
+            foreach (explode(',', $request->categories) as $category) {
+                $categories[] = [
+                    'category' => $category,
+                ];
+            }
+        }
+        $uploadedThumb = false;
+        $thumbName = self::defineThumbImageName($request);
+
+        return new self(
+            wpId: (string) $request->wp_id,
+            customerId: $customerId,
+            shopListingId: null,
+            shopTaxonomyId: null,
+            materials: [$material],
+            printerId: $request->printer_id ?? 3,
+            coatingId: $request->coating_id ?? null,
+            unit: 'mm',
+            name: $request->original_file_name ?? $request->file_name ?? '',
+            modelName: $request->model_name ?? null,
+            fileName: $request->file_name,
+            thumbName: $thumbName,
+            uploadedThumb: $uploadedThumb,
+            modelVolumeCc: $request->material_volume,
+            modelXLength: $request->x_dim,
+            modelYLength: $request->y_dim,
+            modelZLength: $request->z_dim,
+            modelBoxVolume: $request->box_volume,
+            surfaceArea: $request->surface_area,
+            modelParts: $request->model_parts ?? 1,
+            modelScale: $request->scale ? number_format(round((float) $request->scale, 4), 4) : 1,
+            categories: $categories,
+            metaData: $request->meta_data ?? null,
+        );
+    }
+
     public static function fromWpRequest(Request $request, int $customerId): ModelDTO
     {
         $material = Material::where('wp_id', $request->wp_id)->first();
@@ -60,39 +102,7 @@ readonly class ModelDTO
             Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
         } else {
             $uploadedThumb = false;
-            //printer_id.material_id.coating_id.scale.unit
-            $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
-                str_replace('_resized', '', $request->file_name),
-                $request->printer_id ?? 3,
-                $request->wp_id ?? 1,
-                $request->coating_id ?? null,
-                $request->scale ?? 1,
-                'mm',
-            );
-
-            $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
-            $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
-            $fileHeaders = get_headers($fileThumb);
-            if (str_contains($fileHeaders[0], '404')) {
-                $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
-                    str_replace('_resized', '', $request->file_name),
-                    $request->printer_id ?? 3,
-                    1,
-                    $request->coating_id ?? null,
-                    1,
-                    'mm',
-                );
-
-                $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
-                $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
-                $fileHeaders = get_headers($fileThumb);
-                if (str_contains($fileHeaders[0], '404')) {
-                    $model = Model::where('file_name', 'like', '%' . str_replace('_resized', '', $request->file_name) . '%')->first();
-                    if ($model) {
-                        $thumbName = str_replace(env('APP_SITE_STL_UPLOAD_DIR'), '', $model->thumb_name);
-                    }
-                }
-            }
+            $thumbName = self::defineThumbImageName($request);
         }
 
         return new self(
@@ -170,5 +180,46 @@ readonly class ModelDTO
             categories: $categories,
             metaData: $model->meta_data,
         );
+    }
+
+    /**
+     * @param Request $request
+     * @return array|string|string[]
+     */
+    private static function defineThumbImageName(Request $request): string|array
+    {
+        $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
+            str_replace('_resized', '', $request->file_name),
+            $request->printer_id ?? 3,
+            $request->wp_id ?? 1,
+            $request->coating_id ?? null,
+            $request->scale ?? 1,
+            'mm',
+        );
+
+        $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
+        $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
+        $fileHeaders = get_headers($fileThumb);
+        if (str_contains($fileHeaders[0], '404')) {
+            $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
+                str_replace('_resized', '', $request->file_name),
+                $request->printer_id ?? 3,
+                1,
+                $request->coating_id ?? null,
+                1,
+                'mm',
+            );
+
+            $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
+            $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
+            $fileHeaders = get_headers($fileThumb);
+            if (str_contains($fileHeaders[0], '404')) {
+                $model = Model::where('file_name', 'like', '%' . str_replace('_resized', '', $request->file_name) . '%')->first();
+                if ($model) {
+                    $thumbName = str_replace(env('APP_SITE_STL_UPLOAD_DIR'), '', $model->thumb_name);
+                }
+            }
+        }
+        return $thumbName;
     }
 }
