@@ -45,6 +45,7 @@ class LogRequest extends Resource
         'http_code',
         'method',
         'user_agent',
+        'remote_address',
     ];
 
     /**
