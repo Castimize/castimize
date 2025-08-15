@@ -36,7 +36,7 @@ class ModelResource extends JsonResource
             $calculatedTotal = (new CalculatePricesService())->calculatePriceOfModel($price, $this->model_volume_cc, $this->model_surface_area_cm2);
         }
 
-        $fileThumbnail = null;
+//        $fileThumbnail = null;
         $siteThumb = sprintf('%s/%s', env('APP_SITE_URL'), $thumb);
         if (Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb)) {
             $fileThumbnail = sprintf('%s/%s', env('AWS_URL'), $thumb);
@@ -60,6 +60,7 @@ class ModelResource extends JsonResource
             'is_shop_owner' => $isShopOwner,
             'shop_listing_id' => $this->shopListingModel?->shop_listing_id ?? null,
             'materials' => MaterialResource::collection($this->materials)->toArray($request),
+            'display_model_name' => $this->model_name ?? $this->name,
             'model_name' => $this->model_name,
             'name' => $this->name,
             'file_name' => $this->file_name,

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTO\Model\ModelDTO;
 use App\DTO\Order\CalculateShippingFeeUploadDTO;
 use App\Http\Resources\CalculatedPriceResource;
 use App\Http\Resources\CalculatedShippingFeeResource;
+use App\Models\Customer;
 use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ModelsService;
@@ -34,9 +36,18 @@ class PricesApiController extends ApiController
                 'errors' => $e->getMessage(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+        $customer = null;
+        if ($request->has('customer_id') && ! empty($request->customer_id)) {
+            $customer = Customer::where('wp_id', $request->customer_id)->first();
+        }
 
-        if ($request->has('file_name', 'original_file_name') && $request->get('file_name') !== null && $request->get('original_file_name') !== null) {
-            $this->modelsService->storeModelFromApi($request);
+        if (
+            $request->has('file_name', 'original_file_name') &&
+            $request->get('file_name') !== null &&
+            $request->get('original_file_name') !== null &&
+            $request->get('file_name') !== $request->get('original_file_name')
+        ) {
+            $this->modelsService->storeModelFromModelDTO(ModelDTO::fromApiRequest($request, $customer?->id), $customer);
         }
 
         $response = new CalculatedPriceResource($price);

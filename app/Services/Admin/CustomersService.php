@@ -290,7 +290,7 @@ class CustomersService
             $state = null;
             if ($stateName) {
                 $state = State::firstOrCreate(
-                    ['name' => $stateName],
+                    ['slug' => Str::slug($stateName)],
                     ['name' => $stateName, 'slug' => Str::slug($stateName), 'country_id' => $country->id]
                 );
             }
@@ -298,7 +298,7 @@ class CustomersService
             $city = null;
             if ($cityName) {
                 $city = City::firstOrCreate(
-                    ['name' => $cityName],
+                    ['slug' => Str::slug($cityName)],
                     ['name' => $cityName, 'slug' => Str::slug($cityName), 'state_id' => $state?->id, 'country_id' => $country->id]
                 );
             }
