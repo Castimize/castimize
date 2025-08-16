@@ -358,7 +358,7 @@ class ModelsService
                 if ($shopListingId && ! empty($shopListingId)) {
                     $listing = $etsyService->getListing($shop, $shopListingId);
                     if (! $listing) {
-                        Log::error('Lsting not found');
+                        Log::error('Listing not found');
                         $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
                         return $model;
                     }
