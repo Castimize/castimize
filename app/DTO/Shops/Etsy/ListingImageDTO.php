@@ -7,7 +7,7 @@ namespace App\DTO\Shops\Etsy;
 use App\Models\Model;
 use Illuminate\Support\Facades\Storage;
 
-readonly class ListingImageDTO
+class ListingImageDTO
 {
     public function __construct(
         public int $shopId,

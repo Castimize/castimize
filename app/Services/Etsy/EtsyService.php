@@ -438,7 +438,7 @@ class EtsyService
         try {
             $listing = $etsyListingService->createDraftListing($listingDTO);
         } catch (Exception $exception) {
-            dd($exception);
+            Log::error($exception->getMessage() . PHP_EOL . $exception->getFile() . PHP_EOL . $exception->getTraceAsString());
         }
 
         if ($listing) {
@@ -489,9 +489,12 @@ class EtsyService
         $etsyListingService = new EtsyListingService(
             shop: $shop,
         );
-        $listingDTO = ListingDTO::fromModel($shop, $model);
-        $listing = $etsyListingService->getListing(
-            listingId: $listingDTO->listingId,
+        $listing = $this->getListing($shop, $model->shopListingModel->shop_listing_id);
+
+        $listingDTO = ListingDTO::fromModel(
+            shop: $shop,
+            model: $model,
+            listing: $listing,
         );
 
         Log::info('Update listing: ' . $listingDTO->listingId);
@@ -533,6 +536,7 @@ class EtsyService
 
     public function updateListingInventory(Shop $shop, ListingDTO $listingDTO, array $existingInventory): void
     {
+//        dd($existingInventory);
         Log::info('Listing inventory creating: ' . $listingDTO->listingId);
         $listingId = $listingDTO->listingId;
 
@@ -543,19 +547,6 @@ class EtsyService
             $currency = $listingInventory->currency;
             $quantity = $listingInventory->quantity;
             $isEnabled = $listingInventory->isEnabled;
-            if (array_key_exists('products', $existingInventory)) {
-                foreach ($existingInventory['products'] as $product) {
-                    foreach ($product['property_values'] as $propertyValue) {
-                        if ($propertyValue['property_name'] === 'Material' && $propertyValue['values'][0] === $listingInventory->name) {
-                            $offering = $product['offerings'][0];
-                            $sku = $product['sku'];
-                            $price = $offering['price']['amount'] / $offering['price']['divisor'];
-                            $quantity = $offering['quantity'];
-                            $isEnabled = $offering['is_enabled'];
-                        }
-                    }
-                }
-            }
             $variations[] = [
                 'sku' => $sku,
                 'material' => str_replace('(1µm)', '(1 micron)', $listingInventory->name),
@@ -565,7 +556,41 @@ class EtsyService
                 'is_enabled' => $isEnabled,
             ];
         }
-//        dd($variations);
+        try {
+            if (array_key_exists('products', $existingInventory)) {
+                foreach ($existingInventory['products'] as $product) {
+                    foreach ($product['property_values'] as $propertyValue) {
+                        if ($propertyValue['property_name'] === 'Material') {
+                            $offering = $product['offerings'][0];
+                            $index = null;
+                            for ($i = 0, $iMax = count($variations); $i < $iMax; $i++) {
+                                if ($propertyValue['values'][0] === $variations[$i]['material']) {
+                                    $index = $i;
+                                }
+                            }
+                            if ($index) {
+                                $variations[$index]['sku'] = $product['sku'];
+                                $variations[$index]['price'] = $offering['price']['amount'] / $offering['price']['divisor'];
+                                $variations[$index]['quantity'] = $offering['quantity'];
+                                $variations[$index]['is_enabled'] = $offering['is_enabled'];
+                            } else {
+                                $variations[] = [
+                                    'sku' => $product['sku'],
+                                    'material' => $propertyValue['values'][0],
+                                    'price' => $offering['price']['amount'] / $offering['price']['divisor'],
+                                    'quantity' => $offering['quantity'],
+                                    'currency_code' => $offering['price']['currency_code'],
+                                    'is_enabled' => $offering['is_enabled'],
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            Log::error($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString());
+        }
+
         try {
             $inventoryResponse = (new EtsyInventoryService(
                 shop: $shop,
