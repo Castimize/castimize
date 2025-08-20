@@ -51,6 +51,7 @@ class ModelsService
                     'surface_area' => 'model_surface_area_cm2',
                     'scale' => 'model_scale',
                     'categories' => 'categories',
+                    'link' => 'id',
                 ];
 
                 if (! isset($mapper, $orderColumn)) {
