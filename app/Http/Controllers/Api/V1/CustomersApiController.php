@@ -32,7 +32,9 @@ class CustomersApiController extends ApiController
 
     public function showCustomerWp(ShowCustomerWpRequest $request): CustomerResource
     {
-        $customer = Customer::where('wp_id', $request->wp_id)->first();
+        $customer = Customer::with(['orders'])
+            ->withCount('orders')
+            ->where('wp_id', $request->wp_id)->first();
         if ($customer === null) {
             LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');

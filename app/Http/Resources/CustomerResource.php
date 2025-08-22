@@ -27,7 +27,7 @@ class CustomerResource extends JsonResource
             'last_name' => $this->last_name,
             'username' => $this->user?->username,
             'last_order' => $lastOrderArray,
-            'order_count' => $this->orders->count(),
+            'order_count' => $this->orders_count ?? $this->orders->count(),
             'avatar' => $this->user?->avatar ? env('CLOUDFLARE_R2_URL') . $this->user->avatar : null,
             'date_created' => $this->created_at,
             'date_modified' => $this->updated_at,
