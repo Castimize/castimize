@@ -443,16 +443,16 @@ class OrdersService
                     $withoutResizedFileName = str_replace('_resized', '', $fileName);
                     $fileHeaders = get_headers($fileUrl);
                     // Check files exists on local storage of site and not on R2
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileName)) {
-                        Storage::disk('r2')->put($fileName, file_get_contents($fileUrl));
+                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
+                        Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
                     }
                     // Check files exists on local storage of site and not on R2 (without resized
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($withoutResizedFileName)) {
-                        Storage::disk('r2')->put($withoutResizedFileName, file_get_contents($fileUrl));
+                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
+                        Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
                     }
                     // Check file thumb exists on local storage of site and not on R2
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileNameThumb)) {
-                        Storage::disk('r2')->put($fileNameThumb, file_get_contents($fileThumb));
+                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
+                        Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
                     }
                 } catch (Exception $e) {
                     Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
@@ -579,16 +579,16 @@ class OrdersService
 
                 try {
                     // Check files exists on local storage of site and not on R2
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileName)) {
-                        Storage::disk('r2')->put($fileName, file_get_contents($fileUrl));
+                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
+                        Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
                     }
                     // Check files exists on local storage of site and not on R2 (without resized
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($withoutResizedFileName)) {
-                        Storage::disk('r2')->put($withoutResizedFileName, file_get_contents($fileUrl));
+                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
+                        Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
                     }
                     // Check file thumb exists on local storage of site and not on R2
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('r2')->exists($fileNameThumb)) {
-                        Storage::disk('r2')->put($fileNameThumb, file_get_contents($fileThumb));
+                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
+                        Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
                     }
                 } catch (Exception $e) {
                     Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
