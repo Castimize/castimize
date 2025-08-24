@@ -54,7 +54,7 @@ class PoRejectByManufacturerAction extends Action
         }
         $fileName = sprintf('%s-rejection-%s.%s', auth()->user()->manufacturer->id, time(), $fields->photo->extension());
         $fullFileName = 'admin/rejections/' . $fileName;
-        Storage::disk('s3_private')->putFileAs('admin/rejections/', $fields->photo, $fileName);
+        Storage::disk('r2_private')->putFileAs('admin/rejections/', $fields->photo, $fileName);
 
         foreach ($models as $model) {
             $rejectionReason = RejectionReason::find($fields->rejection_reason_id);
@@ -91,7 +91,7 @@ class PoRejectByManufacturerAction extends Action
             Textarea::make(__('Extra note'), 'note_manufacturer'),
 
             Image::make(__('Photo'), 'photo')
-                ->disk('s3_private')
+                ->disk('r2_private')
                 ->path('admin/rejections'),
         ];
     }

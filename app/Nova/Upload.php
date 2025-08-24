@@ -73,7 +73,7 @@ class Upload extends Resource
                 ->sortable(),
 
             File::make(__('Stl file'), 'file_name')
-                ->disk('s3')
+                ->disk('r2')
                 ->path('wp-content/uploads/p3d/')
                 ->acceptedTypes('.stl,.obj,.3ds'),
 
