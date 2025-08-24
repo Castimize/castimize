@@ -13,7 +13,7 @@ use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\CurrencyService;
 use Illuminate\Support\Collection;
 
-readonly class ListingDTO
+class ListingDTO
 {
     public function __construct(
         public int $shopId,
@@ -82,10 +82,10 @@ readonly class ListingDTO
             shopId: $shopOauth['shop_id'],
             listingId: $listing ? $listing->listing_id : ($listingId ?? $model->shopListingModel?->shop_listing_id ?? null),
             state: $listing ? $listing->state : null,
-            quantity: 1,
-            title: $model->model_name ?? $model->name,
-            description: '3D print model: ' . ($model->model_name ?? $model->name),
-            price: (int) ($price * 100),
+            quantity: $listing ? $listing->quantity : 1,
+            title: $listing ? $listing->title : $model->model_name ?? $model->name,
+            description: $listing ? $listing->description : '3D print model: ' . ($model->model_name ?? $model->name),
+            price: (int)  ($listing ? $listing->price->amount : ($price * 100)),
             whoMade: 'i_did',
             whenMade: 'made_to_order',
             taxonomyId: (int) ($taxonomyId ?? ($listing ? $listing->taxonomy_id : ($shopOauth['default_taxonomy_id'] ?? 12380))), // 3D Printer Files

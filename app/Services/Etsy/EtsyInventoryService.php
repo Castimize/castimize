@@ -61,20 +61,16 @@ class EtsyInventoryService
             ];
         }
 
-        try {
-            $payload = [
-                'products' => $inventoryProducts,
-                'price_on_property' => [514],
-                'quantity_on_property' => [514],
-                'sku_on_property' => [514],
-            ];
+        $payload = [
+            'products' => $inventoryProducts,
+            'price_on_property' => [514],
+            'quantity_on_property' => [514],
+            'sku_on_property' => [514],
+        ];
 //            dd($payload);
-            return $this->client->put("listings/{$listingId}/inventory", [
-                'json' => $payload,
-            ]);
-        } catch (Exception $e) {
-            dd($e->getMessage());
-        }
+        return $this->client->put("listings/{$listingId}/inventory", [
+            'json' => $payload,
+        ]);
     }
 }
 
