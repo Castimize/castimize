@@ -110,7 +110,8 @@ class PoReprintByDcAction extends Action
                     ReprintReason::all()->pluck('reason', 'id')->toArray()
                 )->displayUsingLabels(),
 
-            Textarea::make(__('Reason'),'reason'),
+            Textarea::make(__('Reason'),'reason')
+                ->required(),
         ];
     }
 }

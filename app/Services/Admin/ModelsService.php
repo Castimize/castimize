@@ -51,6 +51,7 @@ class ModelsService
                     'surface_area' => 'model_surface_area_cm2',
                     'scale' => 'model_scale',
                     'categories' => 'categories',
+                    'link' => 'id',
                 ];
 
                 if (! isset($mapper, $orderColumn)) {
@@ -358,7 +359,7 @@ class ModelsService
                 if ($shopListingId && ! empty($shopListingId)) {
                     $listing = $etsyService->getListing($shop, $shopListingId);
                     if (! $listing) {
-                        Log::error('Lsting not found');
+                        Log::error('Listing not found');
                         $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
                         return $model;
                     }
