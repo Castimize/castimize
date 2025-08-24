@@ -88,14 +88,14 @@ class Rejection extends Resource
             Textarea::make(__('Note Castimize'), 'note_castimize'),
 
             Image::make(__('Photo'), 'photo')
-                ->disk('s3_private')
+                ->disk('r2_private')
                 ->path('admin/rejections')
                 ->maxWidth(1024)
                 ->thumbnail(function($value, $disk) {
-                    return 'data: image/png;base64,' . base64_encode(Storage::disk('s3_private')->get($value));
+                    return 'data: image/png;base64,' . base64_encode(Storage::disk('r2_private')->get($value));
                 })
                 ->preview(function($value, $disk) {
-                    return 'data: image/png;base64,' . base64_encode(Storage::disk('s3_private')->get($value));
+                    return 'data: image/png;base64,' . base64_encode(Storage::disk('r2_private')->get($value));
                 }),
 
             DateTime::make(__('Approved at'), 'approved_at')

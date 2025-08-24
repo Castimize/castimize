@@ -99,7 +99,7 @@ readonly class ModelDTO
             $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
             $thumbFileExtension = $file->getClientOriginalExtension();
             $thumbName = time().'_'.str_replace(' ','_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
-            Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
+            Storage::disk('r2')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
         } else {
             $uploadedThumb = false;
             $thumbName = self::defineThumbImageName($request);
@@ -152,7 +152,7 @@ readonly class ModelDTO
             $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
             $thumbFileExtension = $file->getClientOriginalExtension();
             $thumbName = time().'_'.str_replace(' ','_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
-            Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
+            Storage::disk('r2')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
         }
 
         return new self(

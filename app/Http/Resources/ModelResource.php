@@ -39,7 +39,7 @@ class ModelResource extends JsonResource
 //        $fileThumbnail = null;
         $siteThumb = sprintf('%s/%s', env('APP_SITE_URL'), $thumb);
         if (Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb)) {
-            $fileThumbnail = sprintf('%s/%s', env('AWS_URL'), $thumb);
+            $fileThumbnail = sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $thumb);
         } else {
 //            $fileHeaders = get_headers($siteThumb);
 //            if (!str_contains($fileHeaders[0], '404')) {
@@ -65,7 +65,7 @@ class ModelResource extends JsonResource
             'name' => $this->name,
             'file_name' => $this->file_name,
             'raw_file_name' => str_replace('wp-content/uploads/p3d/', '', $this->file_name),
-            'file_url' => sprintf('%s/%s', env('AWS_URL'), str_replace('_resized', '', $this->file_name)),
+            'file_url' => sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), str_replace('_resized', '', $this->file_name)),
             'file_url_site' => sprintf('%s/%s', env('APP_SITE_URL'), str_replace('_resized', '', $this->file_name)),
             'file_thumbnail' => $fileThumbnail,
             'thumbnail_key' => $thumbnailKey,

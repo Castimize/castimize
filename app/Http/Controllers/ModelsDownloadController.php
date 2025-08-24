@@ -33,7 +33,7 @@ class ModelsDownloadController extends Controller
         foreach ($orderQueues as $orderQueue) {
             $rawFileName = str_replace('wp-content/uploads/p3d/', '', $orderQueue->upload->file_name);
             $zip->add(
-                sprintf('%s/%s', env('AWS_URL'), $orderQueue->upload->file_name),
+                sprintf('%s/%s', env('CLOUDFLARE_R2_URL'), $orderQueue->upload->file_name),
                 sprintf('%s-%s', $orderQueue->id, $rawFileName)
             );
         }
