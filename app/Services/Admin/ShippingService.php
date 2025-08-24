@@ -456,7 +456,7 @@ class ShippingService
             }
         }
         $errorMessages = [];
-        if ($validation_results['messages']) {
+        if (isset($validation_results['messages']) && $validation_results['messages']) {
             foreach ($validation_results['messages'] as $message) {
                 if ($message['type'] === 'address_error') {
                     $valid = 0;

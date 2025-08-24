@@ -155,7 +155,6 @@ class TestDataSeeder extends Seeder
         $material = $materialGroup->materials()->create([
             'currency_id' => 1,
             'name' => 'Gold',
-            'customer_lead_time' => 5,
             'fast_delivery_lead_time' => 2,
             'fast_delivery_fee' => 2000.00,
             'currency_code' => 'USD',
@@ -199,7 +198,7 @@ class TestDataSeeder extends Seeder
         ]);
 
         $complaintReason = ComplaintReason::create([
-            'name' => 'Niet volgens STL',
+            'reason' => 'Niet volgens STL',
             'created_at' => now()->format('Y-m-d H:i:s'),
             'created_by' => $systemUser->id,
         ]);
