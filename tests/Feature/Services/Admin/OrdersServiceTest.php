@@ -5,16 +5,19 @@ declare(strict_types=1);
 namespace Tests\Feature\Services\Admin;
 
 use App\Services\Admin\OrdersService;
-use Codexshaper\WooCommerce\Models\Order;
+use Codexshaper\WooCommerce\Facades\Order;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
+use Tests\Traits\NeedsWpOrder;
 
 class OrdersServiceTest extends TestCase
 {
+    use NeedsWpOrder;
     use RefreshDatabase;
 
     private OrdersService $ordersService;
@@ -26,6 +29,7 @@ class OrdersServiceTest extends TestCase
         $this->ordersService = app(OrdersService::class);
         Bus::fake();
         Queue::fake();
+        Event::fake();
     }
 
     /**
@@ -34,10 +38,13 @@ class OrdersServiceTest extends TestCase
     #[Test]
     public function it_creates_order_from_wp(): void
     {
-        $wpOrder = new Order();
-        $wpOrder->customer_id = 1;
-        dd($wpOrder);
-        $json = $this->getWPOrderData();
+        $wpOrder = Order::find(3324);
+        $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseHas('orders', [
+            'order_number' => $wpOrder->order_number,
+        ]);
     }
 
     /**
