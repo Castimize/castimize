@@ -19,6 +19,6 @@ class PrivateRejectionImageController extends Controller
             abort(Response::HTTP_NOT_FOUND);
         }
 
-        return response()->file(Storage::disk('s3_private')->path($rejection->photo));
+        return response()->file(Storage::disk('r2_private')->path($rejection->photo));
     }
 }
