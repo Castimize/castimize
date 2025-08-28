@@ -45,7 +45,7 @@ class OrdersService
             $country = Country::where('alpha2', 'nl')->first();
         }
         $customer = null;
-        if (!empty($wpOrder['customer_id'])) {
+        if (! empty($wpOrder['customer_id'])) {
             $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($wpOrder['customer_id']);
             $customer = $this->customersService->storeCustomerFromWpCustomer($wpCustomer);
         }

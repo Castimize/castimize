@@ -4,78 +4,74 @@ declare(strict_types=1);
 
 namespace Tests\Traits;
 
+use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Woocommerce\WcOrderStatesEnum;
 use Codexshaper\WooCommerce\Models\Order;
+use stdClass;
 
-trait NeedsWpOrder
+trait NeedsWoocommerceModel
 {
-    protected function createWpOrder(
+    protected function getWoocommerceOrder(
         ?int $orderNumber = null,
         ?WcOrderStatesEnum $wcOrderStatesEnum = null,
-    ): Order {
+        ?CurrencyEnum $currencyEnum = null,
+    ) {
         $orderNumber = $orderNumber ?? fake()->numberBetween(1000, 9999);
-        $wpOrder = new Order();
-        $wpOrder->id = $orderNumber;
-        $wpOrder->total = '211.51';
-        $wpOrder->number = $orderNumber;
-        $wpOrder->status = $wcOrderStatesEnum->value ?? fake()->randomElement(WcOrderStatesEnum::cases());
-        $wpOrder->billing = [
-            'city' => 'Amsterdam',
-            'email' => 'castimize@gmail.com',
-            'phone' => '+31612345678',
-            'state' => 'NH',
-            'company' => 'Castimize',
-            'country' => 'NL',
-            'postcode' => '1111AA',
-            'address_1' => 'Teststraat 1',
-            'address_2' => '',
-            'last_name' => 'de Tester',
-            'first_name' => 'Piet',
-        ];
-        $wpOrder->shipping = [
-            'city' => 'Amsterdam',
-            'email' => 'castimize@gmail.com',
-            'phone' => '+31612345678',
-            'state' => 'NH',
-            'company' => 'Castimize',
-            'country' => 'NL',
-            'postcode' => '1111AA',
-            'address_1' => 'Teststraat 1',
-            'address_2' => '',
-            'last_name' => 'de Tester',
-            'first_name' => 'Piet',
-        ];
-        $wpOrder->cart_tax = '0.00';
-        $wpOrder->currency = 'EUR';
-        $wpOrder->date_paid = '2025-04-07T20:09:58';
-        $wpOrder->documents = [
-                'invoice' => [
-                    'date' => '2025-04-07T20:09:59',
-                'number' => 240,
-                'date_timestamp' => 1744049399,
-            ],
-        ];
-        $wpOrder->fee_lines = [
-            [
-                'id' => 1677,
-                'name' => 'Paypal usage & Handling fee',
-                'taxes' => [],
-                'total' => '8.14',
-                'amount' => '8.135092',
-                'meta_data' => [
-                    [
-                        'id' => 25568,
-                        'key' => '_last_added_fee',
-                        'value' => 'Paypal usage & Handling fee',
-                        'display_key' => '_last_added_fee',
-                        'display_value' => 'Paypal usage &amp; Handling fee',
-                    ],
-                ],
-                'tax_class' => null,
-                'total_tax' => '0.00',
-                'tax_status' => 'taxable',
-            ],
-        ];
+        $wpOrder = [];
+        $wpOrder['id'] = $orderNumber;
+        $wpOrder['total'] = '211.51';
+        $wpOrder['number'] = $orderNumber;
+        $wpOrder['status'] = $wcOrderStatesEnum->value ?? fake()->randomElement(WcOrderStatesEnum::cases());
+        $wpOrder['billing'] = new stdClass();
+        $wpOrder['billing']->city = 'Amsterdam';
+        $wpOrder['billing']->email = 'castimize@gmail.com';
+        $wpOrder['billing']->phone = '+31612345678';
+        $wpOrder['billing']->state = 'NH';
+        $wpOrder['billing']->company = 'Castimize';
+        $wpOrder['billing']->country = 'NL';
+        $wpOrder['billing']->postcode = '1111AA';
+        $wpOrder['billing']->address_1 = 'Teststraat 1';
+        $wpOrder['billing']->address_2 = '';
+        $wpOrder['billing']->last_name = 'de Tester';
+        $wpOrder['billing']->first_name = 'Piet';
+        $wpOrder['shipping'] = new stdClass();
+        $wpOrder['shipping']->city = 'Amsterdam';
+        $wpOrder['shipping']->email = 'castimize@gmail.com';
+        $wpOrder['shipping']->phone = '+31612345678';
+        $wpOrder['shipping']->state = 'NH';
+        $wpOrder['shipping']->company = 'Castimize';
+        $wpOrder['shipping']->country = 'NL';
+        $wpOrder['shipping']->postcode = '1111AA';
+        $wpOrder['shipping']->address_1 = 'Teststraat 1';
+        $wpOrder['shipping']->address_2 = '';
+        $wpOrder['shipping']->last_name = 'de Tester';
+        $wpOrder['shipping']->first_name = 'Piet';
+        $wpOrder['cart_tax'] = '0.00';
+        $wpOrder['currency'] = $currencyEnum->value ?? CurrencyEnum::USD->value;
+        $wpOrder['date_paid'] = now()->format('c');
+        $wpOrder['documents'] = new stdClass();
+        $wpOrder['documents']->invoice = new stdClass();
+        $wpOrder['documents']->invoice->date = now()->addMinute()->format('c');
+        $wpOrder['documents']->invoice->number = fake()->numberBetween(1, 999);
+        $wpOrder['documents']->invoice->date_timestamp = now()->addMinute()->timestamp;
+        $wpOrder['fee_lines'] = new stdClass();
+        $wpOrder['fee_lines']->id = fake()->numberBetween(1, 9999);
+        $wpOrder['fee_lines']->name = 'Paypal usage & Handling fee';
+        $wpOrder['fee_lines']->taxes = [];
+        $wpOrder['fee_lines']->total = '8.14';
+        $wpOrder['fee_lines']->amount = '8.135092';
+        $wpOrder['fee_lines']->tax_class = null;
+        $wpOrder['fee_lines']->total_tax = '0.00';
+        $wpOrder['fee_lines']->tax_status = 'taxable';
+        $wpOrder['fee_lines']->meta_data = [];
+        $feeLineMetaData = new stdClass();
+        $feeLineMetaData->id = fake()->numberBetween(1, 99999);
+        $feeLineMetaData->key = '_last_added_fee';
+        $feeLineMetaData->value = 'Paypal usage & Handling fee';
+        $feeLineMetaData->display_key = '_last_added_fee';
+        $feeLineMetaData->display_value = 'Paypal usage & Handling fee';
+        $wpOrder['fee_lines']->meta_data[] = $feeLineMetaData;
+
         $wpOrder->meta_data = [
             [
                 'id' => 9457,

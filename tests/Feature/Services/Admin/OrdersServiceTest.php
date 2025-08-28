@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Services\Admin;
 
+use App\Enums\Woocommerce\WcOrderStatesEnum;
 use App\Services\Admin\OrdersService;
 use Codexshaper\WooCommerce\Facades\Order;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,11 +14,11 @@ use Illuminate\Support\Facades\Queue;
 use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
-use Tests\Traits\NeedsWpOrder;
+use Tests\Traits\NeedsWoocommerceModel;
 
 class OrdersServiceTest extends TestCase
 {
-    use NeedsWpOrder;
+    use NeedsWoocommerceModel;
     use RefreshDatabase;
 
     private OrdersService $ordersService;
@@ -38,12 +39,14 @@ class OrdersServiceTest extends TestCase
     #[Test]
     public function it_creates_order_from_wp(): void
     {
-        $wpOrder = Order::find(3324);
+//        $wpOrder = Order::find(3324);
+        $wpOrder = $this->getWoocommerceOrder(3324, WcOrderStatesEnum::Processing);
+        dd($wpOrder);
         $this->ordersService->storeOrderFromWpOrder($wpOrder);
 
         $this->assertDatabaseCount('orders', 1);
         $this->assertDatabaseHas('orders', [
-            'order_number' => $wpOrder->order_number,
+            'order_number' => $wpOrder['number'],
         ]);
     }
 

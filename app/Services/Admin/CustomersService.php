@@ -20,7 +20,7 @@ class CustomersService
     {
         $customer = Customer::with(['addresses'])->where('wp_id', $wpCustomer['id'])->first();
 
-        if ($customer === null && !empty($wpCustomer['email'])) {
+        if ($customer === null && ! empty($wpCustomer['email'])) {
             $customer = Customer::with(['addresses'])->where('email', $wpCustomer['email'])->first();
         }
 
