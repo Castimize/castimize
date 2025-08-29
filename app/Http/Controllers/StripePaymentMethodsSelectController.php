@@ -9,7 +9,6 @@ use Illuminate\Validation\ValidationException;
 
 class StripePaymentMethodsSelectController extends Controller
 {
-
     public function __construct(
         private StripeService $stripeService,
     ) {}

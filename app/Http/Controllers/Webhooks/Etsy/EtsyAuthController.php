@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EtsyAuthController
 {
-
     public function __invoke(Request $request, EtsyService $etsyService)
     {
         try {

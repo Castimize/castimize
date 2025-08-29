@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PrivateRejectionImageController extends Controller
 {
-
     public function __invoke(Request $request, int $id)
     {
         $rejection = Rejection::find($id);

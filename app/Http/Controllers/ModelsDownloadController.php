@@ -8,7 +8,6 @@ use STS\ZipStream\Facades\Zip;
 
 class ModelsDownloadController extends Controller
 {
-
     public function __invoke(Request $request)
     {
         if (! $request->hasValidSignature()) {

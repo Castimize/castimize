@@ -10,15 +10,11 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
-     *
-     * @return void
      */
     public function boot(): void {}
 
     /**
      * Register the application services.
-     *
-     * @return void
      */
     public function register(): void
     {

@@ -8,7 +8,6 @@ use Spatie\LaravelPdf\Facades\Pdf;
 
 class PoLabelsDownloadController extends Controller
 {
-
     public function __invoke(Request $request)
     {
         if (! $request->hasValidSignature()) {
