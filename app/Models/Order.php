@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use App\Filters\RemoveTestCustomerIdsFilter;
 use App\Filters\RemoveTestEmailAddressesFilter;
 use App\Observers\OrderObserver;
@@ -392,14 +393,16 @@ class Order extends Model
         return $this->hasMany(InvoiceLine::class);
     }
 
-    public function scopeRemoveTestEmailAddresses($query, string $column)
+    #[Scope]
+    protected function removeTestEmailAddresses($query, string $column)
     {
         $removeTestEmailAddressesFilter = new RemoveTestEmailAddressesFilter($column);
 
         return $query->tap($removeTestEmailAddressesFilter);
     }
 
-    public function scopeRemoveTestCustomerIds($query, string $column)
+    #[Scope]
+    protected function removeTestCustomerIds($query, string $column)
     {
         $removeTestEmailAddressesFilter = new RemoveTestCustomerIdsFilter($column);
 

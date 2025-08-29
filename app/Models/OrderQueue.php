@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use App\Enums\Admin\OrderStatusesEnum;
 use App\Filters\HasLastOrderQueueStatusFilter;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
@@ -206,7 +207,8 @@ class OrderQueue extends Model
         return $this->hasOne(Reprint::class);
     }
 
-    public function scopeWhereHasLastOrderQueueStatus($query, string $statusSlug): void
+    #[Scope]
+    protected function whereHasLastOrderQueueStatus($query, string $statusSlug): void
     {
         $hasLastOrderQueueStatusFilter = new HasLastOrderQueueStatusFilter($statusSlug);
         $query->tap($hasLastOrderQueueStatusFilter);
