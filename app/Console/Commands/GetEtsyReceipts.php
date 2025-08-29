@@ -42,7 +42,7 @@ class GetEtsyReceipts extends Command
         WoocommerceApiService $woocommerceApiService,
         ShopOrderService $shopOrderService,
         StripeService $stripeService,
-    ) {
+    ): int {
         $date = now()->subDays(14);
         $shops = Shop::with(['shopOwner.customer'])->where('id', 2)->where('active', true)->where('shop', ShopOwnerShopsEnum::Etsy->value)->get();
 

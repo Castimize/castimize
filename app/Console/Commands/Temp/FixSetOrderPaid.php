@@ -25,7 +25,7 @@ class FixSetOrderPaid extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $paymentIntent = (new StripeService)->getPaymentIntent('pi_3QFQFD0004dOynzN0vbN8CLp');
         SetOrderPaid::dispatch($paymentIntent, null);

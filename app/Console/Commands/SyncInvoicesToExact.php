@@ -27,7 +27,7 @@ class SyncInvoicesToExact extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $invoices = Invoice::with(['customer', 'lines'])
 //            ->where('id', 22)

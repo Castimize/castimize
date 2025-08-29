@@ -25,7 +25,7 @@ class FixExpectedDeliveryDate extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $query = ManufacturerShipment::with('trackingStatuses')
             ->withTrashed()

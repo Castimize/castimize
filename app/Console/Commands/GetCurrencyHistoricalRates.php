@@ -30,7 +30,7 @@ class GetCurrencyHistoricalRates extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $baseCurrency = config('app.currency');
         $supportedCurrencies = config('app.supported_currencies');

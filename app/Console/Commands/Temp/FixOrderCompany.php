@@ -24,7 +24,7 @@ class FixOrderCompany extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $query = Order::withTrashed()
             ->whereNotNull('wp_id');

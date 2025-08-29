@@ -25,7 +25,7 @@ class FixCustomerNames extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         //        $wpCustomers = \Codexshaper\WooCommerce\Facades\Customer::all();
         $customers = Customer::whereNotNull('wp_id')->orderByDesc('id')->get();

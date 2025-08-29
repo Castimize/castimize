@@ -30,7 +30,7 @@ class SyncHistoryExchangeRatesToExact extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $dateFrom = Carbon::parse('2025-02-01');
         $dateTo = now();

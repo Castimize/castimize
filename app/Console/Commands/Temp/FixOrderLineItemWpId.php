@@ -24,7 +24,7 @@ class FixOrderLineItemWpId extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $query = Order::with(['uploads'])
             ->withTrashed()

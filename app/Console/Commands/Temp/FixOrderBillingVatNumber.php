@@ -24,7 +24,7 @@ class FixOrderBillingVatNumber extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $query = Order::withTrashed()
             ->whereNull('billing_vat_number')

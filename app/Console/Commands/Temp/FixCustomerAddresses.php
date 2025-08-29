@@ -26,7 +26,7 @@ class FixCustomerAddresses extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $customersService = new CustomersService;
         //        $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find(866);

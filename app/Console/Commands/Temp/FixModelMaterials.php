@@ -24,7 +24,7 @@ class FixModelMaterials extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $customers = Customer::withTrashed()->get();
 
