@@ -6,6 +6,7 @@
 /public/vendor/nova
 /public/vendor/nova-kit
 /storage/*.key
+/storage/pail
 /vendor
 .env
 .env.backup
@@ -19,4 +20,5 @@ npm-debug.log
 yarn-error.log
 /.fleet
 /.idea
+/.nova
 /.vscode
