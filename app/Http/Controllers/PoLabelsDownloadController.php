@@ -3,20 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\OrderQueue;
-use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Spatie\LaravelPdf\Facades\Pdf;
 
 class PoLabelsDownloadController extends Controller
 {
-    use ValidatesRequests;
 
     public function __invoke(Request $request)
     {
         if (! $request->hasValidSignature()) {
             abort(401);
         }
-        $data = $this->validate($request, [
+        $data = $request->validate([
             'manufacturer_id' => 'required',
             'order_queue_ids' => 'required',
             'filename' => 'required',
