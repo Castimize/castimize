@@ -7,15 +7,9 @@ use Illuminate\Support\Facades\Route;
 
 // Route::get('/user', [UsersApiController::class, 'show'])->can('viewUser')->middleware('auth:sanctum');
 
-Route::group(['middleware' => [RequestLogger::class]], function () {
-    Route::group([
-        'prefix' => 'v1',
-        'as' => 'api.',
-        'namespace' => 'App\Http\Controllers\Api\V1',
-    ], function () {
-        Route::group([
-            'middleware' => ['auth:sanctum', AuthGates::class],
-        ], function () {
+Route::middleware(RequestLogger::class)->group(function () {
+    Route::prefix('v1')->name('api.')->namespace('App\Http\Controllers\Api\V1')->group(function () {
+        Route::middleware('auth:sanctum', AuthGates::class)->group(function () {
             // Users
             Route::get('user', 'UsersApiController@show')->name('api.users.get-user');
             Route::post('users/wp', 'UsersApiController@storeUserWp')->name('api.users.store-user-wp');

@@ -12,24 +12,19 @@ use App\Http\Middleware\VerifyStripeWebhookSignature;
 use App\Services\Exact\ExactOnlineService;
 use Illuminate\Support\Facades\Route;
 
-Route::group([
-    'prefix' => 'exact',
-    'namespace' => 'App\Http\Controllers',
-], function () {
-    Route::get('connect', ['as' => 'exact.connect', 'uses' => 'ExactOnlineController@appConnect']);
-    Route::post('authorize', ['as' => 'exact.authorize', 'uses' => 'ExactOnlineController@appAuthorize']);
-    Route::get('oauth', ['as' => 'exact.callback', 'uses' => 'ExactOnlineController@appCallback']);
-    Route::post('callback-webhook', ['as' => 'exact.webhook', 'uses' => 'ExactOnlineController@appCallbackWebhook']);
+Route::prefix('exact')->namespace('App\Http\Controllers')->group(function () {
+    Route::get('connect', 'ExactOnlineController@appConnect')->name('exact.connect');
+    Route::post('authorize', 'ExactOnlineController@appAuthorize')->name('exact.authorize');
+    Route::get('oauth', 'ExactOnlineController@appCallback')->name('exact.callback');
+    Route::post('callback-webhook', 'ExactOnlineController@appCallbackWebhook')->name('exact.webhook');
 
     Route::get('test', function () {
         dd((new ExactOnlineService)->getGlAccounts());
     });
 });
 
-Route::group(['middleware' => [RequestLogger::class]], function () {
-    Route::group([
-        'namespace' => 'App\Http\Controllers',
-    ], function () {
+Route::middleware(RequestLogger::class)->group(function () {
+    Route::namespace('App\Http\Controllers')->group(function () {
         Route::post('/webhooks/payment/stripe/callback', StripeWebhookController::class)
             ->name('webhooks.payment.stripe.callback')
             ->middleware(VerifyStripeWebhookSignature::class);
@@ -38,10 +33,7 @@ Route::group(['middleware' => [RequestLogger::class]], function () {
             ->middleware(VerifyShippoWebhookSignature::class);
     });
 
-    Route::group([
-        'prefix' => 'providers',
-        'namespace' => 'App\Http\Controllers',
-    ], function () {
+    Route::prefix('providers')->namespace('App\Http\Controllers')->group(function () {
         Route::get('etsy/oauth', EtsyAuthController::class)
             ->name('providers.etsy.oauth');
     });
