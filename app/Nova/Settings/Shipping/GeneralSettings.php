@@ -3,20 +3,24 @@
 namespace App\Nova\Settings\Shipping;
 
 use App\Enums\Shippo\ShippoVatTypesEnum;
-use App\Services\Shippo\ShippoService;
 use Devloops\NovaSystemSettings\Contracts\SystemSettings;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 
-
 class GeneralSettings extends SystemSettings
 {
     public ?string $upsCarrierAccount;
+
     public ?string $eoriNumber;
+
     public ?string $eoriNumberGb;
+
     public ?string $taxNumber;
+
     public ?string $taxType;
+
     public ?string $contentsExplanation;
+
     public ?string $certifySigner;
 
     public static function group(): string

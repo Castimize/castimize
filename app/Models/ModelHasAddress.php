@@ -10,6 +10,7 @@ class ModelHasAddress extends Pivot
     use HasFactory;
 
     public $incrementing = false;
+
     protected $primaryKey = ['address_id', 'model_type', 'model_id'];
 
     /**

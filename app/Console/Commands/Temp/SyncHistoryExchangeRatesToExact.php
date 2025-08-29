@@ -4,7 +4,6 @@ namespace App\Console\Commands\Temp;
 
 use App\Jobs\SyncExchangeRateToExact;
 use App\Models\CurrencyHistoryRate;
-use App\Services\Exact\ExactOnlineService;
 use AshAllenDesign\LaravelExchangeRates\Classes\ExchangeRate;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -53,7 +52,7 @@ class SyncHistoryExchangeRatesToExact extends Command
                     ->where('historical_date', $date->format('Y-m-d'))
                     ->first();
 
-                if (!$currencyHistoryRate) {
+                if (! $currencyHistoryRate) {
                     $result = $exchangeRates->exchangeRate(
                         from: $baseCurrency,
                         to: $supportedCurrencies,
@@ -72,7 +71,7 @@ class SyncHistoryExchangeRatesToExact extends Command
                             SyncExchangeRateToExact::dispatch($currencyHistoryRate);
                         }
                     }
-                } else if ($currencyHistoryRate->exact_online_guid === null) {
+                } elseif ($currencyHistoryRate->exact_online_guid === null) {
                     SyncExchangeRateToExact::dispatch($currencyHistoryRate);
                 }
 
@@ -81,7 +80,7 @@ class SyncHistoryExchangeRatesToExact extends Command
             }
             $progressBar->finish();
         } catch (Exception $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
     }
 }

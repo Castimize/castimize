@@ -31,8 +31,6 @@ class AcceptRejectionAction extends Action implements ShouldQueue
     /**
      * Perform the action on the given models.
      *
-     * @param ActionFields $fields
-     * @param Collection $models
      * @return mixed
      */
     public function handle(ActionFields $fields, Collection $models)
@@ -42,7 +40,7 @@ class AcceptRejectionAction extends Action implements ShouldQueue
             $model->note_castimize = $fields->note_castimize;
             $model->approved_at = now();
             $model->save();
-            if (!array_key_exists($model->order_id, $orders)) {
+            if (! array_key_exists($model->order_id, $orders)) {
                 $orders[$model->order_id] = $model->order;
             }
         }
@@ -50,7 +48,7 @@ class AcceptRejectionAction extends Action implements ShouldQueue
         foreach ($orders as $order) {
             $cacheKey = sprintf('create-order-all-rejected-job-%s', $order->id);
 
-            if (!Cache::has($cacheKey)) {
+            if (! Cache::has($cacheKey)) {
                 CheckOrderAllRejected::dispatch($order)->delay(now()->addHours(2));
                 Cache::forever($cacheKey, 1);
             }
@@ -62,7 +60,6 @@ class AcceptRejectionAction extends Action implements ShouldQueue
     /**
      * Get the fields available on the action.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)

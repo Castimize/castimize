@@ -25,12 +25,11 @@ class ShippingProfileDTO
         public int $maxDeliveryDays,
         /** @var Collection<ShippingProfileDestinationDTO> */
         public ?Collection $shippingProfileDestinations = null,
-    ) {
-    }
+    ) {}
 
     public static function fromShop(int $shopId): self
     {
-        $dcSettings = (new DcSettings());
+        $dcSettings = (new DcSettings);
 
         return new self(
             shopId: $shopId,

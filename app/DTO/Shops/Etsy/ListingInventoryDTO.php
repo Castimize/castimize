@@ -22,8 +22,7 @@ readonly class ListingInventoryDTO
         public int $quantity,
         public CurrencyEnum $currency,
         public bool $isEnabled,
-    ) {
-    }
+    ) {}
 
     public static function fromModel(Shop $shop, Material $material, Model $model, ?int $listingId): self
     {
@@ -31,7 +30,7 @@ readonly class ListingInventoryDTO
 
         $price = app()->environment() !== 'production' ?
             0.18 :
-            (new CalculatePricesService())->calculatePriceOfModel(
+            (new CalculatePricesService)->calculatePriceOfModel(
                 price: $material->prices->first(),
                 materialVolume: (float) $model->model_volume_cc,
                 surfaceArea: (float) $model->model_surface_area_cm2,
@@ -45,7 +44,7 @@ readonly class ListingInventoryDTO
 
         return new self(
             listingId: $listingId,
-            sku: 'CAST-' . app(HelperService::class)->generateSku($material->name, (int) $material->wp_id),
+            sku: 'CAST-'.app(HelperService::class)->generateSku($material->name, (int) $material->wp_id),
             name: $material->name,
             price: $price,
             quantity: 999,

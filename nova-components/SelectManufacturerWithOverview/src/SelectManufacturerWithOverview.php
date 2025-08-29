@@ -3,7 +3,6 @@
 namespace Castimize\SelectManufacturerWithOverview;
 
 use Illuminate\Support\Collection;
-use Illuminate\Validation\Validator;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -21,7 +20,6 @@ class SelectManufacturerWithOverview extends Field
     /**
      * Set the options.
      *
-     * @param  array $options
      * @return $this
      */
     public function options(array $options)
@@ -64,6 +62,7 @@ class SelectManufacturerWithOverview extends Field
         if ($saveAsJson) {
             return $value;
         }
+
         return is_array($value) || is_object($value) ? (array) $value : json_decode($value);
     }
 
@@ -74,25 +73,27 @@ class SelectManufacturerWithOverview extends Field
 
         $value = is_null($value) ? ($this->nullable ? $value : $value = []) : $value;
         $value = is_array($value) ? $value : explode(',', $value);
-//        if (count($value) === 0) {
-//            throw new \Exception(__('Please select PO\'s'));
-//        }
+        //        if (count($value) === 0) {
+        //            throw new \Exception(__('Please select PO\'s'));
+        //        }
         $model->{$attribute} = ($saveAsJson || is_null($value)) ? $value : json_encode($value);
     }
 
     private function shouldSaveAsJson($model, $attribute)
     {
-        if (!empty($model) && !is_array($model) && method_exists($model, 'getCasts')) {
+        if (! empty($model) && ! is_array($model) && method_exists($model, 'getCasts')) {
             $casts = $model->getCasts();
             $isCastedToArray = ($casts[$attribute] ?? null) === 'array';
+
             return $this->saveAsJSON || $isCastedToArray;
         }
+
         return false;
     }
 
     public function resolveForAction($request)
     {
-        if (!is_null($this->value)) {
+        if (! is_null($this->value)) {
             return;
         }
 
@@ -103,7 +104,7 @@ class SelectManufacturerWithOverview extends Field
 
     public function resolveDefaultValue(NovaRequest $request)
     {
-        if (!is_null($this->value)) {
+        if (! is_null($this->value)) {
             return parent::resolveDefaultValue($request);
         }
 
@@ -128,6 +129,7 @@ class SelectManufacturerWithOverview extends Field
                         return false;
                     }
                 }
+
                 return true;
             });
 
@@ -144,12 +146,12 @@ class SelectManufacturerWithOverview extends Field
     /**
      * Allows the field to save an actual JSON array to a SQL JSON column.
      *
-     * @param bool $saveAsJSON
      * @return self
      **/
     public function saveAsJSON(bool $saveAsJSON = true)
     {
         $this->saveAsJSON = $saveAsJSON;
+
         return $this;
     }
 }

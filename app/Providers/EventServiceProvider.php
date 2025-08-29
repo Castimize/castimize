@@ -21,9 +21,9 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Event::listen('revisionable.*', function($model, $revisions) {
+        Event::listen('revisionable.*', function ($model, $revisions) {
             // Do something with the revisions or the changed model.
-            //dd($model, $revisions);
+            // dd($model, $revisions);
         });
     }
 }

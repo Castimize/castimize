@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Filters\RemoveTestCustomerIdsFilter;
 use App\Filters\RemoveTestEmailAddressesFilter;
 use App\Observers\OrderObserver;
-use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -21,11 +20,12 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([OrderObserver::class])]
 class Order extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     public $wpOrder;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -277,9 +277,6 @@ class Order extends Model
         );
     }
 
-    /**
-     * @return Attribute
-     */
     protected function billingAddress(): Attribute
     {
         return Attribute::make(
@@ -311,17 +308,15 @@ class Order extends Model
         );
     }
 
-    /**
-     * @return Attribute
-     */
     protected function shippingAddress(): Attribute
     {
         $email = $this->email;
-        if (!empty($this->shipping_email)) {
+        if (! empty($this->shipping_email)) {
             $email = $this->shipping_email;
-        } else if (!empty($this->billing_email)) {
+        } elseif (! empty($this->billing_email)) {
             $email = $this->billing_email;
         }
+
         return Attribute::make(
             get: fn () => [
                 'first_name' => $this->shipping_first_name,
@@ -340,9 +335,6 @@ class Order extends Model
         );
     }
 
-    /**
-     * @return Attribute
-     */
     protected function customerCountry(): Attribute
     {
         return Attribute::make(
@@ -350,73 +342,46 @@ class Order extends Model
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function customerShipment(): BelongsTo
     {
         return $this->belongsTo(CustomerShipment::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function uploads(): HasMany
     {
         return $this->hasMany(Upload::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function orderQueues(): HasMany
     {
         return $this->hasMany(OrderQueue::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function rejections(): HasMany
     {
         return $this->hasMany(Rejection::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function reprints(): HasMany
     {
         return $this->hasMany(Reprint::class);
@@ -430,24 +395,26 @@ class Order extends Model
     public function scopeRemoveTestEmailAddresses($query, string $column)
     {
         $removeTestEmailAddressesFilter = new RemoveTestEmailAddressesFilter($column);
+
         return $query->tap($removeTestEmailAddressesFilter);
     }
 
     public function scopeRemoveTestCustomerIds($query, string $column)
     {
         $removeTestEmailAddressesFilter = new RemoveTestCustomerIdsFilter($column);
+
         return $query->tap($removeTestEmailAddressesFilter);
     }
 
     /**
      * Get the days overdue
-     * @return float|null
      */
-    public function daysOverdue(): float|null
+    public function daysOverdue(): ?float
     {
         if ($this->status === 'overdue') {
             return now()->diffInDays($this->due_date);
         }
+
         return null;
     }
 
@@ -464,10 +431,11 @@ class Order extends Model
         $return = true;
         foreach ($this->uploads as $upload) {
             $orderQueueStatus = $upload->orderQueue->getLastStatus();
-            if (!$orderQueueStatus->orderStatus->end_status) {
+            if (! $orderQueueStatus->orderStatus->end_status) {
                 $return = false;
             }
         }
+
         return $return;
     }
 }

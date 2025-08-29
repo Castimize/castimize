@@ -22,7 +22,7 @@ Route::group([
     Route::post('callback-webhook', ['as' => 'exact.webhook', 'uses' => 'ExactOnlineController@appCallbackWebhook']);
 
     Route::get('test', function () {
-        dd((new ExactOnlineService())->getGlAccounts());
+        dd((new ExactOnlineService)->getGlAccounts());
     });
 });
 

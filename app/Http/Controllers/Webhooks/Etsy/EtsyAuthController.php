@@ -19,7 +19,7 @@ class EtsyAuthController
         try {
             $etsyService->requestAccessToken($request);
         } catch (Exception $e) {
-            return new Response($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString(), Response::HTTP_BAD_REQUEST);
+            return new Response($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getTraceAsString(), Response::HTTP_BAD_REQUEST);
         }
 
         return new Response('Success', 200);

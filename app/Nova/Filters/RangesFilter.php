@@ -18,22 +18,16 @@ class RangesFilter extends Filter
      */
     public $component = 'select-filter';
 
-
     /**
      * Create a new filter instance.
      *
-     * @param string $column
      * @return void
      */
-    public function __construct(protected string $column)
-    {
-
-    }
+    public function __construct(protected string $column) {}
 
     /**
      * Apply the filter to the given query.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @param  mixed  $value
      * @return Builder
@@ -46,7 +40,6 @@ class RangesFilter extends Filter
     /**
      * Get the filter's available options.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function options(NovaRequest $request)

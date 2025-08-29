@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Customer;
-use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\PaymentService;
 use App\Services\Admin\ShopOwnersService;
@@ -16,8 +15,7 @@ class PaymentsApiController extends ApiController
     public function __construct(
         private PaymentService $paymentService,
         private ShopOwnersService $shopOwnersService,
-    ) {
-    }
+    ) {}
 
     public function createSetupIntent(int $customerId): JsonResponse
     {
@@ -58,8 +56,8 @@ class PaymentsApiController extends ApiController
             $shopOwner->refresh();
 
         } catch (Exception $exception) {
-            LogRequestService::addResponse(request(), ['message' => $exception->getMessage() . PHP_EOL . $exception->getFile()], 500);
-            abort(Response::HTTP_BAD_REQUEST, 'Unable to cancel mandate with error: ' . $exception->getMessage());
+            LogRequestService::addResponse(request(), ['message' => $exception->getMessage().PHP_EOL.$exception->getFile()], 500);
+            abort(Response::HTTP_BAD_REQUEST, 'Unable to cancel mandate with error: '.$exception->getMessage());
         }
 
         return response(null, Response::HTTP_NO_CONTENT);

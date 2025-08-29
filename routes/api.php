@@ -5,7 +5,7 @@ use App\Http\Middleware\RequestLogger;
 use App\Http\Middleware\ValidateWcWebhookSignature;
 use Illuminate\Support\Facades\Route;
 
-//Route::get('/user', [UsersApiController::class, 'show'])->can('viewUser')->middleware('auth:sanctum');
+// Route::get('/user', [UsersApiController::class, 'show'])->can('viewUser')->middleware('auth:sanctum');
 
 Route::group(['middleware' => [RequestLogger::class]], function () {
     Route::group([

@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Services\Exact\LaravelExactOnline;
+use Illuminate\Support\ServiceProvider;
 use Picqer\Financials\Exact\Connection;
 
 class LaravelExactOnlineServiceProvider extends ServiceProvider
@@ -13,9 +13,7 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
-    {
-    }
+    public function boot() {}
 
     /**
      * Register the application services.
@@ -30,11 +28,11 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
             if (app()->environment() === 'production') {
                 $config = LaravelExactOnline::loadConfig();
 
-                $connection = new Connection();
+                $connection = new Connection;
                 $connection->setRedirectUrl(route('exact.callback'));
                 $connection->setExactClientId(config('exactonline.exact_client_id'));
                 $connection->setExactClientSecret(config('exactonline.exact_client_secret'));
-                $connection->setBaseUrl('https://start.exactonline.' . config('exactonline.exact_country_code'));
+                $connection->setBaseUrl('https://start.exactonline.'.config('exactonline.exact_country_code'));
 
                 if (config('exactonline.exact_division') !== '') {
                     $connection->setDivision(config('exactonline.exact_division'));

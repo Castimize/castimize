@@ -12,9 +12,10 @@ use Wildside\Userstamps\Userstamps;
 
 class ShopOwner extends Model
 {
-    use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -22,7 +23,7 @@ class ShopOwner extends Model
      *
      * @var array<int, string>
      */
-    protected  $fillable = [
+    protected $fillable = [
         'customer_id',
         'active',
     ];

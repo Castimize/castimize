@@ -2,7 +2,6 @@
 
 namespace App\Nova;
 
-
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
@@ -15,7 +14,6 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Titasgailius\SearchRelations\SearchesRelations;
-use Vyuldashev\NovaMoneyField\Money;
 
 class Price extends Resource
 {
@@ -71,7 +69,6 @@ class Price extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -106,7 +103,7 @@ class Price extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Setup fee amount'), function () {
-                return $this->setup_fee_amount ? currencyFormatter((float)$this->setup_fee_amount, $this->currency_code) : '';
+                return $this->setup_fee_amount ? currencyFormatter((float) $this->setup_fee_amount, $this->currency_code) : '';
             })
                 ->exceptOnForms()
                 ->sortable(),
@@ -129,7 +126,7 @@ class Price extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Price minimum per stl'), function () {
-                return $this->price_minimum_per_stl ? currencyFormatter((float)$this->price_minimum_per_stl, $this->currency_code) : '';
+                return $this->price_minimum_per_stl ? currencyFormatter((float) $this->price_minimum_per_stl, $this->currency_code) : '';
             })
                 ->exceptOnForms()
                 ->sortable(),
@@ -147,7 +144,7 @@ class Price extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Price volume cc'), function () {
-                return $this->price_volume_cc ? currencyFormatter((float)$this->price_volume_cc, $this->currency_code) : '';
+                return $this->price_volume_cc ? currencyFormatter((float) $this->price_volume_cc, $this->currency_code) : '';
             })
                 ->exceptOnForms()
                 ->sortable(),
@@ -165,7 +162,7 @@ class Price extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Price surface cm2'), function () {
-                return $this->price_surface_cm2 ? currencyFormatter((float)$this->price_surface_cm2, $this->currency_code) : '';
+                return $this->price_surface_cm2 ? currencyFormatter((float) $this->price_surface_cm2, $this->currency_code) : '';
             })
                 ->exceptOnForms()
                 ->sortable(),
@@ -183,7 +180,7 @@ class Price extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Fixed fee per part'), function () {
-                return $this->fixed_fee_per_part ? currencyFormatter((float)$this->fixed_fee_per_part, $this->currency_code) : '';
+                return $this->fixed_fee_per_part ? currencyFormatter((float) $this->fixed_fee_per_part, $this->currency_code) : '';
             })
                 ->exceptOnForms()
                 ->sortable(),
@@ -195,7 +192,6 @@ class Price extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -206,7 +202,6 @@ class Price extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -219,7 +214,6 @@ class Price extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -230,7 +224,6 @@ class Price extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

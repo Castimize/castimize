@@ -34,13 +34,9 @@ readonly class UploadDTO
         public ?MonetaryAmount $totalTax,
         public ?array $metaData,
         public int $customerLeadTime,
-    ) {
-    }
+    ) {}
 
-    public static function fromApiRequest()
-    {
-
-    }
+    public static function fromApiRequest() {}
 
     public static function fromWpRequest($lineItem, string $countryIso): UploadDTO
     {
@@ -110,14 +106,14 @@ readonly class UploadDTO
 
         $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
 
-        $total = (new CalculatePricesService())->calculatePriceOfModel(
+        $total = (new CalculatePricesService)->calculatePriceOfModel(
             price: $material->prices->first(),
             materialVolume: (float) $model->model_volume_cc,
             surfaceArea: (float) $model->model_surface_area_cm2,
         );
 
         if (
-            //app()->environment() === 'production' &&
+            // app()->environment() === 'production' &&
             array_key_exists('shop_currency', $shop->shop_oauth) &&
             $shop->shop_oauth['shop_currency'] !== config('app.currency') &&
             in_array(CurrencyEnum::from($shop->shop_oauth['shop_currency']), CurrencyEnum::cases(), true)
@@ -129,7 +125,7 @@ readonly class UploadDTO
 
         $total = MonetaryAmount::fromFloat($total)->multiply($line['transaction']->quantity ?? 1);
 
-        $totalTax = new MonetaryAmount();
+        $totalTax = new MonetaryAmount;
         if ($taxPercentage) {
             $totalTax = MonetaryAmount::fromFloat(($taxPercentage / 100) * $total->toFloat());
         }

@@ -18,14 +18,18 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([CustomerShipmentObserver::class])]
 class CustomerShipment extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     public $selectedPOs;
+
     public $fromAddress = [];
+
     public $toAddress = [];
+
     public $parcel = [];
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -112,33 +116,21 @@ class CustomerShipment extends Model
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function orderQueues(): HasMany
     {
         return $this->hasMany(OrderQueue::class);
     }
 
-    /**
-     * @return MorphMany
-     */
     public function trackingStatuses(): MorphMany
     {
         return $this->morphMany(

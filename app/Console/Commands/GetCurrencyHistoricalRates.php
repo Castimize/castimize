@@ -64,7 +64,7 @@ class GetCurrencyHistoricalRates extends Command
                 }
             }
         } catch (InvalidFormatException|Exception $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
             $this->error($e->getMessage());
         }
     }

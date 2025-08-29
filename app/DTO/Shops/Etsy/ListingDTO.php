@@ -41,14 +41,13 @@ class ListingDTO
         public ?Collection $listingImages,
         /** @var Collection<ListingInventoryDTO> */
         public ?Collection $listingInventory,
-    ) {
-    }
+    ) {}
 
     public static function fromModel(Shop $shop, Model $model, ?int $listingId = null, ?int $taxonomyId = null, $listing = null, $listingImages = null): self
     {
         $shopOauth = $shop->shop_oauth;
-        $customsItemSettings = new CustomsItemSettings();
-        $parcelSettings = new ParcelSettings();
+        $customsItemSettings = new CustomsItemSettings;
+        $parcelSettings = new ParcelSettings;
 
         $price = 0.00;
         $density = 0.00;
@@ -56,10 +55,10 @@ class ListingDTO
         foreach ($model->materials as $material) {
             $priceMaterial = app()->environment() !== 'production' ?
                 0.18 :
-                (new CalculatePricesService())->calculatePriceOfModel(
+                (new CalculatePricesService)->calculatePriceOfModel(
                     price: $material->prices->sortBy('price_volume_cc')->first(),
-                    materialVolume: (float)$model->model_volume_cc,
-                    surfaceArea: (float)$model->model_surface_area_cm2,
+                    materialVolume: (float) $model->model_volume_cc,
+                    surfaceArea: (float) $model->model_surface_area_cm2,
                 );
             if ($price === 0.00 || $priceMaterial < $price) {
                 $price = $priceMaterial;
@@ -84,8 +83,8 @@ class ListingDTO
             state: $listing ? $listing->state : null,
             quantity: $listing ? $listing->quantity : 1,
             title: $listing ? $listing->title : $model->model_name ?? $model->name,
-            description: $listing ? $listing->description : '3D print model: ' . ($model->model_name ?? $model->name),
-            price: (int)  ($listing ? $listing->price->amount : ($price * 100)),
+            description: $listing ? $listing->description : '3D print model: '.($model->model_name ?? $model->name),
+            price: (int) ($listing ? $listing->price->amount : ($price * 100)),
             whoMade: 'i_did',
             whenMade: 'made_to_order',
             taxonomyId: (int) ($taxonomyId ?? ($listing ? $listing->taxonomy_id : ($shopOauth['default_taxonomy_id'] ?? 12380))), // 3D Printer Files

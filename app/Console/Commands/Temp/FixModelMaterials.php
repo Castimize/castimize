@@ -33,26 +33,26 @@ class FixModelMaterials extends Command
             foreach ($models as $model) {
                 $model->materials()->attach($model->material_id);
             }
-//            $uniqueModels = [];
-//            foreach ($customer->models->sortBy('name')->sortBy('id') as $model) {
-//                $key = sprintf('%s_%s', $model->file_name, $model->model_scale);
-//                if (! array_key_exists($key, $uniqueModels)) {
-//                    $uniqueModels[$key] = [
-//                        'ids' => [],
-//                        'names' => [],
-//                        'materials' => [],
-//                    ];
-//                }
-//
-//                $uniqueModels[$key]['ids'][] = $model->id;
-//                if (! in_array($model->name, $uniqueModels[$key]['names'], true)) {
-//                    $uniqueModels[$key]['names'][] = $model->name;
-//                }
-//                if (! in_array($model->material_id, $uniqueModels[$key]['materials'], true)) {
-//                    $uniqueModels[$key]['materials'][] = $model->material_id;
-//                }
-//            }
-//            dd($uniqueModels);
+            //            $uniqueModels = [];
+            //            foreach ($customer->models->sortBy('name')->sortBy('id') as $model) {
+            //                $key = sprintf('%s_%s', $model->file_name, $model->model_scale);
+            //                if (! array_key_exists($key, $uniqueModels)) {
+            //                    $uniqueModels[$key] = [
+            //                        'ids' => [],
+            //                        'names' => [],
+            //                        'materials' => [],
+            //                    ];
+            //                }
+            //
+            //                $uniqueModels[$key]['ids'][] = $model->id;
+            //                if (! in_array($model->name, $uniqueModels[$key]['names'], true)) {
+            //                    $uniqueModels[$key]['names'][] = $model->name;
+            //                }
+            //                if (! in_array($model->material_id, $uniqueModels[$key]['materials'], true)) {
+            //                    $uniqueModels[$key]['materials'][] = $model->material_id;
+            //                }
+            //            }
+            //            dd($uniqueModels);
         }
     }
 }

@@ -30,13 +30,11 @@ class PoRejectByManufacturerAction extends Action
     /**
      * Perform the action on the given models.
      *
-     * @param ActionFields $fields
-     * @param Collection $models
      * @return mixed
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         foreach ($models as $model) {
             $hasEndStatus = [];
             /** @var $model OrderQueue */
@@ -53,7 +51,7 @@ class PoRejectByManufacturerAction extends Action
             }
         }
         $fileName = sprintf('%s-rejection-%s.%s', auth()->user()->manufacturer->id, time(), $fields->photo->extension());
-        $fullFileName = 'admin/rejections/' . $fileName;
+        $fullFileName = 'admin/rejections/'.$fileName;
         Storage::disk('r2_private')->putFileAs('admin/rejections/', $fields->photo, $fileName);
 
         foreach ($models as $model) {
@@ -77,13 +75,12 @@ class PoRejectByManufacturerAction extends Action
     /**
      * Get the fields available on the action.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
     {
         return [
-            Select::make(__('Reason'),'rejection_reason_id')
+            Select::make(__('Reason'), 'rejection_reason_id')
                 ->options(
                     RejectionReason::all()->pluck('reason', 'id')->toArray()
                 )->displayUsingLabels(),

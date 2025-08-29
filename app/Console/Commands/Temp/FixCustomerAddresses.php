@@ -28,9 +28,9 @@ class FixCustomerAddresses extends Command
      */
     public function handle()
     {
-        $customersService = new CustomersService();
-//        $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find(866);
-//        dd($wpCustomer);
+        $customersService = new CustomersService;
+        //        $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find(866);
+        //        dd($wpCustomer);
         $customers = Customer::whereNotNull('wp_id')->orderByDesc('id')->get();
         $totalCustomers = $customers->count();
         $progressBar = $this->output->createProgressBar($totalCustomers);
@@ -38,14 +38,13 @@ class FixCustomerAddresses extends Command
         $this->info("Updating $totalCustomers customers from Woocommerce");
         $progressBar->start();
 
-
         foreach ($customers as $customer) {
             $this->info("Updating $customer->wp_id");
             try {
                 $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($customer->wp_id);
                 $customersService->storeCustomerFromWpCustomer($wpCustomer);
             } catch (Exception $e) {
-                $this->info($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                $this->info($e->getMessage().PHP_EOL.$e->getTraceAsString());
             }
 
             $progressBar->advance();

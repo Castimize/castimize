@@ -2,7 +2,6 @@
 
 namespace App\Nova;
 
-
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
@@ -56,7 +55,6 @@ class Material extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -102,7 +100,7 @@ class Material extends Resource
                 ->sortable(),
 
             Text::make(__('Fast delivery fee'), function () {
-                return $this->fast_delivery_fee ? currencyFormatter((float)$this->fast_delivery_fee, $this->currency_code) : '';
+                return $this->fast_delivery_fee ? currencyFormatter((float) $this->fast_delivery_fee, $this->currency_code) : '';
             })
                 ->exceptOnForms()
                 ->sortable(),
@@ -178,28 +176,28 @@ class Material extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Discount'), function () {
-                return $this->discount ? $this->discount . '%' : '';
+                return $this->discount ? $this->discount.'%' : '';
             })
 //                ->sizeOnDetail('w-1/4')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Text::make(__('Bulk discount 10'), function () {
-                return $this->bulk_discount_10 ? $this->bulk_discount_10 . '%' : '';
+                return $this->bulk_discount_10 ? $this->bulk_discount_10.'%' : '';
             })
 //                ->sizeOnDetail('w-1/4')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Text::make(__('Bulk discount 25'), function () {
-                return $this->bulk_discount_25 ? $this->bulk_discount_25 . '%' : '';
+                return $this->bulk_discount_25 ? $this->bulk_discount_25.'%' : '';
             })
 //                ->sizeOnDetail('w-1/4')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Text::make(__('Bulk discount 50'), function () {
-                return $this->bulk_discount_50 ? $this->bulk_discount_50 . '%' : '';
+                return $this->bulk_discount_50 ? $this->bulk_discount_50.'%' : '';
             })
 //                ->sizeOnDetail('w-1/4')
                 ->hideByDefault()
@@ -214,7 +212,6 @@ class Material extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -225,7 +222,6 @@ class Material extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -238,7 +234,6 @@ class Material extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -249,7 +244,6 @@ class Material extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)
