@@ -6,7 +6,6 @@ use App\Nova\Actions\AcceptRejectionAction;
 use App\Nova\Actions\DeclineRejectionAction;
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
@@ -146,8 +145,12 @@ class Rejection extends Resource
                     'check-circle' => $this->approved_at !== null,
                 ])
                 ->tooltip([
-                    'x-circle' => __('Declined at :date', ['date' => $this->declined_at]),
-                    'check-circle' => __('Accepted at :date', ['date' => $this->approved_at]),
+                    'x-circle' => __('Declined at :date', [
+                        'date' => $this->declined_at,
+                    ]),
+                    'check-circle' => __('Accepted at :date', [
+                        'date' => $this->approved_at,
+                    ]),
                 ])
                 ->color([
                     'x-circle' => 'red-500',

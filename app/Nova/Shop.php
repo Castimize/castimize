@@ -72,7 +72,9 @@ class Shop extends Resource
                 ->onlyOnForms(),
 
             Select::make(__('Shop'), 'shop')
-                ->options(['etsy' => 'Etsy']),
+                ->options([
+                    'etsy' => 'Etsy',
+                ]),
 
             Boolean::make(__('Active'), 'active')
                 ->sortable(),

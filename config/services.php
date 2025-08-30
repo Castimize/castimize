@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
@@ -55,5 +54,4 @@ return [
             'client_secret' => env('ETSY_CLIENT_SECRET'),
         ],
     ],
-
 ];

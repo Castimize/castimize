@@ -45,12 +45,16 @@ class EtsyApiController extends ApiController
         $customer = Customer::find($customerId);
         $shop = $customer->shopOwner?->shops?->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
         if ($shop === null) {
-            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse($request, [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $url = $this->etsyService->getAuthorizationUrl($shop);
 
-        return response()->json(['url' => $url]);
+        return response()->json([
+            'url' => $url,
+        ]);
     }
 
     public function getShopReturnPolicy(int $customerId, int $returnPolicyId): JsonResponse
@@ -115,7 +119,6 @@ class EtsyApiController extends ApiController
 
         $listings = $this->etsyService->syncListings($shop, $models);
 
-        //        return response()->json(['no']);
         return response()->json($listings->toArray());
     }
 
@@ -125,7 +128,9 @@ class EtsyApiController extends ApiController
         $shop = $customer->shopOwner->shops->first();
         $deleted = $this->etsyService->syncListings($shop, $listingId);
 
-        return response()->json(['deleted' => $deleted]);
+        return response()->json([
+            'deleted' => $deleted,
+        ]);
     }
 
     public function getShippingCarriers(int $customerId): JsonResponse
@@ -188,7 +193,9 @@ class EtsyApiController extends ApiController
     {
         $customer = Customer::with('shopOwner.shops')->find($customerId);
         $shop = $customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
-        $shopReceipts = $this->etsyService->getShopReceipts($shop, ['min_created' => now()->subDays(14)->timestamp]);
+        $shopReceipts = $this->etsyService->getShopReceipts($shop, [
+            'min_created' => now()->subDays(14)->timestamp,
+        ]);
 
         $response = [];
 

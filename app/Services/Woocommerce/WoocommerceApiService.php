@@ -28,14 +28,9 @@ class WoocommerceApiService
     public function createOrder(OrderDTO $orderDTO)
     {
         $data = [
-            // 'status' => $orderDTO->status,
             'customer_id' => $orderDTO->customerId,
             'currency' => $orderDTO->currencyCode,
             'prices_include_tax' => false,
-            //            'total' => $orderDTO->total->toString(),
-            //            'total_tax' => $orderDTO->totalTax->toString(),
-            //            'shipping_total' => $orderDTO->shippingFee->toString(),
-            //            'shipping_tax' => $orderDTO->shippingFeeTax->toString(),
             'set_paid' => true,
             'billing' => [
                 'first_name' => $orderDTO->billingFirstName,
@@ -65,7 +60,6 @@ class WoocommerceApiService
             // products added to an order
             'line_items' => $orderDTO->uploads->map(fn (UploadDTO $uploadDTO) => [
                 'product_id' => 3228,
-                //                'name' => '3D',
                 'quantity' => $uploadDTO->quantity,
                 'subtotal' => $uploadDTO->subtotal->toString(),
                 'subtotal_tax' => $uploadDTO->subtotalTax?->toString(),
@@ -117,10 +111,6 @@ class WoocommerceApiService
             $data['fee_lines'] = [];
             /** @var PaymentFeeDTO $paymentFeeDTO */
             foreach ($orderDTO->paymentFees as $paymentFeeDTO) {
-                //                $total = $paymentFeeDTO->total;
-                //                if ($paymentFeeDTO->totalTax) {
-                //                    $total = $total->subtract($paymentFeeDTO->totalTax);
-                //                }
                 $data['fee_lines'][] = [
                     'name' => $paymentFeeDTO->name,
                     'tax_class' => $paymentFeeDTO->taxClass,
@@ -137,9 +127,6 @@ class WoocommerceApiService
                 ];
             }
         }
-        //        $taxes = Tax::all();
-        //        dd($taxes);
-        //        dd($data);
 
         return Order::create($data);
     }
@@ -156,7 +143,9 @@ class WoocommerceApiService
 
     public function deleteOrder(int $wpOrderId)
     {
-        $options = ['force' => true]; // Set force option true for delete permanently. Default value false
+        $options = [
+            'force' => true,
+        ]; // Set force option true for delete permanently. Default value false
 
         return Order::delete($wpOrderId, $options);
     }

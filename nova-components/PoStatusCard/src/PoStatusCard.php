@@ -17,17 +17,25 @@ class PoStatusCard extends Card
     {
         $count = count($statuses);
 
-        return $this->withMeta(['statuses' => $statuses, 'statusesCount' => $count, 'statusesWidth' => (100 / $count)]);
+        return $this->withMeta([
+            'statuses' => $statuses,
+            'statusesCount' => $count,
+            'statusesWidth' => (100 / $count),
+        ]);
     }
 
     public function activeSlug(string $slug): PoStatusCard
     {
-        return $this->withMeta(['activeSlug' => $slug]);
+        return $this->withMeta([
+            'activeSlug' => $slug,
+        ]);
     }
 
     public function refreshIntervalSeconds(int $seconds = 60): PoStatusCard
     {
-        return $this->withMeta(['refreshIntervalSeconds' => $seconds]);
+        return $this->withMeta([
+            'refreshIntervalSeconds' => $seconds,
+        ]);
     }
 
     /**

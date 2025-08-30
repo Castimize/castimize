@@ -113,16 +113,14 @@ class OrderDateDaterangepickerFilter extends Daterangepicker
         return $this;
     }
 
-    /**
-     * @param  Carbon[]  $periods
-     */
     public function setRanges(array $ranges): self
     {
-        $result = [];
         $result = collect($ranges)->mapWithKeys(function (array $item, string $key) {
-            return [$key => (collect($item)->map(function (Carbon $date) {
-                return $date->format('Y-m-d');
-            }))];
+            return [
+                $key => (collect($item)->map(function (Carbon $date) {
+                    return $date->format('Y-m-d');
+                })),
+            ];
         })->toArray();
 
         $this->ranges = $result;

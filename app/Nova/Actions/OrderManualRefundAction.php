@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
+use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class OrderManualRefundAction extends Action
@@ -53,8 +54,10 @@ class OrderManualRefundAction extends Action
         $max = $this->model->total - ($this->model->total_refund ?? 0);
 
         return [
-            \Laravel\Nova\Fields\Currency::make(__('Refund amount'), 'refund_amount')
-                ->help(__('Max refund amount is :max', ['max' => currencyFormatter((float) $max, $this->model->currency_code ?? config('app.currency'))]))
+            Currency::make(__('Refund amount'), 'refund_amount')
+                ->help(__('Max refund amount is :max', [
+                    'max' => currencyFormatter((float) $max, $this->model->currency_code ?? config('app.currency')),
+                ]))
                 ->min(0)
                 ->max($max)
                 ->currency($this->model->currency_code)

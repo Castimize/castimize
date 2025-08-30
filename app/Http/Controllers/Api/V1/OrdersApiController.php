@@ -26,7 +26,9 @@ class OrdersApiController extends ApiController
 
         $order = Order::where('order_number', $orderNumber)->first();
         if ($order === null) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse(request(), [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
@@ -40,7 +42,9 @@ class OrdersApiController extends ApiController
     {
         $order = Order::where('wp_id', $request->wp_id)->first();
         if ($order === null) {
-            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse($request, [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $response = new OrderResource($order);
@@ -59,7 +63,10 @@ class OrdersApiController extends ApiController
 
         $expectedDeliveryDate = $this->ordersService->calculateExpectedDeliveryDate($uploads, $country);
 
-        $response = ['success' => true, 'expected_delivery_date' => $expectedDeliveryDate];
+        $response = [
+            'success' => true,
+            'expected_delivery_date' => $expectedDeliveryDate,
+        ];
         LogRequestService::addResponse($request, $response);
 
         return response()->json($response);

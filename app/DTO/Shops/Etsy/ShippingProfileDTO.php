@@ -23,7 +23,9 @@ class ShippingProfileDTO
         public string $processingTimeUnit,
         public int $minDeliveryDays,
         public int $maxDeliveryDays,
-        /** @var Collection<ShippingProfileDestinationDTO> */
+        /**
+         * @var Collection<ShippingProfileDestinationDTO>
+         */
         public ?Collection $shippingProfileDestinations = null,
     ) {}
 

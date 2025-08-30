@@ -62,7 +62,9 @@ class InvoicesService
             'total' => $total,
             'total_tax' => $totalTax,
             'currency_code' => $order->currency_code,
-            'description' => __('Order #:orderNumber', ['orderNumber' => $wpOrder['id']]),
+            'description' => __('Order #:orderNumber', [
+                'orderNumber' => $wpOrder['id'],
+            ]),
             'email' => $wpOrder['billing']->email,
             'contact_person' => $wpOrder['billing']->first_name.' '.$wpOrder['billing']->last_name,
             'address_line1' => $wpOrder['billing']->address_1,

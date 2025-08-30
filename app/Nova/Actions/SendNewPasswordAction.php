@@ -46,7 +46,10 @@ class SendNewPasswordAction extends Action
 
                 // ToDo: Send new password
 
-                return ActionResponse::danger(__('New password mailed to :name => :password', ['name' => $model->name, 'password' => $password]));
+                return ActionResponse::danger(__('New password mailed to :name => :password', [
+                    'name' => $model->name,
+                    'password' => $password,
+                ]));
             }
 
             return ActionResponse::danger(__('There is no user found on this model'));

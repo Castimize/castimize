@@ -18,7 +18,11 @@ class PaymentService
     public function createStripeSetupIntent(Customer $customer): SetupIntent
     {
         if ($customer->stripe_data === null || ! array_key_exists('stripe_id', $customer->stripe_data)) {
-            $stripeCustomer = $this->stripeService->getCustomers(params: ['email' => $customer->email])->first();
+            $stripeCustomer = $this->stripeService->getCustomers(
+                params: [
+                    'email' => $customer->email,
+                ],
+            )->first();
             if (! $stripeCustomer) {
                 $stripeCustomer = $this->stripeService->createCustomer(customer: $customer);
             }

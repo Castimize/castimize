@@ -30,7 +30,12 @@ class AddressApiController extends ApiController
         ];
 
         if (empty($addressData['country'])) {
-            $response = ['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []];
+            $response = [
+                'valid' => false,
+                'address' => [],
+                'address_changed' => 0,
+                'messages' => [],
+            ];
             LogRequestService::addResponse($request, $response);
 
             return response()->json($response);
@@ -53,7 +58,11 @@ class AddressApiController extends ApiController
                 uploads: collect($request->uploads)->map(fn ($upload) => CalculateShippingFeeUploadDTO::fromWpRequest($upload)),
             );
         } catch (UnprocessableEntityHttpException $e) {
-            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
+            LogRequestService::addResponse($request, [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], $e->getCode());
 
             return response()->json([
                 'errors' => $e->getMessage(),

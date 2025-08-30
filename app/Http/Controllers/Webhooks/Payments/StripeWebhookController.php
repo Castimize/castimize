@@ -42,7 +42,11 @@ class StripeWebhookController extends WebhookController
                 json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)
             );
         } catch (UnexpectedValueException $e) {
-            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
+            LogRequestService::addResponse($request, [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], $e->getCode());
 
             // Invalid payload
             return $this->badRequestMethod();
@@ -118,7 +122,7 @@ class StripeWebhookController extends WebhookController
             try {
                 LogRequestService::addResponse(request(), $customer);
             } catch (Throwable $exception) {
-                Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+                Log::error($exception->getMessage().PHP_EOL.$exception->getLine().PHP_EOL.$exception->getTraceAsString());
             }
         }
 
@@ -136,13 +140,6 @@ class StripeWebhookController extends WebhookController
             new SetOrderPaid($paymentIntent, $logRequestId),
             new CreateInvoicesFromOrder($paymentIntent->metadata->order_id),
         ])->onQueue('stripe')->dispatch();
-        //        SetOrderPaid::dispatch($paymentIntent, $logRequestId)
-        //            ->onQueue('stripe')
-        //            ->delay(now()->addMinute());
-        //
-        //        CreateInvoicesFromOrder::dispatch($paymentIntent->metadata->order_id)
-        //            ->onQueue('exact')
-        //            ->delay(now()->addMinute());
 
         return $this->successMethod();
     }
@@ -174,7 +171,7 @@ class StripeWebhookController extends WebhookController
 
             return $this->successMethod();
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getLine().PHP_EOL.$exception->getTraceAsString());
 
             return $this->badRequestMethod();
         }
@@ -201,7 +198,7 @@ class StripeWebhookController extends WebhookController
 
             return $this->successMethod();
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getLine().PHP_EOL.$exception->getTraceAsString());
 
             return $this->badRequestMethod();
         }
@@ -220,7 +217,7 @@ class StripeWebhookController extends WebhookController
         try {
             LogRequestService::addResponse(request(), $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getLine().PHP_EOL.$exception->getTraceAsString());
         }
 
         return $this->successMethod();

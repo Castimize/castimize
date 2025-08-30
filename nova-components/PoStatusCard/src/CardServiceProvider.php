@@ -11,8 +11,6 @@ class CardServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot()
     {
@@ -28,8 +26,6 @@ class CardServiceProvider extends ServiceProvider
 
     /**
      * Register the card's routes.
-     *
-     * @return void
      */
     protected function routes()
     {
@@ -44,8 +40,6 @@ class CardServiceProvider extends ServiceProvider
 
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register()
     {

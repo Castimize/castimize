@@ -99,7 +99,11 @@ class ModelsService
 
             $models = $modelsQuery->get();
 
-            return ['items' => ModelResource::collection($models), 'filtered' => $recordsFiltered, 'total' => $recordsTotal];
+            return [
+                'items' => ModelResource::collection($models),
+                'filtered' => $recordsFiltered,
+                'total' => $recordsTotal,
+            ];
         });
     }
 
@@ -221,7 +225,7 @@ class ModelsService
                 Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
             }
         } catch (Exception $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getLine().PHP_EOL.$e->getTraceAsString());
         }
 
         if ($customer) {
@@ -322,8 +326,6 @@ class ModelsService
 
     public function updateModelFromModelDTO(Model $model, ModelDTO $modelDTO, ?int $customerId = null): Model
     {
-        $etsyService = (new EtsyService);
-
         $model->model_name = $modelDTO->modelName;
         if ($modelDTO->categories) {
             $model->categories = $modelDTO->categories;
@@ -338,12 +340,10 @@ class ModelsService
 
         $model->materials()->sync($modelDTO->materials);
 
-        $model = $this->isShopOwnerModel(
+        return $this->isShopOwnerModel(
             model: $model,
             modelDTO: $modelDTO,
         );
-
-        return $model;
     }
 
     private function isShopOwnerModel(Model $model, ModelDTO $modelDTO)
@@ -360,7 +360,11 @@ class ModelsService
                     $listing = $etsyService->getListing($shop, $shopListingId);
                     if (! $listing) {
                         Log::error('Listing not found');
-                        $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
+                        $model->load([
+                            'materials',
+                            'customer.shopOwner.shops',
+                            'shopListingModel',
+                        ]);
 
                         return $model;
                     }
@@ -387,7 +391,11 @@ class ModelsService
                         );
                     }
 
-                    $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
+                    $model->load([
+                        'materials',
+                        'customer.shopOwner.shops',
+                        'shopListingModel',
+                    ]);
 
                     $this->syncModelToShop($model);
                 }
@@ -406,7 +414,7 @@ class ModelsService
                     try {
                         (new EtsyService)->syncListing($shop, $model);
                     } catch (Exception $e) {
-                        Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+                        Log::error($e->getMessage().PHP_EOL.$e->getLine().PHP_EOL.$e->getTraceAsString());
                     }
                 }
             }
@@ -422,7 +430,7 @@ class ModelsService
                     try {
                         (new EtsyService)->deleteListing($shop, $model->shopListingModel->shop_listing_id);
                     } catch (Exception $e) {
-                        Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+                        Log::error($e->getMessage().PHP_EOL.$e->getLine().PHP_EOL.$e->getTraceAsString());
                     }
                 }
             }

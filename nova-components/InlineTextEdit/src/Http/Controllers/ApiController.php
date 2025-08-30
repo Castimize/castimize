@@ -24,13 +24,14 @@ class ApiController extends Controller
         $column = $request->column;
         $value = $request->value;
 
-        $model = null;
         try {
             $model = app($modelClass)->find($modelId);
             $model->$column = $value;
             $model->save();
         } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 400);
         }
 
         return response('', Response::HTTP_NO_CONTENT);

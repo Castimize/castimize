@@ -16,7 +16,9 @@ class InlineTextEdit extends Field
 
     protected function resolveAttribute($resource, $attribute)
     {
-        $this->withMeta(['resourceId' => $resource->getKey()]);
+        $this->withMeta([
+            'resourceId' => $resource->getKey(),
+        ]);
 
         return parent::resolveAttribute($resource, $attribute);
     }
@@ -34,11 +36,15 @@ class InlineTextEdit extends Field
 
     public function modelClass(string $modelClass): InlineTextEdit
     {
-        return $this->withMeta(['modelClass' => $modelClass]);
+        return $this->withMeta([
+            'modelClass' => $modelClass,
+        ]);
     }
 
     public function maxWidth(?int $maxWidthPx = null): InlineTextEdit
     {
-        return $this->withMeta(['maxWidth' => $maxWidthPx]);
+        return $this->withMeta([
+            'maxWidth' => $maxWidthPx,
+        ]);
     }
 }

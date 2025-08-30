@@ -81,7 +81,6 @@ class Listing extends Resource
     /**
      * Get all active listings on Etsy. Filtered by listing ID. Support upto 100 IDs.
      *
-     * @param  array  $params
      * @return Collection[Etsy\Resources\Listing]
      */
     public static function allByIds(

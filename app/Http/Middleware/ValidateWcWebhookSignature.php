@@ -19,7 +19,9 @@ class ValidateWcWebhookSignature
 
         $signature = $request->header('x-wc-webhook-signature');
         if (empty($signature)) {
-            LogRequestService::addResponse($request, ['message' => 'Invalid key'], 401);
+            LogRequestService::addResponse($request, [
+                'message' => 'Invalid key',
+            ], 401);
 
             return response(['Invalid key'], 401);
         }
@@ -28,7 +30,9 @@ class ValidateWcWebhookSignature
         $calculated_hmac = base64_encode(hash_hmac('sha256', $payload, env('WOOCOMMERCE_KEY'), true));
 
         if ($signature != $calculated_hmac) {
-            LogRequestService::addResponse($request, ['message' => 'Invalid payload'], 401);
+            LogRequestService::addResponse($request, [
+                'message' => 'Invalid payload',
+            ], 401);
 
             return response(['Invalid payload'], 401);
         }

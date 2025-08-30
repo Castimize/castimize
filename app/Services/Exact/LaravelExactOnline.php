@@ -13,13 +13,19 @@ use RuntimeException;
 
 class LaravelExactOnline
 {
-    /** @var null|Lock */
+    /**
+     * @var null|Lock
+     */
     public static $lock = null;
 
-    /** @var Connection */
+    /**
+     * @var Connection
+     */
     private $connection;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private static $lockKey = 'exactonline.refreshLock';
 
     /**

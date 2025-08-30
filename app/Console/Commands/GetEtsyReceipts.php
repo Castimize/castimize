@@ -48,7 +48,12 @@ class GetEtsyReceipts extends Command
 
         foreach ($shops as $shop) {
             try {
-                $receipts = $etsyService->getShopReceipts($shop, ['min_created' => $date]);
+                $receipts = $etsyService->getShopReceipts(
+                    shop: $shop,
+                    params: [
+                        'min_created' => $date,
+                    ],
+                );
                 $this->info(sprintf('Found %s receipts for %s', $receipts->count(), $shop->id));
                 foreach ($receipts->data as $receipt) {
                     $this->info(sprintf('Receipt %s', $receipt->receipt_id));
@@ -62,7 +67,6 @@ class GetEtsyReceipts extends Command
                             try {
                                 // Create OrderDTO from Etsy receipt
                                 $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
-                                //                                dd($orderDTO);
                                 // Use mandate to pay the order
                                 $wcOrder = $woocommerceApiService->createOrder($orderDTO);
                                 $this->info('Woocommerce order created with id: '.$wcOrder['id']);

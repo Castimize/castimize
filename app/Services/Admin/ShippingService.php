@@ -12,7 +12,6 @@ use App\Nova\Settings\Shipping\GeneralSettings;
 use App\Services\Shippo\ShippoService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use RuntimeException;
@@ -32,9 +31,6 @@ class ShippingService
         return $this->_fromAddress;
     }
 
-    /**
-     * @return ShippingService
-     */
     public function setFromAddress(array $address): static
     {
         $this->_fromAddress = $address;
@@ -47,9 +43,6 @@ class ShippingService
         return $this->_toAddress;
     }
 
-    /**
-     * @return $this
-     */
     public function setToAddress(array $address): static
     {
         $this->_toAddress = $address;
@@ -70,11 +63,9 @@ class ShippingService
         $createAddressMethod = 'create'.$type.'Address';
         $cacheKey = $this->_shippoService->getCacheKey($this->$getAddressMethod());
 
-        // return Cache::remember($cacheKey . '_v3', 31556926, function() use ($getAddressMethod, $setAddressMethod, $createAddressMethod, $getShipmentAddressMethod) {
         return $this->_shippoService->$setAddressMethod($this->$getAddressMethod())
             ->$createAddressMethod(true)
             ->$getShipmentAddressMethod();
-        // });
     }
 
     /**
@@ -105,7 +96,12 @@ class ShippingService
             $address['country'] = $shippoAddress['country'];
         }
 
-        return ['valid' => $valid, 'address' => $address, 'address_changed' => $addressChanged, 'messages' => $errorMessages];
+        return [
+            'valid' => $valid,
+            'address' => $address,
+            'address_changed' => $addressChanged,
+            'messages' => $errorMessages,
+        ];
     }
 
     /**
@@ -180,11 +176,9 @@ class ShippingService
                 'importer_reference' => $orderNumber,
                 'currency' => $currency,
                 'contents_type' => $contentsType,
-                // 'eori_number' => strtoupper($customerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
             ])
             ->createShipment();
         $shippoShipment = $this->_shippoService->getShipment();
-        //        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 
         if ($rate === null) {
@@ -266,12 +260,6 @@ class ShippingService
         // Make as return and bill to us
         $extra = [
             'is_return' => true,
-            //            'billing' => [
-            //                'account' => 'G2240C',
-            //                'country' => 'NL',
-            //                'type' => 'THIRD_PARTY',
-            //                'zip' => $toAddress['zip'],
-            //            ],
         ];
 
         $this->_shippoService
@@ -279,11 +267,9 @@ class ShippingService
                 'exporter_reference' => $manufacturerShipment->id,
                 'importer_reference' => $orderNumber,
                 'currency' => $currency,
-                // 'eori_number' => $this->generalSettings->eoriNumber,
             ])
             ->createShipment($extra);
         $shippoShipment = $this->_shippoService->getShipment();
-        //        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 
         if ($rate === null) {
@@ -308,7 +294,7 @@ class ShippingService
             ->createLabel($manufacturerShipment->id, $rate['object_id']);
         $transaction = $this->_shippoService->getTransaction();
 
-        // Log::info(print_r($transaction, true));
+
         if ($transaction && $transaction['status'] === 'SUCCESS') {
             return $this->_shippoService->toArray();
         }
@@ -408,10 +394,8 @@ class ShippingService
     private function checkAddressValid($validation_results, bool $test = false, bool $frontend = true): array
     {
         $valid = 1;
-        if (is_array($validation_results)) {
-            if (app()->environment('production')) {
-                $valid = $validation_results['is_valid'] ? 1 : 0;
-            }
+        if (is_array($validation_results) && app()->environment('production')) {
+            $valid = $validation_results['is_valid'] ? 1 : 0;
         }
         $errorMessages = [];
         if ($validation_results['messages']) {

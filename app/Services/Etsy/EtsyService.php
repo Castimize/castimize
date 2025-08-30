@@ -13,7 +13,6 @@ use App\Models\Model;
 use App\Models\Shop;
 use App\Models\ShopListingModel;
 use App\Services\Admin\ShopListingModelService;
-use App\Services\Etsy\Resources\Listing;
 use Etsy\Collection;
 use Etsy\Etsy;
 use Etsy\OAuth\Client;
@@ -48,7 +47,6 @@ class EtsyService
     {
         $this->client = new Client(client_id: $shop->shop_oauth['client_id']);
         $scopes = PermissionScopes::ALL_SCOPES;
-        //        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
 
         [$verifier, $code_challenge] = $this->client->generateChallengeCode();
         $nonce = $this->client->createNonce();
@@ -104,7 +102,9 @@ class EtsyService
         if (! array_key_exists('refresh_token', $shop->shop_oauth) || ! array_key_exists('access_token', $shop->shop_oauth)) {
             $shop->active = 0;
             $shop->save();
-            throw new Exception(__('Shop is unauthenticated :shopOwner', ['shopOwner' => $shop->shop_owner_id]));
+            throw new Exception(__('Shop is unauthenticated :shopOwner', [
+                'shopOwner' => $shop->shop_owner_id,
+            ]));
         }
         $this->client = new Client(client_id: $shop->shop_oauth['client_id']);
         $response = $this->client->refreshAccessToken($shop->shop_oauth['refresh_token']);
@@ -115,7 +115,7 @@ class EtsyService
     public function getShop(Shop $shop): ?EtsyShop
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return $this->addShopToShopOwnerShop($shop);
     }
@@ -123,7 +123,7 @@ class EtsyService
     public function getShopReturnPolicy(Shop $shop, int $returnPolicyId): ReturnPolicy
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return ReturnPolicy::get(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -134,7 +134,7 @@ class EtsyService
     public function getShopReturnPolicies(Shop $shop): Collection
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return ReturnPolicy::all(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -144,7 +144,7 @@ class EtsyService
     public function createShopReturnPolicy(Shop $shop): ReturnPolicy
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         $shopReturnPolicy = ReturnPolicy::create(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -192,7 +192,7 @@ class EtsyService
     public function getSellerTaxonomy(Shop $shop): Collection
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return SellerTaxonomy::all();
     }
@@ -315,8 +315,6 @@ class EtsyService
             listingId: $listingId,
         );
 
-        // Log::info('Listing inventory: ' . print_r($data, true));
-
         return $data;
     }
 
@@ -371,7 +369,7 @@ class EtsyService
     public function getListingImages(Shop $shop, int $listingId): Collection
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return ListingImage::all(listing_id: $listingId);
     }
@@ -379,7 +377,7 @@ class EtsyService
     public function getShippingCarriers(Shop $shop): Collection
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
         return ShippingCarrier::all('NL');
     }
@@ -513,10 +511,7 @@ class EtsyService
 
         // Also set state to active again
         $data = [
-            //            'title' => $listingDTO->title,
-            //            'description' => $listingDTO->description,
             'taxonomy_id' => $listingDTO->taxonomyId,
-            // 'shipping_profile_id' => $listingDTO->shippingProfileId,
             'return_policy_id' => $listingDTO->returnPolicyId,
             'materials' => $materials,
             'item_weight' => $listingDTO->itemWeight,
@@ -537,7 +532,6 @@ class EtsyService
 
     public function updateListingInventory(Shop $shop, ListingDTO $listingDTO, array $existingInventory): void
     {
-        //        dd($existingInventory);
         Log::info('Listing inventory creating: '.$listingDTO->listingId);
         $listingId = $listingDTO->listingId;
 

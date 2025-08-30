@@ -37,9 +37,13 @@ class ListingDTO
         public ?string $itemDimensionsUnit,
         public ?int $processingMin,
         public ?int $processingMax,
-        /** @var Collection<ListingImageDTO> */
+        /**
+         * @var Collection<ListingImageDTO>
+         */
         public ?Collection $listingImages,
-        /** @var Collection<ListingInventoryDTO> */
+        /**
+         * @var Collection<ListingInventoryDTO>
+         */
         public ?Collection $listingInventory,
     ) {}
 
@@ -72,7 +76,9 @@ class ListingDTO
             $shopOauth['shop_currency'] !== config('app.currency') &&
             in_array(CurrencyEnum::from($shopOauth['shop_currency']), CurrencyEnum::cases(), true)
         ) {
-            /** @var CurrencyService $currencyService */
+            /**
+             * @var CurrencyService $currencyService
+             */
             $currencyService = app(CurrencyService::class);
             $price = $currencyService->convertCurrency(config('app.currency'), $shopOauth['shop_currency'], $price);
         }

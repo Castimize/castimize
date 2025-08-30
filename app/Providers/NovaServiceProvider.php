@@ -64,8 +64,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         parent::boot();
 
-        //        Nova::withBreadcrumbs();
-
         Nova::mainMenu(function (Request $request) {
             if ($request->user()->isManufacturer()) {
                 Nova::withoutGlobalSearch();
@@ -220,8 +218,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
     /**
      * Register the Nova routes.
-     *
-     * @return void
      */
     protected function routes()
     {
@@ -235,8 +231,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      * Register the Nova gate.
      *
      * This gate determines who can access Nova in non-local environments.
-     *
-     * @return void
      */
     protected function gate()
     {

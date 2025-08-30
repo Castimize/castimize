@@ -195,7 +195,9 @@ class CustomersService
         if ($billingAddress === null) {
             $billingAddress = $this->createAddress($request->billing);
             if ($billingAddress !== null) {
-                $customer->addresses()->wherePivot('default_billing', 1)->update(['default_billing' => 0]);
+                $customer->addresses()->wherePivot('default_billing', 1)->update([
+                    'default_billing' => 0,
+                ]);
                 $pivotData = [
                     'default_billing' => 1,
                     'contact_name' => sprintf('%s %s', $request->billing['first_name'], $request->billing['last_name']),
@@ -219,7 +221,9 @@ class CustomersService
                 'phone' => $request->shipping['phone'] ?? null,
             ];
             if ($shippingAddress !== null && $shippingAddress !== $billingAddress) {
-                $customer->addresses()->wherePivot('default_shipping', 1)->update(['default_shipping' => 0]);
+                $customer->addresses()->wherePivot('default_shipping', 1)->update([
+                    'default_shipping' => 0,
+                ]);
                 $customer->addresses()->attach($shippingAddress, $pivotData);
             } else {
                 $customer->addresses()->syncWithPivotValues($shippingAddress, $pivotData);
@@ -286,16 +290,29 @@ class CustomersService
             $state = null;
             if ($stateName) {
                 $state = State::firstOrCreate(
-                    ['slug' => Str::slug($stateName)],
-                    ['name' => $stateName, 'slug' => Str::slug($stateName), 'country_id' => $country->id]
+                    [
+                        'slug' => Str::slug($stateName),
+                    ],
+                    [
+                        'name' => $stateName,
+                        'slug' => Str::slug($stateName),
+                        'country_id' => $country->id,
+                    ],
                 );
             }
             $cityName = $input->city;
             $city = null;
             if ($cityName) {
                 $city = City::firstOrCreate(
-                    ['slug' => Str::slug($cityName)],
-                    ['name' => $cityName, 'slug' => Str::slug($cityName), 'state_id' => $state?->id, 'country_id' => $country->id]
+                    [
+                        'slug' => Str::slug($cityName),
+                    ],
+                    [
+                        'name' => $cityName,
+                        'slug' => Str::slug($cityName),
+                        'state_id' => $state?->id,
+                        'country_id' => $country->id,
+                    ]
                 );
             }
 
@@ -331,16 +348,29 @@ class CustomersService
             $state = null;
             if ($stateName) {
                 $state = State::firstOrCreate(
-                    ['name' => $stateName],
-                    ['name' => $stateName, 'slug' => Str::slug($stateName), 'country_id' => $country->id]
+                    [
+                        'name' => $stateName,
+                    ],
+                    [
+                        'name' => $stateName,
+                        'slug' => Str::slug($stateName),
+                        'country_id' => $country->id,
+                    ]
                 );
             }
             $cityName = $input['city'];
             $city = null;
             if ($cityName) {
                 $city = City::firstOrCreate(
-                    ['name' => $cityName],
-                    ['name' => $cityName, 'slug' => Str::slug($cityName), 'state_id' => $state?->id, 'country_id' => $country->id]
+                    [
+                        'name' => $cityName,
+                    ],
+                    [
+                        'name' => $cityName,
+                        'slug' => Str::slug($cityName),
+                        'state_id' => $state?->id,
+                        'country_id' => $country->id,
+                    ]
                 );
             }
 

@@ -34,7 +34,9 @@ class CustomersApiController extends ApiController
             ->withCount('orders')
             ->where('wp_id', $request->wp_id)->first();
         if ($customer === null) {
-            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse($request, [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $response = new CustomerResource($customer);
@@ -58,18 +60,15 @@ class CustomersApiController extends ApiController
     public function updateCustomerWp(Request $request): JsonResponse
     {
         return response()->json($request->all());
-        //        $customer = (new CustomersService())->storeCustomerFromApi($request);
-        //
-        //        return (new CustomerResource($customer))
-        //            ->response()
-        //            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     public function deleteCustomerWp(Request $request): Response
     {
         $customer = Customer::where('wp_id', $request->id)->first();
         if ($customer === null) {
-            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse($request, [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $customer->delete();

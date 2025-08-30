@@ -21,7 +21,9 @@ class PaymentsApiController extends ApiController
     {
         $customer = Customer::where('wp_id', $customerId)->first();
         if (! $customer) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse(request(), [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $setupIntent = $this->paymentService->createStripeSetupIntent($customer);
@@ -35,7 +37,9 @@ class PaymentsApiController extends ApiController
     {
         $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if (! $customer) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse(request(), [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
@@ -56,7 +60,9 @@ class PaymentsApiController extends ApiController
             $shopOwner->refresh();
 
         } catch (Exception $exception) {
-            LogRequestService::addResponse(request(), ['message' => $exception->getMessage().PHP_EOL.$exception->getFile()], 500);
+            LogRequestService::addResponse(request(), [
+                'message' => $exception->getMessage().PHP_EOL.$exception->getLine().PHP_EOL.$exception->getFile(),
+            ], 500);
             abort(Response::HTTP_BAD_REQUEST, 'Unable to cancel mandate with error: '.$exception->getMessage());
         }
 

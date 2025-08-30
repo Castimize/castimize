@@ -20,8 +20,6 @@ class RangesFilter extends Filter
 
     /**
      * Create a new filter instance.
-     *
-     * @return void
      */
     public function __construct(protected string $column) {}
 

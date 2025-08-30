@@ -30,7 +30,11 @@ class PricesApiController extends ApiController
         try {
             $price = $this->calculatePricesService->calculatePrice($request);
         } catch (UnprocessableEntityHttpException $e) {
-            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
+            LogRequestService::addResponse($request, [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], $e->getCode());
 
             return response()->json([
                 'errors' => $e->getMessage(),
