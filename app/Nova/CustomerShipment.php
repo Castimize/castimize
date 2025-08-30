@@ -15,6 +15,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Laravel\Nova\Exceptions\HelperNotSupported;
 use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\FormData;
@@ -140,6 +141,7 @@ class CustomerShipment extends Resource
      * Get the fields displayed by the resource.
      *
      * @return array
+     * @throws HelperNotSupported
      */
     public function fields(NovaRequest $request)
     {
@@ -264,7 +266,7 @@ class CustomerShipment extends Resource
         $parcelSettings = (new ParcelSettings);
 
         return [
-            SelectWithOverview::make('PO\'s', 'selectedPOs')
+            SelectWithOverview::make(__('PO\'s'), 'selectedPOs')
                 ->placeholder(__('Select PO\'s'))
                 ->options(\App\Models\OrderQueue::getAtDcOrderQueueOptions())
                 ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders()),
