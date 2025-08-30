@@ -17,12 +17,11 @@ class ShopOwnersApiController extends ApiController
     public function __construct(
         private ShopOwnersService $shopOwnersService,
         private CustomersService $customersService,
-    ) {
-    }
+    ) {}
 
     public function show(int $customerId): ShopOwnerResource
     {
-//        dd(Order::find(7444));
+        //        dd(Order::find(7444));
         abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
         if (! $customer) {
@@ -32,6 +31,7 @@ class ShopOwnersApiController extends ApiController
 
         $response = new ShopOwnerResource($customer->shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -48,6 +48,7 @@ class ShopOwnersApiController extends ApiController
             if ($s->shop === $shop) {
                 $response = new ShopResource($s);
                 LogRequestService::addResponse(request(), $response);
+
                 return $response;
             }
         }
@@ -78,6 +79,7 @@ class ShopOwnersApiController extends ApiController
 
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -111,6 +113,7 @@ class ShopOwnersApiController extends ApiController
         $shopOwner->refresh();
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -137,6 +140,7 @@ class ShopOwnersApiController extends ApiController
 
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -156,11 +160,12 @@ class ShopOwnersApiController extends ApiController
             if ($s->shop === $shop) {
                 $s = $this->shopOwnersService->setShopActiveState(
                     shop: $s,
-                    active: (bool) ($request->active === "1" ? 1 : 0),
+                    active: (bool) ($request->active === '1' ? 1 : 0),
                 );
 
                 $response = new ShopResource($s);
                 LogRequestService::addResponse(request(), $response);
+
                 return $response;
             }
         }

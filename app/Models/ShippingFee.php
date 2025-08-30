@@ -15,9 +15,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([ShippingFeeObserver::class])]
 class ShippingFee extends Model
 {
-    use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -25,7 +26,7 @@ class ShippingFee extends Model
      *
      * @var array<int, string>
      */
-    protected  $fillable = [
+    protected $fillable = [
         'logistics_zone_id',
         'currency_id',
         'name',
@@ -99,9 +100,6 @@ class ShippingFee extends Model
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function logisticsZone(): BelongsTo
     {
         return $this->belongsTo(LogisticsZone::class);

@@ -9,6 +9,7 @@ use OpenApi\Annotations as OA;
  * @OA\Schema(
  *     title="User",
  *     description="User model",
+ *
  *     @OA\Xml(
  *         name="User"
  *     )
@@ -24,7 +25,7 @@ class User
      *     example=1
      * )
      *
-     * @var integer
+     * @var int
      */
     private $id;
 

@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use App\Services\Admin\LogRequestService;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class ValidateWcWebhookSignature
@@ -21,6 +20,7 @@ class ValidateWcWebhookSignature
         $signature = $request->header('x-wc-webhook-signature');
         if (empty($signature)) {
             LogRequestService::addResponse($request, ['message' => 'Invalid key'], 401);
+
             return response(['Invalid key'], 401);
         }
 
@@ -29,6 +29,7 @@ class ValidateWcWebhookSignature
 
         if ($signature != $calculated_hmac) {
             LogRequestService::addResponse($request, ['message' => 'Invalid payload'], 401);
+
             return response(['Invalid payload'], 401);
         }
 

@@ -7,7 +7,6 @@ namespace App\Services\Admin;
 use App\Models\Shop;
 use App\Models\ShopOrder;
 use App\Models\User;
-use Codexshaper\WooCommerce\Models\Order;
 use Etsy\Resources\Receipt;
 
 class ShopOrderService

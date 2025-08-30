@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Crypt;
             ];
             $shop->shop_oauth = $shopOauth;
 
-            $url = (new EtsyService())->getAuthorizationUrl($shop);
+            $url = (new EtsyService)->getAuthorizationUrl($shop);
         }
 
         return [

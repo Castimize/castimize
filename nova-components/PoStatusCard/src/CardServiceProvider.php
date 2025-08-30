@@ -38,8 +38,8 @@ class CardServiceProvider extends ServiceProvider
         }
 
         Route::middleware(['nova'])
-                ->prefix('nova-vendor/po-status-card')
-                ->group(__DIR__.'/../routes/api.php');
+            ->prefix('nova-vendor/po-status-card')
+            ->group(__DIR__.'/../routes/api.php');
     }
 
     /**

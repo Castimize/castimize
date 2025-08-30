@@ -16,6 +16,7 @@ class CreateOrderFromDTO implements ShouldQueue
     use Queueable;
 
     public $tries = 5;
+
     public $timeout = 120;
 
     private OrdersService $ordersService;
@@ -25,7 +26,7 @@ class CreateOrderFromDTO implements ShouldQueue
      */
     public function __construct(public OrderDTO $orderDto, public ?int $logRequestId = null)
     {
-        $this->ordersService = new OrdersService();
+        $this->ordersService = new OrdersService;
     }
 
     /**
@@ -42,13 +43,13 @@ class CreateOrderFromDTO implements ShouldQueue
         try {
             $this->ordersService->storeOrderFromDto($this->orderDto);
         } catch (Throwable $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

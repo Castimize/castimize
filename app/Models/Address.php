@@ -12,11 +12,11 @@ use Wildside\Userstamps\Userstamps;
 
 class Address extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
-    protected $revisionCreationsEnabled = true;
 
+    protected $revisionCreationsEnabled = true;
 
     /**
      * The attributes that are mass assignable.
@@ -50,51 +50,36 @@ class Address extends Model
         ];
     }
 
-    /**
-     * @return null|string
-     */
     public function getFullAddressAttribute(): ?string
     {
-        return $this->address_line1 . ' ' . $this->address_line2 . ', ' . $this->postal_code . ' ' . $this->city->name . ', ' . $this->country->name;
+        return $this->address_line1.' '.$this->address_line2.', '.$this->postal_code.' '.$this->city->name.', '.$this->country->name;
     }
 
     public function getFullAddressWithBreaksAttribute(): ?string
     {
-        return $this->address_line1 . "<br>" . $this->address_line2 . "<br>" . $this->postal_code . ' ' . $this->city->name . "<br>" . $this->country->name;
+        return $this->address_line1.'<br>'.$this->address_line2.'<br>'.$this->postal_code.' '.$this->city->name.'<br>'.$this->country->name;
     }
 
     public function getFullAddressWithNewLinesAttribute(): ?string
     {
-        return $this->address_line1 . "\n" . $this->address_line2 . "\n" . $this->postal_code . ' ' . $this->city->name . "\n" . $this->country->name;
+        return $this->address_line1."\n".$this->address_line2."\n".$this->postal_code.' '.$this->city->name."\n".$this->country->name;
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function state(): BelongsTo
     {
         return $this->belongsTo(State::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
-    /**
-     * @return MorphToMany
-     */
     public function customers(): MorphToMany
     {
         return $this->morphedByMany(
@@ -102,13 +87,13 @@ class Address extends Model
             'model',
             'model_has_addresses'
         )
-        ->withPivot([
-            'default_billing',
-            'default_shipping',
-            'company',
-            'contact_name',
-            'phone',
-            'email',
-        ]);
+            ->withPivot([
+                'default_billing',
+                'default_shipping',
+                'company',
+                'contact_name',
+                'phone',
+                'email',
+            ]);
     }
 }

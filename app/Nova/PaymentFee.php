@@ -33,6 +33,7 @@ class PaymentFee extends Resource
     public function title()
     {
         $paymentMethodsOptions = PaymentMethodsEnum::options();
+
         return ! empty($this->payment_method) && array_key_exists($this->payment_method, $paymentMethodsOptions) ? $paymentMethodsOptions[$this->payment_method] : $this->id;
     }
 
@@ -59,7 +60,6 @@ class PaymentFee extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -133,90 +133,90 @@ class PaymentFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Fee'), function () {
-                return $this->fee && $this->type === PaymentFeeTypesEnum::FIXED->value ? currencyFormatter((float)$this->fee, $this->currency_code) : $this->fee . '%';
+                return $this->fee && $this->type === PaymentFeeTypesEnum::FIXED->value ? currencyFormatter((float) $this->fee, $this->currency_code) : $this->fee.'%';
             })
                 ->exceptOnForms()
                 ->sortable(),
 
-//            \Laravel\Nova\Fields\Currency::make(__('Minimum fee'), 'minimum_fee')
-//                ->min(0)
-//                ->step(0.01)
-//                ->locale(config('app.format_locale'))
-//                ->dependsOn(
-//                    ['currency_code', 'type'],
-//                    function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
-//                        if ($formData->type === PaymentFeeTypesEnum::FIXED->value) {
-//                            $field->show()->required(false);
-//                            $field->currency($formData->currency_code);
-//                        } else {
-//                            $field->hide()->required(false);
-//                        }
-//                    }
-//                )
-//                ->onlyOnForms(),
-//
-//            Number::make(__('Minimum fee'), 'minimum_fee')
-//                ->help(__('In percentage'))
-//                ->step(0.01)
-//                ->dependsOn(
-//                    ['type'],
-//                    function (Number $field, NovaRequest $request, FormData $formData) {
-//                        if ($formData->type === PaymentFeeTypesEnum::PERCENTAGE->value) {
-//                            $field->show()->required(false);
-//                        } else {
-//                            $field->hide()->required(false);
-//                        }
-//                    }
-//                )
-//                ->onlyOnForms(),
-//
-//            Text::make(__('Minimum fee'), function () {
-//                return $this->minimum_fee && $this->type === PaymentFeeTypesEnum::FIXED->value ?
-//                    currencyFormatter((float)$this->minimum_fee, $this->currency_code) :
-//                    $this->minimum_fee . ($this->minimum_fee > 0.00 ? '%' : '');
-//            })
-//                ->exceptOnForms()
-//                ->sortable(),
-//
-//            \Laravel\Nova\Fields\Currency::make(__('Maximum fee'), 'maximum_fee')
-//                ->min(0)
-//                ->step(0.01)
-//                ->locale(config('app.format_locale'))
-//                ->dependsOn(
-//                    ['currency_code', 'type'],
-//                    function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
-//                        if ($formData->type === PaymentFeeTypesEnum::FIXED->value) {
-//                            $field->show()->required(false);
-//                            $field->currency($formData->currency_code);
-//                        } else {
-//                            $field->hide()->required(false);
-//                        }
-//                    }
-//                )
-//                ->onlyOnForms(),
-//
-//            Number::make(__('Maximum fee'), 'maximum_fee')
-//                ->help(__('In percentage'))
-//                ->step(0.01)
-//                ->dependsOn(
-//                    ['type'],
-//                    function (Number $field, NovaRequest $request, FormData $formData) {
-//                        if ($formData->type === PaymentFeeTypesEnum::PERCENTAGE->value) {
-//                            $field->show()->required(false);
-//                        } else {
-//                            $field->hide()->required(false);
-//                        }
-//                    }
-//                )
-//                ->onlyOnForms(),
-//
-//            Text::make(__('Maximum fee'), function () {
-//                return $this->maximum_fee && $this->type === PaymentFeeTypesEnum::FIXED->value ?
-//                    currencyFormatter((float)$this->maximum_fee, $this->currency_code) :
-//                    $this->maximum_fee . ($this->maximum_fee > 0.00 ? '%' : '');
-//            })
-//                ->exceptOnForms()
-//                ->sortable(),
+            //            \Laravel\Nova\Fields\Currency::make(__('Minimum fee'), 'minimum_fee')
+            //                ->min(0)
+            //                ->step(0.01)
+            //                ->locale(config('app.format_locale'))
+            //                ->dependsOn(
+            //                    ['currency_code', 'type'],
+            //                    function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
+            //                        if ($formData->type === PaymentFeeTypesEnum::FIXED->value) {
+            //                            $field->show()->required(false);
+            //                            $field->currency($formData->currency_code);
+            //                        } else {
+            //                            $field->hide()->required(false);
+            //                        }
+            //                    }
+            //                )
+            //                ->onlyOnForms(),
+            //
+            //            Number::make(__('Minimum fee'), 'minimum_fee')
+            //                ->help(__('In percentage'))
+            //                ->step(0.01)
+            //                ->dependsOn(
+            //                    ['type'],
+            //                    function (Number $field, NovaRequest $request, FormData $formData) {
+            //                        if ($formData->type === PaymentFeeTypesEnum::PERCENTAGE->value) {
+            //                            $field->show()->required(false);
+            //                        } else {
+            //                            $field->hide()->required(false);
+            //                        }
+            //                    }
+            //                )
+            //                ->onlyOnForms(),
+            //
+            //            Text::make(__('Minimum fee'), function () {
+            //                return $this->minimum_fee && $this->type === PaymentFeeTypesEnum::FIXED->value ?
+            //                    currencyFormatter((float)$this->minimum_fee, $this->currency_code) :
+            //                    $this->minimum_fee . ($this->minimum_fee > 0.00 ? '%' : '');
+            //            })
+            //                ->exceptOnForms()
+            //                ->sortable(),
+            //
+            //            \Laravel\Nova\Fields\Currency::make(__('Maximum fee'), 'maximum_fee')
+            //                ->min(0)
+            //                ->step(0.01)
+            //                ->locale(config('app.format_locale'))
+            //                ->dependsOn(
+            //                    ['currency_code', 'type'],
+            //                    function (\Laravel\Nova\Fields\Currency $field, NovaRequest $request, FormData $formData) {
+            //                        if ($formData->type === PaymentFeeTypesEnum::FIXED->value) {
+            //                            $field->show()->required(false);
+            //                            $field->currency($formData->currency_code);
+            //                        } else {
+            //                            $field->hide()->required(false);
+            //                        }
+            //                    }
+            //                )
+            //                ->onlyOnForms(),
+            //
+            //            Number::make(__('Maximum fee'), 'maximum_fee')
+            //                ->help(__('In percentage'))
+            //                ->step(0.01)
+            //                ->dependsOn(
+            //                    ['type'],
+            //                    function (Number $field, NovaRequest $request, FormData $formData) {
+            //                        if ($formData->type === PaymentFeeTypesEnum::PERCENTAGE->value) {
+            //                            $field->show()->required(false);
+            //                        } else {
+            //                            $field->hide()->required(false);
+            //                        }
+            //                    }
+            //                )
+            //                ->onlyOnForms(),
+            //
+            //            Text::make(__('Maximum fee'), function () {
+            //                return $this->maximum_fee && $this->type === PaymentFeeTypesEnum::FIXED->value ?
+            //                    currencyFormatter((float)$this->maximum_fee, $this->currency_code) :
+            //                    $this->maximum_fee . ($this->maximum_fee > 0.00 ? '%' : '');
+            //            })
+            //                ->exceptOnForms()
+            //                ->sortable(),
 
             new Panel(__('History'), $this->commonMetaData(false, false, false, false)),
         ];
@@ -225,7 +225,6 @@ class PaymentFee extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -236,7 +235,6 @@ class PaymentFee extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -249,7 +247,6 @@ class PaymentFee extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -260,7 +257,6 @@ class PaymentFee extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

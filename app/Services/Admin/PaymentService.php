@@ -7,15 +7,13 @@ namespace App\Services\Admin;
 use App\Models\Customer;
 use App\Services\Payment\Stripe\StripeService;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Stripe\SetupIntent;
 
 class PaymentService
 {
     public function __construct(
         private StripeService $stripeService,
-    ) {
-    }
+    ) {}
 
     public function createStripeSetupIntent(Customer $customer): SetupIntent
     {

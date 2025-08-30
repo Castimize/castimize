@@ -23,12 +23,13 @@ class SelectWithOverview extends Field
     /**
      * Set the options.
      *
-     * @param  array $options
      * @return $this
      */
     public function options(array $options)
     {
-        if (is_callable($options)) $options = call_user_func($options);
+        if (is_callable($options)) {
+            $options = call_user_func($options);
+        }
         $options = collect($options ?: []);
 
         return $this->withMeta([
@@ -58,8 +59,13 @@ class SelectWithOverview extends Field
         $value = data_get($resource, str_replace('->', '.', $attribute));
         $saveAsJson = $this->shouldSaveAsJson($resource, $attribute);
 
-        if ($value instanceof Collection) return $value;
-        if ($saveAsJson) return $value;
+        if ($value instanceof Collection) {
+            return $value;
+        }
+        if ($saveAsJson) {
+            return $value;
+        }
+
         return is_array($value) || is_object($value) ? (array) $value : json_decode($value);
     }
 
@@ -75,17 +81,19 @@ class SelectWithOverview extends Field
 
     private function shouldSaveAsJson($model, $attribute)
     {
-        if (!empty($model) && !is_array($model) && method_exists($model, 'getCasts')) {
+        if (! empty($model) && ! is_array($model) && method_exists($model, 'getCasts')) {
             $casts = $model->getCasts();
             $isCastedToArray = ($casts[$attribute] ?? null) === 'array';
+
             return $this->saveAsJSON || $isCastedToArray;
         }
+
         return false;
     }
 
     public function resolveForAction($request)
     {
-        if (!is_null($this->value)) {
+        if (! is_null($this->value)) {
             return;
         }
 
@@ -96,7 +104,7 @@ class SelectWithOverview extends Field
 
     public function resolveDefaultValue(NovaRequest $request)
     {
-        if (!is_null($this->value)) {
+        if (! is_null($this->value)) {
             return parent::resolveDefaultValue($request);
         }
 
@@ -121,6 +129,7 @@ class SelectWithOverview extends Field
                         return false;
                     }
                 }
+
                 return true;
             });
 
@@ -137,12 +146,12 @@ class SelectWithOverview extends Field
     /**
      * Allows the field to save an actual JSON array to a SQL JSON column.
      *
-     * @param bool $saveAsJSON
      * @return self
      **/
     public function saveAsJSON(bool $saveAsJSON = true)
     {
         $this->saveAsJSON = $saveAsJSON;
+
         return $this;
     }
 }

@@ -8,13 +8,12 @@ use App\Services\Admin\LogRequestService;
 
 class MaterialsApiController extends ApiController
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function index()
     {
         $materials = Material::all();
+
         return MaterialResource::collection($materials);
     }
 
@@ -22,6 +21,7 @@ class MaterialsApiController extends ApiController
     {
         $response = new MaterialResource($material);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 }

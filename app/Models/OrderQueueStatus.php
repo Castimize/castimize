@@ -14,9 +14,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([OrderQueueStatusObserver::class])]
 class OrderQueueStatus extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -47,17 +48,11 @@ class OrderQueueStatus extends Model
         ];
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function orderQueue(): BelongsTo
     {
         return $this->belongsTo(OrderQueue::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function orderStatus(): BelongsTo
     {
         return $this->belongsTo(OrderStatus::class);

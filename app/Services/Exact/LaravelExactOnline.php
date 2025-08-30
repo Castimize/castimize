@@ -3,7 +3,6 @@
 namespace App\Services\Exact;
 
 use Exception;
-use File;
 use Illuminate\Contracts\Cache\Lock;
 use Illuminate\Contracts\Cache\LockProvider;
 use Illuminate\Contracts\Cache\Repository;
@@ -31,15 +30,15 @@ class LaravelExactOnline
         if (! $this->connection) {
             $this->connection = app()->make('Exact\Connection');
         }
+
         return $this->connection;
     }
 
     /**
      * Magically calls methods from Picqer Exact Online API
      *
-     * @param $method
-     * @param $arguments
      * @return mixed
+     *
      * @throws Exception
      */
     public function __call($method, $arguments)
@@ -48,15 +47,15 @@ class LaravelExactOnline
 
             $method = lcfirst(substr($method, 10));
 
-            call_user_func([$this->connection, $method], implode(",", $arguments));
+            call_user_func([$this->connection, $method], implode(',', $arguments));
 
             return $this;
 
         }
 
-        $classname = "\\Picqer\\Financials\\Exact\\" . $method;
+        $classname = '\\Picqer\\Financials\\Exact\\'.$method;
 
-        if (!class_exists($classname)) {
+        if (! class_exists($classname)) {
             throw new RuntimeException('Invalid type called');
         }
 
@@ -65,8 +64,6 @@ class LaravelExactOnline
     }
 
     /**
-     * @param Connection $connection
-     * @return void
      * @throws JsonException
      */
     public static function tokenUpdateCallback(Connection $connection): void
@@ -83,7 +80,7 @@ class LaravelExactOnline
     /**
      * Function to handle the token refresh call from picqer.
      *
-     * @param Connection $connection Connection instance.
+     * @param  Connection  $connection  Connection instance.
      */
     public static function tokenRefreshCallback(Connection $connection): void
     {
@@ -114,6 +111,7 @@ class LaravelExactOnline
         }
 
         self::$lock = $store->lock(self::$lockKey, 60);
+
         return self::$lock->block(30);
     }
 
@@ -129,6 +127,7 @@ class LaravelExactOnline
 
     /**
      * @return object
+     *
      * @throws JsonException
      */
     public static function loadConfig()
@@ -139,17 +138,14 @@ class LaravelExactOnline
             $config = Storage::disk('r2_private')->get('exact/credentials.json');
         }
 
-        return (object)json_decode($config, false, 512, JSON_THROW_ON_ERROR);
+        return (object) json_decode($config, false, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
-     * @param $config
-     * @return void
      * @throws JsonException
      */
     public static function storeConfig($config): void
     {
         Storage::disk('r2_private')->put('exact/credentials.json', json_encode($config, JSON_THROW_ON_ERROR));
     }
-
 }

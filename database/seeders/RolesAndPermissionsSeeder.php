@@ -5,8 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Ranium\SeedOnce\Traits\SeedOnce;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
@@ -15,10 +15,8 @@ class RolesAndPermissionsSeeder extends Seeder
 
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
@@ -43,12 +41,12 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $collection->each(function ($item, $key) {
             // create permissions for each collection item
-            Permission::create(['group' => $item, 'name' => 'viewAny' . $item]);
-            Permission::create(['group' => $item, 'name' => 'view' . $item]);
-            Permission::create(['group' => $item, 'name' => 'update' . $item]);
-            Permission::create(['group' => $item, 'name' => 'create' . $item]);
-            Permission::create(['group' => $item, 'name' => 'delete' . $item]);
-            Permission::create(['group' => $item, 'name' => 'destroy' . $item]);
+            Permission::create(['group' => $item, 'name' => 'viewAny'.$item]);
+            Permission::create(['group' => $item, 'name' => 'view'.$item]);
+            Permission::create(['group' => $item, 'name' => 'update'.$item]);
+            Permission::create(['group' => $item, 'name' => 'create'.$item]);
+            Permission::create(['group' => $item, 'name' => 'delete'.$item]);
+            Permission::create(['group' => $item, 'name' => 'destroy'.$item]);
         });
 
         // Create a Super-Admin Role and assign all Permissions
@@ -66,12 +64,12 @@ class RolesAndPermissionsSeeder extends Seeder
         $roleApi->givePermissionTo(Permission::whereIn('group', ['Api'])->get());
 
         // Give Users Super-Admin Role (System user and dev)
-         $user = User::where('email', 'matthijs.bon1@gmail.com')->first();
-         $user->assignRole('super-admin');
-         $user = User::where('email', 'matthbon@hotmail.com')->first();
-         $user->assignRole('super-admin');
+        $user = User::where('email', 'matthijs.bon1@gmail.com')->first();
+        $user->assignRole('super-admin');
+        $user = User::where('email', 'matthbon@hotmail.com')->first();
+        $user->assignRole('super-admin');
 
-         // Give Users Admin Role
+        // Give Users Admin Role
         $user = User::where('email', 'oscar@castimize.com')->first();
         $user->assignRole('admin');
         $user = User::where('email', 'robin@castimize.com')->first();
