@@ -40,7 +40,7 @@
         "kaiserkiwi/nova-queue-management": "^1.2",
         "laravel/framework": "^12.26",
         "laravel/nightwatch": "^1.7",
-        "laravel/nova": "^4.0",
+        "laravel/nova": "^4.35.11",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "league/flysystem-aws-s3-v3": "^3.0",

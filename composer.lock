@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "399da5205a65c12178998828a56fef89",
+    "content-hash": "16ce5fa5092c375bf50417c0818da463",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -744,12 +744,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Castimize/nova-flexible-content.git",
-                "reference": "091e806e6dea7090f6ff37450665fa34f38748ff"
+                "reference": "d51ba38d0714969b60cb719f4545cce2e2264af0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Castimize/nova-flexible-content/zipball/091e806e6dea7090f6ff37450665fa34f38748ff",
-                "reference": "091e806e6dea7090f6ff37450665fa34f38748ff",
+                "url": "https://api.github.com/repos/Castimize/nova-flexible-content/zipball/d51ba38d0714969b60cb719f4545cce2e2264af0",
+                "reference": "d51ba38d0714969b60cb719f4545cce2e2264af0",
                 "shasum": ""
             },
             "require": {
@@ -849,7 +849,7 @@
                     "url": "https://github.com/whitecube"
                 }
             ],
-            "time": "2025-07-27T15:16:52+00:00"
+            "time": "2025-08-30T09:46:25+00:00"
         },
         {
             "name": "castimize/po-status-card",
