@@ -18,6 +18,8 @@
         "castimize/po-status-card": "@dev",
         "castimize/select-manufacturer-with-overview": "@dev",
         "castimize/select-with-overview": "@dev",
+        "castimize/nova-editable-field": "dev-main",
+        "castimize/nova-flexible-content": "dev-master",
         "cmixin/business-day": "^1.18",
         "codexshaper/laravel-woocommerce": "^3.0",
         "coroowicaksono/chart-js-integration": "^0.4.3",
@@ -31,7 +33,6 @@
         "digital-creative/table-widget": "^1.0",
         "digital-creative/value-widget": "^1.0",
         "eminiarts/nova-tabs": "^2.2",
-        "ferdiunal/nova-editable-field": "^1.0",
         "gldrenthe89/nova-string-generator-field": "^4.1",
         "guzzlehttp/guzzle": "^7.9",
         "inakiabt/etsy-php": "^0.12.2",
@@ -69,18 +70,19 @@
         "venturecraft/revisionable": "^1.42",
         "wamesk/laravel-nova-tel-input": "^1.0",
         "wesselperik/nova-status-field": "^2.1",
-        "whitecube/nova-flexible-content": "^2.0",
         "wildside/userstamps": "^2.5",
         "ext-bcmath": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
+        "phpecs/phpecs": "^2.1",
         "phpunit/phpunit": "^11.5.3",
-        "laravel/pail": "^1.2.2"
+        "symplify/coding-standard": "^12.4"
     },
     "autoload": {
         "psr-4": {
@@ -141,6 +143,14 @@
         "nova": {
             "type": "composer",
             "url": "https://nova.laravel.com"
+        },
+        "nova-editable-field": {
+            "type": "vcs",
+            "url": "https://github.com/Castimize/nova-editable-field.git"
+        },
+        "nova-flexible-content": {
+            "type": "vcs",
+            "url": "https://github.com/Castimize/nova-flexible-content.git"
         },
         "0": {
             "type": "path",
