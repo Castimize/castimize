@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Nova\Fields\FormData;
 use Carbon\Carbon;
 use Cmixin\BusinessDay;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Nova\Fields\FormData as LaravelFormData;
 use Shippo;
 use Spatie\LaravelPdf\Facades\Pdf;
 
@@ -17,7 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $loader = AliasLoader::getInstance();
+        $loader->alias(LaravelFormData::class, FormData::class);
     }
 
     /**

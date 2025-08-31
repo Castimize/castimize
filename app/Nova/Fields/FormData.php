@@ -30,12 +30,11 @@ class FormData extends FluentDecorator
 
     /**
      * Make fluent payload from request.
-     *
-     * @param  array<string, mixed>  $fields
      * @return static
      */
-    public static function make(NovaRequest $request, array $fields)
+    public static function make($attributes = [])
     {
+        $request = $attributes;
         if (! \is_null($request->resource) && ! \is_null($request->resourceId)) {
             $fields["resource:{$request->resource}"] = $request->resourceId;
         }
@@ -48,7 +47,7 @@ class FormData extends FluentDecorator
             $fields["resource:{$request->relatedResource}"] = $request->relatedResourceId;
         }
 
-        return new static($fields, $request);
+        return new static($attributes, $request);
     }
 
     /**

@@ -293,8 +293,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind('Laravel\Nova\Fields\FormData', function ($app) {
-            return $app->make(FormData::class);
-        });
+
     }
 }
