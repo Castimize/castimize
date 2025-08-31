@@ -30,7 +30,7 @@ class GetCurrencyHistoricalRates extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $baseCurrency = config('app.currency');
         $supportedCurrencies = config('app.supported_currencies');
@@ -64,7 +64,7 @@ class GetCurrencyHistoricalRates extends Command
                 }
             }
         } catch (InvalidFormatException|Exception $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
             $this->error($e->getMessage());
         }
     }

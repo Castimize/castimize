@@ -8,6 +8,7 @@ use OpenApi\Annotations as OA;
  * @OA\Schema(
  *     title="UserResource",
  *     description="User resource",
+ *
  *     @OA\Xml(
  *         name="UserResource"
  *     )

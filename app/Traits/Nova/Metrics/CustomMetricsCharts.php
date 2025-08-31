@@ -21,7 +21,7 @@ trait CustomMetricsCharts
             $dateRanges[] = $date->format('Y-m-d');
         }
 
-        $currencyService = new CurrencyService();
+        $currencyService = new CurrencyService;
         $xAxis = [];
         $revenue = [];
         $costs = [];
@@ -37,19 +37,19 @@ trait CustomMetricsCharts
             )
             ->whereNotNull('orders.paid_at')
             ->whereNull('orders.deleted_at')
-            ->whereRaw("DATE(orders.created_at) in ('" . implode("','", $dateRanges) . "')")
+            ->whereRaw("DATE(orders.created_at) in ('".implode("','", $dateRanges)."')")
             ->orderBy('entry_date')
             ->groupBy('entry_date', 'orders.currency_code');
 
         if (request()->range) {
-            //$query = $query->whereBetween('created_at', request()->range);
+            // $query = $query->whereBetween('created_at', request()->range);
         }
         $query = $this->removeTestEmailAddresses('email', $query);
         $data = $query->get();
 
         $converted = [];
         foreach ($data as $row) {
-            if (!array_key_exists($row->entry_date, $converted)) {
+            if (! array_key_exists($row->entry_date, $converted)) {
                 $converted[$row->entry_date] = [
                     'revenue' => $currencyService->convertCurrency($row->currency_code, config('app.currency'), $row->revenue),
                     'costs' => $currencyService->convertCurrency($row->currency_code, config('app.currency'), $row->costs),
@@ -76,7 +76,7 @@ trait CustomMetricsCharts
             }
         }
 
-        return (new LineChart())
+        return (new LineChart)
             ->title(__('Revenue Costs Profit Per Day'))
             ->animations([
                 'enabled' => true,
@@ -88,12 +88,12 @@ trait CustomMetricsCharts
                     'label' => __('Revenue'),
                     'borderColor' => 'rgb(14 165 233)',
                     'data' => $revenue,
-                ],[
+                ], [
                     'barPercentage' => 0.5,
                     'label' => __('Costs'),
                     'borderColor' => 'rgb(139 92 246)',
                     'data' => $costs,
-                ],[
+                ], [
                     'barPercentage' => 0.5,
                     'label' => __('Profit'),
                     'borderColor' => 'rgb(34 197 94)',
@@ -117,7 +117,7 @@ trait CustomMetricsCharts
 
     public function getOrdersPerDayMetric(): LineChart
     {
-        return (new LineChart())
+        return (new LineChart)
             ->title(__('Orders Per Day'))
             ->model(Order::class)
             ->animations([
@@ -133,11 +133,11 @@ trait CustomMetricsCharts
                 'btnFilterDefault' => '30',
                 'btnFilterList' => $this->defaultRanges(),
                 'uom' => 'day',
-                //'sum' => 'order_number',
+                // 'sum' => 'order_number',
                 'queryFilter' => [
                     [
                         'key' => 'paid_at',
-                        'operator' => 'IS NOT NULL'
+                        'operator' => 'IS NOT NULL',
                     ],
                     [
                         'key' => 'deleted_at',

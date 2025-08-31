@@ -15,12 +15,14 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy(ShopOwnerAuthObserver::class)]
 class Shop extends Model
 {
-    use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     public $oathKey;
+
     public $oathSecret;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -28,7 +30,7 @@ class Shop extends Model
      *
      * @var array<int, string>
      */
-    protected  $fillable = [
+    protected $fillable = [
         'shop_owner_id',
         'shop',
         'shop_oauth',

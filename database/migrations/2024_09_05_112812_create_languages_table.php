@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('languages', function (Blueprint $table) {
             $table->id();
-            $table->string('iso',3);
-            $table->string('locale',10)->nullable();
+            $table->string('iso', 3);
+            $table->string('locale', 10)->nullable();
             $table->string('local_name')->nullable();
             $table->string('en_name')->nullable();
             $table->timestamps();

@@ -94,6 +94,7 @@ trait CustomMetricsQueries
         foreach ($period as $date) {
             $dateRanges[] = $date->format('Y-m-d');
         }
+
         return $dateRanges;
     }
 
@@ -106,7 +107,7 @@ trait CustomMetricsQueries
         }
         if ($orderDateFilter) {
             [$dateFrom, $dateTo] = explode(' to ', $orderDateFilter);
-            $query = $this->addOrderDateToQuery($dateFrom, $dateTo . ' 23:59:59', $query);
+            $query = $this->addOrderDateToQuery($dateFrom, $dateTo.' 23:59:59', $query);
         }
 
         return $query;

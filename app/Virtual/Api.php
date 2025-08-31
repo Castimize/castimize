@@ -9,9 +9,11 @@ use OpenApi\Annotations as OA;
  *      version="0.0.1",
  *      title="Castimize OpenApi Demo Documentation",
  *      description="Swagger OpenApi documentation for Castimize",
+ *
  *      @OA\Contact(
  *          email="matthbon@hotmail.com"
  *      ),
+ *
  *      @OA\License(
  *          name="Apache 2.0",
  *          url="http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -28,6 +30,4 @@ use OpenApi\Annotations as OA;
  *     description="API Endpoints of Projects"
  * )
  */
-class Api
-{
-}
+class Api {}

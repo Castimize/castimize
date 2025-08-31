@@ -1,0 +1,30 @@
+{
+    "name": "castimize/column-toggler",
+    "description": "A Laravel Nova tool.",
+    "keywords": [
+        "laravel",
+        "nova",
+        "column-toggle"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^7.3|^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Castimize\\ColumnToggler\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Castimize\\ColumnToggler\\ToolServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

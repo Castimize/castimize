@@ -20,7 +20,7 @@ class NewOrdersRevenueValueWidget extends ValueWidget
 
     public function value(Filters $filters): mixed
     {
-        $currencyService = new CurrencyService();
+        $currencyService = new CurrencyService;
         $orders = $filters->applyToQueryBuilder(
             Order::with(['uploads'])
                 ->whereNotNull('paid_at')
@@ -37,6 +37,6 @@ class NewOrdersRevenueValueWidget extends ValueWidget
             $total += $uploadTotal;
         }
 
-        return currencyFormatter((float)$total);
+        return currencyFormatter((float) $total);
     }
 }

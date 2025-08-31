@@ -11,7 +11,7 @@ class OrdersServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testItCreatesOrderFromWp(): void
+    public function test_it_creates_order_from_wp(): void
     {
         $json = $this->getWPOrderData();
     }

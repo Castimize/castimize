@@ -18,7 +18,6 @@ class StatusFilter extends Filter
     /**
      * Apply the filter to the given query.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @param  mixed  $value
      * @return Builder
@@ -31,7 +30,6 @@ class StatusFilter extends Filter
     /**
      * Get the filter's available options.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function options(NovaRequest $request)

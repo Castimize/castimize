@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
             'created_by' => $systemUser->id,
         ]);
         $token = $user->createToken('test-token', ['*'])->plainTextToken;
-        $this->command->info('Test token for user: ' . $user->name . ' => ' . $token);
+        $this->command->info('Test token for user: '.$user->name.' => '.$token);
         User::create([
             'username' => 'oknoeff',
             'name' => 'Oscar Knoeff',

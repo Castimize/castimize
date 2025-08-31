@@ -58,7 +58,8 @@ class EtsyListingService
                 ],
             );
         } catch (Exception $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getTraceAsString());
+
             return null;
         }
     }

@@ -27,7 +27,7 @@ class SyncInvoicesToExact extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $invoices = Invoice::with(['customer', 'lines'])
 //            ->where('id', 22)
@@ -45,13 +45,12 @@ class SyncInvoicesToExact extends Command
         $progressBar->start();
 
         foreach ($invoices as $invoice) {
-            //(new ExactOnlineService())->deleteSyncedInvoice($invoice);
+            // (new ExactOnlineService())->deleteSyncedInvoice($invoice);
 
-
-//            (new ExactOnlineService())->syncInvoice($invoice);
-//            if ($invoice->paid) {
-//                (new ExactOnlineService())->syncInvoicePaid($invoice);
-//            }
+            //            (new ExactOnlineService())->syncInvoice($invoice);
+            //            if ($invoice->paid) {
+            //                (new ExactOnlineService())->syncInvoicePaid($invoice);
+            //            }
             Bus::chain([
                 new SyncCustomerToExact($invoice->customer->wp_id),
                 new SyncInvoiceToExact($invoice, $invoice->customer->wp_id, true),

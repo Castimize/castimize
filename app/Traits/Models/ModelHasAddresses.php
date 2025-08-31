@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 trait ModelHasAddresses
 {
-    /**
-     * @return MorphToMany
-     */
     public function addresses(): MorphToMany
     {
         return $this->morphToMany(

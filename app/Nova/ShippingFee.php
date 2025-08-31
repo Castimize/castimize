@@ -2,10 +2,8 @@
 
 namespace App\Nova;
 
-
 use App\Traits\Nova\CommonMetaDataTrait;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
-use Illuminate\Http\Request;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\ID;
@@ -17,7 +15,8 @@ use Laravel\Nova\Panel;
 
 class ShippingFee extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+//    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -56,7 +55,6 @@ class ShippingFee extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -89,7 +87,7 @@ class ShippingFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Default rate'), function () {
-                return $this->default_rate ? currencyFormatter((float)$this->default_rate, $this->currency_code) : '';
+                return $this->default_rate ? currencyFormatter((float) $this->default_rate, $this->currency_code) : '';
             })
                 ->exceptOnForms()
                 ->sortable(),
@@ -109,7 +107,7 @@ class ShippingFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 1'), function () {
-                return $this->rate_increase_1 ? $this->rate_increase_1 . '%' : '';
+                return $this->rate_increase_1 ? $this->rate_increase_1.'%' : '';
             })
 //                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
@@ -127,7 +125,7 @@ class ShippingFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 2'), function () {
-                return $this->rate_increase_1 ? $this->rate_increase_1 . '%' : '';
+                return $this->rate_increase_1 ? $this->rate_increase_1.'%' : '';
             })
 //                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
@@ -145,7 +143,7 @@ class ShippingFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 3'), function () {
-                return $this->rate_increase_3 ? $this->rate_increase_3 . '%' : '';
+                return $this->rate_increase_3 ? $this->rate_increase_3.'%' : '';
             })
 //                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
@@ -158,7 +156,6 @@ class ShippingFee extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -169,7 +166,6 @@ class ShippingFee extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -182,7 +178,6 @@ class ShippingFee extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -193,7 +188,6 @@ class ShippingFee extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

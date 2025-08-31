@@ -4,19 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\DTO\Order\OrderDTO;
-use App\DTO\Shops\Etsy\ListingImageDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDestinationDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDTO;
 use App\Enums\Shops\ShopOwnerShopsEnum;
 use App\Models\Country;
 use App\Models\Customer;
 use App\Models\Model;
-use App\Models\Shop;
 use App\Services\Admin\LogRequestService;
 use App\Services\Etsy\EtsyService;
-use App\Services\Woocommerce\WoocommerceApiService;
-use Etsy\Etsy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,8 +20,7 @@ class EtsyApiController extends ApiController
 {
     public function __construct(
         private EtsyService $etsyService,
-    ) {
-    }
+    ) {}
 
     public function getTaxonomy(int $customerId): JsonResponse
     {
@@ -51,12 +45,16 @@ class EtsyApiController extends ApiController
         $customer = Customer::find($customerId);
         $shop = $customer->shopOwner?->shops?->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
         if ($shop === null) {
-            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse($request, [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $url = $this->etsyService->getAuthorizationUrl($shop);
 
-        return response()->json(['url' => $url]);
+        return response()->json([
+            'url' => $url,
+        ]);
     }
 
     public function getShopReturnPolicy(int $customerId, int $returnPolicyId): JsonResponse
@@ -121,7 +119,6 @@ class EtsyApiController extends ApiController
 
         $listings = $this->etsyService->syncListings($shop, $models);
 
-//        return response()->json(['no']);
         return response()->json($listings->toArray());
     }
 
@@ -131,7 +128,9 @@ class EtsyApiController extends ApiController
         $shop = $customer->shopOwner->shops->first();
         $deleted = $this->etsyService->syncListings($shop, $listingId);
 
-        return response()->json(['deleted' => $deleted]);
+        return response()->json([
+            'deleted' => $deleted,
+        ]);
     }
 
     public function getShippingCarriers(int $customerId): JsonResponse
@@ -139,7 +138,6 @@ class EtsyApiController extends ApiController
         $customer = Customer::find($customerId);
         $shop = $customer->shopOwner->shops->first();
         $shippingCarriers = $this->etsyService->getShippingCarriers($shop);
-
 
         return response()->json($shippingCarriers->toJson());
     }
@@ -149,7 +147,6 @@ class EtsyApiController extends ApiController
         $customer = Customer::find($customerId);
         $shop = $customer->shopOwner->shops->first();
         $shippingProfiles = $this->etsyService->getShippingProfiles($shop);
-
 
         return response()->json($shippingProfiles->toJson());
     }
@@ -189,7 +186,6 @@ class EtsyApiController extends ApiController
         $shop = $customer->shopOwner->shops->first();
         $shopPaymentLedgerEntries = $this->etsyService->getShopPaymentAccountLedgerEntries($shop);
 
-
         return response()->json($shopPaymentLedgerEntries->toJson());
     }
 
@@ -197,7 +193,9 @@ class EtsyApiController extends ApiController
     {
         $customer = Customer::with('shopOwner.shops')->find($customerId);
         $shop = $customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
-        $shopReceipts = $this->etsyService->getShopReceipts($shop, ['min_created' => now()->subDays(14)->timestamp]);
+        $shopReceipts = $this->etsyService->getShopReceipts($shop, [
+            'min_created' => now()->subDays(14)->timestamp,
+        ]);
 
         $response = [];
 

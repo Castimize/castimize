@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\DTO\Order\CalculateShippingFeeUploadDTO;
 use App\Http\Resources\CalculatedShippingFeeResource;
+use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ShippingService;
-use App\Services\Admin\CalculatePricesService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use JsonException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -31,8 +30,14 @@ class AddressApiController extends ApiController
         ];
 
         if (empty($addressData['country'])) {
-            $response = ['valid' => false, 'address' => [], 'address_changed' => 0, 'messages' => []];
+            $response = [
+                'valid' => false,
+                'address' => [],
+                'address_changed' => 0,
+                'messages' => [],
+            ];
             LogRequestService::addResponse($request, $response);
+
             return response()->json($response);
         }
 
@@ -48,12 +53,17 @@ class AddressApiController extends ApiController
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         try {
-            $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
+            $shippingFee = (new CalculatePricesService)->calculateShippingFeeNew(
                 countryIso: $request->country,
                 uploads: collect($request->uploads)->map(fn ($upload) => CalculateShippingFeeUploadDTO::fromWpRequest($upload)),
             );
         } catch (UnprocessableEntityHttpException $e) {
-            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
+            LogRequestService::addResponse($request, [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], $e->getCode());
+
             return response()->json([
                 'errors' => $e->getMessage(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -61,6 +71,7 @@ class AddressApiController extends ApiController
 
         $response = new CalculatedShippingFeeResource($shippingFee);
         LogRequestService::addResponse($request, $response);
+
         return $response;
     }
 }

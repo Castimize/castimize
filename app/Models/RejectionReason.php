@@ -10,9 +10,10 @@ use Wildside\Userstamps\Userstamps;
 
 class RejectionReason extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**

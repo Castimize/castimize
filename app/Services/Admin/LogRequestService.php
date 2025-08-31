@@ -8,7 +8,7 @@ use Throwable;
 
 class LogRequestService
 {
-    public static function logRequest($request): LogRequest|null
+    public static function logRequest($request): ?LogRequest
     {
         try {
             $requestToLog = $request;
@@ -29,12 +29,13 @@ class LogRequestService
                 'request' => $requestToLog->all(),
             ]);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+
             return null;
         }
     }
 
-    public static function logRequestOutgoing(string $pathInfo, string $requestUri, string $userAgent, string $method, array $headers, $request, $response): LogRequest|null
+    public static function logRequestOutgoing(string $pathInfo, string $requestUri, string $userAgent, string $method, array $headers, $request, $response): ?LogRequest
     {
         try {
             return LogRequest::create([
@@ -50,12 +51,13 @@ class LogRequestService
                 'response' => $response,
             ]);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+
             return null;
         }
     }
 
-    public static function addResponse($request, $response, int $httpCode = 200): LogRequest|null
+    public static function addResponse($request, $response, int $httpCode = 200): ?LogRequest
     {
         if ($request->has('log_request_id')) {
             $logRequest = LogRequest::find($request->log_request_id);
@@ -63,13 +65,15 @@ class LogRequestService
                 $logRequest->response = $response;
                 $logRequest->http_code = $httpCode;
                 $logRequest->save();
+
                 return $logRequest;
             }
         }
+
         return null;
     }
 
-    public static function addResponseById(?int $logRequestId, $response, int $httpCode = 200): LogRequest|null
+    public static function addResponseById(?int $logRequestId, $response, int $httpCode = 200): ?LogRequest
     {
         if ($logRequestId) {
             $logRequest = LogRequest::find($logRequestId);
@@ -77,9 +81,11 @@ class LogRequestService
                 $logRequest->response = $response;
                 $logRequest->http_code = $httpCode;
                 $logRequest->save();
+
                 return $logRequest;
             }
         }
+
         return null;
     }
 }

@@ -61,7 +61,6 @@ class InvoiceExactSalesEntry extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -83,7 +82,6 @@ class InvoiceExactSalesEntry extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -94,7 +92,6 @@ class InvoiceExactSalesEntry extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -105,7 +102,6 @@ class InvoiceExactSalesEntry extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -116,7 +112,6 @@ class InvoiceExactSalesEntry extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

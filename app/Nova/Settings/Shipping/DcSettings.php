@@ -7,18 +7,26 @@ use Devloops\NovaSystemSettings\Contracts\SystemSettings;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 
-
 class DcSettings extends SystemSettings
 {
     public ?string $name;
+
     public ?string $company;
+
     public ?string $addressLine1;
+
     public ?string $addressLine2;
+
     public ?string $postalCode;
+
     public ?string $city;
+
     public ?string $state;
+
     public ?string $country;
+
     public ?string $phone;
+
     public ?string $email;
 
     public static function group(): string

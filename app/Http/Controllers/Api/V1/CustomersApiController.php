@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Requests\DeleteCustomerRequest;
 use App\Http\Requests\ShowCustomerWpRequest;
-use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Services\Admin\CustomersService;
@@ -18,8 +16,7 @@ class CustomersApiController extends ApiController
 {
     public function __construct(
         private CustomersService $customersService,
-    ) {
-    }
+    ) {}
 
     public function show(Customer $customer): CustomerResource
     {
@@ -27,6 +24,7 @@ class CustomersApiController extends ApiController
 
         $response = new CustomerResource($customer);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -36,11 +34,14 @@ class CustomersApiController extends ApiController
             ->withCount('orders')
             ->where('wp_id', $request->wp_id)->first();
         if ($customer === null) {
-            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse($request, [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $response = new CustomerResource($customer);
         LogRequestService::addResponse($request, $response);
+
         return $response;
     }
 
@@ -51,6 +52,7 @@ class CustomersApiController extends ApiController
 
         $response = new CustomerResource($customer);
         LogRequestService::addResponse($request, $response);
+
         return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
@@ -58,18 +60,15 @@ class CustomersApiController extends ApiController
     public function updateCustomerWp(Request $request): JsonResponse
     {
         return response()->json($request->all());
-//        $customer = (new CustomersService())->storeCustomerFromApi($request);
-//
-//        return (new CustomerResource($customer))
-//            ->response()
-//            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     public function deleteCustomerWp(Request $request): Response
     {
         $customer = Customer::where('wp_id', $request->id)->first();
         if ($customer === null) {
-            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse($request, [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $customer->delete();

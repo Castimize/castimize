@@ -63,7 +63,6 @@ class InvoiceLine extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -83,11 +82,11 @@ class InvoiceLine extends Resource
             Text::make(__('Currency'), 'currency_code'),
 
             Text::make(__('Total'), function () {
-                return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
+                return $this->total ? currencyFormatter((float) $this->total, $this->currency_code) : '';
             }),
 
             Text::make(__('Total tax'), function () {
-                return $this->total_tax ? currencyFormatter((float)$this->total_tax, $this->currency_code) : '';
+                return $this->total_tax ? currencyFormatter((float) $this->total_tax, $this->currency_code) : '';
             }),
         ];
     }
@@ -95,7 +94,6 @@ class InvoiceLine extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -106,7 +104,6 @@ class InvoiceLine extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -117,7 +114,6 @@ class InvoiceLine extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -128,7 +124,6 @@ class InvoiceLine extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

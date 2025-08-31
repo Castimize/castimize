@@ -22,12 +22,14 @@ class ShippoWebhookController extends WebhookController
         try {
             $shippoRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
             $event = $shippoRequest['event'];
-        } catch(UnexpectedValueException $e) {
+        } catch (UnexpectedValueException $e) {
             Log::error($e->getMessage());
+
             // Invalid payload
             return $this->badRequestMethod();
         } catch (Exception $e) {
             Log::error($e->getMessage());
+
             return $this->badRequestMethod();
         }
 
@@ -40,7 +42,7 @@ class ShippoWebhookController extends WebhookController
                 $this->handleTrackUpdated($shippoRequest['data']);
                 break;
             default:
-                echo 'Received unknown event type ' . $event;
+                echo 'Received unknown event type '.$event;
         }
 
         return $this->missingMethod();
@@ -55,7 +57,7 @@ class ShippoWebhookController extends WebhookController
             if ($typeShipment === 'customer_shipment') {
                 $shipment = CustomerShipment::where('id', $shipmentId)->where('shippo_transaction_id', $data['object_id'])->first();
             }
-        } else if ($data['transaction']) {
+        } elseif ($data['transaction']) {
             $shipment = CustomerShipment::where('shippo_transaction_id', $data['transaction'])->first();
             if ($shipment === null) {
                 $shipment = ManufacturerShipment::where('shippo_transaction_id', $data['transaction'])->first();
@@ -83,7 +85,7 @@ class ShippoWebhookController extends WebhookController
             if ($typeShipment === 'customer_shipment') {
                 $shipment = CustomerShipment::where('id', $shipmentId)->where('shippo_transaction_id', $data['object_id'])->first();
             }
-        } else if ($data['transaction']) {
+        } elseif ($data['transaction']) {
             $shipment = CustomerShipment::where('shippo_transaction_id', $data['transaction'])->first();
             if ($shipment === null) {
                 $shipment = ManufacturerShipment::where('shippo_transaction_id', $data['transaction'])->first();
@@ -98,7 +100,7 @@ class ShippoWebhookController extends WebhookController
                 $shipment->sent_at = Carbon::parse($data['tracking_status']['status_date']);
                 $shipment->save();
 
-                $orderQueuesService = new OrderQueuesService();
+                $orderQueuesService = new OrderQueuesService;
                 foreach ($shipment->orderQueues as $orderQueue) {
                     $orderQueuesService->setStatus($orderQueue, 'in-transit-to-customer');
                 }
@@ -121,10 +123,10 @@ class ShippoWebhookController extends WebhookController
                     $shipment->arrived_at = Carbon::parse($data['tracking_status']['status_date']);
                     $shipment->save();
 
-                    $orderQueuesService = new OrderQueuesService();
+                    $orderQueuesService = new OrderQueuesService;
                     $orders = [];
                     foreach ($shipment->orderQueues as $orderQueue) {
-                        if (!array_key_exists($orderQueue->order_id, $orders)) {
+                        if (! array_key_exists($orderQueue->order_id, $orders)) {
                             $orders[$orderQueue->order_id] = $orderQueue->order;
                         }
                         $orderQueuesService->setStatus($orderQueue, 'completed');
@@ -133,16 +135,16 @@ class ShippoWebhookController extends WebhookController
                     // ToDo: If all order queues completed, update order in woocommerce to customer
                     foreach ($orders as $order) {
                         if ($order->allOrderQueuesEndStatus()) {
-                            (new WoocommerceApiService())->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Completed->value);
+                            (new WoocommerceApiService)->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Completed->value);
                         }
                     }
                 }
-            } else if ($shipment instanceof ManufacturerShipment) {
+            } elseif ($shipment instanceof ManufacturerShipment) {
                 if ($data['tracking_status']['status'] === 'DELIVERED') {
                     $shipment->arrived_at = Carbon::parse($data['tracking_status']['status_date']);
                     $shipment->save();
 
-                    $orderQueuesService = new OrderQueuesService();
+                    $orderQueuesService = new OrderQueuesService;
                     foreach ($shipment->orderQueues as $orderQueue) {
                         $orderQueuesService->setStatus($orderQueue, 'at-dc');
                     }

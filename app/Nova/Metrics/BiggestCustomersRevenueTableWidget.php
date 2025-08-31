@@ -27,7 +27,7 @@ class BiggestCustomersRevenueTableWidget extends TableWidget
 
     public function value(Filters $filters): Collection
     {
-        $currencyService = new CurrencyService();
+        $currencyService = new CurrencyService;
 
         $query = DB::table('orders')
             ->join('customers', 'customers.id', '=', 'orders.customer_id')
@@ -59,10 +59,10 @@ class BiggestCustomersRevenueTableWidget extends TableWidget
         $data = [];
 
         foreach ($rows as $row) {
-            $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float)$row->revenue);
-            $cost = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float)$row->costs);
+            $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float) $row->revenue);
+            $cost = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float) $row->costs);
             $prof = $rev - $cost;
-            if (!array_key_exists($row->customer_id, $data)) {
+            if (! array_key_exists($row->customer_id, $data)) {
                 $data[$row->customer_id] = [
                     'name' => $row->name,
                     'orders' => $row->orders,
@@ -79,8 +79,8 @@ class BiggestCustomersRevenueTableWidget extends TableWidget
             return $a['revenue'] < $b['revenue'];
         });
         for ($i = 0, $iMax = count($data); $iMax > $i; $i++) {
-            $data[$i]['revenue'] = currencyFormatter((float)$data[$i]['revenue']);
-            $data[$i]['bruto_margin'] = currencyFormatter((float)$data[$i]['bruto_margin']);
+            $data[$i]['revenue'] = currencyFormatter((float) $data[$i]['revenue']);
+            $data[$i]['bruto_margin'] = currencyFormatter((float) $data[$i]['bruto_margin']);
         }
 
         if (count($data) === 0) {

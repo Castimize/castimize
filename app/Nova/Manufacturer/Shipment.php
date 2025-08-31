@@ -5,12 +5,10 @@ namespace App\Nova\Manufacturer;
 use Alexwenzel\DependencyContainer\DependencyContainer;
 use App\Enums\Shippo\ShippoDistanceUnitsEnum;
 use App\Enums\Shippo\ShippoMassUnitsEnum;
-use App\Nova\OrderQueue;
 use App\Nova\Resource;
 use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Nova\TrackingStatus;
-use App\Services\Shippo\ShippoService;
 use Castimize\SelectManufacturerWithOverview\SelectManufacturerWithOverview;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -106,13 +104,11 @@ class Shipment extends Resource
     }
 
     /**
-     * @param NovaRequest $request
-     * @param $query
      * @return Builder
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        if (!$request->viaRelationship() && auth()->user()->manufacturer) {
+        if (! $request->viaRelationship() && auth()->user()->manufacturer) {
             $query = $query->where('manufacturer_id', auth()->user()->manufacturer->id);
         }
 
@@ -127,39 +123,38 @@ class Shipment extends Resource
     /**
      * Build a "detail" query for the given resource.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @return Builder
      */
     public static function detailQuery(NovaRequest $request, $query)
     {
-        if (!$request->viaRelationship() && auth()->user()->isManufacturer()) {
+        if (! $request->viaRelationship() && auth()->user()->isManufacturer()) {
             $query = $query->where('manufacturer_id', auth()->user()->manufacturer->id);
         }
 
         $query->withCount('orderQueues as order_queues_count');
+
         return parent::detailQuery($request, $query);
     }
 
     /**
      * Return the location to redirect the user after creation.
      *
-     * @param NovaRequest $request
-     * @param Resource $resource
+     * @param  resource  $resource
      * @return string
      */
     public static function redirectAfterCreate(NovaRequest $request, $resource)
     {
         if ($request->viaRelationship()) {
-            return '/resources/' . app($request->viaResource())::uriKey() . '/' . $request->viaResourceId;
+            return '/resources/'.app($request->viaResource())::uriKey().'/'.$request->viaResourceId;
         }
-        return '/resources/' . static::uriKey() . '/' . $resource->getKey();
+
+        return '/resources/'.static::uriKey().'/'.$resource->getKey();
     }
 
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -171,6 +166,7 @@ class Shipment extends Resource
                 if (empty($this->tracking_url)) {
                     return $this->tracking_number;
                 }
+
                 return sprintf('<a class="link-default" href="%s" target="_blank">%s</a>', $this->tracking_url, $this->tracking_number);
             })
                 ->asHtml()
@@ -181,7 +177,8 @@ class Shipment extends Resource
                 if (empty($this->label_url)) {
                     return '';
                 }
-                return '<a class="link-default" href="' . $this->label_url . '" target="_blank">' . __('Label') . '</a>';
+
+                return '<a class="link-default" href="'.$this->label_url.'" target="_blank">'.__('Label').'</a>';
             })
                 ->asHtml()
                 ->exceptOnForms()
@@ -191,7 +188,8 @@ class Shipment extends Resource
                 if (empty($this->commercial_invoice_url)) {
                     return '';
                 }
-                return '<a class="link-default" href="' . $this->commercial_invoice_url . '" target="_blank">' . __('Commercial invoice') . '</a>';
+
+                return '<a class="link-default" href="'.$this->commercial_invoice_url.'" target="_blank">'.__('Commercial invoice').'</a>';
             })
                 ->asHtml()
                 ->onlyOnDetail()
@@ -201,7 +199,8 @@ class Shipment extends Resource
                 if (empty($this->qr_code_url)) {
                     return '';
                 }
-                return '<a class="link-default" href="' . $this->qr_code_url . '" target="_blank">' . __('QR code') . '</a>';
+
+                return '<a class="link-default" href="'.$this->qr_code_url.'" target="_blank">'.__('QR code').'</a>';
             })
                 ->asHtml()
                 ->onlyOnDetail()
@@ -245,7 +244,6 @@ class Shipment extends Resource
     /**
      * Get the fields displayed by the resource on create page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForCreate(NovaRequest $request)
@@ -255,8 +253,8 @@ class Shipment extends Resource
         } else {
             $manufacturer = auth()->user()->manufacturer;
         }
-        $dcSettings = (new DcSettings());
-        $parcelSettings = (new ParcelSettings());
+        $dcSettings = (new DcSettings);
+        $parcelSettings = (new ParcelSettings);
 
         return [
             SelectManufacturerWithOverview::make('PO\'s', 'selectedPOs')
@@ -266,7 +264,7 @@ class Shipment extends Resource
                 ->options(\App\Models\OrderQueue::getAvailableForShippingOrderQueueOptions())
                 ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders()),
 
-            Heading::make('<h3 class="font-normal text-xl">' . __('General') . '</h3>')
+            Heading::make('<h3 class="font-normal text-xl">'.__('General').'</h3>')
                 ->asHtml()
                 ->canSee(function ($request) use ($manufacturer) {
                     return $manufacturer->can_handle_own_shipping;
@@ -282,7 +280,7 @@ class Shipment extends Resource
                 }),
 
             DependencyContainer::make([
-                Heading::make('<h3 class="font-normal text-xl">' . __('Tracking') . '</h3>')
+                Heading::make('<h3 class="font-normal text-xl">'.__('Tracking').'</h3>')
                     ->asHtml(),
 
                 Text::make(__('Tracking number'), 'tracking_number'),
@@ -291,7 +289,7 @@ class Shipment extends Resource
             ])->dependsOn('handles_own_shipping', true),
 
             DependencyContainer::make([
-                Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')
+                Heading::make('<h3 class="font-normal text-xl">'.__('From address').'</h3>')
                     ->asHtml(),
 
                 Text::make(__('Name'), 'from_address_name')
@@ -324,7 +322,7 @@ class Shipment extends Resource
                 Text::make(__('Email'), 'from_address_email')
                     ->default($manufacturer->email),
 
-                Heading::make('<h3 class="font-normal text-xl">' . __('To address') . '</h3>')
+                Heading::make('<h3 class="font-normal text-xl">'.__('To address').'</h3>')
                     ->asHtml(),
 
                 Text::make(__('Name'), 'to_address_name')
@@ -367,7 +365,7 @@ class Shipment extends Resource
                     ->readonly()
                     ->default($dcSettings->email),
 
-                Heading::make('<h3 class="font-normal text-xl">' . __('Parcel settings') . '</h3>')
+                Heading::make('<h3 class="font-normal text-xl">'.__('Parcel settings').'</h3>')
                     ->asHtml(),
 
                 Select::make(__('Distance unit'), 'parcel_distance_unit')
@@ -397,7 +395,6 @@ class Shipment extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -408,7 +405,6 @@ class Shipment extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -421,7 +417,6 @@ class Shipment extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -432,7 +427,6 @@ class Shipment extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

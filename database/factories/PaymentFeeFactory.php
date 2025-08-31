@@ -2,11 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Country;
 use App\Models\Currency;
-use App\Models\Material;
 use App\Models\PaymentFee;
-use App\Models\Price;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -16,10 +16,10 @@ class ModelsApiControllerTest extends BaseTestCase
     {
         parent::setUp();
 
-//        $this->seed();
+        //        $this->seed();
     }
 
-    public function testItStoresModel(): void
+    public function test_it_stores_model(): void
     {
         dd(User::all()->first());
         $response = $this->postJson(route('api.api.api.models.store'), []);

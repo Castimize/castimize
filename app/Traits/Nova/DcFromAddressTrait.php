@@ -9,7 +9,8 @@ trait DcFromAddressTrait
 {
     protected function fromAddressFields()
     {
-        $dcSettings = (new DcSettings());
+        $dcSettings = (new DcSettings);
+
         return [
             Text::make(__('Name'), 'from_address_name')
                 ->default($dcSettings->name),

@@ -18,7 +18,6 @@ abstract class ManufacturerResource extends NovaResource
     /**
      * Build an "index" query for the given resource.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @return Builder
      */
@@ -36,7 +35,6 @@ abstract class ManufacturerResource extends NovaResource
     /**
      * Build a Scout search query for the given resource.
      *
-     * @param NovaRequest $request
      * @param  \Laravel\Scout\Builder  $query
      * @return \Laravel\Scout\Builder
      */
@@ -48,7 +46,6 @@ abstract class ManufacturerResource extends NovaResource
     /**
      * Build a "detail" query for the given resource.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @return Builder
      */
@@ -62,7 +59,6 @@ abstract class ManufacturerResource extends NovaResource
      *
      * This query determines which instances of the model may be attached to other resources.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @return Builder
      */

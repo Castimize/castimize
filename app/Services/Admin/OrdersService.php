@@ -24,17 +24,19 @@ use Stripe\Charge;
 class OrdersService
 {
     private CustomersService $customersService;
-    private UploadsService $uploadsService;
-    private OrderQueuesService $orderQueuesService;
-    private WoocommerceApiService $woocommerceApiService;
 
+    private UploadsService $uploadsService;
+
+    private OrderQueuesService $orderQueuesService;
+
+    private WoocommerceApiService $woocommerceApiService;
 
     public function __construct()
     {
-        $this->customersService = new CustomersService();
+        $this->customersService = new CustomersService;
         $this->uploadsService = app(UploadsService::class);
-        $this->orderQueuesService = new OrderQueuesService();
-        $this->woocommerceApiService = new WoocommerceApiService();
+        $this->orderQueuesService = new OrderQueuesService;
+        $this->woocommerceApiService = new WoocommerceApiService;
     }
 
     public function storeOrderFromWpOrder($wpOrder)
@@ -45,7 +47,7 @@ class OrdersService
             $country = Country::where('alpha2', 'nl')->first();
         }
         $customer = null;
-        if (!empty($wpOrder['customer_id'])) {
+        if (! empty($wpOrder['customer_id'])) {
             $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($wpOrder['customer_id']);
             $customer = $this->customersService->storeCustomerFromWpCustomer($wpCustomer);
         }
@@ -174,7 +176,7 @@ class OrdersService
             $country = Country::where('alpha2', 'nl')->first();
         }
         $customer = null;
-        if (!empty($orderDto->customerId)) {
+        if (! empty($orderDto->customerId)) {
             $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($orderDto->customerId);
             $customer = $this->customersService->storeCustomerFromWpCustomer($wpCustomer);
         }
@@ -311,7 +313,7 @@ class OrdersService
         $refundTaxAmount = 0.00;
         $lineItems = [];
         foreach ($orderQueues as $orderQueue) {
-            if (!$orderQueue->rejection) {
+            if (! $orderQueue->rejection) {
                 $refundAll = false;
             } else {
                 $refundAmount += $orderQueue->upload->total;
@@ -339,7 +341,7 @@ class OrdersService
             $order->save();
         }
 
-        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
+        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string) $refundAmount, $lineItems);
 
         if ($cancelOrder) {
             $this->woocommerceApiService->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Cancelled->value);
@@ -372,7 +374,7 @@ class OrdersService
         }
         $order->save();
 
-        return $this->woocommerceApiService->refundOrder($order->wp_id, (string)$refundAmount);
+        return $this->woocommerceApiService->refundOrder($order->wp_id, (string) $refundAmount);
     }
 
     public function handleRefund(Order $order, $orderQueues)
@@ -407,7 +409,7 @@ class OrdersService
             $order->save();
         }
 
-        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
+        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string) $refundAmount, $lineItems);
 
         if ($cancelOrder) {
             $this->woocommerceApiService->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Cancelled->value);
@@ -443,19 +445,19 @@ class OrdersService
                     $withoutResizedFileName = str_replace('_resized', '', $fileName);
                     $fileHeaders = get_headers($fileUrl);
                     // Check files exists on local storage of site and not on R2
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
+                    if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileName)) {
                         Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
                     }
                     // Check files exists on local storage of site and not on R2 (without resized
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
+                    if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($withoutResizedFileName)) {
                         Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
                     }
                     // Check file thumb exists on local storage of site and not on R2
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
+                    if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileNameThumb)) {
                         Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
                     }
                 } catch (Exception $e) {
-                    Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                    Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
                 }
 
                 $model = Model::where('file_name', $withoutResizedFileName)->first();
@@ -579,19 +581,19 @@ class OrdersService
 
                 try {
                     // Check files exists on local storage of site and not on R2
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
+                    if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileName)) {
                         Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
                     }
                     // Check files exists on local storage of site and not on R2 (without resized
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
+                    if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($withoutResizedFileName)) {
                         Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
                     }
                     // Check file thumb exists on local storage of site and not on R2
-                    if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
+                    if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileNameThumb)) {
                         Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
                     }
                 } catch (Exception $e) {
-                    Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                    Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
                 }
 
                 $model = Model::where('file_name', $withoutResizedFileName)->first();
@@ -639,11 +641,6 @@ class OrdersService
         return $biggestCustomerLeadTime;
     }
 
-    /**
-     * @param mixed $uploads
-     * @param Country|null $country
-     * @return string
-     */
     public function calculateExpectedDeliveryDate(mixed $uploads, ?Country $country): string
     {
         $biggestCustomerLeadTime = null;
@@ -654,6 +651,7 @@ class OrdersService
                 $biggestCustomerLeadTime = $customerLeadTime;
             }
         }
+
         return now()->addBusinessDays($biggestCustomerLeadTime)->toFormattedDateString();
     }
 }

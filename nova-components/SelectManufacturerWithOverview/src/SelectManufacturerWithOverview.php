@@ -3,7 +3,6 @@
 namespace Castimize\SelectManufacturerWithOverview;
 
 use Illuminate\Support\Collection;
-use Illuminate\Validation\Validator;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -20,11 +19,8 @@ class SelectManufacturerWithOverview extends Field
 
     /**
      * Set the options.
-     *
-     * @param  array $options
-     * @return $this
      */
-    public function options(array $options)
+    public function options(array $options): static
     {
         if (is_callable($options)) {
             $options = call_user_func($options);
@@ -33,24 +29,34 @@ class SelectManufacturerWithOverview extends Field
 
         return $this->withMeta([
             'options' => $options->map(function ($option) {
-                return ['label' => $option['label'], 'value' => $option['value'], 'group' => $option['group']];
+                return [
+                    'label' => $option['label'],
+                    'value' => $option['value'],
+                    'group' => $option['group'],
+                ];
             })->values()->all(),
         ]);
     }
 
-    public function overviewHeaders(array $overviewHeaders)
+    public function overviewHeaders(array $overviewHeaders): SelectManufacturerWithOverview
     {
-        return $this->withMeta(['overviewHeaders' => $overviewHeaders]);
+        return $this->withMeta([
+            'overviewHeaders' => $overviewHeaders,
+        ]);
     }
 
-    public function shouldShowColumnBorders(bool $showColumnBorders = true)
+    public function shouldShowColumnBorders(bool $showColumnBorders = true): SelectManufacturerWithOverview
     {
-        return $this->withMeta(['shouldShowColumnBorders' => $showColumnBorders]);
+        return $this->withMeta([
+            'shouldShowColumnBorders' => $showColumnBorders,
+        ]);
     }
 
-    public function shouldShowCheckboxes(bool $shouldShowCheckboxes = true)
+    public function shouldShowCheckboxes(bool $shouldShowCheckboxes = true): SelectManufacturerWithOverview
     {
-        return $this->withMeta(['shouldShowCheckboxes' => $shouldShowCheckboxes]);
+        return $this->withMeta([
+            'shouldShowCheckboxes' => $shouldShowCheckboxes,
+        ]);
     }
 
     protected function resolveAttribute($resource, $attribute)
@@ -64,35 +70,38 @@ class SelectManufacturerWithOverview extends Field
         if ($saveAsJson) {
             return $value;
         }
+
         return is_array($value) || is_object($value) ? (array) $value : json_decode($value);
     }
 
-    protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute)
+    protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute): void
     {
         $value = $request->input($requestAttribute) ?: null;
         $saveAsJson = $this->shouldSaveAsJson($model, $attribute);
 
         $value = is_null($value) ? ($this->nullable ? $value : $value = []) : $value;
         $value = is_array($value) ? $value : explode(',', $value);
-//        if (count($value) === 0) {
-//            throw new \Exception(__('Please select PO\'s'));
-//        }
+        //        if (count($value) === 0) {
+        //            throw new \Exception(__('Please select PO\'s'));
+        //        }
         $model->{$attribute} = ($saveAsJson || is_null($value)) ? $value : json_encode($value);
     }
 
-    private function shouldSaveAsJson($model, $attribute)
+    private function shouldSaveAsJson($model, $attribute): bool
     {
-        if (!empty($model) && !is_array($model) && method_exists($model, 'getCasts')) {
+        if (! empty($model) && ! is_array($model) && method_exists($model, 'getCasts')) {
             $casts = $model->getCasts();
             $isCastedToArray = ($casts[$attribute] ?? null) === 'array';
+
             return $this->saveAsJSON || $isCastedToArray;
         }
+
         return false;
     }
 
-    public function resolveForAction($request)
+    public function resolveForAction($request): void
     {
-        if (!is_null($this->value)) {
+        if (! is_null($this->value)) {
             return;
         }
 
@@ -103,7 +112,7 @@ class SelectManufacturerWithOverview extends Field
 
     public function resolveDefaultValue(NovaRequest $request)
     {
-        if (!is_null($this->value)) {
+        if (! is_null($this->value)) {
             return parent::resolveDefaultValue($request);
         }
 
@@ -128,6 +137,7 @@ class SelectManufacturerWithOverview extends Field
                         return false;
                     }
                 }
+
                 return true;
             });
 
@@ -143,13 +153,11 @@ class SelectManufacturerWithOverview extends Field
 
     /**
      * Allows the field to save an actual JSON array to a SQL JSON column.
-     *
-     * @param bool $saveAsJSON
-     * @return self
      **/
-    public function saveAsJSON(bool $saveAsJSON = true)
+    public function saveAsJSON(bool $saveAsJSON = true): static
     {
         $this->saveAsJSON = $saveAsJSON;
+
         return $this;
     }
 }

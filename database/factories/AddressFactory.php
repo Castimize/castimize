@@ -20,14 +20,14 @@ class AddressFactory extends Factory
      */
     public function definition(): array
     {
-//        $faker = fake(LocaleEnum::from($attributes['locale_code'])->getFakerLocale());
-//        return [
-//            'zip_code' => $faker->postcode(),
-//            'house_nr' => $faker->randomNumber(2, true),
-//            'street' => $faker->streetName(),
-//            'city' => $faker->city(),
-//            'phone' => $faker->phoneNumber(),
-//        ];
+        //        $faker = fake(LocaleEnum::from($attributes['locale_code'])->getFakerLocale());
+        //        return [
+        //            'zip_code' => $faker->postcode(),
+        //            'house_nr' => $faker->randomNumber(2, true),
+        //            'street' => $faker->streetName(),
+        //            'city' => $faker->city(),
+        //            'phone' => $faker->phoneNumber(),
+        //        ];
 
         return [
             'lat' => fake()->latitude,

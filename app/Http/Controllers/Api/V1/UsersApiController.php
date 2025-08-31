@@ -17,8 +17,7 @@ class UsersApiController extends ApiController
 {
     public function __construct(
         private UsersService $usersService,
-    ) {
-    }
+    ) {}
 
     public function show(): UserResource
     {
@@ -26,6 +25,7 @@ class UsersApiController extends ApiController
 
         $response = new UserResource(auth()->user());
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -34,12 +34,17 @@ class UsersApiController extends ApiController
         try {
             $user = $this->usersService->storeUserFromApi($request);
         } catch (Exception $e) {
-            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
+            LogRequestService::addResponse($request, [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], $e->getCode());
             abort(Response::HTTP_UNPROCESSABLE_ENTITY, '422 Unable to add user');
         }
 
         $response = new UserResource($user);
         LogRequestService::addResponse($request, $response);
+
         return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
@@ -48,7 +53,9 @@ class UsersApiController extends ApiController
     {
         $user = User::where('wp_id', $request->wp_id)->first();
         if ($user === null) {
-            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse($request, [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $user->delete();

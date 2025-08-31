@@ -7,7 +7,7 @@ use App\Nova\Filters\CreatedAtDaterangepickerFilter;
 use App\Nova\Filters\StatusFilter;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Carbon\Carbon;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\HasMany;
@@ -21,7 +21,8 @@ use Tomodo531\FilterableFilters\FilterableFilters;
 
 class Order extends Resource
 {
-    use CommonMetaDataTrait, ColumnTogglerTrait;
+//    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -83,8 +84,6 @@ class Order extends Resource
     public static $pollingInterval = 60;
 
     /**
-     * @param NovaRequest $request
-     * @param $query
      * @return Builder
      */
     public static function indexQuery(NovaRequest $request, $query)
@@ -102,7 +101,6 @@ class Order extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -113,7 +111,6 @@ class Order extends Resource
     /**
      * Get the fields displayed by the resource on index page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForIndex(NovaRequest $request)
@@ -131,38 +128,39 @@ class Order extends Resource
                 ->sortable(),
 
             Text::make(__('Country'), function () {
-                    return $this->customer_country;
-                })
+                return $this->customer_country;
+            })
                 ->sortable(),
 
             $this->getStatusField(),
 
             Text::make(__('Order parts'), function () {
-                    return $this->totalOrderParts();
-                })
+                return $this->totalOrderParts();
+            })
                 ->sortable(),
 
             Text::make(__('Total'), function () {
-                    return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
-                })
+                return $this->total ? currencyFormatter((float) $this->total, $this->currency_code) : '';
+            })
                 ->sortable(),
 
             Text::make(__('Total refund'), function () {
-                    return $this->total_refund ? currencyFormatter((float)$this->total_refund, $this->currency_code) : '';
-                })
+                return $this->total_refund ? currencyFormatter((float) $this->total_refund, $this->currency_code) : '';
+            })
                 ->hideByDefault()
                 ->sortable(),
 
             Text::make(__('Created at'), function () {
-                    return Carbon::parse($this->created_at)->format('d-m-Y H:i:s');
-                })
+                return Carbon::parse($this->created_at)->format('d-m-Y H:i:s');
+            })
                 ->sortable(),
 
             Text::make(__('Paid at'), function () {
                 if ($this->paid_at === null) {
-                    return '<span class="text-red-500">' . __('Not paid') . '</span>';
+                    return '<span class="text-red-500">'.__('Not paid').'</span>';
                 }
-                return '<span>' . Carbon::parse($this->paid_at)->format('d-m-Y H:i:s') . '</span>';
+
+                return '<span>'.Carbon::parse($this->paid_at)->format('d-m-Y H:i:s').'</span>';
             })
                 ->asHtml()
                 ->sortable(),
@@ -171,13 +169,13 @@ class Order extends Resource
                 ->hideByDefault(),
 
             Text::make(__('Due date'), function () {
-                    return $this->due_date ? Carbon::parse($this->due_date)->format('d-m-Y H:i:s') : '';
-                })
+                return $this->due_date ? Carbon::parse($this->due_date)->format('d-m-Y H:i:s') : '';
+            })
                 ->sortable(),
 
             Text::make(__('Arrived at'), function () {
-                    return $this->arrived_at ? Carbon::parse($this->arrived_at)->format('d-m-Y H:i:s') : '-';
-                })
+                return $this->arrived_at ? Carbon::parse($this->arrived_at)->format('d-m-Y H:i:s') : '-';
+            })
                 ->sortable(),
         ];
     }
@@ -185,7 +183,6 @@ class Order extends Resource
     /**
      * Get the fields displayed by the resource on detail page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForDetail(NovaRequest $request)
@@ -198,28 +195,29 @@ class Order extends Resource
             $this->getStatusField(),
 
             Text::make(__('Created at'), function () {
-                    return Carbon::parse($this->created_at)->format('d-m-Y H:i:s');
-                })
+                return Carbon::parse($this->created_at)->format('d-m-Y H:i:s');
+            })
                 ->sortable(),
 
             Text::make(__('Paid at'), function () {
                 if ($this->paid_at === null) {
                     return __('Not paid');
                 }
-                    return Carbon::parse($this->paid_at)->format('d-m-Y H:i:s');
-                })
+
+                return Carbon::parse($this->paid_at)->format('d-m-Y H:i:s');
+            })
                 ->sortable(),
 
             Text::make(__('Payment method'), 'payment_method'),
 
             Text::make(__('Due date'), function () {
-                    return $this->due_date ? Carbon::parse($this->due_date)->format('d-m-Y H:i:s') : '';
-                })
+                return $this->due_date ? Carbon::parse($this->due_date)->format('d-m-Y H:i:s') : '';
+            })
                 ->sortable(),
 
             Text::make(__('Arrived at'), function () {
-                    return $this->arrived_at !== null ? Carbon::parse($this->arrived_at)->format('d-m-Y H:i:s') : '-';
-                })
+                return $this->arrived_at !== null ? Carbon::parse($this->arrived_at)->format('d-m-Y H:i:s') : '-';
+            })
                 ->sortable(),
 
             Text::make(__('Order parts'), function () {
@@ -227,18 +225,18 @@ class Order extends Resource
             }),
 
             Text::make(__('Total'), function () {
-                return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
+                return $this->total ? currencyFormatter((float) $this->total, $this->currency_code) : '';
             }),
 
             Text::make(__('Total refund'), function () {
-                return $this->total_refund ? currencyFormatter((float)$this->total_refund ,$this->currency_code) : '';
+                return $this->total_refund ? currencyFormatter((float) $this->total_refund, $this->currency_code) : '';
             }),
 
             BelongsTo::make(__('Customer'), 'customer'),
 
             Text::make(__('Country'), function () {
-                    return $this->customer_country;
-                })
+                return $this->customer_country;
+            })
                 ->sortable(),
 
             Text::make(__('Phone'), 'billing_phone_number'),
@@ -264,18 +262,13 @@ class Order extends Resource
     /**
      * Get the fields displayed by the resource on detail page.
      *
-     * @param NovaRequest $request
      * @return array
      */
-    public function fieldsForCreate(NovaRequest $request)
-    {
-
-    }
+    public function fieldsForCreate(NovaRequest $request) {}
 
     /**
      * Get the fields displayed by the resource on detail page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForUpdate(NovaRequest $request)
@@ -300,7 +293,6 @@ class Order extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -311,7 +303,6 @@ class Order extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -325,9 +316,9 @@ class Order extends Resource
                         'foreignkey' => 'country_id',
                     ],
                 ]),
-            (new CreatedAtDaterangepickerFilter( DateHelper::ALL))
+            (new CreatedAtDaterangepickerFilter(DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
-            new StatusFilter(),
+            new StatusFilter,
 
         ];
     }
@@ -335,7 +326,6 @@ class Order extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -346,7 +336,6 @@ class Order extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)
@@ -361,19 +350,20 @@ class Order extends Resource
         ];
     }
 
-    /**
-     * @return mixed
-     */
     protected function getStatusField(): mixed
     {
         return Text::make(__('Status'), function () {
             return match ($this->status) {
-                'pending' => '<span data-toggle="tooltip" data-placement="top" title="' . __('Pending') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(107 114 128)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
-                'processing' => '<span data-toggle="tooltip" data-placement="top" title="' . __('In process since :date', ['date' => Carbon::parse($this->created_at)->format('d-m-Y H:i:s')]) . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(6 182 212)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></span>',
-                'overdue' => '<span data-toggle="tooltip" data-placement="top" title="' . __('Overdue since :days', ['days' => $this->daysOverdue()]) . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(249 115 22)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
-                'almost-overdue' => '<span data-toggle="tooltip" data-placement="top" title="' . __('Almost overdue') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(234 179 8)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></span>',
-                'completed' => '<span data-toggle="tooltip" data-placement="top" title="' . __('Completed') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(34 197 94)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
-                'canceled' => '<span data-toggle="tooltip" data-placement="top" title="' . __('Canceled') . '"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(239 68 68)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
+                'pending' => '<span data-toggle="tooltip" data-placement="top" title="'.__('Pending').'"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(107 114 128)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
+                'processing' => '<span data-toggle="tooltip" data-placement="top" title="'.__('In process since :date', [
+                    'date' => Carbon::parse($this->created_at)->format('d-m-Y H:i:s'),
+                ]).'"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(6 182 212)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></span>',
+                'overdue' => '<span data-toggle="tooltip" data-placement="top" title="'.__('Overdue since :days', [
+                    'days' => $this->daysOverdue(),
+                ]).'"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(249 115 22)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
+                'almost-overdue' => '<span data-toggle="tooltip" data-placement="top" title="'.__('Almost overdue').'"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(234 179 8)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></span>',
+                'completed' => '<span data-toggle="tooltip" data-placement="top" title="'.__('Completed').'"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(34 197 94)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
+                'canceled' => '<span data-toggle="tooltip" data-placement="top" title="'.__('Canceled').'"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="rgb(239 68 68)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>',
                 default => ''
             };
         })
@@ -382,9 +372,6 @@ class Order extends Resource
 
     }
 
-    /**
-     * @return array
-     */
     protected function billingAddressFields(): array
     {
         return [
@@ -450,9 +437,6 @@ class Order extends Resource
         ];
     }
 
-    /**
-     * @return array
-     */
     protected function shippingAddressFields(): array
     {
         return [

@@ -9,6 +9,7 @@ enum ShippoCustomsDeclarationIncoTermsEnum: string
     case FCA = 'FCA';
     case DAP = 'DAP';
     case EDAP = 'eDAP';
+
     public static function values(): array
     {
         $values = [];
