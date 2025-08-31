@@ -143,7 +143,6 @@ abstract class FluentDecorator implements Arrayable, ArrayAccess, Jsonable, Json
      *
      * @param  TKey  $key
      * @param  TValue  $value
-     * @return void
      */
     public function __set($key, $value)
     {
@@ -165,7 +164,6 @@ abstract class FluentDecorator implements Arrayable, ArrayAccess, Jsonable, Json
      * Dynamically unset an attribute.
      *
      * @param  TKey  $key
-     * @return void
      */
     public function __unset($key)
     {

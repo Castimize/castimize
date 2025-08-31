@@ -3,7 +3,6 @@
 namespace Castimize\ColumnToggler\Http\Middleware;
 
 use Laravel\Nova\Nova;
-use Castimize\ColumnToggler\ColumnToggler;
 
 class Authorize
 {
@@ -29,6 +28,6 @@ class Authorize
      */
     public function matchesTool($tool)
     {
-        return $tool instanceof ColumnToggler;
+//        return $tool instanceof ColumnToggler;
     }
 }
