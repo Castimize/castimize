@@ -7,7 +7,7 @@ use App\Nova\Filters\CreatedAtDaterangepickerFilter;
 use App\Nova\Filters\StatusFilter;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Carbon\Carbon;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\HasMany;
@@ -21,7 +21,8 @@ use Tomodo531\FilterableFilters\FilterableFilters;
 
 class Order extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+//    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.

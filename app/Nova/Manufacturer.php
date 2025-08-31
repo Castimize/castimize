@@ -4,7 +4,7 @@ namespace App\Nova;
 
 use App\Nova\Manufacturer\Shipment;
 use App\Traits\Nova\CommonMetaDataTrait;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Email;
@@ -18,7 +18,8 @@ use Wame\TelInput\TelInput;
 
 class Manufacturer extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+//    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.

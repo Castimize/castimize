@@ -205,6 +205,9 @@ return [
     ],
 
     'vendors' => [
+        'column_toggler' => [
+            'enable_sorting' => false,
+        ],
         'collapsible_resource_manager' => [
             'move_user_menu' => false,
             'move_theme_switcher' => false,

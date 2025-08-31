@@ -4,7 +4,7 @@ namespace App\Nova\Manufacturer;
 
 use App\Nova\Country;
 use App\Nova\Resource;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Email;
 use Laravel\Nova\Fields\ID;
@@ -16,7 +16,7 @@ use Wame\TelInput\TelInput;
 
 class Profile extends Resource
 {
-    use ColumnTogglerTrait;
+//    use ColumnTogglerTrait;
 
     /**
      * The model the resource corresponds to.

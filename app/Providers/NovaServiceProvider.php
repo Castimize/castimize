@@ -46,6 +46,7 @@ use Illuminate\Support\Facades\Gate;
 use Kaiserkiwi\NovaQueueManagement\Resources\FailedJob;
 use Kaiserkiwi\NovaQueueManagement\Resources\Job;
 use Kaiserkiwi\NovaQueueManagement\Tool;
+use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
@@ -292,5 +293,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind('Laravel\Nova\Fields\FormData', function ($app) {
+            return $app->make(FormData::class);
+        });
     }
 }

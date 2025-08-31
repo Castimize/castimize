@@ -3,7 +3,7 @@
 namespace App\Nova;
 
 use App\Traits\Nova\CommonMetaDataTrait;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\FormData;
@@ -17,7 +17,9 @@ use Titasgailius\SearchRelations\SearchesRelations;
 
 class Price extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait, SearchesRelations;
+//    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
+    use SearchesRelations;
 
     /**
      * The model the resource corresponds to.

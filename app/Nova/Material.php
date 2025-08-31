@@ -3,7 +3,7 @@
 namespace App\Nova;
 
 use App\Traits\Nova\CommonMetaDataTrait;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\HasMany;
@@ -17,7 +17,8 @@ use Laravel\Nova\Panel;
 
 class Material extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.

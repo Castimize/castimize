@@ -5,7 +5,7 @@ namespace App\Nova;
 use App\Enums\Admin\PaymentFeeTypesEnum;
 use App\Enums\Admin\PaymentMethodsEnum;
 use App\Traits\Nova\CommonMetaDataTrait;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
@@ -16,7 +16,8 @@ use Laravel\Nova\Panel;
 
 class PaymentFee extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+//    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.

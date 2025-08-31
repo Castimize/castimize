@@ -5,7 +5,7 @@ namespace App\Nova;
 use App\Nova\Actions\AcceptRejectionAction;
 use App\Nova\Actions\DeclineRejectionAction;
 use App\Traits\Nova\CommonMetaDataTrait;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
@@ -18,7 +18,8 @@ use WesselPerik\StatusField\StatusField;
 
 class Rejection extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+//    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
