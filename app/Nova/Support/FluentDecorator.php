@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Nova\Support;
+namespace App\Nova\Support;
 
 use ArrayAccess;
 use Illuminate\Contracts\Support\Arrayable;

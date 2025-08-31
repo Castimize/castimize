@@ -1,20 +1,20 @@
 <?php
 
-namespace Laravel\Nova\Fields;
+namespace App\Nova\Fields;
 
+use App\Nova\Support\FluentDecorator;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Support\FluentDecorator;
 
 /**
  * @template TKey of array-key
  * @template TValue
  *
- * @extends FluentDecorator<TKey, TValue>
+ * @extends \App\Nova\Support\FluentDecorator<TKey, TValue>
  */
 class FormData extends FluentDecorator
 {
