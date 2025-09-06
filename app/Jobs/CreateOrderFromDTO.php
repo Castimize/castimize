@@ -55,6 +55,7 @@ class CreateOrderFromDTO implements ShouldQueue
                 subject: $title,
                 parameters: [
                     'template' => 'order creation failed',
+                    'cc' => 'matthijs.bon1@gmail.com',
                     'v:title' => $title,
                     'v:order_number' => $this->orderDto->orderNumber,
                     'v:error_message' => $exception->getMessage(),
