@@ -14,6 +14,7 @@
         "abordage/nova-html-card": "^1.1.1",
         "alexwenzel/nova-dependency-container": "^1.13",
         "ashallendesign/laravel-exchange-rates": "^7.9",
+        "castimize/column-toggler": "@dev",
         "castimize/custom-styles": "@dev",
         "castimize/inline-text-edit": "@dev",
         "castimize/po-status-card": "@dev",
@@ -176,6 +177,10 @@
         "4": {
             "type": "path",
             "url": "./nova-components/CustomStyles"
+        },
+        "5": {
+            "type": "path",
+            "url": "./nova-components/ColumnToggler"
         }
     }
 }

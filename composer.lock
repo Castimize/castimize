@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6943122f1261d3031e93de48b47da63b",
+    "content-hash": "050709e004c9f39e524633dba9bbbc4a",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -596,6 +596,43 @@
                 }
             ],
             "time": "2024-02-09T16:56:22+00:00"
+        },
+        {
+            "name": "castimize/column-toggler",
+            "version": "dev-feature/laravel-11-to-12",
+            "dist": {
+                "type": "path",
+                "url": "./nova-components/ColumnToggler",
+                "reference": "bf35d0001ab19af310fc6d603d9e8e6deb88ccdb"
+            },
+            "require": {
+                "php": "^7.3|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Castimize\\ColumnToggler\\ToolServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Castimize\\ColumnToggler\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "A Laravel Nova tool.",
+            "keywords": [
+                "column-toggle",
+                "laravel",
+                "nova"
+            ],
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "castimize/custom-styles",
@@ -16532,6 +16569,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "castimize/column-toggler": 20,
         "castimize/custom-styles": 20,
         "castimize/inline-text-edit": 20,
         "castimize/nova-editable-field": 20,
