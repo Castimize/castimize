@@ -52,5 +52,15 @@ return [
             'client_secret' => env('ETSY_CLIENT_SECRET'),
         ],
     ],
+    'mailgun' => [
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
+        'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+        'scheme' => 'https',
+        'sandbox' => [
+            'address' => 'postmaster@sandbox4c752ea276bb491b9fab04eaac055656.mailgun.org',
+            'name' => 'Mailgun sandbox',
+        ],
+    ],
 
 ];
