@@ -19,9 +19,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([UserObserver::class])]
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRoles, Notifiable, Impersonatable, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, Impersonatable, Notifiable, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     protected $dontKeepRevisionOf = ['password', 'remember_token'];
@@ -90,7 +91,6 @@ class User extends Authenticatable
 
     /**
      * Determines if the User is a Super admin
-     * @return bool
      */
     public function isSuperAdmin(): bool
     {
@@ -99,7 +99,6 @@ class User extends Authenticatable
 
     /**
      * Determines if the User is a admin
-     * @return bool
      */
     public function isAdmin(): bool
     {
@@ -108,7 +107,6 @@ class User extends Authenticatable
 
     /**
      * Determines if the User is Customer support
-     * @return bool
      */
     public function isCustomerSupport(): bool
     {
@@ -117,7 +115,6 @@ class User extends Authenticatable
 
     /**
      * Determines if the User is Customer support
-     * @return bool
      */
     public function isManufacturer(): bool
     {

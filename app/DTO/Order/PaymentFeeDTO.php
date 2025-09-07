@@ -10,7 +10,7 @@ use App\Models\Customer;
 use App\Models\PaymentFee;
 use App\Services\Payment\Stripe\StripeService;
 
-class  PaymentFeeDTO
+class PaymentFeeDTO
 {
     public function __construct(
         public string $paymentMethod,
@@ -21,8 +21,7 @@ class  PaymentFeeDTO
         public ?MonetaryAmount $totalTax,
         public array $taxes = [],
         public array $metaData = [],
-    ) {
-    }
+    ) {}
 
     public static function fromWpRequest(string $paymentMethod, $feeLine): self
     {
@@ -43,9 +42,9 @@ class  PaymentFeeDTO
         $total = 0.00;
         $totalTax = 0.00;
 
-        $paymentMethod = (new StripeService())->getPaymentMethod($customer->stripe_data['payment_method']);
+        $paymentMethod = (new StripeService)->getPaymentMethod($customer->stripe_data['payment_method']);
         $paymentMethodEnum = PaymentMethodsEnum::from($paymentMethod->type);
-        $paymentMethodName = PaymentMethodsEnum::options()[$paymentMethod->type] . ' usage & Handling fee';
+        $paymentMethodName = PaymentMethodsEnum::options()[$paymentMethod->type].' usage & Handling fee';
 
         $paymentFee = PaymentFee::where('payment_method', $paymentMethodEnum->value)->first();
         $taxes = [];
@@ -77,7 +76,7 @@ class  PaymentFeeDTO
                 [
                     'key' => '_last_added_fee',
                     'value' => $paymentMethodName,
-                ]
+                ],
             ],
         );
     }

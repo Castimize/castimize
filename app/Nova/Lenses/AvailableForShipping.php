@@ -52,7 +52,6 @@ class AvailableForShipping extends Lens
     /**
      * Get the query builder / paginator for the lens.
      *
-     * @param LensRequest $request
      * @param  Builder  $query
      * @return mixed
      */
@@ -71,20 +70,19 @@ class AvailableForShipping extends Lens
     /**
      * Get the fields available to the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
     {
         $fields = $this->manufacturerPOFields();
-//        $fields[] = BelongsTo::make()
+
+        //        $fields[] = BelongsTo::make()
         return $fields;
     }
 
     /**
      * Get the cards available on the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -105,23 +103,21 @@ class AvailableForShipping extends Lens
     /**
      * Get the filters available for the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
     {
         return [
-            (new MaterialFilter()),
-            (new EntryDateDaterangepickerFilter( DateHelper::ALL)),
-            (new ContractDateDaterangepickerFilter( DateHelper::ALL)),
-            (new OrderQueueOrderStatusFilter()),
+            (new MaterialFilter),
+            (new EntryDateDaterangepickerFilter(DateHelper::ALL)),
+            (new ContractDateDaterangepickerFilter(DateHelper::ALL)),
+            (new OrderQueueOrderStatusFilter),
         ];
     }
 
     /**
      * Get the actions available on the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

@@ -59,7 +59,6 @@ class Upload extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -101,7 +100,7 @@ class Upload extends Resource
                 ),
 
             Text::make(__('Manufacturer discount'), function () {
-                return $this->manufacturer_discount ? $this->manufacturer_discount . '%' : '';
+                return $this->manufacturer_discount ? $this->manufacturer_discount.'%' : '';
             })
                 ->hideByDefault()
                 ->onlyOnDetail(),
@@ -113,9 +112,9 @@ class Upload extends Resource
 
             Text::make(__('Manufacturer'), function () {
                 return $this->orderQueue?->manufacturer
-                    ? '<span><a class="link-default" href="/admin/resources/maufacturers/' . $this->orderQueue->manufacturer->id . '">' . $this->orderQueue->manufacturer->name . '</a></span>'
+                    ? '<span><a class="link-default" href="/admin/resources/maufacturers/'.$this->orderQueue->manufacturer->id.'">'.$this->orderQueue->manufacturer->name.'</a></span>'
                     : '';
-                })
+            })
                 ->asHtml()
                 ->sortable(),
 
@@ -123,12 +122,9 @@ class Upload extends Resource
         ];
     }
 
-
-
     /**
      * Get the fields displayed by the resource on index page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForIndex(NovaRequest $request)
@@ -153,7 +149,7 @@ class Upload extends Resource
             Number::make(__('Quantity'), 'quantity'),
 
             Text::make(__('Price'), function () {
-                return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
+                return $this->total ? currencyFormatter((float) $this->total, $this->currency_code) : '';
             })
                 ->sortable(),
 
@@ -163,7 +159,7 @@ class Upload extends Resource
 
             Text::make(__('Manufacturer'), function () {
                 return $this->orderQueue?->manufacturer
-                    ? '<span><a class="link-default" href="/admin/resources/maufacturers/' . $this->orderQueue->manufacturer->id . '">' . $this->orderQueue->manufacturer->name . '</a></span>'
+                    ? '<span><a class="link-default" href="/admin/resources/maufacturers/'.$this->orderQueue->manufacturer->id.'">'.$this->orderQueue->manufacturer->name.'</a></span>'
                     : '';
             })
                 ->asHtml()
@@ -175,6 +171,7 @@ class Upload extends Resource
 
             Text::make(__('Completed at'), function () {
                 $completedAt = $this->completed_at;
+
                 return $completedAt ? $completedAt->format('d-m-Y H:i:s') : '-';
             }),
 
@@ -199,7 +196,6 @@ class Upload extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -210,7 +206,6 @@ class Upload extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -221,7 +216,6 @@ class Upload extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -232,7 +226,6 @@ class Upload extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

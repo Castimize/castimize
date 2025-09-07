@@ -12,9 +12,10 @@ use Wildside\Userstamps\Userstamps;
 
 class TrackingStatus extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -51,9 +52,6 @@ class TrackingStatus extends Model
         ];
     }
 
-    /**
-     * @return MorphTo
-     */
     public function shipment(): MorphTo
     {
         return $this->morphTo();

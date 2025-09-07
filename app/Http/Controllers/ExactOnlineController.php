@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Exact\LaravelExactOnline;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use JsonException;
-use App\Services\Exact\LaravelExactOnline;
 
 class ExactOnlineController extends Controller
 {
@@ -42,7 +42,6 @@ class ExactOnlineController extends Controller
      * Exact Callback
      * Saves the authorisation and refresh tokens
      *
-     * @param Request $request
      * @throws JsonException
      */
     public function appCallback(Request $request)

@@ -10,8 +10,7 @@ class HasLastOrderQueueStatusFilter
 {
     public function __construct(
         private string $statusSlug,
-    ) {
-    }
+    ) {}
 
     public function __invoke(Builder $query): void
     {

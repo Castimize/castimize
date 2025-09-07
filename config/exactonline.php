@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /**
      * The Client ID of your Exact Online application.
      */

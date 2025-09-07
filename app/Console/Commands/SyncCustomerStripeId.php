@@ -25,7 +25,7 @@ class SyncCustomerStripeId extends Command
     /**
      * Execute the console command.
      */
-    public function handle(StripeService $stripeService)
+    public function handle(StripeService $stripeService): int
     {
         $customers = Customer::whereJsonDoesntContainKey('stripe_data->stripe_id')->whereNotNull('wp_id')->get();
         $totalCustomers = $customers->count();
@@ -35,7 +35,9 @@ class SyncCustomerStripeId extends Command
         $progressBar->start();
 
         foreach ($customers as $customer) {
-            $stripeCustomer = $stripeService->getCustomers(['email' => $customer->email]);
+            $stripeCustomer = $stripeService->getCustomers([
+                'email' => $customer->email,
+            ]);
             $stripeData = $customer->stripe_data ?? [];
             $stripeData['stripe_id'] = $stripeCustomer->first()?->id;
             $customer->stripe_data = $stripeData;

@@ -10,9 +10,7 @@ class UploadObserver
     /**
      * Handle the Upload "creating" event.
      */
-    public function creating(Upload $upload): void
-    {
-    }
+    public function creating(Upload $upload): void {}
 
     /**
      * Handle the Upload "updated" event.

@@ -18,6 +18,7 @@ class CreateOrderFromDTO implements ShouldQueue
     use Queueable;
 
     public $tries = 5;
+
     public $timeout = 120;
 
     private OrdersService $ordersService;
@@ -27,7 +28,7 @@ class CreateOrderFromDTO implements ShouldQueue
      */
     public function __construct(public OrderDTO $orderDto, public ?int $logRequestId = null)
     {
-        $this->ordersService = new OrdersService();
+        $this->ordersService = new OrdersService;
     }
 
     /**

@@ -24,7 +24,7 @@ class FixCustomerWpId extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $wpCustomers = \Codexshaper\WooCommerce\Facades\Customer::all();
         $totalCustomers = $wpCustomers->count();

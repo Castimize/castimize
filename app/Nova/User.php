@@ -2,7 +2,6 @@
 
 namespace App\Nova;
 
-
 use App\Traits\Nova\CommonMetaDataTrait;
 use DateTimeZone;
 use Gldrenthe89\NovaStringGeneratorField\NovaGeneratePassword;
@@ -63,8 +62,6 @@ class User extends Resource
     ];
 
     /**
-     * @param NovaRequest $request
-     * @param $query
      * @return Builder
      */
     public static function indexQuery(NovaRequest $request, $query)
@@ -73,7 +70,7 @@ class User extends Resource
          * @var $user \App\Models\User
          */
         $user = auth()->user();
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->where('id', '>', 1);
         }
         if (empty($request->get('orderBy'))) {
@@ -88,12 +85,12 @@ class User extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
     {
         $timezones = DateTimeZone::listIdentifiers();
+
         return [
             ID::make()->sortable(),
 
@@ -164,7 +161,6 @@ class User extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -175,7 +171,6 @@ class User extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -188,7 +183,6 @@ class User extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -199,7 +193,6 @@ class User extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

@@ -27,7 +27,7 @@ use SLASH2NL\NovaBackButton\NovaBackButton;
 
 class Po extends Resource
 {
-    use CommonMetaDataTrait, OrderQueueStatusFieldTrait, ManufacturerPOFieldsTrait;
+    use CommonMetaDataTrait, ManufacturerPOFieldsTrait, OrderQueueStatusFieldTrait;
 
     /**
      * The model the resource corresponds to.
@@ -106,13 +106,11 @@ class Po extends Resource
     ];
 
     /**
-     * @param NovaRequest $request
-     * @param $query
      * @return Builder
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        if (!$request->viaRelationship() && auth()->user()->manufacturer) {
+        if (! $request->viaRelationship() && auth()->user()->manufacturer) {
             $query->where('manufacturer_id', auth()->user()->manufacturer->id)
                 ->whereHas('order', function (Builder $query) {
                     $query->removeTestEmailAddresses('email')
@@ -151,21 +149,19 @@ class Po extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
     {
         return $this->manufacturerPOFields();
-//            $this->getStatusField(),
-//
-//            $this->getStatusCheckField(),
+        //            $this->getStatusField(),
+        //
+        //            $this->getStatusCheckField(),
     }
 
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -186,24 +182,23 @@ class Po extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
+     *
      * @throws Exception
      */
     public function filters(NovaRequest $request)
     {
         return [
-            (new MaterialFilter()),
+            (new MaterialFilter),
             EntryDateDaterangepickerFilter::make(),
             ContractDateDaterangepickerFilter::make(),
-            (new OrderQueueOrderStatusFilter()),
+            (new OrderQueueOrderStatusFilter),
         ];
     }
 
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -220,7 +215,6 @@ class Po extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

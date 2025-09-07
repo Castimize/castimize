@@ -15,12 +15,11 @@ class CountriesTableSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * @return void
      * @throws JsonException
      */
     public function run(): void
     {
-        $json = json_decode(file_get_contents(__DIR__ . '/data/Countries.json'), true, 512, JSON_THROW_ON_ERROR);
+        $json = json_decode(file_get_contents(__DIR__.'/data/Countries.json'), true, 512, JSON_THROW_ON_ERROR);
 
         $systemUser = User::where('email', 'matthijs.bon1@gmail.com')->first();
 

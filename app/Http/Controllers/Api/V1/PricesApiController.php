@@ -21,8 +21,7 @@ class PricesApiController extends ApiController
     public function __construct(
         private ModelsService $modelsService,
         private CalculatePricesService $calculatePricesService,
-    ) {
-    }
+    ) {}
 
     public function calculatePrice(Request $request): JsonResponse|CalculatedPriceResource
     {
@@ -31,7 +30,12 @@ class PricesApiController extends ApiController
         try {
             $price = $this->calculatePricesService->calculatePrice($request);
         } catch (UnprocessableEntityHttpException $e) {
-            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
+            LogRequestService::addResponse($request, [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], $e->getCode());
+
             return response()->json([
                 'errors' => $e->getMessage(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -52,6 +56,7 @@ class PricesApiController extends ApiController
 
         $response = new CalculatedPriceResource($price);
         LogRequestService::addResponse($request, $response);
+
         return $response;
     }
 

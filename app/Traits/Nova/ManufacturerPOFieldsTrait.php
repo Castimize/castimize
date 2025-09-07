@@ -23,7 +23,7 @@ trait ManufacturerPOFieldsTrait
                 return $this->upload->customer_id;
             }),
 
-            Text::make(__('Order ID'), function() {
+            Text::make(__('Order ID'), function () {
                 return $this->order->order_number;
             })
                 ->hideOnExport()
@@ -69,6 +69,7 @@ trait ManufacturerPOFieldsTrait
                 if ($this->upload->quantity > 0) {
                     return $this->manufacturer_costs && $this->manufacturer_costs > 0.00 ? currencyFormatter((float) ($this->manufacturer_costs / $this->upload->quantity), $this->currency_code) : '';
                 }
+
                 return $this->manufacturer_costs && $this->manufacturer_costs > 0.00 ? currencyFormatter((float) $this->manufacturer_costs, $this->currency_code) : '';
             })
                 ->sortable(),
@@ -79,7 +80,7 @@ trait ManufacturerPOFieldsTrait
                 ->sortable(),
 
             Text::make(__('Discount'), function () {
-                return $this->upload->manufacturer_discount ? $this->upload->manufacturer_discount . '%' : '';
+                return $this->upload->manufacturer_discount ? $this->upload->manufacturer_discount.'%' : '';
             }),
 
             Text::make(__('Purity mark'), function () {

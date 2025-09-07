@@ -8,6 +8,7 @@ use Ranium\SeedOnce\Traits\SeedOnce;
 class DatabaseSeeder extends Seeder
 {
     use SeedOnce;
+
     /**
      * Seed the application's database.
      */

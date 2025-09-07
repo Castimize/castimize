@@ -3,9 +3,7 @@
 namespace App\Nova\Actions;
 
 use App\Services\Etsy\EtsyService;
-use Etsy\OAuth\Client;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
@@ -27,19 +25,17 @@ class EtsyAuthorizationUrlAction extends Action
     /**
      * Perform the action on the given models.
      *
-     * @param ActionFields $fields
-     * @param Collection $models
      * @return mixed
      */
     public function handle(ActionFields $fields, Collection $models)
     {
         $shop = $models->first();
         $shop->shop_oauth = [
-                'client_id' => $fields->oauthKey,
-                'client_secret' => Crypt::encryptString($fields->oathSecret),
-            ];
+            'client_id' => $fields->oauthKey,
+            'client_secret' => Crypt::encryptString($fields->oathSecret),
+        ];
 
-        $url = (new EtsyService())->getAuthorizationUrl($shop);
+        $url = (new EtsyService)->getAuthorizationUrl($shop);
 
         return ActionResponse::openInNewTab($url);
     }
@@ -47,7 +43,6 @@ class EtsyAuthorizationUrlAction extends Action
     /**
      * Get the fields available on the action.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)

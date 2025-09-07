@@ -16,6 +16,7 @@ class CreateInvoicesFromOrder implements ShouldQueue
     use Queueable;
 
     public $tries = 5;
+
     public $timeout = 120;
 
     /**
@@ -24,8 +25,7 @@ class CreateInvoicesFromOrder implements ShouldQueue
     public function __construct(
         public int $wpOrderId,
         public ?int $logRequestId = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -37,7 +37,6 @@ class CreateInvoicesFromOrder implements ShouldQueue
             return;
         }
         $customer = $order->customer;
-
 
         try {
             $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($this->wpOrderId);
@@ -56,13 +55,13 @@ class CreateInvoicesFromOrder implements ShouldQueue
             }
 
         } catch (Throwable $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

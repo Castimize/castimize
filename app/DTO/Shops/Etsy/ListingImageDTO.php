@@ -18,17 +18,17 @@ class ListingImageDTO
         public int $rank = 1,
         public bool $overwrite = false,
         public bool $isWatermarked = false,
-    ) {
-    }
+    ) {}
 
-    public static function fromModel(int $shopId, Model $model, int $listingImageId = null): self
+    public static function fromModel(int $shopId, Model $model, ?int $listingImageId = null): self
     {
         $thumb = sprintf('%s.thumb.png', str_replace('_resized', '', $model->file_name));
+
         return new self(
             shopId: $shopId,
             listingId: $model->shopListingModel?->shop_listing_id,
             image: Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? sprintf('%s/%s', env('AWS_URL'), $thumb) : '',
-//            image: Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? Storage::disk(env('FILESYSTEM_DISK'))->get($thumb) : '',
+            //            image: Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? Storage::disk(env('FILESYSTEM_DISK'))->get($thumb) : '',
             listingImageId: $listingImageId,
             altText: $model->model_name ?? $model->name,
         );

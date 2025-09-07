@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands\Temp;
 
-use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Console\Command;
 
@@ -25,7 +24,7 @@ class FixOrderTaxPercentage extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $query = Order::with(['uploads'])
             ->withTrashed()

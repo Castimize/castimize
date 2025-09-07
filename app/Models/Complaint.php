@@ -11,9 +11,10 @@ use Wildside\Userstamps\Userstamps;
 
 class Complaint extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -51,33 +52,21 @@ class Complaint extends Model
         ];
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function complaintReason(): BelongsTo
     {
         return $this->belongsTo(ComplaintReason::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function upload(): BelongsTo
     {
         return $this->belongsTo(Upload::class);

@@ -11,9 +11,10 @@ use Wildside\Userstamps\Userstamps;
 
 class MaterialGroup extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -39,9 +40,6 @@ class MaterialGroup extends Model
         ];
     }
 
-    /**
-     * @return HasMany
-     */
     public function materials(): HasMany
     {
         return $this->hasMany(Material::class);

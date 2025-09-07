@@ -17,8 +17,7 @@ readonly class ShippingProfileDestinationDTO
         public string $destinationCountryIso,
         public int $minDeliveryDays,
         public int $maxDeliveryDays,
-    ) {
-    }
+    ) {}
 
     public static function fromCountry(int $shopId, Country $country, int $shippingProfileId): self
     {

@@ -4,7 +4,6 @@ namespace App\Nova\Filters;
 
 use App\Models\Country;
 use App\Models\Order;
-use App\Models\OrderStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Filters\Filter;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -31,7 +30,6 @@ class OrderQueueCountryFilter extends Filter
     /**
      * Apply the filter to the given query.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @param  mixed  $value
      * @return Builder
@@ -39,14 +37,13 @@ class OrderQueueCountryFilter extends Filter
     public function apply(NovaRequest $request, $query, $value)
     {
         return $query->whereHas('order', function ($q) use ($value) {
-                $q->where('country_id', $value);
-            });
+            $q->where('country_id', $value);
+        });
     }
 
     /**
      * Get the filter's available options.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function options(NovaRequest $request)
@@ -57,6 +54,7 @@ class OrderQueueCountryFilter extends Filter
         foreach ($countries as $country) {
             $array[$country->alpha2] = $country->id;
         }
+
         return $array;
     }
 }

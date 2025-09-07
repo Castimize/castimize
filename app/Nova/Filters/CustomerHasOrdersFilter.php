@@ -2,7 +2,6 @@
 
 namespace App\Nova\Filters;
 
-use App\Models\Material;
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Filters\Filter;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -24,7 +23,6 @@ class CustomerHasOrdersFilter extends Filter
     /**
      * Apply the filter to the given query.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @param  mixed  $value
      * @return Builder
@@ -41,7 +39,6 @@ class CustomerHasOrdersFilter extends Filter
     /**
      * Get the filter's available options.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function options(NovaRequest $request)

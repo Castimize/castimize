@@ -25,7 +25,6 @@ class TestDataSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * @return void
      * @throws JsonException
      */
     public function run(): void
@@ -143,7 +142,7 @@ class TestDataSeeder extends Seeder
             'created_by' => $systemUser->id,
         ]);
 
-        $pivotData = [ 'default_billing' => 1, 'default_shipping' => 1, 'contact_name' => 'Test contact' ];
+        $pivotData = ['default_billing' => 1, 'default_shipping' => 1, 'contact_name' => 'Test contact'];
         $customer->addresses()->attach($address, $pivotData);
 
         $materialGroup = MaterialGroup::create([

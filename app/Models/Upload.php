@@ -19,9 +19,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([UploadObserver::class])]
 class Upload extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -75,9 +76,6 @@ class Upload extends Model
         ];
     }
 
-    /**
-     * @return mixed
-     */
     public function getLastStatus(): mixed
     {
         return $this->orderQueue?->getLastStatus();
@@ -235,25 +233,16 @@ class Upload extends Model
         return $this->hasMany(OrderQueue::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);

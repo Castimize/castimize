@@ -38,8 +38,7 @@ readonly class CustomerDTO
         public ?string $shippingCity,
         public ?string $shippingState,
         public ?string $shippingCountry,
-    ) {
-    }
+    ) {}
 
     public static function fromApiRequest(Customer $customer, Request $request): self
     {

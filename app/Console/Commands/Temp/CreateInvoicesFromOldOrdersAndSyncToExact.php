@@ -25,7 +25,7 @@ class CreateInvoicesFromOldOrdersAndSyncToExact extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $orders = Order::with(['uploads'])
             ->has('uploads')

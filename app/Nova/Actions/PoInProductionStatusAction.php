@@ -30,13 +30,11 @@ class PoInProductionStatusAction extends Action
     /**
      * Perform the action on the given models.
      *
-     * @param ActionFields $fields
-     * @param Collection $models
      * @return mixed
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         foreach ($models as $model) {
             $hasEndStatus = [];
             /** @var $model OrderQueue */
@@ -53,11 +51,11 @@ class PoInProductionStatusAction extends Action
             }
         }
         foreach ($models as $model) {
-            if (!$model->manufacturerCost) {
+            if (! $model->manufacturerCost) {
                 $manufacturerCost = auth()->user()->manufacturer->costs->where('active', true)->where('material_id', $model->upload->material_id)->first();
                 if ($manufacturerCost) {
                     $model->manufacturer_cost_id = $manufacturerCost->id;
-                    $model->manufacturer_costs = (new CalculatePricesService())->calculateCostsOfModel(
+                    $model->manufacturer_costs = (new CalculatePricesService)->calculateCostsOfModel(
                         $manufacturerCost,
                         $model->upload->model_volume_cc,
                         $model->upload->model_surface_area_cm2,
@@ -78,7 +76,6 @@ class PoInProductionStatusAction extends Action
     /**
      * Get the fields available on the action.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)

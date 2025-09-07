@@ -3,19 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rejection;
-use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class PrivateRejectionImageController extends Controller
 {
-    use ValidatesRequests;
-
     public function __invoke(Request $request, int $id)
     {
         $rejection = Rejection::find($id);
-        if (!$rejection) {
+        if (! $rejection) {
             abort(Response::HTTP_NOT_FOUND);
         }
 

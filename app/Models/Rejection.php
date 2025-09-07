@@ -15,9 +15,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([RejectionObserver::class])]
 class Rejection extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -85,41 +86,26 @@ class Rejection extends Model
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function orderQueue(): BelongsTo
     {
         return $this->belongsTo(OrderQueue::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function upload(): BelongsTo
     {
         return $this->belongsTo(Upload::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function rejectionReason(): BelongsTo
     {
         return $this->belongsTo(RejectionReason::class);

@@ -12,9 +12,10 @@ use Wildside\Userstamps\Userstamps;
 
 class LogisticsZone extends Model
 {
-    use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -22,7 +23,7 @@ class LogisticsZone extends Model
      *
      * @var array<int, string>
      */
-    protected  $fillable = [
+    protected $fillable = [
         'name',
         'shipping_servicelevel_token',
     ];
@@ -41,17 +42,11 @@ class LogisticsZone extends Model
         ];
     }
 
-    /**
-     * @return HasOne
-     */
     public function shippingFee(): HasOne
     {
         return $this->hasOne(ShippingFee::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function countries(): BelongsTo
     {
         return $this->belongsTo(Country::class);

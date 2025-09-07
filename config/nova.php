@@ -8,7 +8,6 @@ use Laravel\Nova\Http\Middleware\DispatchServingNovaEvent;
 use Laravel\Nova\Http\Middleware\HandleInertiaRequests;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Nova License Key
@@ -164,15 +163,15 @@ return [
     |
     */
 
-//     'brand' => [
-//         'logo' => resource_path('/img/example-logo.svg'),
+    //     'brand' => [
+    //         'logo' => resource_path('/img/example-logo.svg'),
 
-//         'colors' => [
-//             "400" => "24, 182, 155, 0.5",
-//             "500" => "24, 182, 155",
-//             "600" => "24, 182, 155, 0.75",
-//         ]
-//     ],
+    //         'colors' => [
+    //             "400" => "24, 182, 155, 0.5",
+    //             "500" => "24, 182, 155",
+    //             "600" => "24, 182, 155, 0.75",
+    //         ]
+    //     ],
 
     /*
     |--------------------------------------------------------------------------
@@ -206,6 +205,9 @@ return [
     ],
 
     'vendors' => [
+        'column_toggler' => [
+            'enable_sorting' => false,
+        ],
         'collapsible_resource_manager' => [
             'move_user_menu' => false,
             'move_theme_switcher' => false,
@@ -215,5 +217,4 @@ return [
             'collapse_on_refresh' => false,
         ],
     ],
-
 ];
