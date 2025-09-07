@@ -9,6 +9,7 @@ use App\Services\Admin\OrdersService;
 use App\Services\Mail\MailgunService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -40,17 +41,14 @@ class CreateOrderFromDTO implements ShouldQueue
             return;
         }
 
+        DB::beginTransaction();
         try {
             $this->ordersService->storeOrderFromDto($this->orderDto);
+            DB::commit();
         } catch (Throwable $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
-        }
-
-        try {
-            LogRequestService::addResponseById($this->logRequestId, $order);
-        } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
-            $title = 'Order creation failed for order number: ' . $this->orderDto->orderNumber;
+            DB::rollBack();
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            $title = 'Order creation failed for order number: '.$this->orderDto->orderNumber;
             $mailgunService->send(
                 to: config('mail.from.address'),
                 subject: $title,
@@ -59,11 +57,17 @@ class CreateOrderFromDTO implements ShouldQueue
                     'cc' => 'matthijs.bon1@gmail.com',
                     'v:title' => $title,
                     'v:order_number' => $this->orderDto->orderNumber,
-                    'v:error_message' => $exception->getMessage(),
-                    'v:error_file' => $exception->getFile(),
-                    'v:error_line' => $exception->getLine(),
+                    'v:error_message' => $e->getMessage(),
+                    'v:error_file' => $e->getFile(),
+                    'v:error_line' => $e->getLine(),
                 ],
             );
+        }
+
+        try {
+            LogRequestService::addResponseById($this->logRequestId, $order);
+        } catch (Throwable $exception) {
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }
