@@ -219,7 +219,7 @@ class OrderDTO
         $uploads = collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage));
         /** @var UploadDTO $upload */
         foreach ($uploads as $upload) {
-            $totalItems += $upload->total->toFloat() * $upload->quantity;
+            $totalItems += $upload->total->toFloat();
         }
 
         if ($taxPercentage) {

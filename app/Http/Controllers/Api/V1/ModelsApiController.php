@@ -7,6 +7,7 @@ use App\Http\Resources\ModelResource;
 use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Model;
+use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ModelsService;
 use Illuminate\Http\JsonResponse;
@@ -119,10 +120,15 @@ class ModelsApiController extends ApiController
         ini_set('precision', 53);
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
-            LogRequestService::addResponse(request(), [
-                'message' => '404 Not found',
-            ], 404);
-            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+            $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($customerId);
+            if ($wpCustomer) {
+                $customer = app(CustomersService::class)->storeCustomerFromWpCustomer($wpCustomer);
+            } else {
+                LogRequestService::addResponse(request(), [
+                    'message' => '404 Not found',
+                ], 404);
+                abort(Response::HTTP_NOT_FOUND, '404 Not found');
+            }
         }
 
         $newUploads = [];
