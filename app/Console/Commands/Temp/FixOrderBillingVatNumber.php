@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands\Temp;
 
-use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Console\Command;
 
@@ -25,7 +24,7 @@ class FixOrderBillingVatNumber extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $query = Order::withTrashed()
             ->whereNull('billing_vat_number')
@@ -43,7 +42,7 @@ class FixOrderBillingVatNumber extends Command
             if ($wpOrder) {
                 $billingVatNumber = null;
                 foreach ($wpOrder['meta_data'] as $orderMetaData) {
-                    if ($orderMetaData->key === '_billing_eu_vat_number' && !empty($orderMetaData->value)) {
+                    if ($orderMetaData->key === '_billing_eu_vat_number' && ! empty($orderMetaData->value)) {
                         $billingVatNumber = $orderMetaData->value;
                     }
                 }

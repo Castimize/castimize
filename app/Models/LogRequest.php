@@ -11,9 +11,10 @@ use Wildside\Userstamps\Userstamps;
 
 class LogRequest extends Model
 {
-    use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -21,7 +22,7 @@ class LogRequest extends Model
      *
      * @var array<int, string>
      */
-    protected  $fillable = [
+    protected $fillable = [
         'type',
         'path_info',
         'request_uri',

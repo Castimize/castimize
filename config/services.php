@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
@@ -34,9 +33,11 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+
     'shippo' => [
         'key' => env('SHIPPO_API_KEY'),
     ],
+
     'stripe' => [
         'model' => App\Models\User::class,
         'key' => env('STRIPE_KEY'),
@@ -46,11 +47,21 @@ return [
             'tolerance' => env('STRIPE_WEBHOOK_TOLERANCE', 300),
         ],
     ],
+
     'shops' => [
         'etsy' => [
             'client_id' => env('ETSY_CLIENT_ID'),
             'client_secret' => env('ETSY_CLIENT_SECRET'),
         ],
     ],
-
+    'mailgun' => [
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
+        'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+        'scheme' => 'https',
+        'sandbox' => [
+            'address' => 'postmaster@sandbox4c752ea276bb491b9fab04eaac055656.mailgun.org',
+            'name' => 'Mailgun sandbox',
+        ],
+    ],
 ];

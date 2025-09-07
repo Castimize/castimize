@@ -2,7 +2,6 @@
 
 namespace App\Nova;
 
-
 use App\Traits\Nova\CommonMetaDataTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -79,7 +78,6 @@ class Invoice extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -90,7 +88,6 @@ class Invoice extends Resource
     /**
      * Get the fields displayed by the resource on index page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForIndex(NovaRequest $request)
@@ -116,22 +113,21 @@ class Invoice extends Resource
                 ->sortable(),
 
             Text::make(__('Total'), function () {
-                return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
+                return $this->total ? currencyFormatter((float) $this->total, $this->currency_code) : '';
             }),
 
             Text::make(__('Exact entries'), function () {
                 return $this->exactSalesEntries ? $this->exactSalesEntries->count() : '';
             })
-            ->canSee(function ($request) {
-                return $request->user()->isSuperAdmin();
-            }),
+                ->canSee(function ($request) {
+                    return $request->user()->isSuperAdmin();
+                }),
         ];
     }
 
     /**
      * Get the fields displayed by the resource on index page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForDetail(NovaRequest $request)
@@ -149,26 +145,27 @@ class Invoice extends Resource
             Text::make(__('Type'), 'debit')
                 ->displayUsing(fn ($value) => $value ? __('Invoice') : __('Credit note')),
 
-//            Text::make(__('Type'), function () {
-//                return $this->debit ? __('Invoice') : __('Credit note');
-//            }),
+            //            Text::make(__('Type'), function () {
+            //                return $this->debit ? __('Invoice') : __('Credit note');
+            //            }),
 
             Text::make(__('Description'), 'description'),
 
             Text::make(__('Currency'), 'currency_code'),
 
             Text::make(__('Total'), function () {
-                return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
+                return $this->total ? currencyFormatter((float) $this->total, $this->currency_code) : '';
             }),
 
             Text::make(__('Total tax'), function () {
-                return $this->total_tax ? currencyFormatter((float)$this->total_tax, $this->currency_code) : '';
+                return $this->total_tax ? currencyFormatter((float) $this->total_tax, $this->currency_code) : '';
             }),
 
             Text::make(__('Paid at'), function () {
                 if ($this->paid_at === null) {
                     return __('Not paid');
                 }
+
                 return Carbon::parse($this->paid_at)->format('d-m-Y H:i:s');
             })
                 ->sortable(),
@@ -194,7 +191,6 @@ class Invoice extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -205,7 +201,6 @@ class Invoice extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -216,7 +211,6 @@ class Invoice extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -227,7 +221,6 @@ class Invoice extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

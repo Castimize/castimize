@@ -23,6 +23,6 @@ class StoreModelFromApi implements ShouldQueue
      */
     public function handle(): void
     {
-        (new ModelsService())->storeModelFromApi($this->request);
+        (new ModelsService)->storeModelFromApi($this->request);
     }
 }

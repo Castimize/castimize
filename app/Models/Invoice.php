@@ -14,9 +14,10 @@ use Wildside\Userstamps\Userstamps;
 
 class Invoice extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -96,25 +97,16 @@ class Invoice extends Model
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function lines(): HasMany
     {
         return $this->hasMany(InvoiceLine::class);

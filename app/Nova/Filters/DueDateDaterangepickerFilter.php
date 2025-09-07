@@ -11,9 +11,11 @@ use Rpj\Daterangepicker\Daterangepicker;
 
 class DueDateDaterangepickerFilter extends Daterangepicker
 {
-    private Carbon|null $minDate = null;
-    private Carbon|null $maxDate = null;
-    private array|null $ranges = null;
+    private ?Carbon $minDate = null;
+
+    private ?Carbon $maxDate = null;
+
+    private ?array $ranges = null;
 
     private string $column = 'due_date';
 
@@ -63,12 +65,10 @@ class DueDateDaterangepickerFilter extends Daterangepicker
 
     /**
      * Get the filter's available options.
-     *
-     * @return array
      */
-    public function options(NovaRequest $request): array|null
+    public function options(NovaRequest $request): ?array
     {
-        if (!$this->ranges) {
+        if (! $this->ranges) {
             $this->setRanges(Helper::defaultRanges());
         }
 
@@ -80,12 +80,15 @@ class DueDateDaterangepickerFilter extends Daterangepicker
      *
      * @return array|mixed
      */
-    public function default(): string|null
+    public function default(): ?string
     {
         [$start, $end] = Helper::getParsedDatesGroupedRanges($this->default);
 
         if ($start && $end) {
-            return __(':startDate to :endDate', ['startDate' => $start->format('Y-m-d'), 'endDate' => $end->format('Y-m-d')]);
+            return __(':startDate to :endDate', [
+                'startDate' => $start->format('Y-m-d'),
+                'endDate' => $end->format('Y-m-d'),
+            ]);
         }
 
         return null;
@@ -113,16 +116,14 @@ class DueDateDaterangepickerFilter extends Daterangepicker
         return $this;
     }
 
-    /**
-     * @param Carbon[] $periods
-     */
     public function setRanges(array $ranges): self
     {
-        $result = [];
         $result = collect($ranges)->mapWithKeys(function (array $item, string $key) {
-            return [$key => (collect($item)->map(function (Carbon $date) {
-                return $date->format('Y-m-d');
-            }))];
+            return [
+                $key => (collect($item)->map(function (Carbon $date) {
+                    return $date->format('Y-m-d');
+                })),
+            ];
         })->toArray();
 
         $this->ranges = $result;
@@ -132,8 +133,6 @@ class DueDateDaterangepickerFilter extends Daterangepicker
 
     /**
      * Convert the filter to its JSON representation.
-     *
-     * @return array
      */
     public function jsonSerialize(): array
     {

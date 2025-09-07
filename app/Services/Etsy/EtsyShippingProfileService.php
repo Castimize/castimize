@@ -3,12 +3,9 @@
 namespace App\Services\Etsy;
 
 use AllowDynamicProperties;
-use App\DTO\Shops\Etsy\ListingDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDestinationDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDTO;
 use App\Models\Shop;
-use App\Services\Etsy\Resources\Listing;
-use Etsy\Collection;
 use Etsy\Etsy;
 use Etsy\Resources\ShippingDestination;
 use Etsy\Resources\ShippingProfile;

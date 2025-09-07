@@ -25,9 +25,9 @@ class FixCustomerNames extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
-//        $wpCustomers = \Codexshaper\WooCommerce\Facades\Customer::all();
+        //        $wpCustomers = \Codexshaper\WooCommerce\Facades\Customer::all();
         $customers = Customer::whereNotNull('wp_id')->orderByDesc('id')->get();
         $totalCustomers = $customers->count();
         $progressBar = $this->output->createProgressBar($totalCustomers);
@@ -35,14 +35,13 @@ class FixCustomerNames extends Command
         $this->info("Updating $totalCustomers customers from Woocommerce");
         $progressBar->start();
 
-
         foreach ($customers as $customer) {
             $this->info("Updating $customer->wp_id");
             try {
                 $vatNumber = null;
                 $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($customer->wp_id);
                 foreach ($wpCustomer['meta_data'] as $metaData) {
-                    if ($metaData->key === 'billing_eu_vat_number' && !empty($metaData->value)) {
+                    if ($metaData->key === 'billing_eu_vat_number' && ! empty($metaData->value)) {
                         $vatNumber = $metaData->value;
                     }
                 }

@@ -16,10 +16,6 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class CalculatePricesService
 {
-    /**
-     * @param Request $request
-     * @return Price
-     */
     public function calculatePrice(Request $request): Price
     {
         $material = Material::with(['prices'])->where('wp_id', $request->wp_id)->first();
@@ -51,15 +47,10 @@ class CalculatePricesService
          */
         $price = $material->prices->first();
         $price->calculated_total = $this->calculatePriceOfModel($price, $request->material_volume, $request->surface_area);
+
         return $price;
     }
 
-    /**
-     * @param Price $price
-     * @param float $materialVolume
-     * @param float $surfaceArea
-     * @return float
-     */
     public function calculatePriceOfModel(Price $price, float $materialVolume, float $surfaceArea): float
     {
         if ($price->setup_fee) {
@@ -74,18 +65,11 @@ class CalculatePricesService
         return (float) $total;
     }
 
-    /**
-     * @param ManufacturerCost $cost
-     * @param float $materialVolume
-     * @param float $surfaceArea
-     * @param int $quantity
-     * @return float
-     */
     public function calculateCostsOfModel(ManufacturerCost $cost, float $materialVolume, float $surfaceArea, int $quantity = 1): float
     {
         if ($cost->setup_fee) {
             $total = $cost->setup_fee_amount + ($materialVolume * $cost->costs_volume_cc);
-        } else if ($materialVolume <= $cost->minimum_per_stl) {
+        } elseif ($materialVolume <= $cost->minimum_per_stl) {
             $total = $cost->costs_minimum_per_stl;
         } else {
             $total = ($materialVolume * $cost->costs_volume_cc) + ($surfaceArea * $cost->costs_surface_cm2);
@@ -116,10 +100,6 @@ class CalculatePricesService
         return $shippingFee;
     }
 
-    /**
-     * @param Request $request
-     * @return ShippingFee
-     */
     public function calculateShippingFee(Request $request): ShippingFee
     {
         $country = Country::with(['logisticsZone.shippingFee'])->where('alpha2', $request->country)->first();
@@ -142,18 +122,15 @@ class CalculatePricesService
         return $shippingFee;
     }
 
-    /**
-     * @param Collection $uploads
-     * @return float|int|null
-     */
     private function getTotalVolumeOfUploads(Collection $uploads): float|int|null
     {
         $totalVolume = 0.00;
         /** @var CalculateShippingFeeUploadDTO $calculateShippingFeeUploadDTO */
         foreach ($uploads as $calculateShippingFeeUploadDTO) {
             $totalVolume += $calculateShippingFeeUploadDTO->modelBoxVolume * $calculateShippingFeeUploadDTO->quantity;
-//            $totalVolume += $upload['3dp_options']['model_stats_raw']['model']['box_volume'] * $upload['quantity'];
+            //            $totalVolume += $upload['3dp_options']['model_stats_raw']['model']['box_volume'] * $upload['quantity'];
         }
+
         return $totalVolume;
     }
 }

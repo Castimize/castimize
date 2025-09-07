@@ -9,7 +9,6 @@ use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\State;
-use App\Models\User;
 use App\Services\Woocommerce\WoocommerceApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -20,29 +19,31 @@ class CustomersService
     {
         $customer = Customer::with(['addresses'])->where('wp_id', $wpCustomer['id'])->first();
 
-        if ($customer === null && !empty($wpCustomer['email'])) {
+        if ($customer === null && ! empty($wpCustomer['email'])) {
             $customer = Customer::with(['addresses'])->where('email', $wpCustomer['email'])->first();
         }
 
         if ($customer === null) {
             return $this->createCustomerFromWpCustomer($wpCustomer);
         }
+
         return $this->updateCustomerFromWpCustomer($customer, $wpCustomer);
     }
 
     public function storeCustomerFromWpApi($request): Customer
     {
         $customer = null;
-        if ($request->has('id') && !empty($request->id)) {
+        if ($request->has('id') && ! empty($request->id)) {
             $customer = Customer::where('wp_id', $request->id)->first();
         }
-        if ($customer === null && $request->has('email') && !empty($request->email)) {
+        if ($customer === null && $request->has('email') && ! empty($request->email)) {
             $customer = Customer::where('email', $request->email)->first();
         }
 
         if ($customer === null) {
             return $this->createCustomerFromWp($request);
         }
+
         return $this->updateCustomerFromWp($customer, $request);
     }
 
@@ -99,7 +100,7 @@ class CustomersService
                 ];
                 $customer->addresses()->attach($shippingAddress, $pivotData);
             }
-        } else if ($billingAddress !== null) {
+        } elseif ($billingAddress !== null) {
             $pivotData = [
                 'default_billing' => 1,
                 'default_shipping' => 1,
@@ -118,7 +119,7 @@ class CustomersService
 
         $vatNumber = null;
         foreach ($wpCustomer['meta_data'] as $metaData) {
-            if ($metaData->key === 'billing_eu_vat_number' && !empty($metaData->value)) {
+            if ($metaData->key === 'billing_eu_vat_number' && ! empty($metaData->value)) {
                 $vatNumber = $metaData->value;
             }
         }
@@ -194,7 +195,9 @@ class CustomersService
         if ($billingAddress === null) {
             $billingAddress = $this->createAddress($request->billing);
             if ($billingAddress !== null) {
-                $customer->addresses()->wherePivot('default_billing', 1)->update(['default_billing' => 0]);
+                $customer->addresses()->wherePivot('default_billing', 1)->update([
+                    'default_billing' => 0,
+                ]);
                 $pivotData = [
                     'default_billing' => 1,
                     'contact_name' => sprintf('%s %s', $request->billing['first_name'], $request->billing['last_name']),
@@ -218,12 +221,14 @@ class CustomersService
                 'phone' => $request->shipping['phone'] ?? null,
             ];
             if ($shippingAddress !== null && $shippingAddress !== $billingAddress) {
-                $customer->addresses()->wherePivot('default_shipping', 1)->update(['default_shipping' => 0]);
+                $customer->addresses()->wherePivot('default_shipping', 1)->update([
+                    'default_shipping' => 0,
+                ]);
                 $customer->addresses()->attach($shippingAddress, $pivotData);
             } else {
                 $customer->addresses()->syncWithPivotValues($shippingAddress, $pivotData);
             }
-        } else if ($shippingAddress !== $billingAddress) {
+        } elseif ($shippingAddress !== $billingAddress) {
             $pivotData = [
                 'contact_name' => sprintf('%s %s', $request->shipping['first_name'], $request->shipping['last_name']),
                 'phone' => $request->shipping['phone'] ?? null,
@@ -234,11 +239,6 @@ class CustomersService
         return $customer;
     }
 
-    /**
-     * @param $wpCustomer
-     * @param Customer $customer
-     * @return void
-     */
     private function attachAddressesFromWpCustomer($wpCustomer, Customer $customer): void
     {
         $shippingEmail = $wpCustomer['billing']->email;
@@ -256,14 +256,14 @@ class CustomersService
 
             $pivotDataBilling = [
                 'default_billing' => 1,
-                'company' => !empty($wpCustomer['billing']->company) ? $wpCustomer['billing']->company : null,
+                'company' => ! empty($wpCustomer['billing']->company) ? $wpCustomer['billing']->company : null,
                 'contact_name' => sprintf('%s %s', $wpCustomer['billing']->first_name, $wpCustomer['billing']->last_name),
                 'phone' => $wpCustomer['billing']->phone ?? null,
                 'email' => $wpCustomer['billing']->email ?? null,
             ];
             $pivotDataShipping = [
                 'default_shipping' => 1,
-                'company' => !empty($wpCustomer['shipping']->company) ? $wpCustomer['shipping']->company : null,
+                'company' => ! empty($wpCustomer['shipping']->company) ? $wpCustomer['shipping']->company : null,
                 'contact_name' => sprintf('%s %s', $wpCustomer['shipping']->first_name, $wpCustomer['shipping']->last_name),
                 'phone' => $wpCustomer['shipping']->phone ?? null,
                 'email' => $shippingEmail ?? null,
@@ -290,16 +290,29 @@ class CustomersService
             $state = null;
             if ($stateName) {
                 $state = State::firstOrCreate(
-                    ['slug' => Str::slug($stateName)],
-                    ['name' => $stateName, 'slug' => Str::slug($stateName), 'country_id' => $country->id]
+                    [
+                        'slug' => Str::slug($stateName),
+                    ],
+                    [
+                        'name' => $stateName,
+                        'slug' => Str::slug($stateName),
+                        'country_id' => $country->id,
+                    ],
                 );
             }
             $cityName = $input->city;
             $city = null;
             if ($cityName) {
                 $city = City::firstOrCreate(
-                    ['slug' => Str::slug($cityName)],
-                    ['name' => $cityName, 'slug' => Str::slug($cityName), 'state_id' => $state?->id, 'country_id' => $country->id]
+                    [
+                        'slug' => Str::slug($cityName),
+                    ],
+                    [
+                        'name' => $cityName,
+                        'slug' => Str::slug($cityName),
+                        'state_id' => $state?->id,
+                        'country_id' => $country->id,
+                    ]
                 );
             }
 
@@ -319,6 +332,7 @@ class CustomersService
 
             return $address;
         }
+
         return null;
     }
 
@@ -334,16 +348,29 @@ class CustomersService
             $state = null;
             if ($stateName) {
                 $state = State::firstOrCreate(
-                    ['name' => $stateName],
-                    ['name' => $stateName, 'slug' => Str::slug($stateName), 'country_id' => $country->id]
+                    [
+                        'name' => $stateName,
+                    ],
+                    [
+                        'name' => $stateName,
+                        'slug' => Str::slug($stateName),
+                        'country_id' => $country->id,
+                    ]
                 );
             }
             $cityName = $input['city'];
             $city = null;
             if ($cityName) {
                 $city = City::firstOrCreate(
-                    ['name' => $cityName],
-                    ['name' => $cityName, 'slug' => Str::slug($cityName), 'state_id' => $state?->id, 'country_id' => $country->id]
+                    [
+                        'name' => $cityName,
+                    ],
+                    [
+                        'name' => $cityName,
+                        'slug' => Str::slug($cityName),
+                        'state_id' => $state?->id,
+                        'country_id' => $country->id,
+                    ]
                 );
             }
 
@@ -363,6 +390,7 @@ class CustomersService
 
             return $address;
         }
+
         return null;
     }
 }

@@ -10,22 +10,18 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 /**
  * Class ApiController.
  *
- * @package Castimize\SelectManufacturerWithOverview\Http\Controllers
  * @date    06/05/2024
  */
 class ApiController extends Controller
 {
     /**
      * Load system settings.
-     *
-     * @param NovaRequest $request
-     *
-     * @return JsonResponse
      */
     public function getOverviewItem(NovaRequest $request): JsonResponse
     {
         $orderQueue = OrderQueue::find($request->id);
         $overviewItem = $orderQueue->getOverviewItem(false);
+
         return response()->json([
             'item' => $overviewItem,
         ]);
@@ -35,6 +31,7 @@ class ApiController extends Controller
     {
         $orderQueues = OrderQueue::whereIn('id', $request->ids)->get();
         $overviewFooter = OrderQueue::getOverviewFooter($orderQueues, false);
+
         return response()->json([
             'footer' => $overviewFooter,
         ]);

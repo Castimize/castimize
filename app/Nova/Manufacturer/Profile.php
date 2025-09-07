@@ -2,23 +2,21 @@
 
 namespace App\Nova\Manufacturer;
 
-
 use App\Nova\Country;
 use App\Nova\Resource;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Email;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Nova;
 use Laravel\Nova\Panel;
 use Wame\TelInput\TelInput;
 
 class Profile extends Resource
 {
-    use ColumnTogglerTrait;
+//    use ColumnTogglerTrait;
 
     /**
      * The model the resource corresponds to.
@@ -56,7 +54,6 @@ class Profile extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -108,7 +105,6 @@ class Profile extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -119,7 +115,6 @@ class Profile extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -130,7 +125,6 @@ class Profile extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -141,7 +135,6 @@ class Profile extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)
@@ -149,9 +142,6 @@ class Profile extends Resource
         return [];
     }
 
-    /**
-     * @return array
-     */
     protected function addressFields(): array
     {
         return [
@@ -168,8 +158,8 @@ class Profile extends Resource
                 ->sortable(),
 
             Text::make(__('City'), 'cityName', function () {
-                    return $this->city?->name ?? null;
-                })
+                return $this->city?->name ?? null;
+            })
                 ->required()
                 ->sortable(),
 

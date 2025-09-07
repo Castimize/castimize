@@ -5,8 +5,7 @@ namespace App\Nova;
 use App\Nova\Actions\AcceptRejectionAction;
 use App\Nova\Actions\DeclineRejectionAction;
 use App\Traits\Nova\CommonMetaDataTrait;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
-use Illuminate\Http\Request;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
@@ -19,7 +18,8 @@ use WesselPerik\StatusField\StatusField;
 
 class Rejection extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+//    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -62,7 +62,6 @@ class Rejection extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -88,14 +87,14 @@ class Rejection extends Resource
             Textarea::make(__('Note Castimize'), 'note_castimize'),
 
             Image::make(__('Photo'), 'photo')
-                ->disk('s3_private')
+                ->disk('r2_private')
                 ->path('admin/rejections')
                 ->maxWidth(1024)
-                ->thumbnail(function($value, $disk) {
-                    return 'data: image/png;base64,' . base64_encode(Storage::disk('s3_private')->get($value));
+                ->thumbnail(function ($value, $disk) {
+                    return 'data: image/png;base64,'.base64_encode(Storage::disk('r2_private')->get($value));
                 })
-                ->preview(function($value, $disk) {
-                    return 'data: image/png;base64,' . base64_encode(Storage::disk('s3_private')->get($value));
+                ->preview(function ($value, $disk) {
+                    return 'data: image/png;base64,'.base64_encode(Storage::disk('r2_private')->get($value));
                 }),
 
             DateTime::make(__('Approved at'), 'approved_at')
@@ -109,7 +108,6 @@ class Rejection extends Resource
     /**
      * Get the fields displayed by the resource on index page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForIndex(NovaRequest $request)
@@ -126,14 +124,14 @@ class Rejection extends Resource
                 ->sortable(),
 
             Text::make(__('PO number'), function ($model) {
-                return '<span><a class="link-default" href="/admin/resources/order-queues/' . $model->order_queue_id . '">' . $model->order_queue_id . '</a></span>';
+                return '<span><a class="link-default" href="/admin/resources/order-queues/'.$model->order_queue_id.'">'.$model->order_queue_id.'</a></span>';
             })
                 ->asHtml()
                 ->sortable(),
 
             Text::make(__('Customer'), function ($model) {
                 return $model->order
-                    ? '<span><a class="link-default" href="/admin/resources/customers/' . $model->order->customer_id . '">' . $model->order->billing_name . '</a></span>'
+                    ? '<span><a class="link-default" href="/admin/resources/customers/'.$model->order->customer_id.'">'.$model->order->billing_name.'</a></span>'
                     : '';
             })
                 ->asHtml()
@@ -148,8 +146,12 @@ class Rejection extends Resource
                     'check-circle' => $this->approved_at !== null,
                 ])
                 ->tooltip([
-                    'x-circle' => __('Declined at :date', ['date' => $this->declined_at]),
-                    'check-circle' => __('Accepted at :date', ['date' => $this->approved_at]),
+                    'x-circle' => __('Declined at :date', [
+                        'date' => $this->declined_at,
+                    ]),
+                    'check-circle' => __('Accepted at :date', [
+                        'date' => $this->approved_at,
+                    ]),
                 ])
                 ->color([
                     'x-circle' => 'red-500',
@@ -168,7 +170,6 @@ class Rejection extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -179,7 +180,6 @@ class Rejection extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -190,7 +190,6 @@ class Rejection extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -201,7 +200,6 @@ class Rejection extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

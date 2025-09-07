@@ -7,6 +7,7 @@ use App\Http\Resources\ModelResource;
 use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Model;
+use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ModelsService;
 use Illuminate\Http\JsonResponse;
@@ -20,8 +21,7 @@ class ModelsApiController extends ApiController
 {
     public function __construct(
         private ModelsService $modelsService,
-    ) {
-    }
+    ) {}
 
     public function show(int $customerId, Model $model): ModelResource
     {
@@ -32,6 +32,7 @@ class ModelsApiController extends ApiController
 
         $response = new ModelResource($model);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -39,7 +40,9 @@ class ModelsApiController extends ApiController
     {
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse(request(), [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
@@ -55,7 +58,7 @@ class ModelsApiController extends ApiController
                 $model->model_y_length,
                 $model->model_z_length
             );
-            if (!array_key_exists($key, $models)) {
+            if (! array_key_exists($key, $models)) {
                 $models[$key] = $model;
             }
         }
@@ -63,6 +66,7 @@ class ModelsApiController extends ApiController
 
         $response = ModelResource::collection($models->keyBy->id);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -70,13 +74,16 @@ class ModelsApiController extends ApiController
     {
         $customer = Customer::where('wp_id', $customerId)->first();
         if ($customer === null) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse(request(), [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
         $response = $this->modelsService->getModelsPaginated($request, $customer);
 
         LogRequestService::addResponse(request(), $response['items']);
+
         return response()->json([
             'items' => $response['items'],
             'total' => $response['total'],
@@ -88,7 +95,9 @@ class ModelsApiController extends ApiController
     {
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse(request(), [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
@@ -96,13 +105,14 @@ class ModelsApiController extends ApiController
         [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
 
         $model = $customer->models->where('name', $upload['3dp_options']['model_name_original'])
-//            ->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
             ->where('model_scale', $upload['3dp_options']['scale'] ?? 1)
             ->first();
 
         $modelName = $model ? $model->model_name : null;
 
-        return response()->json(['model_name' => $modelName]);
+        return response()->json([
+            'model_name' => $modelName,
+        ]);
     }
 
     public function getCustomModelAttributes(int $customerId, Request $request): JsonResponse
@@ -110,13 +120,19 @@ class ModelsApiController extends ApiController
         ini_set('precision', 53);
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
-            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+            $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($customerId);
+            if ($wpCustomer) {
+                $customer = app(CustomersService::class)->storeCustomerFromWpCustomer($wpCustomer);
+            } else {
+                LogRequestService::addResponse(request(), [
+                    'message' => '404 Not found',
+                ], 404);
+                abort(Response::HTTP_NOT_FOUND, '404 Not found');
+            }
         }
 
         $newUploads = [];
         foreach (json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR) as $itemKey => $upload) {
-//            dd($upload);
             if (isset($upload['3dp_options'])) {
                 [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
                 $material = Material::where('wp_id', ($upload['3dp_options']['material_id'] ?? $materialId))->first();
@@ -134,7 +150,7 @@ class ModelsApiController extends ApiController
                 $newUploads[$itemKey] = $upload;
                 if ($model) {
                     if ($model->thumb_name) {
-                        $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(env('FILESYSTEM_DISK'))->exists($model->thumb_name) ? sprintf('%s/%s', env('AWS_URL'), $model->thumb_name) : '/' . $model->thumb_name;
+                        $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(env('FILESYSTEM_DISK'))->exists($model->thumb_name) ? sprintf('%s/%s', env('AWS_URL'), $model->thumb_name) : '/'.$model->thumb_name;
                     }
                     $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
                 }
@@ -142,6 +158,7 @@ class ModelsApiController extends ApiController
         }
 
         LogRequestService::addResponse($request, $newUploads);
+
         return response()->json($newUploads);
     }
 
@@ -150,7 +167,9 @@ class ModelsApiController extends ApiController
         ini_set('precision', 17);
         $customer = Customer::where('wp_id', $customerId)->first();
         if ($customer === null) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse(request(), [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
@@ -158,6 +177,7 @@ class ModelsApiController extends ApiController
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
+
         return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
@@ -172,6 +192,7 @@ class ModelsApiController extends ApiController
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
+
         return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }

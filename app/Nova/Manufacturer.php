@@ -2,10 +2,9 @@
 
 namespace App\Nova;
 
-
 use App\Nova\Manufacturer\Shipment;
 use App\Traits\Nova\CommonMetaDataTrait;
-use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Castimize\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Email;
@@ -19,7 +18,8 @@ use Wame\TelInput\TelInput;
 
 class Manufacturer extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+//    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -57,7 +57,6 @@ class Manufacturer extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -124,7 +123,6 @@ class Manufacturer extends Resource
     /**
      * Get the fields displayed by the resource on index page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForIndex(NovaRequest $request)
@@ -155,7 +153,6 @@ class Manufacturer extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -166,7 +163,6 @@ class Manufacturer extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -179,7 +175,6 @@ class Manufacturer extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -190,7 +185,6 @@ class Manufacturer extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)
@@ -198,9 +192,6 @@ class Manufacturer extends Resource
         return [];
     }
 
-    /**
-     * @return array
-     */
     protected function addressFields(): array
     {
         return [

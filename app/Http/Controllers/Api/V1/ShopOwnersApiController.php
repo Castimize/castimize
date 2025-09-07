@@ -17,21 +17,22 @@ class ShopOwnersApiController extends ApiController
     public function __construct(
         private ShopOwnersService $shopOwnersService,
         private CustomersService $customersService,
-    ) {
-    }
+    ) {}
 
     public function show(int $customerId): ShopOwnerResource
     {
-//        dd(Order::find(7444));
         abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
         if (! $customer) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse(request(), [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
         $response = new ShopOwnerResource($customer->shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -40,7 +41,9 @@ class ShopOwnersApiController extends ApiController
         abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if (! $customer || ! $customer->shopOwner) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse(request(), [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
@@ -48,11 +51,14 @@ class ShopOwnersApiController extends ApiController
             if ($s->shop === $shop) {
                 $response = new ShopResource($s);
                 LogRequestService::addResponse(request(), $response);
+
                 return $response;
             }
         }
 
-        LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+        LogRequestService::addResponse(request(), [
+            'message' => '404 Not found',
+        ], 404);
         abort(Response::HTTP_NOT_FOUND, '404 Not found');
     }
 
@@ -60,7 +66,9 @@ class ShopOwnersApiController extends ApiController
     {
         $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
         if ($customer && $customer->shopOwner) {
-            LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop owner already exists, use the update method'], Response::HTTP_BAD_REQUEST);
+            LogRequestService::addResponse(request(), [
+                'message' => '400 Bad request, shop owner already exists, use the update method',
+            ], Response::HTTP_BAD_REQUEST);
             abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop owner already exists use the update method');
         }
 
@@ -78,6 +86,7 @@ class ShopOwnersApiController extends ApiController
 
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -85,7 +94,9 @@ class ShopOwnersApiController extends ApiController
     {
         $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
         if ($customer && ! $customer->shopOwner) {
-            LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop owner doesn\'t exist, use the store method'], Response::HTTP_BAD_REQUEST);
+            LogRequestService::addResponse(request(), [
+                'message' => '400 Bad request, shop owner doesn\'t exist, use the store method',
+            ], Response::HTTP_BAD_REQUEST);
             abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop owner doesn\'t exist, use the store method');
         }
 
@@ -102,7 +113,7 @@ class ShopOwnersApiController extends ApiController
         }
 
         if ($request->shop) {
-            $shop = $this->shopOwnersService->createShop(
+            $this->shopOwnersService->createShop(
                 request: $request,
                 shopOwner: $shopOwner,
             );
@@ -111,6 +122,7 @@ class ShopOwnersApiController extends ApiController
         $shopOwner->refresh();
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -118,7 +130,9 @@ class ShopOwnersApiController extends ApiController
     {
         $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if ($customer && ! $customer->shopOwner) {
-            LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop owner doesn\'t exist, use the store method'], Response::HTTP_BAD_REQUEST);
+            LogRequestService::addResponse(request(), [
+                'message' => '400 Bad request, shop owner doesn\'t exist, use the store method',
+            ], Response::HTTP_BAD_REQUEST);
             abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop owner doesn\'t exist, use the store method');
         }
 
@@ -137,6 +151,7 @@ class ShopOwnersApiController extends ApiController
 
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -144,11 +159,15 @@ class ShopOwnersApiController extends ApiController
     {
         $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if ($customer && ! $customer->shopOwner) {
-            LogRequestService::addResponse(request(), ['message' => '400 Bad request, shop doesn\'t exist, use the store method'], Response::HTTP_BAD_REQUEST);
+            LogRequestService::addResponse(request(), [
+                'message' => '400 Bad request, shop doesn\'t exist, use the store method',
+            ], Response::HTTP_BAD_REQUEST);
             abort(Response::HTTP_BAD_REQUEST, '400 Bad request, shop doesn\'t exist, use the store method');
         }
         if (! is_array($customer->stripe_data) || ! array_key_exists('mandate_id', $customer->stripe_data)) {
-            LogRequestService::addResponse(request(), ['message' => '400 Bad request, no mandate found'], Response::HTTP_BAD_REQUEST);
+            LogRequestService::addResponse(request(), [
+                'message' => '400 Bad request, no mandate found',
+            ], Response::HTTP_BAD_REQUEST);
             abort(Response::HTTP_BAD_REQUEST, '400 Bad request, no mandate found');
         }
 
@@ -156,16 +175,19 @@ class ShopOwnersApiController extends ApiController
             if ($s->shop === $shop) {
                 $s = $this->shopOwnersService->setShopActiveState(
                     shop: $s,
-                    active: (bool) ($request->active === "1" ? 1 : 0),
+                    active: (bool) ($request->active === '1' ? 1 : 0),
                 );
 
                 $response = new ShopResource($s);
                 LogRequestService::addResponse(request(), $response);
+
                 return $response;
             }
         }
 
-        LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+        LogRequestService::addResponse(request(), [
+            'message' => '404 Not found',
+        ], 404);
         abort(Response::HTTP_NOT_FOUND, '404 Not found');
     }
 }

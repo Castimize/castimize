@@ -77,13 +77,9 @@ class OrderDTO
         public ?Carbon $updatedAt,
         public Collection $uploads,
         public ?Collection $paymentFees,
-    ) {
-    }
+    ) {}
 
-    public static function fromApiRequest($request)
-    {
-
-    }
+    public static function fromApiRequest($request) {}
 
     public static function fromWpRequest($request): self
     {
@@ -172,14 +168,14 @@ class OrderDTO
             createdAt: $createdAt,
             updatedAt: $updatedAt,
             uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDTO::fromWpRequest($lineItem, $wpOrder['shipping']->country)),
-//            paymentFees: collect($wpOrder['fee_lines'])->map(fn ($feeLine) => PaymentFeeDTO::fromWpRequest($wpOrder['payment_method'], $feeLine)),
+            //            paymentFees: collect($wpOrder['fee_lines'])->map(fn ($feeLine) => PaymentFeeDTO::fromWpRequest($wpOrder['payment_method'], $feeLine)),
             paymentFees: null,
         );
     }
 
     public static function fromEtsyReceipt(Shop $shop, Receipt $receipt, array $lines): OrderDTO
     {
-        $parser = new Parser();
+        $parser = new Parser;
 
         $customer = $shop->shopOwner->customer;
         $billingAddress = $customer->addresses()->wherePivot('default_billing', 1)->first();
@@ -201,7 +197,7 @@ class OrderDTO
             $vatExempt = 'no';
         }
 
-        $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
+        $shippingFee = (new CalculatePricesService)->calculateShippingFeeNew(
             countryIso: $receipt->country_iso,
             uploads: collect($lines)->map(fn ($line) => CalculateShippingFeeUploadDTO::fromEtsyLine($line)),
         )->calculated_total;
@@ -223,7 +219,7 @@ class OrderDTO
         $uploads = collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage));
         /** @var UploadDTO $upload */
         foreach ($uploads as $upload) {
-            $totalItems += $upload->total->toFloat() * $upload->quantity;
+            $totalItems += $upload->total->toFloat();
         }
 
         if ($taxPercentage) {
@@ -232,7 +228,7 @@ class OrderDTO
         }
 
         $country = Country::where('alpha2', $receipt->country_iso)->first();
-        $expectedDeliveryDate = (new OrdersService())->calculateExpectedDeliveryDate($uploads, $country);
+        $expectedDeliveryDate = (new OrdersService)->calculateExpectedDeliveryDate($uploads, $country);
 
         $metaData = [
             [
@@ -244,20 +240,20 @@ class OrderDTO
                 'value' => 'Etsy',
             ],
             [
-                'key'=> '_wc_stripe_mode',
-                'value'=> 'live',
+                'key' => '_wc_stripe_mode',
+                'value' => 'live',
             ],
             [
                 'key' => 'is_vat_exempt',
                 'value' => $vatExempt,
             ],
             [
-                'key'=> 'wcpdf_order_locale',
-                'value'=> 'en_US',
+                'key' => 'wcpdf_order_locale',
+                'value' => 'en_US',
             ],
             [
-                'key'=> '_expected_delivery_date',
-                'value'=> $expectedDeliveryDate,
+                'key' => '_expected_delivery_date',
+                'value' => $expectedDeliveryDate,
             ],
         ];
 
@@ -304,7 +300,7 @@ class OrderDTO
             orderKey: $receipt->receipt_id,
             status: $receipt->status ?? WcOrderStatesEnum::Pending->value,
             firstName: $name->getFirstname(),
-            lastName: $name->getMiddlename() !== '' ? $name->getMiddlename() . ' ' . $name->getLastName() : $name->getLastName(),
+            lastName: $name->getMiddlename() !== '' ? $name->getMiddlename().' '.$name->getLastName() : $name->getLastName(),
             email: $billingEmail,
             billingFirstName: $customer->first_name,
             billingLastName: $customer->last_name,
@@ -319,7 +315,7 @@ class OrderDTO
             billingCountry: $billingAddress->country->alpha2,
             billingVatNumber: $billingVatNumber,
             shippingFirstName: $name->getFirstname(),
-            shippingLastName: $name->getMiddlename() !== '' ? $name->getMiddlename() . ' ' . $name->getLastName() : $name->getLastName(),
+            shippingLastName: $name->getMiddlename() !== '' ? $name->getMiddlename().' '.$name->getLastName() : $name->getLastName(),
             shippingCompany: null,
             shippingPhoneNumber: $customer->phone,
             shippingEmail: $shippingEmail,
@@ -346,7 +342,7 @@ class OrderDTO
             customerIpAddress: null,
             customerUserAgent: 'Etsy API',
             metaData: $metaData,
-            comments: 'Etsy receipt: ' . $receipt->receipt_id . '\n' . $receipt->message_from_buyer,
+            comments: 'Etsy receipt: '.$receipt->receipt_id.'\n'.$receipt->message_from_buyer,
             promoCode: null,
             isPaid: $isPaid,
             paidAt: null,

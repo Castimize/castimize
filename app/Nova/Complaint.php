@@ -2,7 +2,6 @@
 
 namespace App\Nova;
 
-
 use App\Traits\Nova\CommonMetaDataTrait;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
@@ -54,7 +53,6 @@ class Complaint extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -92,7 +90,7 @@ class Complaint extends Resource
                 ->hideFromIndex(),
 
             Image::make(__('Image'), 'image')
-                ->disk('s3_private')
+                ->disk('r2_private')
                 ->path('admin/complaints'),
         ];
     }
@@ -100,7 +98,6 @@ class Complaint extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -111,7 +108,6 @@ class Complaint extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -124,7 +120,6 @@ class Complaint extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -135,7 +130,6 @@ class Complaint extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

@@ -9,5 +9,4 @@ return [
     'model' => Venturecraft\Revisionable\Revision::class,
 
     'additional_fields' => [],
-
 ];
