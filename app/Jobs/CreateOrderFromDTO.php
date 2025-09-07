@@ -49,6 +49,7 @@ class CreateOrderFromDTO implements ShouldQueue
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
+            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
             $title = 'Order creation failed for order number: ' . $this->orderDto->orderNumber;
             $mailgunService->send(
                 to: config('mail.from.address'),
@@ -63,7 +64,6 @@ class CreateOrderFromDTO implements ShouldQueue
                     'v:error_line' => $exception->getLine(),
                 ],
             );
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
         }
     }
 }
