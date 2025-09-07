@@ -9,6 +9,7 @@ use App\Services\Admin\OrdersService;
 use App\Services\Mail\MailgunService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -41,9 +42,12 @@ class CreateOrderFromDTO implements ShouldQueue
             return;
         }
 
+        DB::beginTransaction();
         try {
             $this->ordersService->storeOrderFromDto($this->orderDto);
+            DB::commit();
         } catch (Throwable $e) {
+            DB::rollBack();
             Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
             $title = 'Order creation failed for order number: '.$this->orderDto->orderNumber;
             $mailgunService->send(
