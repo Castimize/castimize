@@ -57,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
             return $this;
         });
 
-        if ($this->app->environment('production')) {
+        if ($this->app->environment('production') || $this->app->environment('staging')) {
             Pdf::default()
                 ->withBrowsershot(function ($browsershot) {
                     $browsershot
