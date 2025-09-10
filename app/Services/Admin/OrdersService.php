@@ -316,7 +316,7 @@ class OrdersService
             } else {
                 $refundAmount += $orderQueue->upload->total;
                 $refundTaxAmount += $orderQueue->upload->total_tax;
-                $lineItems[] = $this->orderQueuesService->getRefundLineItem($orderQueue, $orderQueue->upload->total, $wpOrder['line_items']);
+//                $lineItems[] = $this->orderQueuesService->getRefundLineItem($orderQueue, $orderQueue->upload->total, $wpOrder['line_items']);
                 $orderQueue->upload->total_refund = $refundAmount;
                 $orderQueue->upload->total_refund_tax = $orderQueue->upload->total_tax;
                 $orderQueue->upload->save();
@@ -339,13 +339,13 @@ class OrdersService
             $order->save();
         }
 
-        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string)$refundAmount, $lineItems);
+//        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string) $refundAmount, $lineItems);
 
         if ($cancelOrder) {
             $this->woocommerceApiService->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Cancelled->value);
         }
 
-        return $refundOrder;
+//        return $refundOrder;
     }
 
     public function handleStripeRefund(Order $order, Charge $charge): void
