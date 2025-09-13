@@ -7,6 +7,7 @@ use App\Nova\Complaint;
 use App\Nova\ComplaintReason;
 use App\Nova\Country;
 use App\Nova\Currency;
+use App\Nova\CurrencyHistoryRate;
 use App\Nova\Customer;
 use App\Nova\CustomerShipment;
 use App\Nova\Dashboards\CastimizeDashboard;
@@ -167,6 +168,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make(__('Internationalization'), [
                     MenuItem::resource(Currency::class),
+                    MenuItem::resource(CurrencyHistoryRate::class),
                     MenuItem::resource(Language::class),
                     MenuItem::resource(Country::class),
                     MenuItem::resource(State::class),
