@@ -17,15 +17,21 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([ManufacturerShipmentObserver::class])]
 class ManufacturerShipment extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     public $selectedPOs;
 
     public $fromAddress = [];
+
     public $toAddress = [];
+
     public $parcel = [];
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -84,7 +90,9 @@ class ManufacturerShipment extends Model
     protected function timeInTransit(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->arrived_at !== null ? $this->arrived_at->diffInDays($this->created_at) : now()->diffInDays($this->created_at),
+            get: fn () => $this->arrived_at !== null
+                ? $this->arrived_at->diffInDays($this->created_at)
+                : now()->diffInDays($this->created_at),
         );
     }
 
@@ -99,33 +107,21 @@ class ManufacturerShipment extends Model
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function orderQueues(): HasMany
     {
         return $this->hasMany(OrderQueue::class);
     }
 
-    /**
-     * @return MorphMany
-     */
     public function trackingStatuses(): MorphMany
     {
         return $this->morphMany(

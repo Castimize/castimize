@@ -40,6 +40,6 @@ class NewOrdersProfitValueWidget extends ValueWidget
             $total += $uploadTotal;
         }
 
-        return currencyFormatter((float)$total);
+        return currencyFormatter((float) $total);
     }
 }

@@ -32,7 +32,7 @@ class CheckOrderAllRejected implements ShouldQueue
             }
         }
 
-        if (!$this->order->has_manual_refund) {
+        if (! $this->order->has_manual_refund) {
             $ordersService = new OrdersService();
             $ordersService->handleRejectionsAndRefund($this->order, $toRejectOrderQueues);
         }

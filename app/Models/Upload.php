@@ -19,9 +19,13 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([UploadObserver::class])]
 class Upload extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -75,9 +79,6 @@ class Upload extends Model
         ];
     }
 
-    /**
-     * @return mixed
-     */
     public function getLastStatus(): mixed
     {
         return $this->orderQueue?->getLastStatus();
@@ -216,7 +217,9 @@ class Upload extends Model
     protected function completedAt(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->status_slug === 'completed' ? $this->status_created_at : null,
+            get: fn ($value) => $this->status_slug === 'completed'
+                ? $this->status_created_at
+                : null,
         );
     }
 
@@ -235,25 +238,16 @@ class Upload extends Model
         return $this->hasMany(OrderQueue::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);

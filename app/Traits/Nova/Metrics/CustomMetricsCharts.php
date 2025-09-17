@@ -29,7 +29,8 @@ trait CustomMetricsCharts
         $query = DB::table('orders')
             ->join('uploads', 'orders.id', '=', 'uploads.order_id')
             ->join('order_queue', 'orders.id', '=', 'order_queue.order_id')
-            ->selectRaw("DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
+            ->selectRaw(
+                "DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
                                    orders.currency_code,
                                    (SUM(uploads.total) / 100) as revenue,
                                    (SUM(order_queue.manufacturer_costs) / 100) as costs,
@@ -49,7 +50,7 @@ trait CustomMetricsCharts
 
         $converted = [];
         foreach ($data as $row) {
-            if (!array_key_exists($row->entry_date, $converted)) {
+            if (! array_key_exists($row->entry_date, $converted)) {
                 $converted[$row->entry_date] = [
                     'revenue' => $currencyService->convertCurrency($row->currency_code, config('app.currency'), $row->revenue),
                     'costs' => $currencyService->convertCurrency($row->currency_code, config('app.currency'), $row->costs),
@@ -88,12 +89,12 @@ trait CustomMetricsCharts
                     'label' => __('Revenue'),
                     'borderColor' => 'rgb(14 165 233)',
                     'data' => $revenue,
-                ],[
+                ], [
                     'barPercentage' => 0.5,
                     'label' => __('Costs'),
                     'borderColor' => 'rgb(139 92 246)',
                     'data' => $costs,
-                ],[
+                ], [
                     'barPercentage' => 0.5,
                     'label' => __('Profit'),
                     'borderColor' => 'rgb(34 197 94)',
@@ -137,7 +138,7 @@ trait CustomMetricsCharts
                 'queryFilter' => [
                     [
                         'key' => 'paid_at',
-                        'operator' => 'IS NOT NULL'
+                        'operator' => 'IS NOT NULL',
                     ],
                     [
                         'key' => 'deleted_at',

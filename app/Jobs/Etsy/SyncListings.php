@@ -7,8 +7,8 @@ namespace App\Jobs\Etsy;
 use App\Models\Customer;
 use App\Models\Shop;
 use App\Services\Etsy\EtsyService;
-use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
 
 class SyncListings implements ShouldQueue
 {
@@ -28,7 +28,8 @@ class SyncListings implements ShouldQueue
 
         $models = [];
         foreach ($customerModels as $model) {
-            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s',
+            $key = sprintf(
+                '%s-%s-%s-%s-%s-%s-%s-%s',
                 $model->model_name,
                 $model->name,
                 $model->model_volume_cc,
@@ -38,7 +39,7 @@ class SyncListings implements ShouldQueue
                 $model->model_y_length,
                 $model->model_z_length
             );
-            if (!array_key_exists($key, $models)) {
+            if (! array_key_exists($key, $models)) {
                 $models[$key] = $model;
             }
         }

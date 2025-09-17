@@ -2,16 +2,14 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Services\Exact\LaravelExactOnline;
+use Illuminate\Support\ServiceProvider;
 use Picqer\Financials\Exact\Connection;
 
 class LaravelExactOnlineServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
-     *
-     * @return void
      */
     public function boot()
     {
@@ -19,8 +17,6 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
 
     /**
      * Register the application services.
-     *
-     * @return void
      */
     public function register()
     {

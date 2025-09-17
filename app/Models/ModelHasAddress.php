@@ -10,7 +10,12 @@ class ModelHasAddress extends Pivot
     use HasFactory;
 
     public $incrementing = false;
-    protected $primaryKey = ['address_id', 'model_type', 'model_id'];
+
+    protected $primaryKey = [
+        'address_id',
+        'model_type',
+        'model_id',
+    ];
 
     /**
      * The attributes that are mass assignable.

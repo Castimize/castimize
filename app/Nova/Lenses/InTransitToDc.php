@@ -6,13 +6,10 @@ use App\Enums\Admin\OrderStatusesEnum;
 use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Actions\PoReprintByManufacturerAction;
 use App\Nova\Filters\ContractDateDaterangepickerFilter;
-use App\Nova\Filters\DueDateDaterangepickerFilter;
 use App\Nova\Filters\EntryDateDaterangepickerFilter;
 use App\Nova\Filters\MaterialFilter;
-use App\Nova\Filters\OrderDateDaterangepickerFilter;
 use App\Nova\Filters\OrderQueueOrderStatusFilter;
 use App\Traits\Nova\ManufacturerPOFieldsTrait;
-use Carbon\Carbon;
 use Castimize\PoStatusCard\PoStatusCard;
 use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Http\Requests\LensRequest;
@@ -54,7 +51,6 @@ class InTransitToDc extends Lens
     /**
      * Get the query builder / paginator for the lens.
      *
-     * @param LensRequest $request
      * @param  Builder  $query
      * @return mixed
      */
@@ -73,7 +69,6 @@ class InTransitToDc extends Lens
     /**
      * Get the fields available to the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -84,7 +79,6 @@ class InTransitToDc extends Lens
     /**
      * Get the cards available on the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -105,7 +99,6 @@ class InTransitToDc extends Lens
     /**
      * Get the filters available for the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -121,7 +114,6 @@ class InTransitToDc extends Lens
     /**
      * Get the actions available on the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

@@ -11,9 +11,13 @@ use Wildside\Userstamps\Userstamps;
 
 class Reprint extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -44,41 +48,26 @@ class Reprint extends Model
         ];
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function orderQueue(): BelongsTo
     {
         return $this->belongsTo(OrderQueue::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function reprintCulprit(): BelongsTo
     {
         return $this->belongsTo(ReprintCulprit::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function reprintReason(): BelongsTo
     {
         return $this->belongsTo(ReprintReason::class);

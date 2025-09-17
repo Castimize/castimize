@@ -12,9 +12,13 @@ use Wildside\Userstamps\Userstamps;
 
 class LogisticsZone extends Model
 {
-    use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -41,17 +45,11 @@ class LogisticsZone extends Model
         ];
     }
 
-    /**
-     * @return HasOne
-     */
     public function shippingFee(): HasOne
     {
         return $this->hasOne(ShippingFee::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function countries(): BelongsTo
     {
         return $this->belongsTo(Country::class);

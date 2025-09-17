@@ -25,19 +25,14 @@ class ShippingService
 
     protected $_fromAddress;
 
-
     protected $_toAddress;
 
-    /**
-     * @return array
-     */
     public function getFromAddress(): array
     {
         return $this->_fromAddress;
     }
 
     /**
-     * @param array $address
      * @return ShippingService
      */
     public function setFromAddress(array $address): static
@@ -46,16 +41,12 @@ class ShippingService
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getToAddress(): array
     {
         return $this->_toAddress;
     }
 
     /**
-     * @param array $address
      * @return $this
      */
     public function setToAddress(array $address): static
@@ -64,19 +55,14 @@ class ShippingService
         return $this;
     }
 
-    /**
-     * @param GeneralSettings $generalSettings
-     * @param DcSettings $dcSettings
-     */
-    public function __construct(public GeneralSettings $generalSettings, public DcSettings $dcSettings)
+    public function __construct(
+        public GeneralSettings $generalSettings,
+        public DcSettings $dcSettings
+    )
     {
         $this->_shippoService = app(ShippoService::class);
     }
 
-    /**
-     * @param string $type
-     * @return Shippo_Object
-     */
     public function createShippoAddress(string $type = 'From'): Shippo_Object
     {
         $getAddressMethod = 'get' . $type . 'Address';
@@ -93,8 +79,6 @@ class ShippingService
     }
 
     /**
-     * @param string $type
-     * @return array
      * @throws JsonException
      */
     public function validateAddress(string $type = 'From'): array
@@ -107,7 +91,7 @@ class ShippingService
         $address['object_id'] = $shippoAddress['object_id'];
 
         if (
-            !empty($shippoAddress['street_no']) ||
+            ! empty($shippoAddress['street_no']) ||
             $address['street1'] !== $shippoAddress['street1'] ||
             $address['city'] !== $shippoAddress['city'] ||
             $address['state'] !== $shippoAddress['state'] ||
@@ -115,19 +99,22 @@ class ShippingService
             $address['country'] !== $shippoAddress['country']
         ) {
             $addressChanged = true;
-            $address['street1'] = $shippoAddress['street1'] . (!empty($shippoAddress['street_no']) ? ' ' . $shippoAddress['street_no'] : '');
+            $address['street1'] = $shippoAddress['street1'] . (! empty($shippoAddress['street_no']) ? ' ' . $shippoAddress['street_no'] : '');
             $address['city'] = $shippoAddress['city'];
             $address['state'] = $shippoAddress['state'];
             $address['zip'] = $shippoAddress['zip'];
             $address['country'] = $shippoAddress['country'];
         }
 
-        return ['valid' => $valid, 'address' => $address, 'address_changed' => $addressChanged, 'messages' => $errorMessages];
+        return [
+            'valid' => $valid,
+            'address' => $address,
+            'address_changed' => $addressChanged,
+            'messages' => $errorMessages,
+        ];
     }
 
     /**
-     * @param Order $order
-     * @return void
      * @throws Shippo_ApiError
      */
     public function createShippoCustomerOrder(Order $order): void
@@ -138,7 +125,7 @@ class ShippingService
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
         [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results'], $shippoToAddress['test']);
-        if (!$valid) {
+        if (! $valid) {
             $message = __('The shipping to address is invalid with the following messages') . PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
                 $message .= $errorMessage['text'] . PHP_EOL;
@@ -154,8 +141,6 @@ class ShippingService
     }
 
     /**
-     * @param CustomerShipment $customerShipment
-     * @return array
      * @throws Shippo_ApiError
      */
     public function createShippoCustomerShipment(CustomerShipment $customerShipment): array
@@ -166,7 +151,7 @@ class ShippingService
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
         [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results'], $shippoToAddress['test'], false);
-        if (!$valid) {
+        if (! $valid) {
             $message = __('The shipping to address is invalid with the following messages') . PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
                 $message .= $errorMessage['text'] . PHP_EOL;
@@ -235,7 +220,7 @@ class ShippingService
         foreach ($transaction['messages'] as $message) {
             $errorMessages[] = $message['text'];
         }
-        if (!empty($errorMessages)) {
+        if (! empty($errorMessages)) {
             throw new Shippo_ApiError(
                 sprintf(
                     '%s%s%s',
@@ -250,8 +235,6 @@ class ShippingService
     }
 
     /**
-     * @param ManufacturerShipment $manufacturerShipment
-     * @return array
      * @throws Shippo_ApiError
      */
     public function createShippoManufacturerShipment(ManufacturerShipment $manufacturerShipment): array
@@ -262,7 +245,7 @@ class ShippingService
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
         [$valid, $errorMessages] = $this->checkAddressValid($shippoFromAddress['validation_results'], $shippoFromAddress['test'], false);
-        if (!$valid) {
+        if (! $valid) {
             $message = __('The shipping from address is invalid with the following messages') . PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
                 $message .= $errorMessage['text'] . PHP_EOL;
@@ -289,12 +272,12 @@ class ShippingService
         // Make as return and bill to us
         $extra = [
             'is_return' => true,
-//            'billing' => [
-//                'account' => 'G2240C',
-//                'country' => 'NL',
-//                'type' => 'THIRD_PARTY',
-//                'zip' => $toAddress['zip'],
-//            ],
+            //            'billing' => [
+            //                'account' => 'G2240C',
+            //                'country' => 'NL',
+            //                'type' => 'THIRD_PARTY',
+            //                'zip' => $toAddress['zip'],
+            //            ],
         ];
 
         $this->_shippoService
@@ -340,7 +323,7 @@ class ShippingService
         foreach ($transaction['messages'] as $message) {
             $errorMessages[] = $message['text'];
         }
-        if (!empty($errorMessages)) {
+        if (! empty($errorMessages)) {
             throw new Shippo_ApiError(
                 sprintf(
                     '%s%s%s%s%s',
@@ -356,10 +339,6 @@ class ShippingService
         return [];
     }
 
-    /**
-     * @param Collection $customerShipments
-     * @param array $params
-     */
     public function createShippoPickup(Collection $customerShipments, array $params)
     {
         $params['transactions'] = $customerShipments->pluck('shippo_transaction_id')->toArray();
@@ -373,10 +352,6 @@ class ShippingService
         dd($shippoPickup);
     }
 
-    /**
-     * @param array $address
-     * @return array
-     */
     private function mapToShippoAddress(array $address): array
     {
         return [
@@ -393,9 +368,6 @@ class ShippingService
         ];
     }
 
-    /**
-     * @return array
-     */
     private function mapDcDefaultToShippoAddress(): array
     {
         return [
@@ -412,11 +384,6 @@ class ShippingService
         ];
     }
 
-    /**
-     * @param $shippoShipment
-     * @param string $shippingCountry
-     * @return mixed
-     */
     private function getCustomerShipmentRate($shippoShipment, string $shippingCountry): mixed
     {
         $country = Country::with('logisticsZone')->where('alpha2', $shippingCountry)->first();
@@ -437,10 +404,6 @@ class ShippingService
         return $shippoShipment['rates'][0] ?? null;
     }
 
-    /**
-     * @param string $shippingCountry
-     * @return string
-     */
     private function getServicelevelToken(string $shippingCountry): string
     {
         $country = Country::with('logisticsZone')->where('alpha2', $shippingCountry)->first();

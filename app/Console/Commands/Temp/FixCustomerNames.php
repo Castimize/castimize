@@ -35,14 +35,13 @@ class FixCustomerNames extends Command
         $this->info("Updating $totalCustomers customers from Woocommerce");
         $progressBar->start();
 
-
         foreach ($customers as $customer) {
             $this->info("Updating $customer->wp_id");
             try {
                 $vatNumber = null;
                 $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($customer->wp_id);
                 foreach ($wpCustomer['meta_data'] as $metaData) {
-                    if ($metaData->key === 'billing_eu_vat_number' && !empty($metaData->value)) {
+                    if ($metaData->key === 'billing_eu_vat_number' && ! empty($metaData->value)) {
                         $vatNumber = $metaData->value;
                     }
                 }

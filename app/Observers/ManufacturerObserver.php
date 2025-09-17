@@ -73,7 +73,7 @@ class ManufacturerObserver
      */
     public function updated(Manufacturer $manufacturer): void
     {
-        if (!$manufacturer->user->hasRole('manufacturer')) {
+        if (! $manufacturer->user->hasRole('manufacturer')) {
             $manufacturer->user->assignRole('manufacturer');
         }
     }

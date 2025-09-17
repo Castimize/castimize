@@ -11,8 +11,6 @@ class FieldServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot()
     {
@@ -21,15 +19,13 @@ class FieldServiceProvider extends ServiceProvider
         });
 
         Nova::serving(function (ServingNova $event) {
-            Nova::script('select-manufacturer-with-overview', __DIR__.'/../dist/js/field.js');
-            Nova::style('select-manufacturer-with-overview', __DIR__.'/../dist/css/field.css');
+            Nova::script('select-manufacturer-with-overview', __DIR__ . '/../dist/js/field.js');
+            Nova::style('select-manufacturer-with-overview', __DIR__ . '/../dist/css/field.css');
         });
     }
 
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register()
     {
@@ -44,6 +40,6 @@ class FieldServiceProvider extends ServiceProvider
 
         Route::middleware(['nova'])
             ->prefix('nova-vendor/select-manufacturer-with-overview')
-            ->group(__DIR__.'/../routes/api.php');
+            ->group(__DIR__ . '/../routes/api.php');
     }
 }

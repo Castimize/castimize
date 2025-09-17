@@ -16,10 +16,6 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class CalculatePricesService
 {
-    /**
-     * @param Request $request
-     * @return Price
-     */
     public function calculatePrice(Request $request): Price
     {
         $material = Material::with(['prices'])->where('wp_id', $request->wp_id)->first();
@@ -54,12 +50,6 @@ class CalculatePricesService
         return $price;
     }
 
-    /**
-     * @param Price $price
-     * @param float $materialVolume
-     * @param float $surfaceArea
-     * @return float
-     */
     public function calculatePriceOfModel(Price $price, float $materialVolume, float $surfaceArea): float
     {
         if ($price->setup_fee) {
@@ -74,13 +64,6 @@ class CalculatePricesService
         return (float) $total;
     }
 
-    /**
-     * @param ManufacturerCost $cost
-     * @param float $materialVolume
-     * @param float $surfaceArea
-     * @param int $quantity
-     * @return float
-     */
     public function calculateCostsOfModel(ManufacturerCost $cost, float $materialVolume, float $surfaceArea, int $quantity = 1): float
     {
         if ($cost->setup_fee) {
@@ -116,10 +99,6 @@ class CalculatePricesService
         return $shippingFee;
     }
 
-    /**
-     * @param Request $request
-     * @return ShippingFee
-     */
     public function calculateShippingFee(Request $request): ShippingFee
     {
         $country = Country::with(['logisticsZone.shippingFee'])->where('alpha2', $request->country)->first();
@@ -142,17 +121,12 @@ class CalculatePricesService
         return $shippingFee;
     }
 
-    /**
-     * @param Collection $uploads
-     * @return float|int|null
-     */
     private function getTotalVolumeOfUploads(Collection $uploads): float|int|null
     {
         $totalVolume = 0.00;
         /** @var CalculateShippingFeeUploadDTO $calculateShippingFeeUploadDTO */
         foreach ($uploads as $calculateShippingFeeUploadDTO) {
             $totalVolume += $calculateShippingFeeUploadDTO->modelBoxVolume * $calculateShippingFeeUploadDTO->quantity;
-//            $totalVolume += $upload['3dp_options']['model_stats_raw']['model']['box_volume'] * $upload['quantity'];
         }
         return $totalVolume;
     }

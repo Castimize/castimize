@@ -18,10 +18,6 @@ class ApiController extends Controller
 {
     /**
      * Load system settings.
-     *
-     * @param NovaRequest $request
-     *
-     * @return JsonResponse
      */
     public function getTotals(NovaRequest $request): JsonResponse
     {

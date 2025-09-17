@@ -2,7 +2,6 @@
 
 namespace App\Nova;
 
-
 use App\Traits\Nova\CommonMetaDataTrait;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Illuminate\Http\Request;
@@ -17,7 +16,7 @@ use Laravel\Nova\Panel;
 
 class ShippingFee extends Resource
 {
-    use ColumnTogglerTrait, CommonMetaDataTrait;
+    use ColumnTogglerTrait; use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -56,7 +55,6 @@ class ShippingFee extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -89,7 +87,7 @@ class ShippingFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Default rate'), function () {
-                return $this->default_rate ? currencyFormatter((float)$this->default_rate, $this->currency_code) : '';
+                return $this->default_rate ? currencyFormatter((float) $this->default_rate, $this->currency_code) : '';
             })
                 ->exceptOnForms()
                 ->sortable(),
@@ -98,56 +96,47 @@ class ShippingFee extends Resource
                 ->step(1),
 
             Number::make(__('Cc threshold 1'), 'cc_threshold_1')
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Rate increase 1'), 'rate_increase_1')
                 ->help(__('In percentage'))
-//                ->sizeOnDetail('w-1/2')
                 ->step(0.01)
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 1'), function () {
                 return $this->rate_increase_1 ? $this->rate_increase_1 . '%' : '';
             })
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Number::make(__('Cc threshold 2'), 'cc_threshold_2')
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Rate increase 2'), 'rate_increase_2')
                 ->help(__('In percentage'))
-//                ->sizeOnDetail('w-1/2')
                 ->step(0.01)
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 2'), function () {
                 return $this->rate_increase_1 ? $this->rate_increase_1 . '%' : '';
             })
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Number::make(__('Cc threshold 3'), 'cc_threshold_3')
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Rate increase 3'), 'rate_increase_3')
                 ->help(__('In percentage'))
-//                ->sizeOnDetail('w-1/2')
                 ->step(0.01)
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 3'), function () {
                 return $this->rate_increase_3 ? $this->rate_increase_3 . '%' : '';
             })
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
@@ -158,7 +147,6 @@ class ShippingFee extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -169,20 +157,16 @@ class ShippingFee extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
     {
-        return [
-
-        ];
+        return [];
     }
 
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -193,7 +177,6 @@ class ShippingFee extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

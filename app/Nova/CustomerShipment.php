@@ -8,7 +8,6 @@ use App\Nova\Actions\ShipmentInTransitToCustomerStatusAction;
 use App\Nova\Filters\CreatedAtDaterangepickerFilter;
 use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
-use App\Services\Shippo\ShippoService;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Carbon\Carbon;
 use Castimize\SelectWithOverview\SelectWithOverview;
@@ -110,8 +109,6 @@ class CustomerShipment extends Resource
     }
 
     /**
-     * @param NovaRequest $request
-     * @param $query
      * @return Builder
      */
     public static function indexQuery(NovaRequest $request, $query)
@@ -129,7 +126,6 @@ class CustomerShipment extends Resource
     /**
      * Build a "detail" query for the given resource.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @return Builder
      */
@@ -142,7 +138,6 @@ class CustomerShipment extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -153,7 +148,7 @@ class CustomerShipment extends Resource
             Text::make(__('Order ID\'s'), function ($model) {
                 $links = [];
                 foreach ($model->orderQueues as $orderQueue) {
-                    if (!array_key_exists($orderQueue->order_id, $links)) {
+                    if (! array_key_exists($orderQueue->order_id, $links)) {
                         $links[$orderQueue->order_id] = '<a class="link-default" href="/admin/resources/orders/' . $orderQueue->order_id . '" target="_blank">' . $orderQueue->order->order_number . '</a>';
                     }
                 }
@@ -230,7 +225,7 @@ class CustomerShipment extends Resource
                 ->sortable(),
 
             Text::make(__('Total costs'), function () {
-                return $this->total_costs ? currencyFormatter((float)$this->total_costs, $this->currency_code) : '';
+                return $this->total_costs ? currencyFormatter((float) $this->total_costs, $this->currency_code) : '';
             })
                 ->exceptOnForms()
                 ->sortable(),
@@ -255,7 +250,6 @@ class CustomerShipment extends Resource
     /**
      * Get the fields displayed by the resource on create page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForCreate(NovaRequest $request)
@@ -511,7 +505,6 @@ class CustomerShipment extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -522,7 +515,6 @@ class CustomerShipment extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      * @throws Exception
      */
@@ -537,7 +529,6 @@ class CustomerShipment extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -548,7 +539,6 @@ class CustomerShipment extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

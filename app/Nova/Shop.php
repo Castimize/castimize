@@ -27,7 +27,12 @@ class Shop extends Resource
 
     public function title(): string
     {
-        return sprintf('%s - %s (%s)', $this->id, $this->shopOwner->customer?->name, $this->shopOwner->customer?->wp_id);
+        return sprintf(
+            '%s - %s (%s)',
+            $this->id,
+            $this->shopOwner->customer?->name,
+            $this->shopOwner->customer?->wp_id
+        );
     }
 
     /**
@@ -52,7 +57,6 @@ class Shop extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -62,7 +66,11 @@ class Shop extends Resource
                 ->sortable(),
 
             Text::make(__('Customer'), function () {
-                return sprintf('%s (%s)', $this->shopOwner->customer?->name, $this->shopOwner->customer?->wp_id);
+                return sprintf(
+                    '%s (%s)',
+                    $this->shopOwner->customer?->name,
+                    $this->shopOwner->customer?->wp_id
+                );
             }),
 
             Text::make(__('Customer Vat number'), function () {
@@ -73,7 +81,9 @@ class Shop extends Resource
                 ->onlyOnForms(),
 
             Select::make(__('Shop'), 'shop')
-                ->options(['etsy' => 'Etsy']),
+                ->options([
+                    'etsy' => 'Etsy',
+                ]),
 
             Boolean::make(__('Active'), 'active')
                 ->sortable(),
@@ -99,7 +109,6 @@ class Shop extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -110,7 +119,6 @@ class Shop extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -121,7 +129,6 @@ class Shop extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -132,7 +139,6 @@ class Shop extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

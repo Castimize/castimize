@@ -9,7 +9,6 @@ use App\Nova\Filters\ManufacturerFilter;
 use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Services\Admin\CurrencyService;
-use App\Services\Shippo\ShippoService;
 use Castimize\SelectManufacturerWithOverview\SelectManufacturerWithOverview;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -107,8 +106,6 @@ class ManufacturerShipment extends Resource
     }
 
     /**
-     * @param NovaRequest $request
-     * @param $query
      * @return Builder
      */
     public static function indexQuery(NovaRequest $request, $query)
@@ -124,7 +121,6 @@ class ManufacturerShipment extends Resource
     /**
      * Build a "detail" query for the given resource.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @return Builder
      */
@@ -137,8 +133,7 @@ class ManufacturerShipment extends Resource
     /**
      * Return the location to redirect the user after creation.
      *
-     * @param NovaRequest $request
-     * @param Resource $resource
+     * @param resource $resource
      * @return string
      */
     public static function redirectAfterCreate(NovaRequest $request, $resource)
@@ -152,7 +147,6 @@ class ManufacturerShipment extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -166,7 +160,7 @@ class ManufacturerShipment extends Resource
             Text::make(__('Order ID\'s'), function ($model) {
                 $links = [];
                 foreach ($model->orderQueues as $orderQueue) {
-                    if (!array_key_exists($orderQueue->order->order_number, $links)) {
+                    if (! array_key_exists($orderQueue->order->order_number, $links)) {
                         $links[$orderQueue->order->order_number] = '<a class="link-default" href="/admin/resources/orders/' . $orderQueue->order_id . '" target="_blank">' . $orderQueue->order->order_number . '</a>';
                     }
                 }
@@ -261,7 +255,6 @@ class ManufacturerShipment extends Resource
     /**
      * Get the fields displayed by the resource on create page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForCreate(NovaRequest $request)
@@ -325,34 +318,34 @@ class ManufacturerShipment extends Resource
                 Text::make(__('Tracking url'), 'tracking_url'),
             ])->dependsOn('handles_own_shipping', true),
 
-                Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')
-                    ->asHtml(),
+            Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')
+                ->asHtml(),
 
-                Text::make(__('Name'), 'from_address_name')
-                    ->dependsOn(
-                        ['manufacturer'],
-                        function (Text $field, NovaRequest $request, FormData $formData) {
-                            if ($formData->manufacturer) {
-                                $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
-                                    return \App\Models\Manufacturer::find($formData->manufacturer);
-                                });
-                                $field->setValue($manufacturer->contact_name_1);
-                            }
+            Text::make(__('Name'), 'from_address_name')
+                ->dependsOn(
+                    ['manufacturer'],
+                    function (Text $field, NovaRequest $request, FormData $formData) {
+                        if ($formData->manufacturer) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                                return \App\Models\Manufacturer::find($formData->manufacturer);
+                            });
+                            $field->setValue($manufacturer->contact_name_1);
                         }
-                    ),
+                    }
+                ),
 
-                Text::make(__('Company'), 'from_address_company')
-                    ->dependsOn(
-                        ['manufacturer'],
-                        function (Text $field, NovaRequest $request, FormData $formData) {
-                            if ($formData->manufacturer) {
-                                $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
-                                    return \App\Models\Manufacturer::find($formData->manufacturer);
-                                });
-                                $field->setValue($manufacturer->name);
-                            }
+            Text::make(__('Company'), 'from_address_company')
+                ->dependsOn(
+                    ['manufacturer'],
+                    function (Text $field, NovaRequest $request, FormData $formData) {
+                        if ($formData->manufacturer) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                                return \App\Models\Manufacturer::find($formData->manufacturer);
+                            });
+                            $field->setValue($manufacturer->name);
                         }
-                    ),
+                    }
+                ),
 
             Text::make(__('Address 1'), 'from_address_address_line1')
                 ->dependsOn(
@@ -530,7 +523,6 @@ class ManufacturerShipment extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -541,7 +533,6 @@ class ManufacturerShipment extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -554,7 +545,6 @@ class ManufacturerShipment extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -565,7 +555,6 @@ class ManufacturerShipment extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

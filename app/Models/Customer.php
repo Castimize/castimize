@@ -18,11 +18,16 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([CustomerObserver::class])]
 class Customer extends Model
 {
-    use HasFactory, ModelHasAddresses, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use ModelHasAddresses;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     public $wpCustomer = null;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -76,57 +81,36 @@ class Customer extends Model
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function uploads(): HasMany
     {
         return $this->hasMany(Upload::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function models(): HasMany
     {
         return $this->hasMany(\App\Models\Model::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function shipments(): HasMany
     {
         return $this->hasMany(CustomerShipment::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function complaints(): HasMany
     {
         return $this->hasMany(Complaint::class);

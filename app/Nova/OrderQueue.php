@@ -2,9 +2,9 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\ExportLineItemsV1Action;
 use App\Nova\Actions\PoCanceledStatusAction;
 use App\Nova\Actions\PoChangeStatusOrderManualAction;
-use App\Nova\Actions\ExportLineItemsV1Action;
 use App\Nova\Actions\PoReprintByDcAction;
 use App\Nova\Filters\DueDateDaterangepickerFilter;
 use App\Nova\Filters\OrderDateDaterangepickerFilter;
@@ -31,7 +31,7 @@ use Titasgailius\SearchRelations\SearchesRelations;
 
 class OrderQueue extends Resource
 {
-    use CommonMetaDataTrait, OrderQueueStatusFieldTrait, SearchesRelations;
+    use CommonMetaDataTrait; use OrderQueueStatusFieldTrait; use SearchesRelations;
 
     /**
      * The model the resource corresponds to.
@@ -126,7 +126,6 @@ class OrderQueue extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -195,7 +194,7 @@ class OrderQueue extends Resource
             Text::make(__('Days till TD'), function ($model) {
                     $lastStatus = $model->getLastStatus();
                     $dateNow = now();
-                    if ($lastStatus && !$lastStatus?->orderStatus->end_status) {
+                    if ($lastStatus && ! $lastStatus?->orderStatus->end_status) {
                         $targetDate = Carbon::parse($model->target_date);
                         if ($dateNow->gt($targetDate)) {
                             return '- ' . round($targetDate->diffInDays($dateNow));
@@ -211,7 +210,7 @@ class OrderQueue extends Resource
             Text::make(__('Days till FAD'), function ($model) {
                     $lastStatus = $model->getLastStatus();
                     $dateNow = now();
-                    if ($lastStatus && !$lastStatus?->orderStatus->end_status) {
+                    if ($lastStatus && ! $lastStatus?->orderStatus->end_status) {
                         $finalArrivalDate = Carbon::parse($model->final_arrival_date);
                         if ($dateNow->gt($finalArrivalDate)) {
                             return '- ' . round($finalArrivalDate->diffInDays($dateNow));
@@ -243,7 +242,7 @@ class OrderQueue extends Resource
                 ->sortable(),
 
             Text::make(__('Total'), function ($model) {
-                    return $model->upload->total ? currencyFormatter((float)$model->upload->total, $model->upload->currency_code) : '';
+                    return $model->upload->total ? currencyFormatter((float) $model->upload->total, $model->upload->currency_code) : '';
                 })
                 ->hideOnExport()
                 ->sortable(),
@@ -278,7 +277,6 @@ class OrderQueue extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -289,7 +287,6 @@ class OrderQueue extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      * @throws Exception
      */
@@ -308,7 +305,6 @@ class OrderQueue extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -319,7 +315,6 @@ class OrderQueue extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

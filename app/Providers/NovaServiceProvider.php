@@ -60,8 +60,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 {
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot()
     {
@@ -123,7 +121,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Material::class),
                     MenuItem::resource(Price::class),
                     MenuItem::resource(Model::class),
-//                    MenuItem::resource(PreferredManufacturer::class),
+                    //                    MenuItem::resource(PreferredManufacturer::class),
                 ])->icon('collection')
 //                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
@@ -222,23 +220,19 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
     /**
      * Register the Nova routes.
-     *
-     * @return void
      */
     protected function routes()
     {
         Nova::routes()
-                ->withAuthenticationRoutes(default: true)
-                ->withPasswordResetRoutes()
-                ->register();
+            ->withAuthenticationRoutes(default: true)
+            ->withPasswordResetRoutes()
+            ->register();
     }
 
     /**
      * Register the Nova gate.
      *
      * This gate determines who can access Nova in non-local environments.
-     *
-     * @return void
      */
     protected function gate()
     {
@@ -277,7 +271,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             (new NovaPermissions())->canSee(function ($request) {
                 return $request->user()->isSuperAdmin();
             }),
-//            new NovaGridSystem(),
+            //            new NovaGridSystem(),
             new Tool(),
             NovaSystemSettings::make([
                 // General
@@ -297,8 +291,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register()
     {

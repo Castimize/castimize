@@ -40,7 +40,6 @@ class StripeService
     }
 
     /**
-     * @return Balance
      * @throws ApiErrorException
      */
     public function getBalance(): Balance
@@ -92,7 +91,9 @@ class StripeService
             'confirm' => true,
             'off_session' => true,
             'return_url' => env('APP_SITE_URL'),
-            'payment_method_types' => [$paymentMethod->type],
+            'payment_method_types' => [
+                $paymentMethod->type,
+            ],
             'metadata' => [
                 'shop_receipt_id' => $orderDTO->shopReceiptId,
                 'source' => $orderDTO->customerUserAgent,
@@ -114,7 +115,9 @@ class StripeService
         return PaymentIntent::create([
             'amount' => 1000,
             'currency' => 'eur',
-            'automatic_payment_methods' => ['enabled' => true],
+            'automatic_payment_methods' => [
+                'enabled' => true,
+            ],
         ]);
     }
 

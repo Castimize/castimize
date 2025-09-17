@@ -38,7 +38,6 @@ class FixCustomerAddresses extends Command
         $this->info("Updating $totalCustomers customers from Woocommerce");
         $progressBar->start();
 
-
         foreach ($customers as $customer) {
             $this->info("Updating $customer->wp_id");
             try {

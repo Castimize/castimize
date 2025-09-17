@@ -24,7 +24,13 @@ class Address extends Resource
      */
     public function title()
     {
-        return sprintf('%s, %s, %s %s', $this->address_line1, $this->address_line2, $this->postal_code, $this->city?->name);
+        return sprintf(
+            '%s, %s, %s %s',
+            $this->address_line1,
+            $this->address_line2,
+            $this->postal_code,
+            $this->city?->name
+        );
     }
 
     /**
@@ -50,7 +56,6 @@ class Address extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -87,7 +92,6 @@ class Address extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -98,7 +102,6 @@ class Address extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -109,7 +112,6 @@ class Address extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -120,7 +122,6 @@ class Address extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

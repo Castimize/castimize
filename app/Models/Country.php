@@ -12,7 +12,10 @@ use Wildside\Userstamps\Userstamps;
 
 class Country extends Model
 {
-    use HasFactory, SoftDeletes, RevisionableTrait, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     public const EU_COUNTRIES = [
         'AT',
@@ -46,6 +49,7 @@ class Country extends Model
     ];
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -85,9 +89,6 @@ class Country extends Model
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function logisticsZone(): BelongsTo
     {
         return $this->belongsTo(LogisticsZone::class);

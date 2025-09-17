@@ -45,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
             while ($value > 0) {
                 $method = sprintf('%sDays', $type);
                 $this->$method();
-                if (!$this->isWeekend()) {
+                if (! $this->isWeekend()) {
                     $type === 'add' ? ++$value : --$value;
                 }
             }
@@ -62,7 +62,7 @@ class AppServiceProvider extends ServiceProvider
                         ->setChromePath('/usr/bin/google-chrome')
                         ->setCustomTempPath(storage_path())
                         ->addChromiumArguments([
-                            'headless=shell'
+                            'headless=shell',
                         ]);
                 });
         }
@@ -75,22 +75,22 @@ class AppServiceProvider extends ServiceProvider
 
 // You can add/remove days (optional):
         $additionalHolidays = [
-//            'independence-day' => null, // Even if it's holiday, you can force it to null to make your business open
-//            'boss-birthday'    => '09-26', // Close the office on September 26th
-//            // you can also use slash if you prefer day first '26/09' (September 26th too)
-//            'julian-christmas' => '= julian 12-25', // We support many calendars such as the Julian calendar
-//            // We support expressions
-//            'special-easter'   => '= Tuesday before easter',
-//            'last-monday'      => '= last Monday of October',
-//            'conditional'      => '= 02-25 if Tuesday then next Friday', // We support conditions
-//            // And we support closures:
-//            'very-special'     => function ($year) {
-//                if ($year === 2020) {
-//                    return '01-15';
-//                }
-//
-//                return '02-15';
-//            },
+            //            'independence-day' => null, // Even if it's holiday, you can force it to null to make your business open
+            //            'boss-birthday'    => '09-26', // Close the office on September 26th
+            //            // you can also use slash if you prefer day first '26/09' (September 26th too)
+            //            'julian-christmas' => '= julian 12-25', // We support many calendars such as the Julian calendar
+            //            // We support expressions
+            //            'special-easter'   => '= Tuesday before easter',
+            //            'last-monday'      => '= last Monday of October',
+            //            'conditional'      => '= 02-25 if Tuesday then next Friday', // We support conditions
+            //            // And we support closures:
+            //            'very-special'     => function ($year) {
+            //                if ($year === 2020) {
+            //                    return '01-15';
+            //                }
+            //
+            //                return '02-15';
+            //            },
         ];
 
         // You can optionally specify some days that are worked even if on weekend

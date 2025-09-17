@@ -47,7 +47,6 @@ class SyncInvoicesToExact extends Command
         foreach ($invoices as $invoice) {
             //(new ExactOnlineService())->deleteSyncedInvoice($invoice);
 
-
 //            (new ExactOnlineService())->syncInvoice($invoice);
 //            if ($invoice->paid) {
 //                (new ExactOnlineService())->syncInvoicePaid($invoice);

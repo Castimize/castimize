@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Mailer
@@ -36,7 +35,6 @@ return [
     */
 
     'mailers' => [
-
         'smtp' => [
             'transport' => 'smtp',
             'url' => env('MAIL_URL'),
@@ -101,7 +99,6 @@ return [
             //     'timeout' => 5,
             // ],
         ],
-
     ],
 
     /*
@@ -119,5 +116,4 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'info@castimize.com'),
         'name' => env('MAIL_FROM_NAME', 'Castimize'),
     ],
-
 ];

@@ -2,15 +2,9 @@
 
 namespace App\Nova\Metrics;
 
-use App\Models\Order;
-use App\Nova\Filters\OrderDateDaterangepickerFilter;
-use App\Nova\Filters\RangesFilter;
-use App\Services\Admin\CurrencyService;
 use App\Traits\Nova\Metrics\CustomMetricsQueries;
-use Carbon\CarbonPeriod;
 use DigitalCreative\ChartJsWidget\Charts\LineChartWidget;
 use DigitalCreative\NovaDashboard\Filters;
-use DigitalCreative\ValueWidget\ValueWidget;
 use Illuminate\Support\Facades\DB;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -42,7 +36,8 @@ class NewOrdersLineChartWidget extends LineChartWidget
         $labels = [];
         $totals = [];
         $query = DB::table('orders')
-            ->selectRaw("DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
+            ->selectRaw(
+                "DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
                                    COUNT(order_number) as total"
             )
             ->whereNotNull('orders.paid_at')
@@ -58,9 +53,9 @@ class NewOrdersLineChartWidget extends LineChartWidget
 
         $converted = [];
         foreach ($rows as $row) {
-            if (!array_key_exists($row->entry_date, $converted)) {
+            if (! array_key_exists($row->entry_date, $converted)) {
                 $converted[$row->entry_date] = [
-                    'total' => (int)$row->total,
+                    'total' => (int) $row->total,
                 ];
             }
         }
@@ -68,7 +63,7 @@ class NewOrdersLineChartWidget extends LineChartWidget
         foreach ($dateRanges as $date) {
                 $labels[] = $date;
             if (array_key_exists($date, $converted)) {
-                $totals[] = (int)$converted[$date]['total'];
+                $totals[] = (int) $converted[$date]['total'];
             } else {
                 $totals[] = 0;
             }

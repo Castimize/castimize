@@ -5,12 +5,11 @@ namespace App\Nova\Manufacturer;
 use Alexwenzel\DependencyContainer\DependencyContainer;
 use App\Enums\Shippo\ShippoDistanceUnitsEnum;
 use App\Enums\Shippo\ShippoMassUnitsEnum;
-use App\Nova\OrderQueue;
+use App\Models\ManufacturerShipment;
 use App\Nova\Resource;
 use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Nova\TrackingStatus;
-use App\Services\Shippo\ShippoService;
 use Castimize\SelectManufacturerWithOverview\SelectManufacturerWithOverview;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -32,9 +31,9 @@ class Shipment extends Resource
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\ManufacturerShipment>
+     * @var class-string<ManufacturerShipment>
      */
-    public static $model = \App\Models\ManufacturerShipment::class;
+    public static $model = ManufacturerShipment::class;
 
     /**
      * Get the displayable label of the resource.
@@ -106,13 +105,11 @@ class Shipment extends Resource
     }
 
     /**
-     * @param NovaRequest $request
-     * @param $query
      * @return Builder
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        if (!$request->viaRelationship() && auth()->user()->manufacturer) {
+        if (! $request->viaRelationship() && auth()->user()->manufacturer) {
             $query = $query->where('manufacturer_id', auth()->user()->manufacturer->id);
         }
 
@@ -127,13 +124,12 @@ class Shipment extends Resource
     /**
      * Build a "detail" query for the given resource.
      *
-     * @param NovaRequest $request
      * @param  Builder  $query
      * @return Builder
      */
     public static function detailQuery(NovaRequest $request, $query)
     {
-        if (!$request->viaRelationship() && auth()->user()->isManufacturer()) {
+        if (! $request->viaRelationship() && auth()->user()->isManufacturer()) {
             $query = $query->where('manufacturer_id', auth()->user()->manufacturer->id);
         }
 
@@ -144,8 +140,7 @@ class Shipment extends Resource
     /**
      * Return the location to redirect the user after creation.
      *
-     * @param NovaRequest $request
-     * @param Resource $resource
+     * @param resource $resource
      * @return string
      */
     public static function redirectAfterCreate(NovaRequest $request, $resource)
@@ -159,7 +154,6 @@ class Shipment extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -245,7 +239,6 @@ class Shipment extends Resource
     /**
      * Get the fields displayed by the resource on create page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForCreate(NovaRequest $request)
@@ -397,7 +390,6 @@ class Shipment extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -408,7 +400,6 @@ class Shipment extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -421,7 +412,6 @@ class Shipment extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -432,7 +422,6 @@ class Shipment extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

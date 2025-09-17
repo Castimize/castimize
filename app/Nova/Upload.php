@@ -20,7 +20,7 @@ use Laravel\Nova\Panel;
 
 class Upload extends Resource
 {
-    use CommonMetaDataTrait, OrderQueueStatusFieldTrait;
+    use CommonMetaDataTrait; use OrderQueueStatusFieldTrait;
 
     /**
      * The model the resource corresponds to.
@@ -59,7 +59,6 @@ class Upload extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -123,12 +122,9 @@ class Upload extends Resource
         ];
     }
 
-
-
     /**
      * Get the fields displayed by the resource on index page.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fieldsForIndex(NovaRequest $request)
@@ -153,7 +149,7 @@ class Upload extends Resource
             Number::make(__('Quantity'), 'quantity'),
 
             Text::make(__('Price'), function () {
-                return $this->total ? currencyFormatter((float)$this->total, $this->currency_code) : '';
+                return $this->total ? currencyFormatter((float) $this->total, $this->currency_code) : '';
             })
                 ->sortable(),
 
@@ -199,7 +195,6 @@ class Upload extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -210,7 +205,6 @@ class Upload extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -221,7 +215,6 @@ class Upload extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -232,7 +225,6 @@ class Upload extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands\Temp;
 
-use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Console\Command;
 

@@ -11,8 +11,6 @@ class UsersService
 {
     /**
      * Store a customer completely from API request
-     * @param $request
-     * @return Customer
      */
     public function storeUserFromApi($request): Customer
     {

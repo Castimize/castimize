@@ -48,7 +48,9 @@ class GetEtsyReceipts extends Command
 
         foreach ($shops as $shop) {
             try {
-                $receipts = $etsyService->getShopReceipts($shop, ['min_created' => $date]);
+                $receipts = $etsyService->getShopReceipts($shop, [
+                    'min_created' => $date,
+                ]);
                 $this->info(sprintf('Found %s receipts for %s', $receipts->count(), $shop->id));
                 foreach ($receipts->data as $receipt) {
                     $this->info(sprintf('Receipt %s', $receipt->receipt_id));

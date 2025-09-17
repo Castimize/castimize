@@ -124,7 +124,7 @@ class ShippoWebhookController extends WebhookController
                     $orderQueuesService = new OrderQueuesService();
                     $orders = [];
                     foreach ($shipment->orderQueues as $orderQueue) {
-                        if (!array_key_exists($orderQueue->order_id, $orders)) {
+                        if (! array_key_exists($orderQueue->order_id, $orders)) {
                             $orders[$orderQueue->order_id] = $orderQueue->order;
                         }
                         $orderQueuesService->setStatus($orderQueue, 'completed');

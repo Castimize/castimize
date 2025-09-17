@@ -2,15 +2,10 @@
 
 namespace App\Nova\Metrics;
 
-use App\Models\Order;
-use App\Nova\Filters\OrderDateDaterangepickerFilter;
-use App\Nova\Filters\RangesFilter;
 use App\Services\Admin\CurrencyService;
 use App\Traits\Nova\Metrics\CustomMetricsQueries;
-use Carbon\CarbonPeriod;
 use DigitalCreative\ChartJsWidget\Charts\LineChartWidget;
 use DigitalCreative\NovaDashboard\Filters;
-use DigitalCreative\ValueWidget\ValueWidget;
 use Illuminate\Support\Facades\DB;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -45,7 +40,8 @@ class RevenueCostsProfitLineChartWidget extends LineChartWidget
         $costs = [];
         $profit = [];
         $query = DB::table('orders')
-            ->selectRaw("DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
+            ->selectRaw(
+                "DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
                                    orders.currency_code,
                                    (
                                       select SUM(total) / 100
@@ -71,10 +67,10 @@ class RevenueCostsProfitLineChartWidget extends LineChartWidget
 
         $converted = [];
         foreach ($rows as $row) {
-            $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float)$row->revenue);
-            $cost = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float)$row->costs);
+            $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float) $row->revenue);
+            $cost = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float) $row->costs);
             $prof = $rev - $cost;
-            if (!array_key_exists($row->entry_date, $converted)) {
+            if (! array_key_exists($row->entry_date, $converted)) {
                 $converted[$row->entry_date] = [
                     'revenue' => $rev,
                     'costs' => $cost,

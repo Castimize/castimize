@@ -6,7 +6,6 @@ use App\Services\Admin\CalculatePricesService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
-use stdClass;
 
 class ModelResource extends JsonResource
 {
@@ -14,14 +13,7 @@ class ModelResource extends JsonResource
     {
         $thumb = $this->thumb_name ?? sprintf('%s.thumb.png', str_replace('_resized', '', $this->file_name));
         $metaData = $this->meta_data;
-//        if ($metaData) {
-//            for ($i = 0, $iMax = count($metaData); $i < $iMax; $i++) {
-//                if ($metaData[$i]['key'] === 'pa_p3d_scale') {
-//                    [$value, $n] = explode(' (', str_replace('&times;', '', $metaData[$i]['value']));
-//                    $metaData[$i]['value'] = $value;
-//                }
-//            }
-//        }
+
         $categoriesRaw = [];
         if ($this->categories !== null) {
             foreach ($this->categories as $category) {
@@ -36,18 +28,14 @@ class ModelResource extends JsonResource
             $calculatedTotal = (new CalculatePricesService())->calculatePriceOfModel($price, $this->model_volume_cc, $this->model_surface_area_cm2);
         }
 
-//        $fileThumbnail = null;
         $siteThumb = sprintf('%s/%s', env('APP_SITE_URL'), $thumb);
         if (Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb)) {
             $fileThumbnail = sprintf('%s/%s', env('AWS_URL'), $thumb);
         } else {
-//            $fileHeaders = get_headers($siteThumb);
-//            if (!str_contains($fileHeaders[0], '404')) {
-                $fileThumbnail = '/' . $thumb;
-//            }
+            $fileThumbnail = '/' . $thumb;
         }
 
-        $thumbnailKey = '3'. $request->wp_id . $this->model_scale . 'mm';
+        $thumbnailKey = '3' . $request->wp_id . $this->model_scale . 'mm';
 
         $isShopOwner = 0;
         if ($this->customer && $this->customer->shopOwner) {

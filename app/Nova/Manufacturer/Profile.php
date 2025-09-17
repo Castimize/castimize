@@ -2,7 +2,7 @@
 
 namespace App\Nova\Manufacturer;
 
-
+use App\Models\Manufacturer;
 use App\Nova\Country;
 use App\Nova\Resource;
 use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
@@ -12,7 +12,6 @@ use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Nova;
 use Laravel\Nova\Panel;
 use Wame\TelInput\TelInput;
 
@@ -23,9 +22,9 @@ class Profile extends Resource
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Manufacturer>
+     * @var class-string<Manufacturer>
      */
-    public static $model = \App\Models\Manufacturer::class;
+    public static $model = Manufacturer::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -56,7 +55,6 @@ class Profile extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -108,7 +106,6 @@ class Profile extends Resource
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -119,7 +116,6 @@ class Profile extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -130,7 +126,6 @@ class Profile extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -141,7 +136,6 @@ class Profile extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)
@@ -149,9 +143,6 @@ class Profile extends Resource
         return [];
     }
 
-    /**
-     * @return array
-     */
     protected function addressFields(): array
     {
         return [

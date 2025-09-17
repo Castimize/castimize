@@ -11,9 +11,13 @@ use Wildside\Userstamps\Userstamps;
 
 class InvoiceExactSalesEntry extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -43,9 +47,6 @@ class InvoiceExactSalesEntry extends Model
         ];
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);

@@ -10,7 +10,9 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class ExportLineItemsV1 implements FromCollection, ShouldAutoSize
 {
-    public function __construct(private $lineItems)
+    public function __construct(
+        private $lineItems,
+    )
     {
         $this->data = collect();
     }
@@ -58,7 +60,7 @@ class ExportLineItemsV1 implements FromCollection, ShouldAutoSize
                     $lineItem->upload->model_parts * $lineItem->upload->quantity,
                     $lineItem->upload->model_volume_cc,
                     $lineItem->upload->model_volume_cc * $lineItem->upload->quantity,
-                    $lineItem->upload->model_surface_area_cm2 ,
+                    $lineItem->upload->model_surface_area_cm2,
                     $lineItem->upload->model_surface_area_cm2 * $lineItem->upload->quantity,
                     $lineItem->manufacturing_costs,
                     $lineItem->manufacturing_costs / $lineItem->upload->quantity,

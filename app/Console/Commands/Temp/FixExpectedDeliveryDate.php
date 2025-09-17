@@ -2,10 +2,8 @@
 
 namespace App\Console\Commands\Temp;
 
-use App\Models\Customer;
 use App\Models\CustomerShipment;
 use App\Models\ManufacturerShipment;
-use App\Models\Order;
 use Illuminate\Console\Command;
 
 class FixExpectedDeliveryDate extends Command
@@ -60,7 +58,6 @@ class FixExpectedDeliveryDate extends Command
                 $customerShipment->expected_delivery_date = $trackingStatus->meta_data['eta'];
                 $customerShipment->save();
             }
-
 
             $progressBar->advance();
         }

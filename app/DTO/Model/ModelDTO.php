@@ -98,7 +98,7 @@ readonly class ModelDTO
             $thumbFileName = $file->getClientOriginalName();
             $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
             $thumbFileExtension = $file->getClientOriginalExtension();
-            $thumbName = time().'_'.str_replace(' ','_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
+            $thumbName = time() . '_' . str_replace(' ', '_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
             Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
         } else {
             $uploadedThumb = false;
@@ -151,7 +151,7 @@ readonly class ModelDTO
             $thumbFileName = $file->getClientOriginalName();
             $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
             $thumbFileExtension = $file->getClientOriginalExtension();
-            $thumbName = time().'_'.str_replace(' ','_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
+            $thumbName = time() . '_' . str_replace(' ', '_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
             Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
         }
 
@@ -183,12 +183,12 @@ readonly class ModelDTO
     }
 
     /**
-     * @param Request $request
      * @return array|string|string[]
      */
     private static function defineThumbImageName(Request $request): string|array
     {
-        $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
+        $thumbName = sprintf(
+            '%s_%s%s%s%s%s.thumb.png',
             str_replace('_resized', '', $request->file_name),
             $request->printer_id ?? 3,
             $request->wp_id ?? 1,
@@ -201,7 +201,8 @@ readonly class ModelDTO
         $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
         $fileHeaders = get_headers($fileThumb);
         if (str_contains($fileHeaders[0], '404')) {
-            $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
+            $thumbName = sprintf(
+                '%s_%s%s%s%s%s.thumb.png',
                 str_replace('_resized', '', $request->file_name),
                 $request->printer_id ?? 3,
                 1,

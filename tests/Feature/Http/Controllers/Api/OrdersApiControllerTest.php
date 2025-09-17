@@ -17,8 +17,6 @@ class OrdersApiControllerTest extends BaseTestCase
 //        dd($response);
     }
 
-
-
     private function getWPOrderData()
     {
         return json_decode(file_get_contents(storage_path('tests/wp-order.json')), true, 512, JSON_THROW_ON_ERROR);
