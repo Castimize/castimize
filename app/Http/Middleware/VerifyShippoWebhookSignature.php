@@ -4,11 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Stripe\Exception\SignatureVerificationException;
-use Stripe\WebhookSignature;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class VerifyShippoWebhookSignature
 {

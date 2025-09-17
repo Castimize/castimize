@@ -16,6 +16,7 @@ class CreateInvoicesFromOrder implements ShouldQueue
     use Queueable;
 
     public $tries = 5;
+
     public $timeout = 120;
 
     /**
@@ -38,7 +39,6 @@ class CreateInvoicesFromOrder implements ShouldQueue
         }
         $customer = $order->customer;
 
-
         try {
             $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($this->wpOrderId);
             if ($wpOrder === null) {
@@ -54,7 +54,6 @@ class CreateInvoicesFromOrder implements ShouldQueue
             if (property_exists($wpOrder['documents'], $creditNoteDocument)) {
                 $invoicesService->storeInvoiceFromWpOrder($customer, $order, false);
             }
-
         } catch (Throwable $e) {
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }

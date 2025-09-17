@@ -19,12 +19,18 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([ManufacturerObserver::class])]
 class Manufacturer extends Model
 {
-    use HasFactory, ModelHasAddresses, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use ModelHasAddresses;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     public $cityName;
+
     public $stateName;
 
     /**
@@ -68,89 +74,56 @@ class Manufacturer extends Model
         'last_active',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function state(): BelongsTo
     {
         return $this->belongsTo(State::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function uploads(): HasMany
     {
         return $this->hasMany(Upload::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function orderQueues(): HasMany
     {
         return $this->hasMany(OrderQueue::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function costs(): HasMany
     {
         return $this->hasMany(ManufacturerCost::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function shipments(): HasMany
     {
         return $this->hasMany(ManufacturerShipment::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function reprints(): HasMany
     {
         return $this->hasMany(Reprint::class);
@@ -171,14 +144,14 @@ class Manufacturer extends Model
         ];
 
         $response = app(ShippingService::class)->setFromAddress($addressData)->validateAddress('From');
-        if (!$response['valid']) {
+        if (! $response['valid']) {
             $messages = [];
             foreach ($response['messages'] as $message) {
                 $messages[] = $message['text'];
             }
             throw new NotFoundHttpException(
                 __('Address is not valid with the following messages: :messages ', [
-                    'messages' => implode(', ', $messages)
+                    'messages' => implode(', ', $messages),
                 ])
             );
         }

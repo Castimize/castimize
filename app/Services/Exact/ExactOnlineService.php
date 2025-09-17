@@ -11,7 +11,6 @@ use App\Services\Admin\CurrencyService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Picqer\Financials\Exact\Account;
 use Picqer\Financials\Exact\ExchangeRate;
 use Picqer\Financials\Exact\GLAccount;
@@ -23,16 +22,21 @@ class ExactOnlineService
 {
     // Omzet binnenland hoog tarief, Klant komt uit NL
     protected const GL_8000 = '4de43a20-6c86-4af6-bcf5-3adec36677c9';
+
     //O mzet buitenland intracommunautair, Klant komt uit EU, maar is zakelijke klant (maw met btw nummer)
     protected const GL_8100 = 'fd7f828e-f006-4c98-ad71-5d2aaf64c474';
+
     // Omzet buiten EU, Klant komt van buiten EU
     protected const GL_8110 = '744f4532-6874-4d64-86a7-1d08a305174b';
+
     // Omzet binnen EU Particulier, Klant komt uit EU, maar particulier (dus BTW belaste omzet)
     protected const GL_8120 = '07f9774b-2a55-442c-ac02-f972f7f5149f';
+
     // Debiteuren
 //    protected const GL_1300 = 'b807f1a9-43ef-4b68-8556-ca3db36e6507';
     // Stripe pending
     protected const GL_1103 = 'b25c4786-24aa-4db2-8c18-57bb672ccc3b';
+
     // Paypal pending
     protected const GL_1104 = '9a56362f-2186-4d69-955a-39ee46fceb20';
     // Af te dragen BTW hoog
@@ -42,6 +46,7 @@ class ExactOnlineService
 
     // Diaries
     protected const DIARY_SALES = 70;
+
     protected const DIARY_MEMORIAL = 90;
 
     protected $diaries = [
@@ -53,9 +58,6 @@ class ExactOnlineService
 
     protected $account;
 
-    /**
-     * ExactOnline constructor.
-     */
     public function __construct()
     {
         $this->connection = app()->make('Exact\Connection');
@@ -64,7 +66,9 @@ class ExactOnlineService
     public function test(): void
     {
         $glAccount = new GLAccount($this->connection);
-        $glAccount = $glAccount->filter("Code eq '8000'", '', '', ['$top' => 1]);
+        $glAccount = $glAccount->filter("Code eq '8000'", '', '', [
+            '$top' => 1,
+        ]);
 
         dd($glAccount);
     }
@@ -144,7 +148,6 @@ class ExactOnlineService
 
         //$acc = $account->filter("ID eq guid'{$customer->exact_online_guid}'");
 
-
         try {
             $account = $this->updateAccount($account, $customer);
             $account->save();
@@ -171,7 +174,9 @@ class ExactOnlineService
             // Revenue
             $revenueLine = [
                 'AmountFC' => $minAmount . number_format($this->getTotalInEuro($invoice, $invoice->total, Carbon::parse($invoice->invoice_date)), 2, '.', ''),
-                'Description' => __('Order #:orderNumber', ['orderNumber' => $orderIdLines->first()->order->order_number]),
+                'Description' => __('Order #:orderNumber', [
+                    'orderNumber' => $orderIdLines->first()->order->order_number,
+                ]),
                 'GLAccount' => $this->findGlAccountForRevenue($invoice),
                 'VATCode' => self::NO_VAT_CODE,
                 'Quantity' => $invoice->debit ? -1 : 1,
@@ -205,8 +210,10 @@ class ExactOnlineService
             $minAmount = $invoice->debit ? '-' : '';
             // Payment method pending, credit
             $salesEntryLines[] = [
-                'AmountFC' => $minAmount . number_format((float)$this->getTotalInEuro($invoice, $invoice->total, Carbon::parse($invoice->invoice_date)), 2, '.', ''),
-                'Description' => __('Order #:orderNumber', ['orderNumber' => $orderIdLines->first()->order->order_number]),
+                'AmountFC' => $minAmount . number_format((float) $this->getTotalInEuro($invoice, $invoice->total, Carbon::parse($invoice->invoice_date)), 2, '.', ''),
+                'Description' => __('Order #:orderNumber', [
+                    'orderNumber' => $orderIdLines->first()->order->order_number,
+                ]),
                 'GLAccount' => $this->findGlAccountForPaymentMethod($orderIdLines->first()->order->payment_issuer),
                 'Type' => $invoice->debit ? 20 : 21,
                 'Quantity' => $invoice->debit ? -1 : 1,
@@ -245,13 +252,10 @@ class ExactOnlineService
         $salesEntry->YourRef = $invoice->invoice_number;
         $salesEntry->OrderNumber = $invoice->invoice_nuber;
         $salesEntry->Description = $invoice->description;
-//        $salesEntry->EntryNumber = $invoice->invoice_number;
         $salesEntry->EntryDate = $entryDate;
         $salesEntry->PaymentCondition = '00';
-//        $salesEntry->PaymentCondition = $this->getPaymentConditionsForDays($bill->company->getBillExpiryDate());
         $salesEntry->Type = $type;
         $salesEntry->SalesEntryLines = $salesEntryLines;
-//        dd($salesEntry);
         $salesEntry->save();
 
         $invoice->exactSalesEntries()->create([
@@ -341,6 +345,8 @@ class ExactOnlineService
                 return $vatCode->Code;
             }
         }
-        throw new RuntimeException(__('VAT Code not found for :countryCode', ['countryCode' => $countryCode]));
+        throw new RuntimeException(__('VAT Code not found for :countryCode', [
+            'countryCode' => $countryCode,
+        ]));
     }
 }

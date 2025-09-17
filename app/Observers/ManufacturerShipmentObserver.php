@@ -2,7 +2,6 @@
 
 namespace App\Observers;
 
-use App\Models\Currency;
 use App\Models\ManufacturerShipment;
 use App\Models\OrderQueue;
 use App\Nova\Settings\Shipping\DcSettings;
@@ -98,10 +97,6 @@ class ManufacturerShipmentObserver
 
     }
 
-    /**
-     * @param ManufacturerShipment $manufacturerShipment
-     * @return void
-     */
     public function created(ManufacturerShipment $manufacturerShipment): void
     {
         $orderQueuesService = new OrderQueuesService();
@@ -112,7 +107,7 @@ class ManufacturerShipmentObserver
                 $orderQueuesService->setStatus($selectedPO, 'in-transit-to-dc');
             }
 
-            if (!$manufacturerShipment->handles_own_shipping) {
+            if (! $manufacturerShipment->handles_own_shipping) {
                 $shippingService = app(ShippingService::class);
                 $response = $shippingService->createShippoManufacturerShipment($manufacturerShipment);
 

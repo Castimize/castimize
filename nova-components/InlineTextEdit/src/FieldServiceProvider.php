@@ -11,8 +11,6 @@ class FieldServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot()
     {
@@ -21,15 +19,13 @@ class FieldServiceProvider extends ServiceProvider
         });
 
         Nova::serving(function (ServingNova $event) {
-            Nova::script('inline-text-edit', __DIR__.'/../dist/js/field.js');
-            Nova::style('inline-text-edit', __DIR__.'/../dist/css/field.css');
+            Nova::script('inline-text-edit', __DIR__ . '/../dist/js/field.js');
+            Nova::style('inline-text-edit', __DIR__ . '/../dist/css/field.css');
         });
     }
 
     /**
      * Register the card's routes.
-     *
-     * @return void
      */
     protected function routes()
     {
@@ -39,13 +35,11 @@ class FieldServiceProvider extends ServiceProvider
 
         Route::middleware(['nova'])
             ->prefix('nova-vendor/inline-text-edit')
-            ->group(__DIR__.'/../routes/api.php');
+            ->group(__DIR__ . '/../routes/api.php');
     }
 
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register()
     {

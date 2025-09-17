@@ -16,9 +16,13 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy(ModelObserver::class)]
 class Model extends EloquentModel
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -61,17 +65,11 @@ class Model extends EloquentModel
         ];
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);

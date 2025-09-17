@@ -53,7 +53,6 @@ class InProduction extends Lens
     /**
      * Get the query builder / paginator for the lens.
      *
-     * @param LensRequest $request
      * @param  Builder  $query
      * @return mixed
      */
@@ -72,7 +71,6 @@ class InProduction extends Lens
     /**
      * Get the fields available to the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -83,7 +81,6 @@ class InProduction extends Lens
     /**
      * Get the cards available on the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -104,7 +101,6 @@ class InProduction extends Lens
     /**
      * Get the filters available for the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function filters(NovaRequest $request)
@@ -120,7 +116,6 @@ class InProduction extends Lens
     /**
      * Get the actions available on the lens.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

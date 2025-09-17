@@ -9,7 +9,6 @@ use Laravel\Nova\Fields\Text;
 trait OrderQueueStatusFieldTrait
 {
     /**
-     * @return Text
      * @throws HelperNotSupported
      */
     protected function getStatusField(): Text
@@ -45,7 +44,6 @@ trait OrderQueueStatusFieldTrait
     }
 
     /**
-     * @return Text
      * @throws HelperNotSupported
      */
     protected function getStatusCheckField(): Text

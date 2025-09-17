@@ -77,7 +77,7 @@ class  PaymentFeeDTO
                 [
                     'key' => '_last_added_fee',
                     'value' => $paymentMethodName,
-                ]
+                ],
             ],
         );
     }

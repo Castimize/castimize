@@ -3,6 +3,7 @@
 namespace App\Nova\Manufacturer;
 
 use App\Enums\Admin\OrderStatusesEnum;
+use App\Models\OrderQueue;
 use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Filters\ContractDateDaterangepickerFilter;
 use App\Nova\Filters\EntryDateDaterangepickerFilter;
@@ -27,14 +28,14 @@ use SLASH2NL\NovaBackButton\NovaBackButton;
 
 class Po extends Resource
 {
-    use CommonMetaDataTrait, OrderQueueStatusFieldTrait, ManufacturerPOFieldsTrait;
+    use CommonMetaDataTrait; use OrderQueueStatusFieldTrait; use ManufacturerPOFieldsTrait;
 
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\OrderQueue>
+     * @var class-string<OrderQueue>
      */
-    public static $model = \App\Models\OrderQueue::class;
+    public static $model = OrderQueue::class;
 
     /**
      * Get the displayable label of the resource.
@@ -106,13 +107,11 @@ class Po extends Resource
     ];
 
     /**
-     * @param NovaRequest $request
-     * @param $query
      * @return Builder
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        if (!$request->viaRelationship() && auth()->user()->manufacturer) {
+        if (! $request->viaRelationship() && auth()->user()->manufacturer) {
             $query->where('manufacturer_id', auth()->user()->manufacturer->id)
                 ->whereHas('order', function (Builder $query) {
                     $query->removeTestEmailAddresses('email')
@@ -151,21 +150,16 @@ class Po extends Resource
     /**
      * Get the fields displayed by the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
     {
         return $this->manufacturerPOFields();
-//            $this->getStatusField(),
-//
-//            $this->getStatusCheckField(),
     }
 
     /**
      * Get the cards available for the request.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)
@@ -186,7 +180,6 @@ class Po extends Resource
     /**
      * Get the filters available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      * @throws Exception
      */
@@ -203,7 +196,6 @@ class Po extends Resource
     /**
      * Get the lenses available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function lenses(NovaRequest $request)
@@ -220,7 +212,6 @@ class Po extends Resource
     /**
      * Get the actions available for the resource.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function actions(NovaRequest $request)

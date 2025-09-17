@@ -18,6 +18,7 @@ class SetOrderPaid implements ShouldQueue
     use Queueable;
 
     public $tries = 5;
+
     public $timeout = 120;
 
     private OrdersService $ordersService;
@@ -27,8 +28,10 @@ class SetOrderPaid implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public PaymentIntent $paymentIntent, public ?int $logRequestId = null)
-    {
+    public function __construct(
+        public PaymentIntent $paymentIntent,
+        public ?int $logRequestId = null,
+    ) {
         $this->ordersService = new OrdersService();
         $this->uploadsService = app(UploadsService::class);
     }

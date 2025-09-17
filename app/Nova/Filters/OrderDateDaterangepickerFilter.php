@@ -12,7 +12,9 @@ use Rpj\Daterangepicker\Daterangepicker;
 class OrderDateDaterangepickerFilter extends Daterangepicker
 {
     private Carbon|null $minDate = null;
+
     private Carbon|null $maxDate = null;
+
     private array|null $ranges = null;
 
     private string $column = 'created_at';
@@ -63,12 +65,10 @@ class OrderDateDaterangepickerFilter extends Daterangepicker
 
     /**
      * Get the filter's available options.
-     *
-     * @return array
      */
     public function options(NovaRequest $request): array|null
     {
-        if (!$this->ranges) {
+        if (! $this->ranges) {
             $this->setRanges(Helper::defaultRanges());
         }
 
@@ -85,7 +85,7 @@ class OrderDateDaterangepickerFilter extends Daterangepicker
         [$start, $end] = Helper::getParsedDatesGroupedRanges($this->default);
 
         if ($start && $end) {
-            return $start->format('Y-m-d').' to '.$end->format('Y-m-d');
+            return $start->format('Y-m-d') . ' to ' . $end->format('Y-m-d');
         }
 
         return null;
@@ -113,16 +113,15 @@ class OrderDateDaterangepickerFilter extends Daterangepicker
         return $this;
     }
 
-    /**
-     * @param Carbon[] $periods
-     */
     public function setRanges(array $ranges): self
     {
         $result = [];
         $result = collect($ranges)->mapWithKeys(function (array $item, string $key) {
-            return [$key => (collect($item)->map(function (Carbon $date) {
-                return $date->format('Y-m-d');
-            }))];
+            return [
+                $key => (collect($item)->map(function (Carbon $date) {
+                                return $date->format('Y-m-d');
+                            })),
+            ];
         })->toArray();
 
         $this->ranges = $result;
@@ -132,8 +131,6 @@ class OrderDateDaterangepickerFilter extends Daterangepicker
 
     /**
      * Convert the filter to its JSON representation.
-     *
-     * @return array
      */
     public function jsonSerialize(): array
     {

@@ -10,10 +10,10 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrdersService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
+use JsonException;
 use Stripe\Charge;
 use Stripe\Customer as StripeCustomer;
 use Stripe\Event;
@@ -34,8 +34,6 @@ class StripeWebhookController extends WebhookController
     /**
      * Handle a Stripe webhook call.
      *
-     * @param Request $request
-     * @return Response
      * @throws JsonException
      */
     public function __invoke(Request $request): Response
@@ -45,7 +43,11 @@ class StripeWebhookController extends WebhookController
                 json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)
             );
         } catch(UnexpectedValueException $e) {
-            LogRequestService::addResponse($request, ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], $e->getCode());
+            LogRequestService::addResponse($request, [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], $e->getCode());
             // Invalid payload
             return $this->badRequestMethod();
         }
@@ -126,10 +128,6 @@ class StripeWebhookController extends WebhookController
         return $this->successMethod();
     }
 
-    /**
-     * @param PaymentIntent $paymentIntent
-     * @return Response
-     */
     protected function handlePaymentIntentSucceeded(PaymentIntent $paymentIntent): Response
     {
         $logRequestId = null;
@@ -140,14 +138,9 @@ class StripeWebhookController extends WebhookController
         Bus::chain([
             new SetOrderPaid($paymentIntent, $logRequestId),
             new CreateInvoicesFromOrder($paymentIntent->metadata->order_id),
-        ])->onQueue('stripe')->dispatch();
-//        SetOrderPaid::dispatch($paymentIntent, $logRequestId)
-//            ->onQueue('stripe')
-//            ->delay(now()->addMinute());
-//
-//        CreateInvoicesFromOrder::dispatch($paymentIntent->metadata->order_id)
-//            ->onQueue('exact')
-//            ->delay(now()->addMinute());
+        ])
+            ->onQueue('stripe')
+            ->dispatch();
 
         return $this->successMethod();
     }
@@ -160,7 +153,8 @@ class StripeWebhookController extends WebhookController
         }
 
         SetOrderCanceled::dispatch($paymentIntent, $logRequestId)
-            ->onQueue('stripe')->delay(now()->addMinute());
+            ->onQueue('stripe')
+            ->delay(now()->addMinute());
 
         return $this->successMethod();
     }

@@ -13,7 +13,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class DownloadPoLabelsAction extends Action
 {
-    use InteractsWithQueue, Queueable;
+    use InteractsWithQueue;
+    use Queueable;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -28,8 +29,6 @@ class DownloadPoLabelsAction extends Action
     /**
      * Perform the action on the given models.
      *
-     * @param ActionFields $fields
-     * @param Collection $models
      * @return mixed
      */
     public function handle(ActionFields $fields, Collection $models)
@@ -47,7 +46,6 @@ class DownloadPoLabelsAction extends Action
     /**
      * Get the fields available on the action.
      *
-     * @param NovaRequest $request
      * @return array
      */
     public function fields(NovaRequest $request)
@@ -57,10 +55,13 @@ class DownloadPoLabelsAction extends Action
 
     protected function getDownloadUrl(string $fileName, array $orderQueueIds): string
     {
-        return URL::temporarySignedRoute('po.labels.download', now()->addMinutes(5), [
-            'manufacturer_id' => encrypt(auth()->user()->manufacturer->id),
-            'order_queue_ids' => $orderQueueIds,
-            'filename' => $fileName,
-        ]);
+        return URL::temporarySignedRoute(
+            'po.labels.download',
+            now()->addMinutes(5), [
+                'manufacturer_id' => encrypt(auth()->user()->manufacturer->id),
+                'order_queue_ids' => $orderQueueIds,
+                'filename' => $fileName,
+            ]
+        );
     }
 }

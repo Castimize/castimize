@@ -5,8 +5,6 @@ namespace App\Jobs;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrderQueuesService;
-use App\Services\Admin\UploadsService;
-use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -18,13 +16,16 @@ class SetOrderCanceled implements ShouldQueue
     use Queueable;
 
     public $tries = 5;
+
     public $timeout = 120;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(public PaymentIntent $paymentIntent, public ?int $logRequestId = null)
-    {
+    public function __construct(
+        public PaymentIntent $paymentIntent,
+        public ?int $logRequestId = null,
+    ) {
         //
     }
 

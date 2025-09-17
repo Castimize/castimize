@@ -8,7 +8,6 @@ use Etsy\Collection;
 use Etsy\Resource;
 
 class ListingVariationOption extends Resource {
-
     /**
      * @var array
      */
@@ -29,7 +28,6 @@ class ListingVariationOption extends Resource {
     /**
      * Get all listing variation options on Etsy.
      *
-     * @param array $params
      * @return Collection[App\Services\Etsy\Resources\ListingVariationOption]
      */
     public static function all(
@@ -46,11 +44,6 @@ class ListingVariationOption extends Resource {
 
     /**
      * Get a listing option variation.
-     *
-     * @param int $listing_id
-     * @param int $variation_option_id
-     * @param array $params
-     * @return Collection
      */
     public static function get(
         int $listing_id,
@@ -67,9 +60,6 @@ class ListingVariationOption extends Resource {
 
     /**
      * Updates an Etsy listing variation option.
-     *
-     * @param int $listing_id
-     * @param array $data
      */
     public static function update(
         int $listing_id,

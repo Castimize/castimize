@@ -20,7 +20,9 @@ class RequestLogger
         $logRequest = LogRequestService::logRequest($request);
 
         if ($logRequest instanceof LogRequest) {
-            $request->request->add(['log_request_id' => $logRequest->id]);
+            $request->request->add([
+                'log_request_id' => $logRequest->id,
+            ]);
         }
 
         return $next($request);

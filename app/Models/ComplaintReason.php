@@ -10,9 +10,13 @@ use Wildside\Userstamps\Userstamps;
 
 class ComplaintReason extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**

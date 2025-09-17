@@ -41,10 +41,10 @@ class EtsyVariationService
         $materials = Material::all(['name'])->pluck('name')->toArray();
 
         $payload = [
-                [
-                    'property_id' => 514, // Custom property
-                    'value_options' => $materials,
-                ],
+            [
+                'property_id' => 514, // Custom property
+                'value_options' => $materials,
+            ],
         ];
 
         try {

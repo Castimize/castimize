@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use App\Models\Price;
-use App\Services\Admin\CurrencyService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -13,7 +12,6 @@ class CalculatedPriceResource extends JsonResource
 
     public function toArray(Request $request): array
     {
-        $currencyService = app(CurrencyService::class);
         return [
             'currency' => $request->currency,
             'printer_id' => $request->printer_id ?? null,
@@ -35,7 +33,7 @@ class CalculatedPriceResource extends JsonResource
             'file_name' => $request->file_name,
             'thumb' => $request->thumb ?? null,
             'total' => $this->calculated_total,
-//            'total' => $currencyService->convertCurrency(config('app.currency'), $request->currency, $this->calculated_total),
+            //            'total' => $currencyService->convertCurrency(config('app.currency'), $request->currency, $this->calculated_total),
         ];
     }
 }

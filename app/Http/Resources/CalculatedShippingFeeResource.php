@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Price;
 use App\Models\ShippingFee;
 use App\Services\Admin\CurrencyService;
 use Illuminate\Http\Request;

@@ -5,12 +5,9 @@ namespace App\Jobs;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrdersService;
-use App\Services\Admin\UploadsService;
-use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
-use Stripe\PaymentIntent;
 use Throwable;
 
 class CreateOrderFromWp implements ShouldQueue
@@ -18,6 +15,7 @@ class CreateOrderFromWp implements ShouldQueue
     use Queueable;
 
     public $tries = 5;
+
     public $timeout = 120;
 
     private OrdersService $ordersService;
@@ -25,8 +23,10 @@ class CreateOrderFromWp implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public int $wpOrderId, public ?int $logRequestId = null)
-    {
+    public function __construct(
+        public int $wpOrderId,
+        public ?int $logRequestId = null,
+    ) {
         $this->ordersService = new OrdersService();
     }
 

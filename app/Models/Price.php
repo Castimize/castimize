@@ -15,9 +15,13 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([PriceObserver::class])]
 class Price extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -134,25 +138,16 @@ class Price extends Model
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);

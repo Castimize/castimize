@@ -32,7 +32,8 @@ class BiggestManufacturersRevenueTableWidget extends TableWidget
         $query = DB::table('orders')
             ->join('order_queue', 'orders.id', '=', 'order_queue.order_id')
             ->join('manufacturers', 'manufacturers.id', '=', 'order_queue.manufacturer_id')
-            ->selectRaw("order_queue.manufacturer_id as manufacturer_id,
+            ->selectRaw(
+                "order_queue.manufacturer_id as manufacturer_id,
                                    manufacturers.name as manufacturer_name,
                                    COUNT(DISTINCT orders.order_number) as orders,
                                    orders.currency_code,
@@ -60,10 +61,10 @@ class BiggestManufacturersRevenueTableWidget extends TableWidget
         $data = [];
 
         foreach ($rows as $row) {
-            $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float)$row->revenue);
-            $cost = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float)$row->costs);
+            $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float) $row->revenue);
+            $cost = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float) $row->costs);
             $prof = $rev - $cost;
-            if (!array_key_exists($row->manufacturer_id, $data)) {
+            if (! array_key_exists($row->manufacturer_id, $data)) {
                 $data[$row->manufacturer_id] = [
                     'name' => $row->manufacturer_name,
                     'orders' => $row->orders,
@@ -80,8 +81,8 @@ class BiggestManufacturersRevenueTableWidget extends TableWidget
             return $a['revenue'] < $b['revenue'];
         });
         for ($i = 0, $iMax = count($data); $iMax > $i; $i++) {
-            $data[$i]['revenue'] = currencyFormatter((float)$data[$i]['revenue']);
-            $data[$i]['bruto_margin'] = currencyFormatter((float)$data[$i]['bruto_margin']);
+            $data[$i]['revenue'] = currencyFormatter((float) $data[$i]['revenue']);
+            $data[$i]['bruto_margin'] = currencyFormatter((float) $data[$i]['bruto_margin']);
         }
 
         if (count($data) === 0) {

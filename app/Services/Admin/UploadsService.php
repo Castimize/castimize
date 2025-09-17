@@ -14,10 +14,6 @@ class UploadsService
     ) {
     }
 
-    /**
-     * @param Upload $upload
-     * @return void
-     */
     public function setUploadToOrderQueue(Upload $upload): void
     {
         $orderQueuesService = new OrderQueuesService();

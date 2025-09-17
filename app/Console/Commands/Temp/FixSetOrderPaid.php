@@ -3,12 +3,8 @@
 namespace App\Console\Commands\Temp;
 
 use App\Jobs\SetOrderPaid;
-use App\Models\Customer;
-use App\Models\Order;
 use App\Services\Payment\Stripe\StripeService;
 use Illuminate\Console\Command;
-use Stripe\PaymentIntent;
-use Stripe\Stripe;
 
 class FixSetOrderPaid extends Command
 {

@@ -18,6 +18,7 @@ class CreateOrderFromDTO implements ShouldQueue
     use Queueable;
 
     public $tries = 5;
+
     public $timeout = 120;
 
     private OrdersService $ordersService;
@@ -25,7 +26,10 @@ class CreateOrderFromDTO implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public OrderDTO $orderDto, public ?int $logRequestId = null)
+    public function __construct(
+        public OrderDTO $orderDto,
+        public ?int $logRequestId = null
+    )
     {
         $this->ordersService = new OrdersService();
     }
@@ -47,8 +51,8 @@ class CreateOrderFromDTO implements ShouldQueue
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
-            $title = 'Order creation failed for order number: '.$this->orderDto->orderNumber;
+            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            $title = 'Order creation failed for order number: ' . $this->orderDto->orderNumber;
             $mailgunService->send(
                 to: config('mail.from.address'),
                 subject: $title,
@@ -67,7 +71,7 @@ class CreateOrderFromDTO implements ShouldQueue
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
         }
     }
 }

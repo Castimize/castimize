@@ -7,10 +7,10 @@ use App\Enums\Shippo\ShippoBuildingTypesEnum;
 use Devloops\NovaSystemSettings\Contracts\SystemSettings;
 use Laravel\Nova\Fields\Select;
 
-
 class PickupSettings extends SystemSettings
 {
     public ?string $buildingType;
+
     public ?string $buildingLocationType;
 
     public static function group(): string

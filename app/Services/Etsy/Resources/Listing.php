@@ -18,7 +18,6 @@ use Etsy\Resources\Review;
 use Etsy\Resources\Transaction;
 
 class Listing extends Resource {
-
     /**
      * @var array
      */
@@ -65,7 +64,6 @@ class Listing extends Resource {
     /**
      * Get all active listings on Etsy.
      *
-     * @param array $params
      * @return Collection[Etsy\Resources\Listing]
      */
     public static function all(
@@ -82,7 +80,6 @@ class Listing extends Resource {
     /**
      * Get all active listings on Etsy. Filtered by listing ID. Support upto 100 IDs.
      *
-     * @param array $params
      * @return Collection[Etsy\Resources\Listing]
      */
     public static function allByIds(
@@ -90,7 +87,7 @@ class Listing extends Resource {
         array $includes = []
     ): Collection {
         $params = [
-            'listing_ids' => $listing_ids
+            'listing_ids' => $listing_ids,
         ];
         if(count($includes) > 0) {
             $params['includes'] = $includes;
@@ -106,8 +103,6 @@ class Listing extends Resource {
     /**
      * Get all listings for a shop.
      *
-     * @param int $shop_id
-     * @param array $params
      * @return Collection[Etsy\Resources\Listing]
      */
     public static function allByShop(
@@ -125,8 +120,6 @@ class Listing extends Resource {
     /**
      * Get all active listings for a shop.
      *
-     * @param int $shop_id
-     * @param array $params
      * @return Collection[Etsy\Resources\Listing]
      */
     public static function allActiveByShop(
@@ -144,8 +137,6 @@ class Listing extends Resource {
     /**
      * Get all featured listings for a shop.
      *
-     * @param int $shop_id
-     * @param array $params
      * @return Collection[Etsy\Resources\Listing]
      */
     public static function allFeaturedByShop(
@@ -163,9 +154,6 @@ class Listing extends Resource {
     /**
      * Get all listings from a receipt.
      *
-     * @param int $shop_id
-     * @param int $receipt_id
-     * @param array $params
      * @return Collection[Etsy\Resources\Listing]
      */
     public static function allByReceipt(
@@ -184,8 +172,6 @@ class Listing extends Resource {
     /**
      * Get all the listings within a shop return policy.
      *
-     * @param int $shop_id
-     * @param int $policy_id
      * @return Collection[\Etsy\Resources\Listing]
      */
     public static function allByReturnPolicy(
@@ -202,9 +188,6 @@ class Listing extends Resource {
     /**
      * Get all listings withing specified shop sections.
      *
-     * @param int $shop_id
-     * @param array|int $section_ids
-     * @param array $params
      * @return Collection[\Etsy\Resources\Listing]
      */
     public static function allByShopSections(
@@ -223,9 +206,6 @@ class Listing extends Resource {
 
     /**
      * Get a listing.
-     *
-     * @param int $listing_id
-     * @param array $params
      */
     public static function get(
         int $listing_id,
@@ -241,9 +221,6 @@ class Listing extends Resource {
 
     /**
      * Create a draft Etsy listing.
-     *
-     * @param int $shop_id
-     * @param array $data
      */
     public static function create(
         int $shop_id,
@@ -259,9 +236,6 @@ class Listing extends Resource {
 
     /**
      * Delete an Etsy listing.
-     *
-     * @param int $listing_id
-     * @return bool
      */
     public static function delete(
         int $listing_id
@@ -273,10 +247,6 @@ class Listing extends Resource {
 
     /**
      * Updates an Etsy listing.
-     *
-     * @param int $shop_id
-     * @param int $listing_id
-     * @param array $data
      */
     public static function update(
         int $shop_id,
@@ -293,14 +263,11 @@ class Listing extends Resource {
 
     /**
      * Saves updates to the current listing.
-     *
-     * @param array|null $data
-     * @return self
      */
     public function save(
         ?array $data = null
     ): self {
-        if(!$data) {
+        if(! $data) {
             $data = $this->getSaveData(true);
         }
         if(count($data) == 0) {
@@ -316,7 +283,6 @@ class Listing extends Resource {
     /**
      * Get all reviews for the listing.
      *
-     * @param array $params
      * @return Collection[Etsy\Resources\Review]
      */
     public function reviews(
@@ -328,7 +294,6 @@ class Listing extends Resource {
     /**
      * Get all transactions for the listing.
      *
-     * @param array $params
      * @return Collection[Etsy\Resources\Transaction]
      */
     public function transactions(
@@ -363,9 +328,6 @@ class Listing extends Resource {
 
     /**
      * Get a specific listing file.
-     *
-     * @param int $file_id
-     * @return ListingFile|null
      */
     public function file(
         int $file_id
@@ -380,10 +342,6 @@ class Listing extends Resource {
 
     /**
      * Link a file to the listing.
-     *
-     * @param int $file_id
-     * @param int $rank
-     * @return ListingFile|null
      */
     public function linkFile(
         int $file_id,
@@ -395,7 +353,7 @@ class Listing extends Resource {
             $this->listing_id,
             [
                 'listing_file_id' => $file_id,
-                'rank' => 1
+                'rank' => 1,
             ]
         );
     }
@@ -413,9 +371,6 @@ class Listing extends Resource {
 
     /**
      * Get a specific listing image.
-     *
-     * @param int $image_id
-     * @return ListingImage|null
      */
     public function image(
         int $image_id
@@ -429,10 +384,6 @@ class Listing extends Resource {
 
     /**
      * Link an existing image to the listing.
-     *
-     * @param int $image_id
-     * @param array $options
-     * @return ListingImage
      */
     public function linkImage(
         int $image_id,
@@ -472,9 +423,6 @@ class Listing extends Resource {
 
     /**
      * Get a specific listing image.
-     *
-     * @param int $video_id
-     * @return ListingVideo|null
      */
     public function video(
         int $video_id
@@ -488,9 +436,6 @@ class Listing extends Resource {
 
     /**
      * Link an existing image to the listing.
-     *
-     * @param int $video_id
-     * @return ListingVideo
      */
     public function linkVideo(
         int $video_id
@@ -506,9 +451,6 @@ class Listing extends Resource {
 
     /**
      * Get the listing inventory.
-     *
-     * @param array $params
-     * @return ListingInventory|null
      */
     public function inventory(array $params = []): ?ListingInventory
     {
@@ -520,9 +462,6 @@ class Listing extends Resource {
 
     /**
      * Get a listing product.
-     *
-     * @param int $product_id
-     * @return ListingProduct
      */
     public function product(
         int $product_id
@@ -536,9 +475,6 @@ class Listing extends Resource {
 
     /**
      * Get a listing translation.
-     *
-     * @param string $language
-     * @return ListingTranslation
      */
     public function translation(
         string $language

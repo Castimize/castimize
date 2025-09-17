@@ -17,13 +17,18 @@ class SyncInvoicePaidToExact implements ShouldQueue
     use Queueable;
 
     public $tries = 5;
+
     public $timeout = 120;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(public Invoice $invoice, public int $wpCustomerId, protected $removeOld = false, public ?int $logRequestId = null)
-    {
+    public function __construct(
+        public Invoice $invoice,
+        public int $wpCustomerId,
+        protected $removeOld = false,
+        public ?int $logRequestId = null,
+    ) {
     }
 
     /**

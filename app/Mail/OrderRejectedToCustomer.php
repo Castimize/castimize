@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -13,13 +12,14 @@ use Illuminate\Queue\SerializesModels;
 
 class OrderRejectedToCustomer extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable; use SerializesModels;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(private Order $order)
-    {
+    public function __construct(
+        private Order $order,
+    ) {
         //
     }
 
@@ -29,7 +29,9 @@ class OrderRejectedToCustomer extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('Your order has been rejected with #:orderId', ['orderId' => $this->order->order_number]),
+            subject: __('Your order has been rejected with #:orderId', [
+                'orderId' => $this->order->order_number,
+            ]),
         );
     }
 

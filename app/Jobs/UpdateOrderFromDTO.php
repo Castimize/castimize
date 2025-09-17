@@ -16,6 +16,7 @@ class UpdateOrderFromDTO implements ShouldQueue
     use Queueable;
 
     public $tries = 5;
+
     public $timeout = 120;
 
     private OrdersService $ordersService;
@@ -23,8 +24,10 @@ class UpdateOrderFromDTO implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public OrderDTO $orderDto, public ?int $logRequestId = null)
-    {
+    public function __construct(
+        public OrderDTO $orderDto,
+        public ?int $logRequestId = null,
+    ) {
         $this->ordersService = new OrdersService();
     }
 

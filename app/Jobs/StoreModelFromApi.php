@@ -13,16 +13,17 @@ class StoreModelFromApi implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(protected $request)
-    {
+    public function __construct(
+        protected $request,
+    ) {
         //
     }
 
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(ModelsService $modelsService): void
     {
-        (new ModelsService())->storeModelFromApi($this->request);
+        $modelsService->storeModelFromApi($this->request);
     }
 }

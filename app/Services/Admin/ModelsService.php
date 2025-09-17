@@ -9,7 +9,6 @@ use App\Http\Resources\ModelResource;
 use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Model;
-use App\Models\User;
 use App\Services\Etsy\EtsyService;
 use Exception;
 use Illuminate\Support\Facades\Cache;
@@ -99,7 +98,11 @@ class ModelsService
             }
 
             $models = $modelsQuery->get();
-            return ['items' => ModelResource::collection($models), 'filtered' => $recordsFiltered, 'total' => $recordsTotal];
+            return [
+                'items' => ModelResource::collection($models),
+                'filtered' => $recordsFiltered,
+                'total' => $recordsTotal,
+            ];
         });
     }
 
@@ -128,15 +131,15 @@ class ModelsService
 
         try {
             // Check files exists on local storage of site and not on R2
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
+            if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileName)) {
                 Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
             }
             // Check files exists on local storage of site and not on R2 (without resized
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
+            if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($withoutResizedFileName)) {
                 Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
             }
             // Check file thumb exists on local storage of site and not on R2
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
+            if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileNameThumb)) {
                 Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
             }
         } catch (Exception $e) {
@@ -209,15 +212,15 @@ class ModelsService
 
         try {
             // Check files exists on local storage of site and not on R2
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileName)) {
+            if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileName)) {
                 Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
             }
             // Check files exists on local storage of site and not on R2 (without resized
-            if (!str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($withoutResizedFileName)) {
+            if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($withoutResizedFileName)) {
                 Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
             }
             // Check file thumb exists on local storage of site and not on R2
-            if (! $modelDTO->uploadedThumb && !str_contains($fileHeaders[0], '404') && !Storage::disk('s3')->exists($fileNameThumb)) {
+            if (! $modelDTO->uploadedThumb && ! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileNameThumb)) {
                 Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
             }
         } catch (Exception $e) {

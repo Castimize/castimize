@@ -37,9 +37,13 @@ class ListingDTO
         public ?string $itemDimensionsUnit,
         public ?int $processingMin,
         public ?int $processingMax,
-        /** @var Collection<ListingImageDTO> */
+        /**
+         * @var Collection<ListingImageDTO>
+         */
         public ?Collection $listingImages,
-        /** @var Collection<ListingInventoryDTO> */
+        /**
+         * @var Collection<ListingInventoryDTO>
+         */
         public ?Collection $listingInventory,
     ) {
     }
@@ -58,8 +62,8 @@ class ListingDTO
                 0.18 :
                 (new CalculatePricesService())->calculatePriceOfModel(
                     price: $material->prices->sortBy('price_volume_cc')->first(),
-                    materialVolume: (float)$model->model_volume_cc,
-                    surfaceArea: (float)$model->model_surface_area_cm2,
+                    materialVolume: (float) $model->model_volume_cc,
+                    surfaceArea: (float) $model->model_surface_area_cm2,
                 );
             if ($price === 0.00 || $priceMaterial < $price) {
                 $price = $priceMaterial;
@@ -85,7 +89,7 @@ class ListingDTO
             quantity: $listing ? $listing->quantity : 1,
             title: $listing ? $listing->title : $model->model_name ?? $model->name,
             description: $listing ? $listing->description : '3D print model: ' . ($model->model_name ?? $model->name),
-            price: (int)  ($listing ? $listing->price->amount : ($price * 100)),
+            price: (int) ($listing ? $listing->price->amount : ($price * 100)),
             whoMade: 'i_did',
             whenMade: 'made_to_order',
             taxonomyId: (int) ($taxonomyId ?? ($listing ? $listing->taxonomy_id : ($shopOauth['default_taxonomy_id'] ?? 12380))), // 3D Printer Files

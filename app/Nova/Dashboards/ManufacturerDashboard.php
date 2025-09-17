@@ -2,9 +2,6 @@
 
 namespace App\Nova\Dashboards;
 
-use App\Nova\Metrics\NewOrders;
-use App\Nova\Metrics\NewOrdersProfit;
-use App\Nova\Metrics\NewOrdersRevenue;
 use App\Traits\Nova\Metrics\CustomMetricsCharts;
 use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Dashboards\Main as Dashboard;

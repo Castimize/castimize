@@ -2,7 +2,6 @@
 
 namespace App\Observers;
 
-use App\Models\OrderStatus;
 use App\Models\Rejection;
 use App\Models\RejectionReason;
 

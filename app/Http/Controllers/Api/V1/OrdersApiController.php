@@ -8,7 +8,6 @@ use App\Http\Resources\OrderResource;
 use App\Jobs\CreateOrderFromDTO;
 use App\Jobs\UpdateOrderFromDTO;
 use App\Models\Country;
-use App\Models\Material;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrdersService;
@@ -19,8 +18,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OrdersApiController extends ApiController
 {
-    public function __construct(private OrdersService $ordersService)
-    {
+    public function __construct(
+        private OrdersService $ordersService,
+    ) {
     }
 
     public function show(int $orderNumber): OrderResource
@@ -29,7 +29,9 @@ class OrdersApiController extends ApiController
 
         $order = Order::where('order_number', $orderNumber)->first();
         if ($order === null) {
-            LogRequestService::addResponse(request(), ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse(request(), [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
@@ -42,7 +44,9 @@ class OrdersApiController extends ApiController
     {
         $order = Order::where('wp_id', $request->wp_id)->first();
         if ($order === null) {
-            LogRequestService::addResponse($request, ['message' => '404 Not found'], 404);
+            LogRequestService::addResponse($request, [
+                'message' => '404 Not found',
+            ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         $response = new OrderResource($order);
@@ -60,7 +64,10 @@ class OrdersApiController extends ApiController
 
         $expectedDeliveryDate = $this->ordersService->calculateExpectedDeliveryDate($uploads, $country);
 
-        $response = ['success' => true, 'expected_delivery_date' => $expectedDeliveryDate];
+        $response = [
+            'success' => true,
+            'expected_delivery_date' => $expectedDeliveryDate,
+        ];
         LogRequestService::addResponse($request, $response);
         return response()->json($response);
     }

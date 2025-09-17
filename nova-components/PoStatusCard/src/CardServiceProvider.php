@@ -11,8 +11,6 @@ class CardServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot()
     {
@@ -21,15 +19,13 @@ class CardServiceProvider extends ServiceProvider
         });
 
         Nova::serving(function (ServingNova $event) {
-            Nova::script('po-status-card', __DIR__.'/../dist/js/card.js');
-            Nova::style('po-status-card', __DIR__.'/../dist/css/card.css');
+            Nova::script('po-status-card', __DIR__ . '/../dist/js/card.js');
+            Nova::style('po-status-card', __DIR__ . '/../dist/css/card.css');
         });
     }
 
     /**
      * Register the card's routes.
-     *
-     * @return void
      */
     protected function routes()
     {
@@ -38,14 +34,12 @@ class CardServiceProvider extends ServiceProvider
         }
 
         Route::middleware(['nova'])
-                ->prefix('nova-vendor/po-status-card')
-                ->group(__DIR__.'/../routes/api.php');
+            ->prefix('nova-vendor/po-status-card')
+            ->group(__DIR__ . '/../routes/api.php');
     }
 
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register()
     {

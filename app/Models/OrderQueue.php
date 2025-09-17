@@ -20,9 +20,13 @@ use Wildside\Userstamps\Userstamps;
 
 class OrderQueue extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -32,7 +36,9 @@ class OrderQueue extends Model
      */
     protected $table = 'order_queue';
 
-    protected $with = ['upload'];
+    protected $with = [
+        'upload',
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -85,9 +91,6 @@ class OrderQueue extends Model
         );
     }
 
-    /**
-     * @return mixed
-     */
     public function getLastStatus(): mixed
     {
         return $this->orderQueueStatuses->last();
@@ -129,7 +132,7 @@ class OrderQueue extends Model
     protected function onSchedule(): Attribute
     {
         return Attribute::make(
-            get: fn () => !now()->gte($this->target_date),
+            get: fn () => ! now()->gte($this->target_date),
         );
     }
 
@@ -139,7 +142,13 @@ class OrderQueue extends Model
     protected function customerShipmentSelectName(): Attribute
     {
         return Attribute::make(
-            get: fn () => sprintf('%s-%s (%s) %s', $this->order->order_number, $this->id, $this->order->uploads->count(), $this->order->billing_name),
+            get: fn () => sprintf(
+                '%s-%s (%s) %s',
+                $this->order->order_number,
+                $this->id,
+                $this->order->uploads->count(),
+                $this->order->billing_name
+            ),
         );
     }
 
@@ -149,69 +158,51 @@ class OrderQueue extends Model
     protected function manufacturerShipmentSelectName(): Attribute
     {
         return Attribute::make(
-            get: fn () => sprintf('%s-%s %s (%s)', $this->order->order_number, $this->id, $this->upload->material_name, $this->upload->material->materialGroup->name),
+            get: fn () => sprintf(
+                '%s-%s %s (%s)',
+                $this->order->order_number,
+                $this->id,
+                $this->upload->material_name,
+                $this->upload->material->materialGroup->name
+            ),
         );
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function upload(): BelongsTo
     {
         return $this->belongsTo(Upload::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function shippingFee(): BelongsTo
     {
         return $this->belongsTo(ShippingFee::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function manufacturerShipment(): BelongsTo
     {
         return $this->belongsTo(ManufacturerShipment::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function manufacturerCost(): BelongsTo
     {
         return $this->belongsTo(ManufacturerCost::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function customerShipment(): BelongsTo
     {
         return $this->belongsTo(CustomerShipment::class);
     }
 
-    /**
-     * @return HasMany
-     */
     public function orderQueueStatuses(): HasMany
     {
         return $this->hasMany(OrderQueueStatus::class);
@@ -222,17 +213,11 @@ class OrderQueue extends Model
         return $this->hasOne(OrderQueueStatus::class)->latest();
     }
 
-    /**
-     * @return HasOne
-     */
     public function rejection(): HasOne
     {
         return $this->hasOne(Rejection::class);
     }
 
-    /**
-     * @return HasOne
-     */
     public function reprint(): HasOne
     {
         return $this->hasOne(Reprint::class);
@@ -256,7 +241,7 @@ class OrderQueue extends Model
 
         $ordersAllAtDc = [];
         foreach ($orderQueues as $orderQueue) {
-            if (!array_key_exists($orderQueue->order_id, $ordersAllAtDc)) {
+            if (! array_key_exists($orderQueue->order_id, $ordersAllAtDc)) {
                 $allAtDc = true;
                 $allOrderQueues = $orderQueue->order->orderQueues;
                 foreach ($allOrderQueues as $oq) {
@@ -267,7 +252,11 @@ class OrderQueue extends Model
                 $ordersAllAtDc[$orderQueue->order_id] = $allAtDc;
             }
 
-            $label = sprintf('%s - %s', ($ordersAllAtDc[$orderQueue->order_id] ? 'V' : 'X'), $orderQueue->customer_shipment_select_name);
+            $label = sprintf(
+                '%s - %s',
+                ($ordersAllAtDc[$orderQueue->order_id] ? 'V' : 'X'),
+                $orderQueue->customer_shipment_select_name
+            );
 
             $options[] = [
                 'label' => $label,
@@ -324,7 +313,7 @@ class OrderQueue extends Model
     {
         $customsItemSettings = app(CustomsItemSettings::class);
         $netWeight = ($this->upload->model_volume_cc * $this->upload->material->density + $customsItemSettings->bag) * $this->upload->quantity;
-        $costs = $isCustomerShipment ? (float)$this->upload->total : (float)$this->manufacturer_costs;
+        $costs = $isCustomerShipment ? (float) $this->upload->total : (float) $this->manufacturer_costs;
         $currencyCode = $isCustomerShipment ? $this->upload->currency_code : $this->currency_code;
         $data = [
             'material' => $this->upload->material_name,
@@ -355,7 +344,7 @@ class OrderQueue extends Model
             $totalParts += ($item->upload->model_parts * $item->upload->quantity);
             $totalBoxVolume += ($item->upload->model_box_volume * $item->upload->quantity);
             $totalWeight += (($item->upload->model_volume_cc * $item->upload->material->density + $customsItemSettings->bag) * $item->upload->quantity);
-            $totalCosts += $isCustomerShipment ? (float)$item->upload->total : (float)$item->manufacturer_costs;;
+            $totalCosts += $isCustomerShipment ? (float) $item->upload->total : (float) $item->manufacturer_costs; ;
             $currencyCode = $isCustomerShipment ? $item->upload->currency_code : $item->currency_code;
         }
 
@@ -365,7 +354,7 @@ class OrderQueue extends Model
             'parts' => $totalParts,
             'box_volume_cm3' => $totalBoxVolume,
             'weight' => round($totalWeight, 2),
-            'costs' => currencyFormatter((float)$totalCosts, $currencyCode),
+            'costs' => currencyFormatter((float) $totalCosts, $currencyCode),
         ];
 
         if ($isCustomerShipment) {
@@ -375,10 +364,6 @@ class OrderQueue extends Model
         return $footer;
     }
 
-    /**
-     * @param $statusSlug
-     * @return mixed
-     */
     public function calculateTargetDate($statusSlug): mixed
     {
         return match ($statusSlug) {
@@ -392,10 +377,6 @@ class OrderQueue extends Model
         };
     }
 
-    /**
-     * @param Carbon $finalArrivalDate
-     * @return Carbon
-     */
     private function getAvailableForShippingDate(Carbon $finalArrivalDate): Carbon
     {
         // Closest date of:
@@ -403,17 +384,16 @@ class OrderQueue extends Model
         // OR: available for shipping + 2 business days
         $lastStatus = $this->getLastStatus();
         $targetDate = $finalArrivalDate->subBusinessDays($this->shippingFee->default_lead_time - $this->manufacturerCost->shipment_lead_time - 1);
-        if (!$lastStatus || $lastStatus->slug !== 'available-for-shipping') {
+        if (! $lastStatus || $lastStatus->slug !== 'available-for-shipping') {
             return $targetDate;
         }
-        $availableForShippingStatusDateCheck = Carbon::parse($lastStatus->created_at)->addBusinessDays(2);
-        return $targetDate->lt($availableForShippingStatusDateCheck) ? $targetDate : $availableForShippingStatusDateCheck;
+        $availableForShippingStatusDateCheck = Carbon::parse($lastStatus->created_at)
+            ->addBusinessDays(2);
+        return $targetDate->lt($availableForShippingStatusDateCheck)
+            ? $targetDate
+            : $availableForShippingStatusDateCheck;
     }
 
-    /**
-     * @param Carbon $finalArrivalDate
-     * @return Carbon
-     */
     private function getInTransitToDcDate(Carbon $finalArrivalDate): Carbon
     {
         // Closest date of:
@@ -421,10 +401,13 @@ class OrderQueue extends Model
         // OR: manufacturing.shipments.sent_at + manufacturing_costs.shipment_lead_time
         $lastStatus = $this->getLastStatus();
         $targetDate = $finalArrivalDate->subBusinessDays($this->shippingFee->default_lead_time - 1);
-        if (!$lastStatus || $lastStatus->slug !== 'in-transit-to-dc') {
+        if (! $lastStatus || $lastStatus->slug !== 'in-transit-to-dc') {
             return $targetDate;
         }
-        $inTransitToDcStatusDateCheck = Carbon::parse($this->manufacturerShipment->sent_at)->addBusinessDays($this->manufacturerCost->shipment_lead_time);
-        return $targetDate->lt($inTransitToDcStatusDateCheck) ? $targetDate : $inTransitToDcStatusDateCheck;
+        $inTransitToDcStatusDateCheck = Carbon::parse($this->manufacturerShipment->sent_at)
+            ->addBusinessDays($this->manufacturerCost->shipment_lead_time);
+        return $targetDate->lt($inTransitToDcStatusDateCheck)
+            ? $targetDate
+            : $inTransitToDcStatusDateCheck;
     }
 }

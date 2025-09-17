@@ -35,7 +35,9 @@ class SyncCustomerStripeId extends Command
         $progressBar->start();
 
         foreach ($customers as $customer) {
-            $stripeCustomer = $stripeService->getCustomers(['email' => $customer->email]);
+            $stripeCustomer = $stripeService->getCustomers([
+                'email' => $customer->email,
+            ]);
             $stripeData = $customer->stripe_data ?? [];
             $stripeData['stripe_id'] = $stripeCustomer->first()?->id;
             $customer->stripe_data = $stripeData;

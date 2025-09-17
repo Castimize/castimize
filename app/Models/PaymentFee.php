@@ -15,9 +15,13 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([PaymentFeeObserver::class])]
 class PaymentFee extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
@@ -41,8 +45,12 @@ class PaymentFee extends Model
     protected function fee(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value ? $value / 100 : $value * 100,
-            set: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value ? $value * 100 : $value / 100,
+            get: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value
+                ? $value / 100
+                : $value * 100,
+            set: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value
+                ? $value * 100
+                : $value / 100,
         );
     }
 
@@ -52,8 +60,12 @@ class PaymentFee extends Model
     protected function minimumFee(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value ? $value / 100 : $value * 100,
-            set: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value ? $value * 100 : $value / 100,
+            get: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value
+                ? $value / 100
+                : $value * 100,
+            set: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value
+                ? $value * 100
+                : $value / 100,
         );
     }
 
@@ -63,8 +75,12 @@ class PaymentFee extends Model
     protected function maximumFee(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value ? $value / 100 : $value * 100,
-            set: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value ? $value * 100 : $value / 100,
+            get: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value
+                ? $value / 100
+                : $value * 100,
+            set: fn ($value) => $this->type === PaymentFeeTypesEnum::FIXED->value
+                ? $value * 100
+                : $value / 100,
         );
     }
 }

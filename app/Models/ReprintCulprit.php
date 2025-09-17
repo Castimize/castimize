@@ -10,9 +10,13 @@ use Wildside\Userstamps\Userstamps;
 
 class ReprintCulprit extends Model
 {
-    use HasFactory, RevisionableTrait, Userstamps, SoftDeletes;
+    use HasFactory;
+    use RevisionableTrait;
+    use Userstamps;
+    use SoftDeletes;
 
     protected $revisionForceDeleteEnabled = true;
+
     protected $revisionCreationsEnabled = true;
 
     /**
