@@ -40,18 +40,18 @@ class OrdersApiController extends ApiController
         return $response;
     }
 
-    public function showOrderWp(ShowOrderWpRequest $request): OrderResource
+    public function showOrderWp(ShowOrderWpRequest $request)
     {
-        $order = Order::where('wp_id', $request->wp_id)->first();
+        $order = \Codexshaper\WooCommerce\Facades\Order::find($request->wp_id);
+//        $order = Order::where('wp_id', $request->wp_id)->first();
         if ($order === null) {
             LogRequestService::addResponse($request, [
                 'message' => '404 Not found',
             ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
-        $response = new OrderResource($order);
-        LogRequestService::addResponse($request, $response);
-        return $response;
+        LogRequestService::addResponse($request, $order);
+        return $order;
     }
 
     public function calculateExpectedDeliveryDate(Request $request): JsonResponse
