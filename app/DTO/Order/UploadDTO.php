@@ -106,7 +106,7 @@ readonly class UploadDTO
     {
         $country = Country::where('alpha2', $receipt->country_iso)->first();
         $model = $line['shop_listing_model']->model;
-        $material = $model->materials->where('name', $line['material'])->first();
+        $material = $line['material'];
 
         $customerLeadTime = $material->dc_lead_time + ($country->logisticsZone->shippingFee?->default_lead_time ?? 0);
 

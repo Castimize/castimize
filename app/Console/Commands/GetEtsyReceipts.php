@@ -67,7 +67,6 @@ class GetEtsyReceipts extends Command
                             try {
                                 // Create OrderDTO from Etsy receipt
                                 $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
-//                                dd($orderDTO);
                                 // Use mandate to pay the order
                                 $wcOrder = $woocommerceApiService->createOrder($orderDTO);
                                 $this->info('Woocommerce order created with id: ' . $wcOrder['id']);
@@ -85,7 +84,9 @@ class GetEtsyReceipts extends Command
                                 $this->info('Payment intent: ' . print_r($paymentIntent, true));
                                 if ($paymentIntent->status === 'succeeded') {
                                     $orderDTO->isPaid = true;
-                                    $orderDTO->paidAt = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'))->format('Y-m-d H:i:s');
+                                    $orderDTO->paidAt = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')
+                                        ?->setTimezone(env('APP_TIMEZONE'))
+                                        ->format('Y-m-d H:i:s');
                                 }
                                 $orderDTO->metaData[] = [
                                     'key' => '_payment_intent_id',

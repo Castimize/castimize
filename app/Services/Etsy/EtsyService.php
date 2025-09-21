@@ -627,6 +627,17 @@ class EtsyService
         );
     }
 
+    public function getShopReceipt(Shop $shop, int $receiptId)
+    {
+        $this->refreshAccessToken($shop);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+
+        return Receipt::get(
+            shop_id: $shop->shop_oauth['shop_id'],
+            receipt_id: $receiptId,
+        );
+    }
+
     public function getShopReceipts(Shop $shop, array $params = [])
     {
         $this->refreshAccessToken($shop);
@@ -642,14 +653,18 @@ class EtsyService
     {
         $lines = [];
         foreach ($receipt->transactions->data as $transaction) {
-            $shopListingModel = ShopListingModel::with('model')->where('shop_id', $shop->id)->where('shop_listing_id', $transaction->listing_id)->first();
+            $shopListingModel = ShopListingModel::with('model.materials')
+                ->where('shop_id', $shop->id)
+                ->where('shop_listing_id', $transaction->listing_id)
+                ->first();
             if ($shopListingModel) {
                 foreach ($transaction->variations as $variation) {
-                    if ($variation->formatted_name === 'Material') {
+                    $material = $shopListingModel->model->materials->where('name', $variation->formatted_value)->first();
+                    if ($variation->formatted_name === 'Material' && $material) {
                         $lines[] = [
                             'transaction' => $transaction,
                             'shop_listing_model' => $shopListingModel,
-                            'material' => $variation->formatted_value,
+                            'material' => $material,
                         ];
                     }
                 }
