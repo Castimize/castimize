@@ -44,7 +44,10 @@ class GetEtsyReceipts extends Command
         StripeService $stripeService,
     ) {
         $date = now()->subDays(14);
-        $shops = Shop::with(['shopOwner.customer'])->where('id', 2)->where('active', true)->where('shop', ShopOwnerShopsEnum::Etsy->value)->get();
+        $shops = Shop::with(['shopOwner.customer'])
+            ->where('active', true)
+            ->where('shop', ShopOwnerShopsEnum::Etsy->value)
+            ->get();
 
         foreach ($shops as $shop) {
             try {
