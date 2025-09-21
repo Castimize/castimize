@@ -43,6 +43,7 @@ Route::group([
             Route::post('orders/calculate-expected-delivery-date', 'OrdersApiController@calculateExpectedDeliveryDate')->name('api.orders.calculate-expected-delivery-date');
             Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');
             Route::get('orders/{order_number}', 'OrdersApiController@show')->name('api.orders.show');
+            Route::get('orders/wp/{order_number}', 'OrdersApiController@showWpOrder')->name('api.orders.show-wp-order');
 
             // Prices
             Route::post('prices/calculate', 'PricesApiController@calculatePrice')->name('api.prices.calculate');

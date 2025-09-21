@@ -54,6 +54,16 @@ class OrdersApiController extends ApiController
         return $order;
     }
 
+    public function showWpOrder(int $orderNumber): JsonResponse
+    {
+        $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($orderNumber);
+        $response = $wpOrder;
+        LogRequestService::addResponse(request(), $response->toArray());
+        return response()
+            ->json($response)
+            ->setStatusCode(Response::HTTP_OK);
+    }
+
     public function calculateExpectedDeliveryDate(Request $request): JsonResponse
     {
         $country = Country::with('logisticsZone.shippingFee')->where('alpha2', $request->country)->first();

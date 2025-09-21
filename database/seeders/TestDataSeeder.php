@@ -146,28 +146,6 @@ class TestDataSeeder extends Seeder
         $pivotData = [ 'default_billing' => 1, 'default_shipping' => 1, 'contact_name' => 'Test contact' ];
         $customer->addresses()->attach($address, $pivotData);
 
-        $materialGroup = MaterialGroup::create([
-            'name' => 'Test material group',
-            'created_at' => now()->format('Y-m-d H:i:s'),
-            'created_by' => $systemUser->id,
-        ]);
-
-        $material = $materialGroup->materials()->create([
-            'currency_id' => 1,
-            'name' => 'Gold',
-            'customer_lead_time' => 5,
-            'fast_delivery_lead_time' => 2,
-            'fast_delivery_fee' => 2000.00,
-            'currency_code' => 'USD',
-            'minimum_x_length' => 100.50,
-            'minimum_y_length' => 80.50,
-            'minimum_z_length' => 40.50,
-            'minimum_volume' => 25.00,
-            'maximum_volume' => 125.00,
-            'created_at' => now()->format('Y-m-d H:i:s'),
-            'created_by' => $systemUser->id,
-        ]);
-
         $service = Service::create([
             'currency_id' => 1,
             'name' => 'Fast delivery',
@@ -187,19 +165,8 @@ class TestDataSeeder extends Seeder
             'created_by' => $systemUser->id,
         ]);
 
-        $material->prices()->create([
-            'country_id' => $country->id,
-            'currency_id' => 1,
-            'setup_fee' => 250.00,
-            'setup_fee_amount' => 3,
-            'minimum_per_stl' => 1,
-            'currency_code' => 'USD',
-            'created_at' => now()->format('Y-m-d H:i:s'),
-            'created_by' => $systemUser->id,
-        ]);
-
         $complaintReason = ComplaintReason::create([
-            'name' => 'Niet volgens STL',
+            'reason' => 'Niet volgens STL',
             'created_at' => now()->format('Y-m-d H:i:s'),
             'created_by' => $systemUser->id,
         ]);
