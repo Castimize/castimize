@@ -13,6 +13,7 @@ use App\Models\Model;
 use App\Models\Shop;
 use App\Models\ShopListingModel;
 use App\Services\Admin\ShopListingModelService;
+use Carbon\Carbon;
 use Etsy\Collection;
 use Etsy\Etsy;
 use Etsy\OAuth\Client;
@@ -656,6 +657,7 @@ class EtsyService
             $shopListingModel = ShopListingModel::with('model.materials')
                 ->where('shop_id', $shop->id)
                 ->where('shop_listing_id', $transaction->listing_id)
+                ->where('created_at', '>=', Carbon::createFromTimestamp($receipt->created_timestamp))
                 ->first();
             if ($shopListingModel) {
                 foreach ($transaction->variations as $variation) {

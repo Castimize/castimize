@@ -72,7 +72,7 @@ readonly class ModelDTO
             modelBoxVolume: $request->box_volume,
             surfaceArea: $request->surface_area,
             modelParts: $request->model_parts ?? 1,
-            modelScale: $request->scale ? number_format(round((float) $request->scale, 4), 4) : 1,
+            modelScale: (float) ($request->scale ? number_format(round((float) $request->scale, 4), 4) : 1),
             categories: $categories,
             metaData: $request->meta_data ?? null,
         );
