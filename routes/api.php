@@ -75,6 +75,7 @@ Route::group([
             Route::get('etsy/{customerId}/shop/return-policies/{returnPolicyId}', 'EtsyApiController@getShopReturnPolicy')->name('api.etsy.get-shop-return-policy');
             Route::post('etsy/{customerId}/shop/return-policies', 'EtsyApiController@createShopReturnPolicy')->name('api.etsy.create-shop-return-policy');
             Route::get('etsy/{customerId}/shop/payments/ledger-entries', 'EtsyApiController@getShopPaymentLedgerEntries')->name('api.etsy.get-shop-payment-ledger-entries');
+            Route::get('etsy/{customerId}/shop/receipts/{receiptId}', 'EtsyApiController@getShopReceipt')->name('api.etsy.get-shop-receipt');
             Route::get('etsy/{customerId}/shop/receipts', 'EtsyApiController@getShopReceipts')->name('api.etsy.get-shop-receipts');
             Route::get('etsy/{customerId}/listings', 'EtsyApiController@getListings')->name('api.etsy.get-listings');
             Route::get('etsy/{customerId}/listings/sync', 'EtsyApiController@syncListings')->name('api.etsy.sync-listings');
