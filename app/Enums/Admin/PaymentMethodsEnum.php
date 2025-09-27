@@ -7,6 +7,7 @@ use Laravel\Nova\Nova;
 enum PaymentMethodsEnum: string
 {
     case ACH_PAYMENT = 'ach';
+    case ACH_DEBIT = 'ach_debit';
     case AFFIRM = 'affirm';
     case AFTERPAY = 'afterpay';
     case ALIPAY = 'alipay';
@@ -95,7 +96,8 @@ enum PaymentMethodsEnum: string
     {
         return [
             self::SEPA_DEBIT->value,
-            self::CREDIT_CARD->value,
+            self::ACH_DEBIT->value,
+//            self::CREDIT_CARD->value,
         ];
     }
 }
