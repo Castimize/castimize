@@ -188,7 +188,7 @@ readonly class UploadDTO
             materialId: $material->id,
             materialName: $material->name,
             name: $model->name,
-            fileName: $model->file_name,
+            fileName: str_replace('wp-content/uploads/p3d/', '', $model->file_name),
             modelVolumeCc: $model->model_volume_cc,
             modelXLength: $model->model_x_length,
             modelYLength: $model->model_y_length,
