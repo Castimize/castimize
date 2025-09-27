@@ -96,7 +96,7 @@ enum PaymentMethodsEnum: string
     {
         return [
             self::SEPA_DEBIT->value,
-            self::ACH_PAYMENT->value,
+//            self::ACH_PAYMENT->value,
 //            self::CREDIT_CARD->value,
         ];
     }
