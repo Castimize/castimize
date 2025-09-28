@@ -30,6 +30,7 @@ return new class extends Migration
             $table->string('device_platform')->nullable();
             $table->string('device_type')->nullable();
             $table->timestamp('last_active')->nullable();
+            $table->boolean('use_address_validation')->default(true);
             $table->timestamps();
             $table->softDeletes();
 

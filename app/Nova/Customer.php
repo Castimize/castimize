@@ -153,6 +153,8 @@ class Customer extends Resource
                 ->sortable()
                 ->onlyOnDetail(),
 
+            Boolean::make(__('Use address validation'), 'use_address_validation'),
+
             MorphToMany::make(__('Addresses'), 'addresses')
                 ->fields(function ($request, $relatedModel) {
                     return [
