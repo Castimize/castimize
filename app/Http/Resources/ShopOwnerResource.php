@@ -58,7 +58,7 @@ class ShopOwnerResource extends JsonResource
             'active' => $this->active,
             'vat_number' => $this->customer->vat_number,
             'stripe_id' => is_array($this->customer->stripe_data) && array_key_exists('stripe_id', $this->customer->stripe_data) ? $this->customer->stripe_data['stripe_id'] : null,
-            'payment_method' => $paymentMethod->type,
+            'payment_method' => $paymentMethod?->type,
             'payment_method_chargable' => $paymentMethodChargable,
             'payment_method_accepted_at' => $paymentMethodAcceptedAt,
             'mandate' => $mandate,
