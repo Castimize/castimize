@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrdersService;
+use App\Services\Admin\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
@@ -27,6 +28,7 @@ class StripeWebhookController extends WebhookController
 {
     public function __construct(
         private OrdersService $ordersService,
+        private PaymentService $paymentService,
     ) {
         parent::__construct();
     }
@@ -188,9 +190,16 @@ class StripeWebhookController extends WebhookController
             $customer = Customer::whereJsonContains('stripe_data->stripe_id', $setupIntent->customer)->first();
         }
         if ($customer) {
+            $paymentMethod = $this->paymentService->getStripePaymentMethod($setupIntent->payment_method);
+            $paymentMethod?->attach([
+                'customer' => $customer->stripe_data['stripe_id'],
+            ]);
+
             $stripeData = $customer->stripe_data ?? [];
             $stripeData['mandate_id'] = $setupIntent->mandate;
             $stripeData['payment_method'] = $setupIntent->payment_method;
+            $stripeData['payment_method_chargable'] = true;
+            $stripeData['payment_method_accepted_at'] = now()->timestamp;
             $customer->stripe_data = $stripeData;
             $customer->save();
         }

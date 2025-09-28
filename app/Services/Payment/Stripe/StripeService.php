@@ -5,12 +5,14 @@ namespace App\Services\Payment\Stripe;
 use App\DTO\Order\OrderDTO;
 use App\Enums\Admin\PaymentMethodsEnum;
 use App\Models\Customer as CastimizeCustomer;
+use Exception;
 use Illuminate\Support\Str;
 use Stripe\Balance;
 use Stripe\Charge;
 use Stripe\Collection;
 use Stripe\Customer;
 use Stripe\Exception\ApiErrorException;
+use Stripe\Exception\CardException;
 use Stripe\Mandate;
 use Stripe\PaymentIntent;
 use Stripe\PaymentMethod;
@@ -58,6 +60,11 @@ class StripeService
         ]);
     }
 
+    public function getSetupIntent(string $setupIntentId): SetupIntent
+    {
+        return SetupIntent::retrieve($setupIntentId);
+    }
+
     public function createSetupIntent(CastimizeCustomer $customer): SetupIntent
     {
         $data = [
@@ -102,6 +109,62 @@ class StripeService
         ]);
     }
 
+    public function createTestPaymentIntent(CastimizeCustomer $customer, string $paymentMethodId): array
+    {
+        try {
+            $stripeData = $customer->stripe_data ?? [];
+
+            $intent = PaymentIntent::create([
+                'amount' => 100, // €1, in cents
+                'currency' => 'eur',
+                'customer' => $stripeData['stripe_id'],
+                'payment_method' => $paymentMethodId,
+                'off_session' => true,
+                'confirm' => true,
+                'capture_method' => 'manual', // zodat we niet echt afschrijven
+            ]);
+
+            if ($intent->status === 'requires_capture') {
+                // Betaling gelukt → annuleren om geld niet af te schrijven
+                $intent->cancel();
+
+                return [
+                    'success' => true,
+                    'status'  => 'usable',
+                    'message' => 'Kaart is bruikbaar voor off-session betalingen.',
+                ];
+            }
+
+            return [
+                'success' => false,
+                'status'  => $intent->status,
+                'message' => 'Onverwachte status ontvangen.',
+            ];
+        } catch (CardException $e) {
+            $error = $e->getError();
+
+            if ($error?->code === 'authentication_required') {
+                return [
+                    'success' => false,
+                    'status'  => 'requires_authentication',
+                    'message' => 'Kaart vereist SCA, niet bruikbaar off-session.',
+                ];
+            }
+
+            return [
+                'success' => false,
+                'status'  => $error?->code ?? 'card_error',
+                'message' => $error?->message,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+
     public function getPaymentMethod(string $paymentMethodId): ?PaymentMethod
     {
         if (Str::startsWith($paymentMethodId, 'pm_')) {
@@ -110,11 +173,11 @@ class StripeService
         return null;
     }
 
-    public function getPaymentMethods()
+    public function getPaymentMethods(): PaymentIntent
     {
         return PaymentIntent::create([
             'amount' => 1000,
-            'currency' => 'eur',
+            'currency' => 'usd',
             'automatic_payment_methods' => [
                 'enabled' => true,
             ],

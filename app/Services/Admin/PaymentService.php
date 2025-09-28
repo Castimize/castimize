@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\Admin;
 
+use App\DTO\Order\OrderDTO;
 use App\Models\Customer;
 use App\Services\Payment\Stripe\StripeService;
 use Exception;
+use RuntimeException;
+use Stripe\Mandate;
+use Stripe\PaymentIntent;
+use Stripe\PaymentMethod;
 use Stripe\SetupIntent;
 
 class PaymentService
@@ -14,6 +19,47 @@ class PaymentService
     public function __construct(
         private StripeService $stripeService,
     ) {}
+
+    public function getStripePaymentMethod(string $paymentMethodId): null|PaymentMethod
+    {
+        return $this->stripeService->getPaymentMethod($paymentMethodId);
+    }
+
+    public function getStripePaymentMethods()
+    {
+        return $this->stripeService->getPaymentMethods();
+    }
+
+    public function attachStripePaymentMethod(Customer $customer, string $paymentMethodId)
+    {
+        $paymentMethod = $this->getStripePaymentMethod($paymentMethodId);
+        $paymentMethod?->attach([
+            'customer' => $customer->stripe_data['stripe_id'],
+        ]);
+
+        $testPaymentMethodResponse = $this->stripeService->createTestPaymentIntent(
+            customer: $customer,
+            paymentMethodId: $paymentMethodId,
+        );
+
+        if ($testPaymentMethodResponse['success']) {
+            $stripeData = $customer->stripe_data;
+            $stripeData['payment_method'] = $paymentMethodId;
+            $stripeData['payment_method_chargable'] = true;
+            $stripeData['payment_method_accepted_at'] = now()->timestamp;
+            $customer->stripe_data = $stripeData;
+            $customer->save();
+        } else {
+            throw new RuntimeException($testPaymentMethodResponse['message']);
+        }
+    }
+
+    public function getStripeSetupIntent(string $setupIntentId): SetupIntent
+    {
+        return $this->stripeService->getSetupIntent(
+            setupIntentId: $setupIntentId,
+        );
+    }
 
     public function createStripeSetupIntent(Customer $customer): SetupIntent
     {
@@ -45,7 +91,22 @@ class PaymentService
         return $setupIntent;
     }
 
-    public function cancelMandate(Customer $customer): void
+    public function createStripePaymentIntent(OrderDTO $orderDTO, Customer $customer): PaymentIntent
+    {
+        return $this->stripeService->createPaymentIntent(
+            orderDTO: $orderDTO,
+            customer: $customer,
+        );
+    }
+
+    public function getStripeMandate(string $mandateId): Mandate
+    {
+        return $this->stripeService->getMandate(
+            mandateId: $mandateId,
+        );
+    }
+
+    public function cancelStripeMandate(Customer $customer): void
     {
         $stripeData = $customer->stripe_data;
         if (
