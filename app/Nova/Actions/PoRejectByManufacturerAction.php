@@ -34,7 +34,7 @@ class PoRejectByManufacturerAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService;
+        $orderQueuesService = new OrderQueuesService();
         foreach ($models as $model) {
             $hasEndStatus = [];
             /** @var $model OrderQueue */
@@ -50,8 +50,13 @@ class PoRejectByManufacturerAction extends Action
                 );
             }
         }
-        $fileName = sprintf('%s-rejection-%s.%s', auth()->user()->manufacturer->id, time(), $fields->photo->extension());
-        $fullFileName = 'admin/rejections/'.$fileName;
+        $fileName = sprintf(
+            '%s-rejection-%s.%s',
+            auth()->user()->manufacturer->id,
+            time(),
+            $fields->photo->extension()
+        );
+        $fullFileName = 'admin/rejections/' . $fileName;
         Storage::disk('r2_private')->putFileAs('admin/rejections/', $fields->photo, $fileName);
 
         foreach ($models as $model) {

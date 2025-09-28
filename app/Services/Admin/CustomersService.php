@@ -26,7 +26,6 @@ class CustomersService
         if ($customer === null) {
             return $this->createCustomerFromWpCustomer($wpCustomer);
         }
-
         return $this->updateCustomerFromWpCustomer($customer, $wpCustomer);
     }
 
@@ -43,7 +42,6 @@ class CustomersService
         if ($customer === null) {
             return $this->createCustomerFromWp($request);
         }
-
         return $this->updateCustomerFromWp($customer, $request);
     }
 
@@ -100,7 +98,7 @@ class CustomersService
                 ];
                 $customer->addresses()->attach($shippingAddress, $pivotData);
             }
-        } elseif ($billingAddress !== null) {
+        } else if ($billingAddress !== null) {
             $pivotData = [
                 'default_billing' => 1,
                 'default_shipping' => 1,
@@ -228,7 +226,7 @@ class CustomersService
             } else {
                 $customer->addresses()->syncWithPivotValues($shippingAddress, $pivotData);
             }
-        } elseif ($shippingAddress !== $billingAddress) {
+        } else if ($shippingAddress !== $billingAddress) {
             $pivotData = [
                 'contact_name' => sprintf('%s %s', $request->shipping['first_name'], $request->shipping['last_name']),
                 'phone' => $request->shipping['phone'] ?? null,
@@ -297,7 +295,7 @@ class CustomersService
                         'name' => $stateName,
                         'slug' => Str::slug($stateName),
                         'country_id' => $country->id,
-                    ],
+                    ]
                 );
             }
             $cityName = $input->city;
@@ -332,7 +330,6 @@ class CustomersService
 
             return $address;
         }
-
         return null;
     }
 
@@ -390,7 +387,6 @@ class CustomersService
 
             return $address;
         }
-
         return null;
     }
 }

@@ -14,16 +14,17 @@ class UploadToOrderQueue implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private Upload $upload)
-    {
+    public function __construct(
+        private Upload $upload,
+    ) {
         //
     }
 
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(UploadsService $uploadsService): void
     {
-        (new UploadsService)->setUploadToOrderQueue($this->upload);
+        $uploadsService->setUploadToOrderQueue($this->upload);
     }
 }

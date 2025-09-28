@@ -96,9 +96,7 @@ class LogisticsZone extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [
-
-        ];
+        return [];
     }
 
     /**

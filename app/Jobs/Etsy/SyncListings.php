@@ -27,7 +27,8 @@ class SyncListings implements ShouldQueue
 
         $models = [];
         foreach ($customerModels as $model) {
-            $key = sprintf('%s-%s-%s-%s-%s-%s-%s-%s',
+            $key = sprintf(
+                '%s-%s-%s-%s-%s-%s-%s-%s',
                 $model->model_name,
                 $model->name,
                 $model->model_volume_cc,

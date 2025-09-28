@@ -15,7 +15,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class PoAvailableForShippingAndDownloadPoLabelsStatusAction extends Action
 {
-    use InteractsWithQueue, Queueable;
+    use InteractsWithQueue;
+    use Queueable;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -73,10 +74,13 @@ class PoAvailableForShippingAndDownloadPoLabelsStatusAction extends Action
 
     protected function getDownloadUrl(string $fileName, array $orderQueueIds): string
     {
-        return URL::temporarySignedRoute('po.labels.download', now()->addMinutes(5), [
-            'manufacturer_id' => encrypt(auth()->user()->manufacturer->id),
-            'order_queue_ids' => $orderQueueIds,
-            'filename' => $fileName,
-        ]);
+        return URL::temporarySignedRoute(
+            'po.labels.download',
+            now()->addMinutes(5), [
+                'manufacturer_id' => encrypt(auth()->user()->manufacturer->id),
+                'order_queue_ids' => $orderQueueIds,
+                'filename' => $fileName,
+            ]
+        );
     }
 }

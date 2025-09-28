@@ -16,7 +16,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class AcceptRejectionAction extends Action implements ShouldQueue
 {
-    use InteractsWithQueue, Queueable;
+    use InteractsWithQueue;
+    use Queueable;
 
     /**
      * The single value that should be used to represent the resource when being displayed.

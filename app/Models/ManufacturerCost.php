@@ -15,7 +15,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([ManufacturerCostObserver::class])]
 class ManufacturerCost extends Model
 {
-    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 

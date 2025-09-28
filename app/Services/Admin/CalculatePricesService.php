@@ -47,7 +47,6 @@ class CalculatePricesService
          */
         $price = $material->prices->first();
         $price->calculated_total = $this->calculatePriceOfModel($price, $request->material_volume, $request->surface_area);
-
         return $price;
     }
 
@@ -69,7 +68,7 @@ class CalculatePricesService
     {
         if ($cost->setup_fee) {
             $total = $cost->setup_fee_amount + ($materialVolume * $cost->costs_volume_cc);
-        } elseif ($materialVolume <= $cost->minimum_per_stl) {
+        } else if ($materialVolume <= $cost->minimum_per_stl) {
             $total = $cost->costs_minimum_per_stl;
         } else {
             $total = ($materialVolume * $cost->costs_volume_cc) + ($surfaceArea * $cost->costs_surface_cm2);
@@ -128,9 +127,7 @@ class CalculatePricesService
         /** @var CalculateShippingFeeUploadDTO $calculateShippingFeeUploadDTO */
         foreach ($uploads as $calculateShippingFeeUploadDTO) {
             $totalVolume += $calculateShippingFeeUploadDTO->modelBoxVolume * $calculateShippingFeeUploadDTO->quantity;
-            //            $totalVolume += $upload['3dp_options']['model_stats_raw']['model']['box_volume'] * $upload['quantity'];
         }
-
         return $totalVolume;
     }
 }

@@ -95,9 +95,7 @@ class Currency extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [
-
-        ];
+        return [];
     }
 
     /**

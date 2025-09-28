@@ -28,7 +28,11 @@ class ShopOrder extends Resource
      */
     public function title()
     {
-        return sprintf('%s-%s', $this->shop_receipt_id, $this->order_number);
+        return sprintf(
+            '%s-%s',
+            $this->shop_receipt_id,
+            $this->order_number
+        );
     }
 
     /**

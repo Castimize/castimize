@@ -8,9 +8,9 @@ use Symplify\EasyCodingStandard\Config\ECSConfig;
 return ECSConfig::configure()
     ->withPaths([
         __DIR__ . '/app',
-//        __DIR__ . '/bootstrap',
+        __DIR__ . '/bootstrap',
         __DIR__ . '/config',
-//        __DIR__ . '/lang',
+        __DIR__ . '/lang',
         __DIR__ . '/nova-components',
         __DIR__ . '/public',
         __DIR__ . '/resources',
@@ -27,8 +27,8 @@ return ECSConfig::configure()
     // uncomment one, apply one, commit, PR, merge and repeat
     ->withPreparedSets(
         arrays: true,
+        comments: true,
         docblocks: true,
-//        spaces: true,
+        spaces: true,
         namespaces: true,
-    //      comments: true,
     );

@@ -11,7 +11,10 @@ use Wildside\Userstamps\Userstamps;
 
 class InvoiceExactSalesEntry extends Model
 {
-    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 

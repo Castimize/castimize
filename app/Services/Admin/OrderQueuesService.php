@@ -13,7 +13,6 @@ class OrderQueuesService
 {
     /**
      * Store order queue from upload
-     *
      * @return array<OrderQueue>
      */
     public function storeFromUpload(Upload $upload, array $manufacturers): array
@@ -30,7 +29,7 @@ class OrderQueuesService
                         'shipping_fee_id' => $shippingFee?->id,
                         'manufacturer_id' => $manufacturer->id,
                         'manufacturer_cost_id' => $manufacturerCost->id,
-                        'manufacturer_costs' => (new CalculatePricesService)->calculateCostsOfModel(
+                        'manufacturer_costs' => (new CalculatePricesService())->calculateCostsOfModel(
                             cost: $manufacturerCost,
                             materialVolume: $upload->model_volume_cc,
                             surfaceArea: $upload->model_surface_area_cm2,
@@ -51,7 +50,7 @@ class OrderQueuesService
         foreach ($upload->orderQueues as $orderQueue) {
             if ($upload->manufacturer_discount !== null) {
                 $manufacturerMaterialCost = $orderQueue->manufacturer->costs->where('active', true)->where('material_id', $upload->material_id)->first();
-                $costs = (new CalculatePricesService)->calculateCostsOfModel(
+                $costs = (new CalculatePricesService())->calculateCostsOfModel(
                     cost: $manufacturerMaterialCost,
                     materialVolume: $upload->model_volume_cc,
                     surfaceArea: $upload->model_surface_area_cm2,
@@ -69,7 +68,6 @@ class OrderQueuesService
     {
         // Create a order queue status in-queue
         $orderStatus = OrderStatus::where('slug', $orderStatusSlug)->first();
-
         return $orderQueue->orderQueueStatuses()->create([
             'order_status_id' => $orderStatus->id,
             'status' => $orderStatus->status,
@@ -86,9 +84,8 @@ class OrderQueuesService
             'refund_total' => $total,
         ];
         if (count($refundTax) > 0) {
-            // $refundLineItem['refund_tax'] = $refundTax;
+            //$refundLineItem['refund_tax'] = $refundTax;
         }
-
         return $refundLineItem;
     }
 
@@ -113,7 +110,6 @@ class OrderQueuesService
                 }
             }
         }
-
         return $refundTax;
     }
 }

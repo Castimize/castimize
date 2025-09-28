@@ -13,7 +13,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class DownloadModelsAction extends Action
 {
-    use InteractsWithQueue, Queueable;
+    use InteractsWithQueue;
+    use Queueable;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -54,10 +55,13 @@ class DownloadModelsAction extends Action
 
     protected function getDownloadUrl(string $fileName, array $orderQueueIds): string
     {
-        return URL::temporarySignedRoute('models.download', now()->addMinutes(5), [
-            'manufacturer_id' => encrypt(auth()->user()->manufacturer->id),
-            'order_queue_ids' => $orderQueueIds,
-            'filename' => $fileName,
-        ]);
+        return URL::temporarySignedRoute(
+            'models.download',
+            now()->addMinutes(5), [
+                'manufacturer_id' => encrypt(auth()->user()->manufacturer->id),
+                'order_queue_ids' => $orderQueueIds,
+                'filename' => $fileName,
+            ]
+        );
     }
 }

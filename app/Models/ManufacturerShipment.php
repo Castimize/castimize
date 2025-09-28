@@ -17,7 +17,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([ManufacturerShipmentObserver::class])]
 class ManufacturerShipment extends Model
 {
-    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     public $selectedPOs;
 
@@ -87,7 +90,9 @@ class ManufacturerShipment extends Model
     protected function timeInTransit(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->arrived_at !== null ? $this->arrived_at->diffInDays($this->created_at) : now()->diffInDays($this->created_at),
+            get: fn () => $this->arrived_at !== null
+                ? $this->arrived_at->diffInDays($this->created_at)
+                : now()->diffInDays($this->created_at),
         );
     }
 

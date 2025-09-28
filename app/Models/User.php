@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,13 +18,23 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([UserObserver::class])]
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRoles, Impersonatable, Notifiable, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasApiTokens;
+    use HasFactory;
+    use HasRoles;
+    use Impersonatable;
+    use Notifiable;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 
     protected $revisionCreationsEnabled = true;
 
-    protected $dontKeepRevisionOf = ['password', 'remember_token'];
+    protected $dontKeepRevisionOf = [
+        'password',
+        'remember_token',
+    ];
 
     /**
      * The attributes that are mass assignable.

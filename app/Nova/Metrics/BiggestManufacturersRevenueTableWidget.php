@@ -27,12 +27,13 @@ class BiggestManufacturersRevenueTableWidget extends TableWidget
 
     public function value(Filters $filters): Collection
     {
-        $currencyService = new CurrencyService;
+        $currencyService = new CurrencyService();
 
         $query = DB::table('orders')
             ->join('order_queue', 'orders.id', '=', 'order_queue.order_id')
             ->join('manufacturers', 'manufacturers.id', '=', 'order_queue.manufacturer_id')
-            ->selectRaw('order_queue.manufacturer_id as manufacturer_id,
+            ->selectRaw(
+                "order_queue.manufacturer_id as manufacturer_id,
                                    manufacturers.name as manufacturer_name,
                                    COUNT(DISTINCT orders.order_number) as orders,
                                    orders.currency_code,
@@ -45,7 +46,7 @@ class BiggestManufacturersRevenueTableWidget extends TableWidget
                                       select SUM(manufacturer_costs) / 100
                                       from order_queue
                                       where order_queue.order_id = orders.id
-                                   ) as costs'
+                                   ) as costs"
             )
             ->whereNotNull('orders.paid_at')
             ->whereNull('orders.deleted_at')

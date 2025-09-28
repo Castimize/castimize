@@ -21,7 +21,11 @@ class SyncCustomerToExact implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public int $wpCustomerId, public ?int $logRequestId = null) {}
+    public function __construct(
+        public int $wpCustomerId,
+        public ?int $logRequestId = null,
+    ) {
+    }
 
     /**
      * Execute the job.
@@ -42,13 +46,13 @@ class SyncCustomerToExact implements ShouldQueue
             $customer->wpCustomer = $wpCustomer;
             $exactOnlineService->syncCustomer($customer);
         } catch (Throwable $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $customer);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
         }
     }
 }

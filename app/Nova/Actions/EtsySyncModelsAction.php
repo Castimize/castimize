@@ -16,7 +16,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class EtsySyncModelsAction extends Action
 {
-    use InteractsWithQueue, Queueable;
+    use InteractsWithQueue;
+    use Queueable;
 
     public function name()
     {
@@ -55,7 +56,7 @@ class EtsySyncModelsAction extends Action
     {
         $customer = Customer::find(8);
         $shop = $customer->shopOwner->shops->first();
-        $taxonomyAsSelect = (new EtsyService)->getTaxonomyAsSelect($shop);
+        $taxonomyAsSelect = (new EtsyService())->getTaxonomyAsSelect($shop);
 
         $options = [];
         foreach ($taxonomyAsSelect as $id => $taxonomy) {
@@ -64,7 +65,7 @@ class EtsySyncModelsAction extends Action
             if (count($fullPath) > 0) {
                 foreach ($fullPath as $pathId) {
                     if (! empty($pathId) && $pathId != $id) {
-                        $fullPathName .= $taxonomyAsSelect[$pathId]['name'].' > ';
+                        $fullPathName .= $taxonomyAsSelect[$pathId]['name'] . ' > ';
                     }
                 }
                 $fullPathName = substr($fullPathName, 0, -3);

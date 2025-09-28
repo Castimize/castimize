@@ -19,8 +19,10 @@ class SelectManufacturerWithOverview extends Field
 
     /**
      * Set the options.
+     *
+     * @return $this
      */
-    public function options(array $options): static
+    public function options(array $options)
     {
         if (is_callable($options)) {
             $options = call_user_func($options);
@@ -38,21 +40,21 @@ class SelectManufacturerWithOverview extends Field
         ]);
     }
 
-    public function overviewHeaders(array $overviewHeaders): SelectManufacturerWithOverview
+    public function overviewHeaders(array $overviewHeaders)
     {
         return $this->withMeta([
             'overviewHeaders' => $overviewHeaders,
         ]);
     }
 
-    public function shouldShowColumnBorders(bool $showColumnBorders = true): SelectManufacturerWithOverview
+    public function shouldShowColumnBorders(bool $showColumnBorders = true)
     {
         return $this->withMeta([
             'shouldShowColumnBorders' => $showColumnBorders,
         ]);
     }
 
-    public function shouldShowCheckboxes(bool $shouldShowCheckboxes = true): SelectManufacturerWithOverview
+    public function shouldShowCheckboxes(bool $shouldShowCheckboxes = true)
     {
         return $this->withMeta([
             'shouldShowCheckboxes' => $shouldShowCheckboxes,
@@ -70,36 +72,33 @@ class SelectManufacturerWithOverview extends Field
         if ($saveAsJson) {
             return $value;
         }
-
         return is_array($value) || is_object($value) ? (array) $value : json_decode($value);
     }
 
-    protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute): void
+    protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute)
     {
         $value = $request->input($requestAttribute) ?: null;
         $saveAsJson = $this->shouldSaveAsJson($model, $attribute);
 
         $value = is_null($value) ? ($this->nullable ? $value : $value = []) : $value;
         $value = is_array($value) ? $value : explode(',', $value);
-        //        if (count($value) === 0) {
-        //            throw new \Exception(__('Please select PO\'s'));
-        //        }
+//        if (count($value) === 0) {
+//            throw new \Exception(__('Please select PO\'s'));
+//        }
         $model->{$attribute} = ($saveAsJson || is_null($value)) ? $value : json_encode($value);
     }
 
-    private function shouldSaveAsJson($model, $attribute): bool
+    private function shouldSaveAsJson($model, $attribute)
     {
         if (! empty($model) && ! is_array($model) && method_exists($model, 'getCasts')) {
             $casts = $model->getCasts();
             $isCastedToArray = ($casts[$attribute] ?? null) === 'array';
-
             return $this->saveAsJSON || $isCastedToArray;
         }
-
         return false;
     }
 
-    public function resolveForAction($request): void
+    public function resolveForAction($request)
     {
         if (! is_null($this->value)) {
             return;
@@ -137,7 +136,6 @@ class SelectManufacturerWithOverview extends Field
                         return false;
                     }
                 }
-
                 return true;
             });
 
@@ -153,11 +151,12 @@ class SelectManufacturerWithOverview extends Field
 
     /**
      * Allows the field to save an actual JSON array to a SQL JSON column.
+     *
+     * @return self
      **/
-    public function saveAsJSON(bool $saveAsJSON = true): static
+    public function saveAsJSON(bool $saveAsJSON = true)
     {
         $this->saveAsJSON = $saveAsJSON;
-
         return $this;
     }
 }

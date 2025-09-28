@@ -7,7 +7,6 @@ use App\Filters\RemoveTestEmailAddressesFilter;
 use App\Observers\OrderObserver;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +20,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([OrderObserver::class])]
 class Order extends Model
 {
-    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use Userstamps;
+    use SoftDeletes;
 
     public $wpOrder;
 
@@ -128,9 +130,6 @@ class Order extends Model
         ];
     }
 
-    /**
-     * Prepare a date for array / JSON serialization.
-     */
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format('d-m-Y H:i:s');
@@ -314,10 +313,9 @@ class Order extends Model
         $email = $this->email;
         if (! empty($this->shipping_email)) {
             $email = $this->shipping_email;
-        } elseif (! empty($this->billing_email)) {
+        } else if (! empty($this->billing_email)) {
             $email = $this->billing_email;
         }
-
         return Attribute::make(
             get: fn () => [
                 'first_name' => $this->shipping_first_name,
@@ -393,31 +391,26 @@ class Order extends Model
         return $this->hasMany(InvoiceLine::class);
     }
 
-    #[Scope]
-    protected function removeTestEmailAddresses($query, string $column)
+    public function scopeRemoveTestEmailAddresses($query, string $column)
     {
         $removeTestEmailAddressesFilter = new RemoveTestEmailAddressesFilter($column);
-
         return $query->tap($removeTestEmailAddressesFilter);
     }
 
-    #[Scope]
-    protected function removeTestCustomerIds($query, string $column)
+    public function scopeRemoveTestCustomerIds($query, string $column)
     {
         $removeTestEmailAddressesFilter = new RemoveTestCustomerIdsFilter($column);
-
         return $query->tap($removeTestEmailAddressesFilter);
     }
 
     /**
      * Get the days overdue
      */
-    public function daysOverdue(): ?float
+    public function daysOverdue(): float|null
     {
         if ($this->status === 'overdue') {
             return now()->diffInDays($this->due_date);
         }
-
         return null;
     }
 
@@ -438,7 +431,6 @@ class Order extends Model
                 $return = false;
             }
         }
-
         return $return;
     }
 }

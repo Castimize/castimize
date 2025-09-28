@@ -5,7 +5,7 @@ namespace App\Nova;
 use App\Enums\Admin\PaymentFeeTypesEnum;
 use App\Enums\Admin\PaymentMethodsEnum;
 use App\Traits\Nova\CommonMetaDataTrait;
-use Castimize\ColumnToggler\ColumnTogglerTrait;
+use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
@@ -16,7 +16,7 @@ use Laravel\Nova\Panel;
 
 class PaymentFee extends Resource
 {
-//    use ColumnTogglerTrait;
+    use ColumnTogglerTrait;
     use CommonMetaDataTrait;
 
     /**
@@ -34,7 +34,6 @@ class PaymentFee extends Resource
     public function title()
     {
         $paymentMethodsOptions = PaymentMethodsEnum::options();
-
         return ! empty($this->payment_method) && array_key_exists($this->payment_method, $paymentMethodsOptions) ? $paymentMethodsOptions[$this->payment_method] : $this->id;
     }
 
@@ -134,7 +133,7 @@ class PaymentFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Fee'), function () {
-                return $this->fee && $this->type === PaymentFeeTypesEnum::FIXED->value ? currencyFormatter((float) $this->fee, $this->currency_code) : $this->fee.'%';
+                return $this->fee && $this->type === PaymentFeeTypesEnum::FIXED->value ? currencyFormatter((float) $this->fee, $this->currency_code) : $this->fee . '%';
             })
                 ->exceptOnForms()
                 ->sortable(),
@@ -240,9 +239,7 @@ class PaymentFee extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [
-
-        ];
+        return [];
     }
 
     /**

@@ -9,13 +9,13 @@ use Wildside\Userstamps\Userstamps;
 
 class ShopListingModel extends Model
 {
-    use HasFactory, SoftDeletes, Userstamps;
+    use HasFactory;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 
     protected $revisionCreationsEnabled = true;
-
-    //    protected $primaryKey = ['shop_owner_auth_id', 'model_id'];
 
     /**
      * The attributes that are mass assignable.

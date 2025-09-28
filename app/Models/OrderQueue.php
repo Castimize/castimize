@@ -6,7 +6,6 @@ use App\Enums\Admin\OrderStatusesEnum;
 use App\Filters\HasLastOrderQueueStatusFilter;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +20,10 @@ use Wildside\Userstamps\Userstamps;
 
 class OrderQueue extends Model
 {
-    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 
@@ -34,7 +36,9 @@ class OrderQueue extends Model
      */
     protected $table = 'order_queue';
 
-    protected $with = ['upload'];
+    protected $with = [
+        'upload',
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -138,7 +142,13 @@ class OrderQueue extends Model
     protected function customerShipmentSelectName(): Attribute
     {
         return Attribute::make(
-            get: fn () => sprintf('%s-%s (%s) %s', $this->order->order_number, $this->id, $this->order->uploads->count(), $this->order->billing_name),
+            get: fn () => sprintf(
+                '%s-%s (%s) %s',
+                $this->order->order_number,
+                $this->id,
+                $this->order->uploads->count(),
+                $this->order->billing_name
+            ),
         );
     }
 
@@ -148,7 +158,13 @@ class OrderQueue extends Model
     protected function manufacturerShipmentSelectName(): Attribute
     {
         return Attribute::make(
-            get: fn () => sprintf('%s-%s %s (%s)', $this->order->order_number, $this->id, $this->upload->material_name, $this->upload->material->materialGroup->name),
+            get: fn () => sprintf(
+                '%s-%s %s (%s)',
+                $this->order->order_number,
+                $this->id,
+                $this->upload->material_name,
+                $this->upload->material->materialGroup->name
+            ),
         );
     }
 
@@ -207,8 +223,7 @@ class OrderQueue extends Model
         return $this->hasOne(Reprint::class);
     }
 
-    #[Scope]
-    protected function whereHasLastOrderQueueStatus($query, string $statusSlug): void
+    public function scopeWhereHasLastOrderQueueStatus($query, string $statusSlug): void
     {
         $hasLastOrderQueueStatusFilter = new HasLastOrderQueueStatusFilter($statusSlug);
         $query->tap($hasLastOrderQueueStatusFilter);
@@ -237,7 +252,11 @@ class OrderQueue extends Model
                 $ordersAllAtDc[$orderQueue->order_id] = $allAtDc;
             }
 
-            $label = sprintf('%s - %s', ($ordersAllAtDc[$orderQueue->order_id] ? 'V' : 'X'), $orderQueue->customer_shipment_select_name);
+            $label = sprintf(
+                '%s - %s',
+                ($ordersAllAtDc[$orderQueue->order_id] ? 'V' : 'X'),
+                $orderQueue->customer_shipment_select_name
+            );
 
             $options[] = [
                 'label' => $label,
@@ -245,7 +264,6 @@ class OrderQueue extends Model
                 'all_at_dc' => $ordersAllAtDc[$orderQueue->order_id],
             ];
         }
-
         return $options;
     }
 
@@ -270,7 +288,6 @@ class OrderQueue extends Model
                 'group' => $orderQueue->upload->material->materialGroup->name,
             ];
         }
-
         return $options;
     }
 
@@ -327,7 +344,7 @@ class OrderQueue extends Model
             $totalParts += ($item->upload->model_parts * $item->upload->quantity);
             $totalBoxVolume += ($item->upload->model_box_volume * $item->upload->quantity);
             $totalWeight += (($item->upload->model_volume_cc * $item->upload->material->density + $customsItemSettings->bag) * $item->upload->quantity);
-            $totalCosts += $isCustomerShipment ? (float) $item->upload->total : (float) $item->manufacturer_costs;
+            $totalCosts += $isCustomerShipment ? (float) $item->upload->total : (float) $item->manufacturer_costs; ;
             $currencyCode = $isCustomerShipment ? $item->upload->currency_code : $item->currency_code;
         }
 
@@ -370,9 +387,11 @@ class OrderQueue extends Model
         if (! $lastStatus || $lastStatus->slug !== 'available-for-shipping') {
             return $targetDate;
         }
-        $availableForShippingStatusDateCheck = Carbon::parse($lastStatus->created_at)->addBusinessDays(2);
-
-        return $targetDate->lt($availableForShippingStatusDateCheck) ? $targetDate : $availableForShippingStatusDateCheck;
+        $availableForShippingStatusDateCheck = Carbon::parse($lastStatus->created_at)
+            ->addBusinessDays(2);
+        return $targetDate->lt($availableForShippingStatusDateCheck)
+            ? $targetDate
+            : $availableForShippingStatusDateCheck;
     }
 
     private function getInTransitToDcDate(Carbon $finalArrivalDate): Carbon
@@ -385,8 +404,10 @@ class OrderQueue extends Model
         if (! $lastStatus || $lastStatus->slug !== 'in-transit-to-dc') {
             return $targetDate;
         }
-        $inTransitToDcStatusDateCheck = Carbon::parse($this->manufacturerShipment->sent_at)->addBusinessDays($this->manufacturerCost->shipment_lead_time);
-
-        return $targetDate->lt($inTransitToDcStatusDateCheck) ? $targetDate : $inTransitToDcStatusDateCheck;
+        $inTransitToDcStatusDateCheck = Carbon::parse($this->manufacturerShipment->sent_at)
+            ->addBusinessDays($this->manufacturerCost->shipment_lead_time);
+        return $targetDate->lt($inTransitToDcStatusDateCheck)
+            ? $targetDate
+            : $inTransitToDcStatusDateCheck;
     }
 }

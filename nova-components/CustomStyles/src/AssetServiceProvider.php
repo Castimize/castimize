@@ -14,8 +14,8 @@ class AssetServiceProvider extends ServiceProvider
     public function boot()
     {
         Nova::serving(function (ServingNova $event) {
-            Nova::script('custom-styles', __DIR__.'/../dist/js/asset.js');
-            Nova::style('custom-styles', __DIR__.'/../dist/css/asset.css');
+            Nova::script('custom-styles', __DIR__ . '/../dist/js/asset.js');
+            Nova::style('custom-styles', __DIR__ . '/../dist/css/asset.css');
         });
     }
 

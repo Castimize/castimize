@@ -40,7 +40,8 @@ class RevenueCostsProfitLineChartWidget extends LineChartWidget
         $costs = [];
         $profit = [];
         $query = DB::table('orders')
-            ->selectRaw("DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
+            ->selectRaw(
+                "DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
                                    orders.currency_code,
                                    (
                                       select SUM(total) / 100

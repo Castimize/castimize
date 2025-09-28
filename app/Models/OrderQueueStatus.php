@@ -14,7 +14,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([OrderQueueStatusObserver::class])]
 class OrderQueueStatus extends Model
 {
-    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 

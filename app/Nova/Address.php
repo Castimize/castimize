@@ -24,7 +24,13 @@ class Address extends Resource
      */
     public function title()
     {
-        return sprintf('%s, %s, %s %s', $this->address_line1, $this->address_line2, $this->postal_code, $this->city?->name);
+        return sprintf(
+            '%s, %s, %s %s',
+            $this->address_line1,
+            $this->address_line2,
+            $this->postal_code,
+            $this->city?->name
+        );
     }
 
     /**

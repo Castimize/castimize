@@ -20,7 +20,7 @@ use Laravel\Nova\Panel;
 
 class Upload extends Resource
 {
-    use CommonMetaDataTrait, OrderQueueStatusFieldTrait;
+    use CommonMetaDataTrait; use OrderQueueStatusFieldTrait;
 
     /**
      * The model the resource corresponds to.

@@ -27,11 +27,12 @@ class BiggestMaterialsRevenueTableWidget extends TableWidget
 
     public function value(Filters $filters): Collection
     {
-        $currencyService = new CurrencyService;
+        $currencyService = new CurrencyService();
 
         $query = DB::table('orders')
             ->join('uploads', 'orders.id', '=', 'uploads.order_id')
-            ->selectRaw('uploads.material_name as material,
+            ->selectRaw(
+                "uploads.material_name as material,
                                    COUNT(DISTINCT orders.order_number) as orders,
                                    orders.currency_code,
                                    (
@@ -43,7 +44,7 @@ class BiggestMaterialsRevenueTableWidget extends TableWidget
                                       select SUM(manufacturer_costs) / 100
                                       from order_queue
                                       where order_queue.order_id = orders.id
-                                   ) as costs'
+                                   ) as costs"
             )
             ->whereNotNull('orders.paid_at')
             ->whereNull('orders.deleted_at')

@@ -12,6 +12,7 @@ use App\Nova\Settings\Shipping\GeneralSettings;
 use App\Services\Shippo\ShippoService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use RuntimeException;
@@ -31,10 +32,12 @@ class ShippingService
         return $this->_fromAddress;
     }
 
+    /**
+     * @return ShippingService
+     */
     public function setFromAddress(array $address): static
     {
         $this->_fromAddress = $address;
-
         return $this;
     }
 
@@ -43,29 +46,36 @@ class ShippingService
         return $this->_toAddress;
     }
 
+    /**
+     * @return $this
+     */
     public function setToAddress(array $address): static
     {
         $this->_toAddress = $address;
-
         return $this;
     }
 
-    public function __construct(public GeneralSettings $generalSettings, public DcSettings $dcSettings)
+    public function __construct(
+        public GeneralSettings $generalSettings,
+        public DcSettings $dcSettings
+    )
     {
         $this->_shippoService = app(ShippoService::class);
     }
 
     public function createShippoAddress(string $type = 'From'): Shippo_Object
     {
-        $getAddressMethod = 'get'.$type.'Address';
-        $getShipmentAddressMethod = 'getShipment'.$type.'Address';
-        $setAddressMethod = 'set'.$type.'Address';
-        $createAddressMethod = 'create'.$type.'Address';
+        $getAddressMethod = 'get' . $type . 'Address';
+        $getShipmentAddressMethod = 'getShipment' . $type . 'Address';
+        $setAddressMethod = 'set' . $type . 'Address';
+        $createAddressMethod = 'create' . $type . 'Address';
         $cacheKey = $this->_shippoService->getCacheKey($this->$getAddressMethod());
 
-        return $this->_shippoService->$setAddressMethod($this->$getAddressMethod())
-            ->$createAddressMethod(true)
-            ->$getShipmentAddressMethod();
+        //return Cache::remember($cacheKey . '_v3', 31556926, function() use ($getAddressMethod, $setAddressMethod, $createAddressMethod, $getShipmentAddressMethod) {
+            return $this->_shippoService->$setAddressMethod($this->$getAddressMethod())
+                ->$createAddressMethod(true)
+                ->$getShipmentAddressMethod();
+        //});
     }
 
     /**
@@ -73,7 +83,7 @@ class ShippingService
      */
     public function validateAddress(string $type = 'From'): array
     {
-        $getAddressMethod = 'get'.$type.'Address';
+        $getAddressMethod = 'get' . $type . 'Address';
         $shippoAddress = $this->createShippoAddress($type);
         $address = $this->$getAddressMethod();
         [$valid, $errorMessages] = $this->checkAddressValid($shippoAddress['validation_results']);
@@ -89,7 +99,7 @@ class ShippingService
             $address['country'] !== $shippoAddress['country']
         ) {
             $addressChanged = true;
-            $address['street1'] = $shippoAddress['street1'].(! empty($shippoAddress['street_no']) ? ' '.$shippoAddress['street_no'] : '');
+            $address['street1'] = $shippoAddress['street1'] . (! empty($shippoAddress['street_no']) ? ' ' . $shippoAddress['street_no'] : '');
             $address['city'] = $shippoAddress['city'];
             $address['state'] = $shippoAddress['state'];
             $address['zip'] = $shippoAddress['zip'];
@@ -116,9 +126,9 @@ class ShippingService
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
         [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results'], $shippoToAddress['test']);
         if (! $valid) {
-            $message = __('The shipping to address is invalid with the following messages').PHP_EOL;
+            $message = __('The shipping to address is invalid with the following messages') . PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
-                $message .= $errorMessage['text'].PHP_EOL;
+                $message .= $errorMessage['text'] . PHP_EOL;
             }
             throw new RuntimeException($message);
         }
@@ -142,9 +152,9 @@ class ShippingService
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
         [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results'], $shippoToAddress['test'], false);
         if (! $valid) {
-            $message = __('The shipping to address is invalid with the following messages').PHP_EOL;
+            $message = __('The shipping to address is invalid with the following messages') . PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
-                $message .= $errorMessage['text'].PHP_EOL;
+                $message .= $errorMessage['text'] . PHP_EOL;
             }
             throw new RuntimeException($message);
         }
@@ -176,9 +186,11 @@ class ShippingService
                 'importer_reference' => $orderNumber,
                 'currency' => $currency,
                 'contents_type' => $contentsType,
+                //'eori_number' => strtoupper($customerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
             ])
             ->createShipment();
         $shippoShipment = $this->_shippoService->getShipment();
+//        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 
         if ($rate === null) {
@@ -234,9 +246,9 @@ class ShippingService
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
         [$valid, $errorMessages] = $this->checkAddressValid($shippoFromAddress['validation_results'], $shippoFromAddress['test'], false);
         if (! $valid) {
-            $message = __('The shipping from address is invalid with the following messages').PHP_EOL;
+            $message = __('The shipping from address is invalid with the following messages') . PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
-                $message .= $errorMessage['text'].PHP_EOL;
+                $message .= $errorMessage['text'] . PHP_EOL;
             }
             throw new RuntimeException($message);
         }
@@ -260,6 +272,12 @@ class ShippingService
         // Make as return and bill to us
         $extra = [
             'is_return' => true,
+            //            'billing' => [
+            //                'account' => 'G2240C',
+            //                'country' => 'NL',
+            //                'type' => 'THIRD_PARTY',
+            //                'zip' => $toAddress['zip'],
+            //            ],
         ];
 
         $this->_shippoService
@@ -267,9 +285,11 @@ class ShippingService
                 'exporter_reference' => $manufacturerShipment->id,
                 'importer_reference' => $orderNumber,
                 'currency' => $currency,
+                //'eori_number' => $this->generalSettings->eoriNumber,
             ])
             ->createShipment($extra);
         $shippoShipment = $this->_shippoService->getShipment();
+//        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 
         if ($rate === null) {
@@ -294,7 +314,7 @@ class ShippingService
             ->createLabel($manufacturerShipment->id, $rate['object_id']);
         $transaction = $this->_shippoService->getTransaction();
 
-
+        //Log::info(print_r($transaction, true));
         if ($transaction && $transaction['status'] === 'SUCCESS') {
             return $this->_shippoService->toArray();
         }
@@ -387,15 +407,16 @@ class ShippingService
     private function getServicelevelToken(string $shippingCountry): string
     {
         $country = Country::with('logisticsZone')->where('alpha2', $shippingCountry)->first();
-
         return $country->logisticsZone->shipping_servicelevel_token;
     }
 
     private function checkAddressValid($validation_results, bool $test = false, bool $frontend = true): array
     {
         $valid = 1;
-        if (is_array($validation_results) && app()->environment('production')) {
-            $valid = $validation_results['is_valid'] ? 1 : 0;
+        if (is_array($validation_results)) {
+            if (app()->environment('production')) {
+                $valid = $validation_results['is_valid'] ? 1 : 0;
+            }
         }
         $errorMessages = [];
         if (isset($validation_results['messages']) && $validation_results['messages']) {
@@ -411,7 +432,6 @@ class ShippingService
                 ];
             }
         }
-
         return [$valid, $errorMessages];
     }
 }

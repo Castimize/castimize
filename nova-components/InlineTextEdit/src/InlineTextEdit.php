@@ -19,7 +19,6 @@ class InlineTextEdit extends Field
         $this->withMeta([
             'resourceId' => $resource->getKey(),
         ]);
-
         return parent::resolveAttribute($resource, $attribute);
     }
 
@@ -41,7 +40,7 @@ class InlineTextEdit extends Field
         ]);
     }
 
-    public function maxWidth(?int $maxWidthPx = null): InlineTextEdit
+    public function maxWidth(int|null $maxWidthPx = null): InlineTextEdit
     {
         return $this->withMeta([
             'maxWidth' => $maxWidthPx,

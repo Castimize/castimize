@@ -76,9 +76,7 @@ class ReprintReason extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [
-
-        ];
+        return [];
     }
 
     /**

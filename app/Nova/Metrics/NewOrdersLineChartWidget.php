@@ -36,7 +36,8 @@ class NewOrdersLineChartWidget extends LineChartWidget
         $labels = [];
         $totals = [];
         $query = DB::table('orders')
-            ->selectRaw("DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
+            ->selectRaw(
+                "DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
                                    COUNT(order_number) as total"
             )
             ->whereNotNull('orders.paid_at')

@@ -16,7 +16,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([MaterialObserver::class])]
 class Material extends Model
 {
-    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 

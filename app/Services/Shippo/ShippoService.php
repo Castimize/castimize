@@ -63,8 +63,9 @@ class ShippoService
         public GeneralSettings $generalSettings,
         public CustomsItemSettings $customsItemSettings,
         public DcSettings $dcSettings,
-        public PickupSettings $pickupSettings,
-    ) {
+        public PickupSettings $pickupSettings
+    )
+    {
         $this->initPackageTypes();
         $this->initCarriers();
         $this->initServices();
@@ -88,7 +89,6 @@ class ShippoService
     public function setFromAddress(array $address): static
     {
         $this->_fromAddress = $address;
-
         return $this;
     }
 
@@ -103,7 +103,6 @@ class ShippoService
     public function setToAddress(array $address): static
     {
         $this->_toAddress = $address;
-
         return $this;
     }
 
@@ -118,7 +117,6 @@ class ShippoService
     public function setShipmentFromAddress(Shippo_Object $shipmentFromAddress): static
     {
         $this->_shipmentFromAddress = $shipmentFromAddress;
-
         return $this;
     }
 
@@ -133,7 +131,6 @@ class ShippoService
     public function setShipmentToAddress(Shippo_Object $shipmentToAddress): static
     {
         $this->_shipmentToAddress = $shipmentToAddress;
-
         return $this;
     }
 
@@ -188,7 +185,6 @@ class ShippoService
             request: $this->_fromAddress,
             response: json_decode($this->_shipmentFromAddress, true, 512, JSON_THROW_ON_ERROR),
         );
-
         return $this;
     }
 
@@ -205,10 +201,12 @@ class ShippoService
             request: $this->_toAddress,
             response: json_decode($this->_shipmentToAddress, true, 512, JSON_THROW_ON_ERROR),
         );
-
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function createOrderLineItems($lineItems): static
     {
         foreach ($lineItems as $lineItem) {
@@ -225,6 +223,9 @@ class ShippoService
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function createOrder(Order $order): static
     {
         $weight = 0;
@@ -261,7 +262,6 @@ class ShippoService
             'mass_unit' => $params['mass_unit'],
             'weight' => $params['weight'],
         ]);
-
         return $this;
     }
 
@@ -291,7 +291,6 @@ class ShippoService
         ]);
 
         $this->_customsItems[] = $customsItem;
-
         return $this;
     }
 
@@ -307,8 +306,10 @@ class ShippoService
             'exporter_reference' => $params['exporter_reference'],
             'importer_reference' => $params['importer_reference'],
             'inco_term' => ShippoCustomsDeclarationIncoTermsEnum::DDU->value,
+            //            'b13a_filing_option' => 'NOT_REQUIRED',
             'currency' => $params['currency'],
             'exporter_identification' => [
+                //'eori_number' => $params['eori_number'],
                 'tax_id' => [
                     'number' => $this->generalSettings->taxNumber,
                     'type' => $this->generalSettings->taxType,
@@ -316,7 +317,6 @@ class ShippoService
             ],
             'items' => $this->_customsItems,
         ]);
-
         return $this;
     }
 
@@ -371,6 +371,24 @@ class ShippoService
         return $this;
     }
 
+//    /**
+//     * Create the shipping label transaction
+//     *
+//     * @param $shippoShipment
+//     * @param int $customerShipmentId
+//     * @param string $servicelevelToken
+//     * @return Shippo_Object
+//     */
+//    public function createLabelInstant($shippoShipment, int $customerShipmentId, string $servicelevelToken): Shippo_Object
+//    {
+//        return Shippo_Transaction::create([
+//            'shipment' => $shippoShipment,
+//            'label_file_type' => 'PDF',
+//            'metadata' => sprintf('customer_shipment:%s', $customerShipmentId),
+//            'servicelevel_token' => $servicelevelToken,
+//        ]);
+//    }
+
     public function createPickup(array $params): Shippo_Object
     {
         return Shippo_Pickup::create([
@@ -405,8 +423,8 @@ class ShippoService
     {
         $headers = (new Shippo_ApiRequestor(''))->getRequestHeaders();
         LogRequestService::logRequestOutgoing(
-            pathInfo: 'https://api.goshippo.com/'.$pathInfo,
-            requestUri: 'https://api.goshippo.com/'.$requestUri,
+            pathInfo: 'https://api.goshippo.com/' . $pathInfo,
+            requestUri: 'https://api.goshippo.com/' . $requestUri,
             userAgent: 'Shippo/v1 PHPBindings/0.0.1',
             method: $method,
             headers: $headers,

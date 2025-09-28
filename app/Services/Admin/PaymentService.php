@@ -24,14 +24,18 @@ class PaymentService
                 ],
             )->first();
             if (! $stripeCustomer) {
-                $stripeCustomer = $this->stripeService->createCustomer(customer: $customer);
+                $stripeCustomer = $this->stripeService->createCustomer(
+                    customer: $customer,
+                );
             }
             $stripeData = $customer->stripe_data ?? [];
             $stripeData['stripe_id'] = $stripeCustomer->id;
             $customer->stripe_data = $stripeData;
             $customer->save();
         }
-        $setupIntent = $this->stripeService->createSetupIntent(customer: $customer);
+        $setupIntent = $this->stripeService->createSetupIntent(
+            customer: $customer,
+        );
 
         $stripeData = $customer->stripe_data;
         $stripeData['setup_intent_id'] = $setupIntent->id;

@@ -15,7 +15,8 @@ class PaymentsApiController extends ApiController
     public function __construct(
         private PaymentService $paymentService,
         private ShopOwnersService $shopOwnersService,
-    ) {}
+    ) {
+    }
 
     public function createSetupIntent(int $customerId): JsonResponse
     {
@@ -61,9 +62,9 @@ class PaymentsApiController extends ApiController
 
         } catch (Exception $exception) {
             LogRequestService::addResponse(request(), [
-                'message' => $exception->getMessage().PHP_EOL.$exception->getLine().PHP_EOL.$exception->getFile(),
+                'message' => $exception->getMessage() . PHP_EOL . $exception->getFile(),
             ], 500);
-            abort(Response::HTTP_BAD_REQUEST, 'Unable to cancel mandate with error: '.$exception->getMessage());
+            abort(Response::HTTP_BAD_REQUEST, 'Unable to cancel mandate with error: ' . $exception->getMessage());
         }
 
         return response(null, Response::HTTP_NO_CONTENT);

@@ -37,7 +37,12 @@ class User extends Resource
      */
     public function title()
     {
-        return sprintf('%s (%s %s)', $this->username, $this->first_name, $this->last_name);
+        return sprintf(
+            '%s (%s %s)',
+            $this->username,
+            $this->first_name,
+            $this->last_name
+        );
     }
 
     /**
@@ -175,9 +180,7 @@ class User extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [
-
-        ];
+        return [];
     }
 
     /**

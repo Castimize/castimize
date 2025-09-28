@@ -15,7 +15,6 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Laravel\Nova\Exceptions\HelperNotSupported;
 use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\FormData;
@@ -133,7 +132,6 @@ class CustomerShipment extends Resource
     public static function detailQuery(NovaRequest $request, $query)
     {
         $query->withCount('orderQueues as order_queues_count');
-
         return parent::detailQuery($request, $query);
     }
 
@@ -141,7 +139,6 @@ class CustomerShipment extends Resource
      * Get the fields displayed by the resource.
      *
      * @return array
-     * @throws HelperNotSupported
      */
     public function fields(NovaRequest $request)
     {
@@ -152,10 +149,9 @@ class CustomerShipment extends Resource
                 $links = [];
                 foreach ($model->orderQueues as $orderQueue) {
                     if (! array_key_exists($orderQueue->order_id, $links)) {
-                        $links[$orderQueue->order_id] = '<a class="link-default" href="/admin/resources/orders/'.$orderQueue->order_id.'" target="_blank">'.$orderQueue->order->order_number.'</a>';
+                        $links[$orderQueue->order_id] = '<a class="link-default" href="/admin/resources/orders/' . $orderQueue->order_id . '" target="_blank">' . $orderQueue->order->order_number . '</a>';
                     }
                 }
-
                 return implode(', ', $links);
             })
                 ->asHtml()
@@ -166,7 +162,6 @@ class CustomerShipment extends Resource
                 if (empty($this->tracking_url)) {
                     return $this->tracking_number;
                 }
-
                 return sprintf('<a class="link-default" href="%s" target="_blank">%s</a>', $this->tracking_url, $this->tracking_number);
             })
                 ->asHtml()
@@ -177,8 +172,7 @@ class CustomerShipment extends Resource
                 if (empty($this->label_url)) {
                     return '';
                 }
-
-                return '<a class="link-default" href="'.$this->label_url.'" target="_blank">'.__('Label').'</a>';
+                return '<a class="link-default" href="' . $this->label_url . '" target="_blank">' . __('Label') . '</a>';
             })
                 ->asHtml()
                 ->exceptOnForms()
@@ -188,8 +182,7 @@ class CustomerShipment extends Resource
                 if (empty($this->commercial_invoice_url)) {
                     return '';
                 }
-
-                return '<a class="link-default" href="'.$this->commercial_invoice_url.'" target="_blank">'.__('Commercial invoice').'</a>';
+                return '<a class="link-default" href="' . $this->commercial_invoice_url . '" target="_blank">' . __('Commercial invoice') . '</a>';
             })
                 ->asHtml()
                 ->onlyOnDetail()
@@ -199,8 +192,7 @@ class CustomerShipment extends Resource
                 if (empty($this->qr_code_url)) {
                     return '';
                 }
-
-                return '<a class="link-default" href="'.$this->qr_code_url.'" target="_blank">'.__('QR code').'</a>';
+                return '<a class="link-default" href="' . $this->qr_code_url . '" target="_blank">' . __('QR code') . '</a>';
             })
                 ->asHtml()
                 ->onlyOnDetail()
@@ -262,16 +254,16 @@ class CustomerShipment extends Resource
      */
     public function fieldsForCreate(NovaRequest $request)
     {
-        $dcSettings = (new DcSettings);
-        $parcelSettings = (new ParcelSettings);
+        $dcSettings = (new DcSettings());
+        $parcelSettings = (new ParcelSettings());
 
         return [
-            SelectWithOverview::make(__('PO\'s'), 'selectedPOs')
+            SelectWithOverview::make('PO\'s', 'selectedPOs')
                 ->placeholder(__('Select PO\'s'))
                 ->options(\App\Models\OrderQueue::getAtDcOrderQueueOptions())
                 ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders()),
 
-            Heading::make('<h3 class="font-normal text-xl">'.__('From address').'</h3>')->asHtml(),
+            Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')->asHtml(),
 
             Text::make(__('Name'), 'from_address_name')
                 ->default($dcSettings->name),
@@ -303,7 +295,7 @@ class CustomerShipment extends Resource
             Text::make(__('Email'), 'from_address_email')
                 ->default($dcSettings->email),
 
-            Heading::make('<h3 class="font-normal text-xl">'.__('To address').'</h3>')->asHtml(),
+            Heading::make('<h3 class="font-normal text-xl">' . __('To address') . '</h3>')->asHtml(),
 
             Text::make(__('Name'), 'to_address_name')
                 ->dependsOn(
@@ -311,12 +303,11 @@ class CustomerShipment extends Resource
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if (is_array($formData->selectedPOs) && count($formData->selectedPOs) > 0) {
                             $firstPO = $formData->selectedPOs[0];
-                            $toAddress = Cache::remember('selectedPOs-'.$firstPO.'-toAddress', 60, function () use ($firstPO) {
+                            $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
                                 $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
                                 if ($orderQueue === null) {
                                     return [];
                                 }
-
                                 return $orderQueue->order->shipping_address;
                             });
                             $field->value = $toAddress['name'];
@@ -330,12 +321,11 @@ class CustomerShipment extends Resource
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if (is_array($formData->selectedPOs) && count($formData->selectedPOs) > 0) {
                             $firstPO = $formData->selectedPOs[0];
-                            $toAddress = Cache::remember('selectedPOs-'.$firstPO.'-toAddress', 60, function () use ($firstPO) {
+                            $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
                                 $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
                                 if ($orderQueue === null) {
                                     return [];
                                 }
-
                                 return $orderQueue->order->shipping_address;
                             });
                             $field->value = $toAddress['company'];
@@ -349,12 +339,11 @@ class CustomerShipment extends Resource
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if (is_array($formData->selectedPOs) && count($formData->selectedPOs) > 0) {
                             $firstPO = $formData->selectedPOs[0];
-                            $toAddress = Cache::remember('selectedPOs-'.$firstPO.'-toAddress', 60, function () use ($firstPO) {
+                            $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
                                 $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
                                 if ($orderQueue === null) {
                                     return [];
                                 }
-
                                 return $orderQueue->order->shipping_address;
                             });
                             $field->value = $toAddress['address_line1'];
@@ -368,12 +357,11 @@ class CustomerShipment extends Resource
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if (is_array($formData->selectedPOs) && count($formData->selectedPOs) > 0) {
                             $firstPO = $formData->selectedPOs[0];
-                            $toAddress = Cache::remember('selectedPOs-'.$firstPO.'-toAddress', 60, function () use ($firstPO) {
+                            $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
                                 $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
                                 if ($orderQueue === null) {
                                     return [];
                                 }
-
                                 return $orderQueue->order->shipping_address;
                             });
                             $field->value = $toAddress['address_line2'];
@@ -387,12 +375,11 @@ class CustomerShipment extends Resource
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if (is_array($formData->selectedPOs) && count($formData->selectedPOs) > 0) {
                             $firstPO = $formData->selectedPOs[0];
-                            $toAddress = Cache::remember('selectedPOs-'.$firstPO.'-toAddress', 60, function () use ($firstPO) {
+                            $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
                                 $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
                                 if ($orderQueue === null) {
                                     return [];
                                 }
-
                                 return $orderQueue->order->shipping_address;
                             });
                             $field->value = $toAddress['postal_code'];
@@ -406,12 +393,11 @@ class CustomerShipment extends Resource
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if (is_array($formData->selectedPOs) && count($formData->selectedPOs) > 0) {
                             $firstPO = $formData->selectedPOs[0];
-                            $toAddress = Cache::remember('selectedPOs-'.$firstPO.'-toAddress', 60, function () use ($firstPO) {
+                            $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
                                 $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
                                 if ($orderQueue === null) {
                                     return [];
                                 }
-
                                 return $orderQueue->order->shipping_address;
                             });
                             $field->value = $toAddress['city'];
@@ -425,12 +411,11 @@ class CustomerShipment extends Resource
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if (is_array($formData->selectedPOs) && count($formData->selectedPOs) > 0) {
                             $firstPO = $formData->selectedPOs[0];
-                            $toAddress = Cache::remember('selectedPOs-'.$firstPO.'-toAddress', 60, function () use ($firstPO) {
+                            $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
                                 $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
                                 if ($orderQueue === null) {
                                     return [];
                                 }
-
                                 return $orderQueue->order->shipping_address;
                             });
                             $field->value = $toAddress['state'];
@@ -444,12 +429,11 @@ class CustomerShipment extends Resource
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if (is_array($formData->selectedPOs) && count($formData->selectedPOs) > 0) {
                             $firstPO = $formData->selectedPOs[0];
-                            $toAddress = Cache::remember('selectedPOs-'.$firstPO.'-toAddress', 60, function () use ($firstPO) {
+                            $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
                                 $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
                                 if ($orderQueue === null) {
                                     return [];
                                 }
-
                                 return $orderQueue->order->shipping_address;
                             });
                             $field->value = $toAddress['country'];
@@ -463,12 +447,11 @@ class CustomerShipment extends Resource
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if (is_array($formData->selectedPOs) && count($formData->selectedPOs) > 0) {
                             $firstPO = $formData->selectedPOs[0];
-                            $toAddress = Cache::remember('selectedPOs-'.$firstPO.'-toAddress', 60, function () use ($firstPO) {
+                            $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
                                 $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
                                 if ($orderQueue === null) {
                                     return [];
                                 }
-
                                 return $orderQueue->order->shipping_address;
                             });
                             $field->value = $toAddress['phone'];
@@ -482,12 +465,11 @@ class CustomerShipment extends Resource
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if (is_array($formData->selectedPOs) && count($formData->selectedPOs) > 0) {
                             $firstPO = $formData->selectedPOs[0];
-                            $toAddress = Cache::remember('selectedPOs-'.$firstPO.'-toAddress', 60, function () use ($firstPO) {
+                            $toAddress = Cache::remember('selectedPOs-' . $firstPO . '-toAddress', 60, function () use ($firstPO) {
                                 $orderQueue = \App\Models\OrderQueue::with(['order'])->find($firstPO);
                                 if ($orderQueue === null) {
                                     return [];
                                 }
-
                                 return $orderQueue->order->shipping_address;
                             });
                             $field->value = $toAddress['email'];
@@ -495,7 +477,7 @@ class CustomerShipment extends Resource
                     }
                 ),
 
-            Heading::make('<h3 class="font-normal text-xl">'.__('Parcel settings').'</h3>')->asHtml(),
+            Heading::make('<h3 class="font-normal text-xl">' . __('Parcel settings') . '</h3>')->asHtml(),
 
             Select::make(__('Distance unit'), 'parcel_distance_unit')
                 ->default($parcelSettings->distanceUnit)
@@ -534,13 +516,12 @@ class CustomerShipment extends Resource
      * Get the filters available for the resource.
      *
      * @return array
-     *
      * @throws Exception
      */
     public function filters(NovaRequest $request)
     {
         return [
-            (new CreatedAtDaterangepickerFilter(DateHelper::ALL))
+            (new CreatedAtDaterangepickerFilter( DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
         ];
     }

@@ -28,9 +28,11 @@ class SetOrderPaid implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public PaymentIntent $paymentIntent, public ?int $logRequestId = null)
-    {
-        $this->ordersService = new OrdersService;
+    public function __construct(
+        public PaymentIntent $paymentIntent,
+        public ?int $logRequestId = null,
+    ) {
+        $this->ordersService = new OrdersService();
         $this->uploadsService = app(UploadsService::class);
     }
 
@@ -64,13 +66,13 @@ class SetOrderPaid implements ShouldQueue
                 }
             }
         } catch (Throwable $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
         }
     }
 }

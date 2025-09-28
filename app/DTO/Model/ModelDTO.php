@@ -33,7 +33,8 @@ readonly class ModelDTO
         public ?float $modelScale,
         public ?array $categories,
         public ?array $metaData,
-    ) {}
+    ) {
+    }
 
     public static function fromApiRequest(Request $request, ?int $customerId = null): ModelDTO
     {
@@ -71,7 +72,7 @@ readonly class ModelDTO
             modelBoxVolume: $request->box_volume,
             surfaceArea: $request->surface_area,
             modelParts: $request->model_parts ?? 1,
-            modelScale: $request->scale ? number_format(round((float) $request->scale, 4), 4) : 1,
+            modelScale: (float) ($request->scale ? number_format(round((float) $request->scale, 4), 4) : 1),
             categories: $categories,
             metaData: $request->meta_data ?? null,
         );
@@ -97,7 +98,7 @@ readonly class ModelDTO
             $thumbFileName = $file->getClientOriginalName();
             $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
             $thumbFileExtension = $file->getClientOriginalExtension();
-            $thumbName = time().'_'.str_replace(' ', '_', $thumbFileNameWithoutExt).'.'.$thumbFileExtension;
+            $thumbName = time() . '_' . str_replace(' ', '_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
             Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
         } else {
             $uploadedThumb = false;
@@ -150,7 +151,7 @@ readonly class ModelDTO
             $thumbFileName = $file->getClientOriginalName();
             $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
             $thumbFileExtension = $file->getClientOriginalExtension();
-            $thumbName = time().'_'.str_replace(' ', '_', $thumbFileNameWithoutExt).'.'.$thumbFileExtension;
+            $thumbName = time() . '_' . str_replace(' ', '_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
             Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
         }
 
@@ -186,7 +187,8 @@ readonly class ModelDTO
      */
     private static function defineThumbImageName(Request $request): string|array
     {
-        $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
+        $thumbName = sprintf(
+            '%s_%s%s%s%s%s.thumb.png',
             str_replace('_resized', '', $request->file_name),
             $request->printer_id ?? 3,
             $request->wp_id ?? 1,
@@ -199,7 +201,8 @@ readonly class ModelDTO
         $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
         $fileHeaders = get_headers($fileThumb);
         if (str_contains($fileHeaders[0], '404')) {
-            $thumbName = sprintf('%s_%s%s%s%s%s.thumb.png',
+            $thumbName = sprintf(
+                '%s_%s%s%s%s%s.thumb.png',
                 str_replace('_resized', '', $request->file_name),
                 $request->printer_id ?? 3,
                 1,
@@ -212,13 +215,12 @@ readonly class ModelDTO
             $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
             $fileHeaders = get_headers($fileThumb);
             if (str_contains($fileHeaders[0], '404')) {
-                $model = Model::where('file_name', 'like', '%'.str_replace('_resized', '', $request->file_name).'%')->first();
+                $model = Model::where('file_name', 'like', '%' . str_replace('_resized', '', $request->file_name) . '%')->first();
                 if ($model) {
                     $thumbName = str_replace(env('APP_SITE_STL_UPLOAD_DIR'), '', $model->thumb_name);
                 }
             }
         }
-
         return $thumbName;
     }
 }

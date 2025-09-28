@@ -292,7 +292,7 @@ class OrderDTO
 
         return new self(
             customerId: $customer->wp_id,
-            customerStripeId: array_key_exists('stripe_id', $stripeData) ? $stripeData['stripe_id'] : null,
+            customerStripeId: $stripeData['stripe_id'] ?? null,
             shopReceiptId: (int) $receipt->receipt_id,
             source: 'etsy',
             wpId: null,

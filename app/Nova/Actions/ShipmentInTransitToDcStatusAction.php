@@ -14,7 +14,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class ShipmentInTransitToDcStatusAction extends Action
 {
-    use InteractsWithQueue, Queueable;
+    use InteractsWithQueue;
+    use Queueable;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -52,7 +53,8 @@ class ShipmentInTransitToDcStatusAction extends Action
     public function fields(NovaRequest $request)
     {
         return [
-            DateTime::make(__('Date sent at'), 'sent_at')->help(__('Leave empty to set sent_at at now()')),
+            DateTime::make(__('Date sent at'), 'sent_at')
+                ->help(__('Leave empty to set sent_at at now()')),
         ];
     }
 }

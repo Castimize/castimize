@@ -29,7 +29,8 @@ trait CustomMetricsCharts
         $query = DB::table('orders')
             ->join('uploads', 'orders.id', '=', 'uploads.order_id')
             ->join('order_queue', 'orders.id', '=', 'order_queue.order_id')
-            ->selectRaw("DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
+            ->selectRaw(
+                "DATE_FORMAT(orders.created_at,'%Y-%m-%d') as entry_date,
                                    orders.currency_code,
                                    (SUM(uploads.total) / 100) as revenue,
                                    (SUM(order_queue.manufacturer_costs) / 100) as costs,

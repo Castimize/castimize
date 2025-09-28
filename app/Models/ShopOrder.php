@@ -9,7 +9,9 @@ use Wildside\Userstamps\Userstamps;
 
 class ShopOrder extends Model
 {
-    use HasFactory, SoftDeletes, Userstamps;
+    use HasFactory;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 

@@ -18,7 +18,11 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([CustomerObserver::class])]
 class Customer extends Model
 {
-    use HasFactory, ModelHasAddresses, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasFactory;
+    use ModelHasAddresses;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     public $wpCustomer = null;
 

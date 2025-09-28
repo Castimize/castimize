@@ -170,7 +170,8 @@ class EtsyApiController extends ApiController
                     shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
                         shopId: $shopId,
                         country: $country,
-                        shippingProfileId: $shippingProfileDTO->shippingProfileId),
+                        shippingProfileId: $shippingProfileDTO->shippingProfileId,
+                    ),
                 );
 
                 $shippingProfileDTO->shippingProfileDestinations->push($shippingProfileDestinationDTO);
@@ -204,5 +205,17 @@ class EtsyApiController extends ApiController
         }
 
         return response()->json($response);
+    }
+
+    public function getShopReceipt(int $customerId, int $receiptId): JsonResponse
+    {
+        $customer = Customer::with('shopOwner.shops')->find($customerId);
+        $shop = $customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
+        $shopReceipt = $this->etsyService->getShopReceipt(
+            shop: $shop,
+            receiptId: $receiptId,
+        );
+
+        return response()->json($shopReceipt->toArray());
     }
 }

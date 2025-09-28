@@ -21,7 +21,7 @@ class ModelsService
     public function getModelsPaginated($request, Customer $customer)
     {
         // Page Length
-        $pageNumber = ($request->start / $request->length) + 1;
+        $pageNumber = ( $request->start / $request->length ) + 1;
         $pageLength = (int) $request->length;
         $skip = (int) (($pageNumber - 1) * $pageLength);
         $orderColumn = $request->order_column;
@@ -98,7 +98,6 @@ class ModelsService
             }
 
             $models = $modelsQuery->get();
-
             return [
                 'items' => ModelResource::collection($models),
                 'filtered' => $recordsFiltered,
@@ -107,7 +106,7 @@ class ModelsService
         });
     }
 
-    public function storeModelFromApi($request, ?Customer $customer = null): ?Model
+    public function storeModelFromApi($request, ?Customer $customer = null): Model|null
     {
         $scale = $request->scale ? number_format(round((float) $request->scale, 4), 4) : 1;
 
@@ -144,7 +143,7 @@ class ModelsService
                 Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
             }
         } catch (Exception $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
 
         if ($customer) {
@@ -157,7 +156,7 @@ class ModelsService
             }
         } else {
             $model = Model::where('name', $request->original_file_name)
-                ->where('file_name', 'wp-content/uploads/p3d/'.$fileName)
+                ->where('file_name', 'wp-content/uploads/p3d/' . $fileName)
                 ->where('model_scale', $scale ?? 1)
                 ->first();
         }
@@ -200,7 +199,7 @@ class ModelsService
         return $model;
     }
 
-    public function storeModelFromModelDTO(ModelDTO $modelDTO, ?Customer $customer = null): ?Model
+    public function storeModelFromModelDTO(ModelDTO $modelDTO, ?Customer $customer = null): Model|null
     {
         $material = Material::where('wp_id', $modelDTO->wpId)->first();
 
@@ -225,7 +224,7 @@ class ModelsService
                 Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
             }
         } catch (Exception $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getLine().PHP_EOL.$e->getTraceAsString());
+            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
 
         if ($customer) {
@@ -256,7 +255,7 @@ class ModelsService
             }
         } else {
             $model = Model::where('name', $modelDTO->name)
-                ->where('file_name', 'wp-content/uploads/p3d/'.$modelDTO->fileName)
+                ->where('file_name', 'wp-content/uploads/p3d/' . $modelDTO->fileName)
                 ->where('model_scale', $modelDTO->modelScale)
                 ->first();
 
@@ -326,6 +325,8 @@ class ModelsService
 
     public function updateModelFromModelDTO(Model $model, ModelDTO $modelDTO, ?int $customerId = null): Model
     {
+        $etsyService = (new EtsyService());
+
         $model->model_name = $modelDTO->modelName;
         if ($modelDTO->categories) {
             $model->categories = $modelDTO->categories;
@@ -340,15 +341,17 @@ class ModelsService
 
         $model->materials()->sync($modelDTO->materials);
 
-        return $this->isShopOwnerModel(
+        $model = $this->isShopOwnerModel(
             model: $model,
             modelDTO: $modelDTO,
         );
+
+        return $model;
     }
 
     private function isShopOwnerModel(Model $model, ModelDTO $modelDTO)
     {
-        $etsyService = (new EtsyService);
+        $etsyService = (new EtsyService());
 
         if (($modelDTO->shopListingId || $model->shopListingModel) && $model->customer->shopOwner) {
             $shop = $model->customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)
@@ -360,12 +363,7 @@ class ModelsService
                     $listing = $etsyService->getListing($shop, $shopListingId);
                     if (! $listing) {
                         Log::error('Listing not found');
-                        $model->load([
-                            'materials',
-                            'customer.shopOwner.shops',
-                            'shopListingModel',
-                        ]);
-
+                        $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
                         return $model;
                     }
                     $listingImages = $etsyService->getListingImages($shop, $listing->listing_id);
@@ -379,23 +377,19 @@ class ModelsService
                         listingImages: $listingImages ? collect($listingImages->data) : null,
                     );
                     if ($model->shopListingModel) {
-                        (new ShopListingModelService)->updateShopListingModel(
+                        (new ShopListingModelService())->updateShopListingModel(
                             shopListingModel: $model->shopListingModel,
                             listingDTO: $listingDTO,
                         );
                     } else {
-                        (new ShopListingModelService)->createShopListingModel(
+                        (new ShopListingModelService())->createShopListingModel(
                             shop: $shop,
                             model: $model,
                             listingDTO: $listingDTO,
                         );
                     }
 
-                    $model->load([
-                        'materials',
-                        'customer.shopOwner.shops',
-                        'shopListingModel',
-                    ]);
+                    $model->load(['materials', 'customer.shopOwner.shops', 'shopListingModel']);
 
                     $this->syncModelToShop($model);
                 }
@@ -412,9 +406,9 @@ class ModelsService
             foreach ($shops as $shop) {
                 if ($shop->active && $shop->shop === ShopOwnerShopsEnum::Etsy->value) {
                     try {
-                        (new EtsyService)->syncListing($shop, $model);
+                        (new EtsyService())->syncListing($shop, $model);
                     } catch (Exception $e) {
-                        Log::error($e->getMessage().PHP_EOL.$e->getLine().PHP_EOL.$e->getTraceAsString());
+                        Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                     }
                 }
             }
@@ -428,9 +422,9 @@ class ModelsService
             foreach ($shops as $shop) {
                 if ($shop->active && $shop->shop === ShopOwnerShopsEnum::Etsy->value && $model->has('shopListingModel')) {
                     try {
-                        (new EtsyService)->deleteListing($shop, $model->shopListingModel->shop_listing_id);
+                        (new EtsyService())->deleteListing($shop, $model->shopListingModel->shop_listing_id);
                     } catch (Exception $e) {
-                        Log::error($e->getMessage().PHP_EOL.$e->getLine().PHP_EOL.$e->getTraceAsString());
+                        Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                     }
                 }
             }

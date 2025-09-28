@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use App\Models\Price;
-use App\Services\Admin\CurrencyService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -13,8 +12,6 @@ class CalculatedPriceResource extends JsonResource
 
     public function toArray(Request $request): array
     {
-        $currencyService = app(CurrencyService::class);
-
         return [
             'currency' => $request->currency,
             'printer_id' => $request->printer_id ?? null,

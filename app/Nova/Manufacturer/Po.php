@@ -3,6 +3,7 @@
 namespace App\Nova\Manufacturer;
 
 use App\Enums\Admin\OrderStatusesEnum;
+use App\Models\OrderQueue;
 use App\Nova\Actions\DownloadModelsAction;
 use App\Nova\Filters\ContractDateDaterangepickerFilter;
 use App\Nova\Filters\EntryDateDaterangepickerFilter;
@@ -27,14 +28,14 @@ use SLASH2NL\NovaBackButton\NovaBackButton;
 
 class Po extends Resource
 {
-    use CommonMetaDataTrait, ManufacturerPOFieldsTrait, OrderQueueStatusFieldTrait;
+    use CommonMetaDataTrait; use OrderQueueStatusFieldTrait; use ManufacturerPOFieldsTrait;
 
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\OrderQueue>
+     * @var class-string<OrderQueue>
      */
-    public static $model = \App\Models\OrderQueue::class;
+    public static $model = OrderQueue::class;
 
     /**
      * Get the displayable label of the resource.
@@ -154,9 +155,6 @@ class Po extends Resource
     public function fields(NovaRequest $request)
     {
         return $this->manufacturerPOFields();
-        //            $this->getStatusField(),
-        //
-        //            $this->getStatusCheckField(),
     }
 
     /**
@@ -183,16 +181,15 @@ class Po extends Resource
      * Get the filters available for the resource.
      *
      * @return array
-     *
      * @throws Exception
      */
     public function filters(NovaRequest $request)
     {
         return [
-            (new MaterialFilter),
+            (new MaterialFilter()),
             EntryDateDaterangepickerFilter::make(),
             ContractDateDaterangepickerFilter::make(),
-            (new OrderQueueOrderStatusFilter),
+            (new OrderQueueOrderStatusFilter()),
         ];
     }
 

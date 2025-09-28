@@ -24,9 +24,11 @@ class UpdateOrderFromDTO implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public OrderDTO $orderDto, public ?int $logRequestId = null)
-    {
-        $this->ordersService = new OrdersService;
+    public function __construct(
+        public OrderDTO $orderDto,
+        public ?int $logRequestId = null,
+    ) {
+        $this->ordersService = new OrdersService();
     }
 
     /**
@@ -43,13 +45,13 @@ class UpdateOrderFromDTO implements ShouldQueue
         try {
             $this->ordersService->updateOrderFromDto($order, $this->orderDto);
         } catch (Throwable $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
         }
     }
 }

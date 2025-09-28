@@ -15,14 +15,15 @@ class CheckOrderAllRejected implements ShouldQueue
 
     public function __construct(
         private Order $order,
-    ) {}
+    ) {
+    }
 
     public function handle(): void
     {
         $cacheKey = sprintf('create-order-all-rejected-job-%s', $this->order->id);
         $orderQueues = $this->order->orderQueues()->with(['rejection', 'upload'])->get();
 
-        $orderQueuesService = new OrderQueuesService;
+        $orderQueuesService = new OrderQueuesService();
         $toRejectOrderQueues = [];
         foreach ($orderQueues as $orderQueue) {
             if ($orderQueue->rejection) {
@@ -32,7 +33,7 @@ class CheckOrderAllRejected implements ShouldQueue
         }
 
         if (! $this->order->has_manual_refund) {
-            $ordersService = new OrdersService;
+            $ordersService = new OrdersService();
             $ordersService->handleRejectionsAndRefund($this->order, $toRejectOrderQueues);
         }
 

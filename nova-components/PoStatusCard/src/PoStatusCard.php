@@ -16,7 +16,6 @@ class PoStatusCard extends Card
     public function statuses(array $statuses): PoStatusCard
     {
         $count = count($statuses);
-
         return $this->withMeta([
             'statuses' => $statuses,
             'statusesCount' => $count,

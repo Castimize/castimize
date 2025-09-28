@@ -21,7 +21,12 @@ class RangesFilter extends Filter
     /**
      * Create a new filter instance.
      */
-    public function __construct(protected string $column) {}
+    public function __construct(
+        protected string $column
+    )
+    {
+
+    }
 
     /**
      * Apply the filter to the given query.

@@ -15,7 +15,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class PoInProductionStatusAction extends Action
 {
-    use InteractsWithQueue, Queueable;
+    use InteractsWithQueue;
+    use Queueable;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -34,7 +35,7 @@ class PoInProductionStatusAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService;
+        $orderQueuesService = new OrderQueuesService();
         foreach ($models as $model) {
             $hasEndStatus = [];
             /** @var $model OrderQueue */
@@ -52,10 +53,16 @@ class PoInProductionStatusAction extends Action
         }
         foreach ($models as $model) {
             if (! $model->manufacturerCost) {
-                $manufacturerCost = auth()->user()->manufacturer->costs->where('active', true)->where('material_id', $model->upload->material_id)->first();
+                $manufacturerCost = auth()
+                    ->user()
+                    ->manufacturer
+                    ->costs
+                    ->where('active', true)
+                    ->where('material_id', $model->upload->material_id)
+                    ->first();
                 if ($manufacturerCost) {
                     $model->manufacturer_cost_id = $manufacturerCost->id;
-                    $model->manufacturer_costs = (new CalculatePricesService)->calculateCostsOfModel(
+                    $model->manufacturer_costs = (new CalculatePricesService())->calculateCostsOfModel(
                         $manufacturerCost,
                         $model->upload->model_volume_cc,
                         $model->upload->model_surface_area_cm2,

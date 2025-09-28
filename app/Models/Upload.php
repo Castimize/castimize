@@ -19,7 +19,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy([UploadObserver::class])]
 class Upload extends Model
 {
-    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 
@@ -214,7 +217,9 @@ class Upload extends Model
     protected function completedAt(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->status_slug === 'completed' ? $this->status_created_at : null,
+            get: fn ($value) => $this->status_slug === 'completed'
+                ? $this->status_created_at
+                : null,
         );
     }
 

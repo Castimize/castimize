@@ -11,11 +11,11 @@ use Rpj\Daterangepicker\Daterangepicker;
 
 class CreatedAtDaterangepickerFilter extends Daterangepicker
 {
-    private ?Carbon $minDate = null;
+    private Carbon|null $minDate = null;
 
-    private ?Carbon $maxDate = null;
+    private Carbon|null $maxDate = null;
 
-    private ?array $ranges = null;
+    private array|null $ranges = null;
 
     private string $column = 'created_at';
 
@@ -66,7 +66,7 @@ class CreatedAtDaterangepickerFilter extends Daterangepicker
     /**
      * Get the filter's available options.
      */
-    public function options(NovaRequest $request): ?array
+    public function options(NovaRequest $request): array|null
     {
         if (! $this->ranges) {
             $this->setRanges(Helper::defaultRanges());
@@ -80,7 +80,7 @@ class CreatedAtDaterangepickerFilter extends Daterangepicker
      *
      * @return array|mixed
      */
-    public function default(): ?string
+    public function default(): string|null
     {
         [$start, $end] = Helper::getParsedDatesGroupedRanges($this->default);
 
@@ -118,11 +118,12 @@ class CreatedAtDaterangepickerFilter extends Daterangepicker
 
     public function setRanges(array $ranges): self
     {
+        $result = [];
         $result = collect($ranges)->mapWithKeys(function (array $item, string $key) {
             return [
                 $key => (collect($item)->map(function (Carbon $date) {
-                    return $date->format('Y-m-d');
-                })),
+                                return $date->format('Y-m-d');
+                            })),
             ];
         })->toArray();
 

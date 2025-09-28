@@ -11,83 +11,81 @@
         "php": "^8.2",
         "ext-bcmath": "*",
         "ext-zip": "*",
-        "abordage/nova-html-card": "^1.1.1",
-        "alexwenzel/nova-dependency-container": "^1.13",
-        "ashallendesign/laravel-exchange-rates": "^7.9",
-        "castimize/column-toggler": "@dev",
+        "abordage/nova-html-card": "^0.3.1",
+        "alexwenzel/nova-dependency-container": "^1.12",
+        "ashallendesign/laravel-exchange-rates": "^7.6",
         "castimize/custom-styles": "@dev",
         "castimize/inline-text-edit": "@dev",
         "castimize/po-status-card": "@dev",
         "castimize/select-manufacturer-with-overview": "@dev",
         "castimize/select-with-overview": "@dev",
-        "castimize/nova-editable-field": "dev-main",
-        "castimize/nova-flexible-content": "dev-master",
         "cmixin/business-day": "^1.18",
         "codexshaper/laravel-woocommerce": "^3.0",
-        "coroowicaksono/chart-js-integration": "v0.4.3",
+        "coroowicaksono/chart-js-integration": "^0.4.3",
         "darkaonline/l5-swagger": "^8.6",
         "devloops/nova-system-settings": "^1.0",
         "devloops/phone-number": "^1.0",
         "digital-creative/chartjs-widget": "^1.0",
+        "digital-creative/column-toggler": "^0.2.3",
         "digital-creative/nova-dashboard": "^1.1",
         "digital-creative/resource-navigation-tab": "^2.1",
+        "digital-creative/table-widget": "^1.0",
         "digital-creative/value-widget": "^1.0",
-        "digital-creative/table-widget": "^v1.0.0",
         "eminiarts/nova-tabs": "^2.2",
-        "gldrenthe89/nova-string-generator-field": "^4.1",
+        "ferdiunal/nova-editable-field": "^1.0",
+        "gldrenthe89/nova-string-generator-field": "^3.1",
         "guzzlehttp/guzzle": "^7.9",
         "inakiabt/etsy-php": "^0.12.2",
         "jeffbeltran/sanctum-tokens": "^2.1",
         "kaiserkiwi/nova-queue-management": "^1.2",
-        "laravel/framework": "^12.26",
+        "laravel/framework": "11.31.0.0",
         "laravel/nightwatch": "^1.7",
         "laravel/nova": "^4.0",
         "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^2.10.1",
+        "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.0",
         "league/flysystem-ziparchive": "^3.29",
         "maatwebsite/laravel-nova-excel": "^1.3",
         "mailgun/mailgun-php": "^4.3",
         "outl1ne/nova-inline-text-field": "^2.0",
-        "outl1ne/nova-multiselect-field": "^4.7.0",
+        "outl1ne/nova-multiselect-field": "^4.6",
         "php-http/guzzle7-adapter": "^1.1",
         "php-http/message": "^1.16",
         "picqer/exact-php-client": "^4.4",
         "predis/predis": "^2.2",
         "psr/simple-cache": "^2.0",
-        "ranium/laravel-seedonce": "^1.7",
+        "ranium/laravel-seedonce": "^1.6",
         "reedware/nova-text-filter": "^2.0",
         "rhysnhall/etsy-php-sdk": "^1.0",
-        "rpj/daterangepicker": "^0.0.11",
+        "rpj/daterangepicker": "^0.0.8",
         "saumini/count": "^1.0",
-        "sentry/sentry-laravel": "^4.13",
+        "sentry/sentry-laravel": "^4.8",
         "sereny/nova-permissions": "^1.6",
         "shippo/shippo-php": "1.*",
         "slash2nl/nova-back-button": "^2.0",
         "spatie/laravel-pdf": "*",
-        "spatie/laravel-permission": "^6.12",
-        "stechstudio/laravel-zipstream": "^5.4",
+        "spatie/laravel-permission": "^6.9",
+        "stechstudio/laravel-zipstream": "^5.1",
         "stripe/stripe-php": "^15.8",
         "symfony/http-client": "^7.3",
         "symfony/mailgun-mailer": "^7.3",
         "theiconic/name-parser": "^1.2",
         "titasgailius/search-relations": "^2.0",
         "tomodo531/filterable-filters": "^2.0",
-        "venturecraft/revisionable": "^1.42",
+        "venturecraft/revisionable": "^1.41",
         "wamesk/laravel-nova-tel-input": "^1.0",
         "wesselperik/nova-status-field": "^2.1",
-        "wildside/userstamps": "^2.5",
-        "ext-bcmath": "*"
+        "whitecube/nova-flexible-content": "^1.1",
+        "wildside/userstamps": "^2.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.13",
-        "laravel/sail": "^1.41",
+        "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
-        "nunomaduro/collision": "^8.6",
-        "phpecs/phpecs": "^2.1",
-        "phpunit/phpunit": "^11.5.3",
+        "nunomaduro/collision": "^8.0",
+        "phpecs/phpecs": "^2.2",
+        "phpunit/phpunit": "^11.0.1",
         "symplify/coding-standard": "^12.4"
     },
     "autoload": {
@@ -120,10 +118,6 @@
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
-        ],
-        "dev": [
-            "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"
         ]
     },
     "extra": {
@@ -150,14 +144,6 @@
             "type": "composer",
             "url": "https://nova.laravel.com"
         },
-        "nova-editable-field": {
-            "type": "vcs",
-            "url": "https://github.com/Castimize/nova-editable-field.git"
-        },
-        "nova-flexible-content": {
-            "type": "vcs",
-            "url": "https://github.com/Castimize/nova-flexible-content.git"
-        },
         "0": {
             "type": "path",
             "url": "./nova-components/SelectWithOverview"
@@ -177,10 +163,6 @@
         "4": {
             "type": "path",
             "url": "./nova-components/CustomStyles"
-        },
-        "5": {
-            "type": "path",
-            "url": "./nova-components/ColumnToggler"
         }
     }
 }

@@ -19,8 +19,8 @@ class FieldServiceProvider extends ServiceProvider
         });
 
         Nova::serving(function (ServingNova $event) {
-            Nova::script('inline-text-edit', __DIR__.'/../dist/js/field.js');
-            Nova::style('inline-text-edit', __DIR__.'/../dist/css/field.css');
+            Nova::script('inline-text-edit', __DIR__ . '/../dist/js/field.js');
+            Nova::style('inline-text-edit', __DIR__ . '/../dist/css/field.css');
         });
     }
 
@@ -35,7 +35,7 @@ class FieldServiceProvider extends ServiceProvider
 
         Route::middleware(['nova'])
             ->prefix('nova-vendor/inline-text-edit')
-            ->group(__DIR__.'/../routes/api.php');
+            ->group(__DIR__ . '/../routes/api.php');
     }
 
     /**

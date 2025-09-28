@@ -16,7 +16,10 @@ use Wildside\Userstamps\Userstamps;
 #[ObservedBy(ModelObserver::class)]
 class Model extends EloquentModel
 {
-    use HasFactory, RevisionableTrait, SoftDeletes, Userstamps;
+    use HasFactory;
+    use RevisionableTrait;
+    use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 

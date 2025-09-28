@@ -22,7 +22,6 @@ class ValidateWcWebhookSignature
             LogRequestService::addResponse($request, [
                 'message' => 'Invalid key',
             ], 401);
-
             return response(['Invalid key'], 401);
         }
 
@@ -33,7 +32,6 @@ class ValidateWcWebhookSignature
             LogRequestService::addResponse($request, [
                 'message' => 'Invalid payload',
             ], 401);
-
             return response(['Invalid payload'], 401);
         }
 

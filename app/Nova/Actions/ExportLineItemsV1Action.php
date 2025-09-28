@@ -17,7 +17,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportLineItemsV1Action extends Action
 {
-    use InteractsWithQueue, Queueable;
+    use InteractsWithQueue;
+    use Queueable;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -53,15 +54,19 @@ class ExportLineItemsV1Action extends Action
     public function fields(NovaRequest $request)
     {
         return [
-            Text::make(__('Filename'), 'filename')->help(__('Add filename with extension, like "export.xlsx"')),
+            Text::make(__('Filename'), 'filename')
+                ->help(__('Add filename with extension, like "export.xlsx"')),
         ];
     }
 
     protected function getDownloadUrl(string $filePath, string $fileName): string
     {
-        return URL::temporarySignedRoute('laravel-nova-excel.download', now()->addMinutes(1), [
-            'path' => encrypt($filePath),
-            'filename' => $fileName,
-        ]);
+        return URL::temporarySignedRoute(
+            'laravel-nova-excel.download',
+            now()->addMinutes(1), [
+                'path' => encrypt($filePath),
+                'filename' => $fileName,
+            ]
+        );
     }
 }

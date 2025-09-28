@@ -139,17 +139,14 @@ class Customer extends Resource
 
             Text::make(__('IP address'), 'visitor')
                 ->readonly()
-//                ->sizeOnDetail('w-1/3')
                 ->onlyOnDetail(),
 
             Text::make(__('Platform'), 'device_platform')
                 ->readonly()
-//                ->sizeOnDetail('w-1/3')
                 ->onlyOnDetail(),
 
             Text::make(__('Type'), 'device_type')
                 ->readonly()
-//                ->sizeOnDetail('w-1/3')
                 ->onlyOnDetail(),
 
             DateTime::make(__('Last active'), 'last_active')
@@ -182,9 +179,6 @@ class Customer extends Resource
             HasMany::make(__('Models'), 'models')
                 ->hideFromIndex(),
 
-            //            HasMany::make(__('Invoices'), 'invoices')
-            //                ->hideFromIndex(),
-            //
             HasMany::make(__('Complaints'), 'complaints')
                 ->hideFromIndex(),
 
@@ -206,22 +200,12 @@ class Customer extends Resource
      * Get the filters available for the resource.
      *
      * @return array
-     *
      * @throws Exception
      */
     public function filters(NovaRequest $request)
     {
         return [
             CustomerHasOrdersFilter::make(),
-            //            FilterableFilters::make(\App\Models\Customer::class)
-            //                ->fields([
-            //                    'country' => [
-            //                        'title' => 'name',
-            //                        'primarykey' => 'id',
-            //                        'foreignkey' => 'country_id',
-            //                    ],
-            //                ]),
-
         ];
     }
 

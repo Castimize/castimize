@@ -22,8 +22,10 @@ class SetOrderCanceled implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public PaymentIntent $paymentIntent, public ?int $logRequestId = null)
-    {
+    public function __construct(
+        public PaymentIntent $paymentIntent,
+        public ?int $logRequestId = null,
+    ) {
         //
     }
 

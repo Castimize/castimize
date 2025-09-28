@@ -24,7 +24,12 @@ class ShopOwner extends Resource
 
     public function title(): string
     {
-        return sprintf('%s - %s (%s)', $this->id, $this->customer->name, $this->customer->wp_id);
+        return sprintf(
+            '%s - %s (%s)',
+            $this->id,
+            $this->customer->name,
+            $this->customer->wp_id
+        );
     }
 
     /**

@@ -2,9 +2,10 @@
 
 namespace App\Nova\Manufacturer;
 
+use App\Models\Manufacturer;
 use App\Nova\Country;
 use App\Nova\Resource;
-use Castimize\ColumnToggler\ColumnTogglerTrait;
+use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Email;
 use Laravel\Nova\Fields\ID;
@@ -16,14 +17,14 @@ use Wame\TelInput\TelInput;
 
 class Profile extends Resource
 {
-//    use ColumnTogglerTrait;
+    use ColumnTogglerTrait;
 
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Manufacturer>
+     * @var class-string<Manufacturer>
      */
-    public static $model = \App\Models\Manufacturer::class;
+    public static $model = Manufacturer::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -158,8 +159,8 @@ class Profile extends Resource
                 ->sortable(),
 
             Text::make(__('City'), 'cityName', function () {
-                return $this->city?->name ?? null;
-            })
+                    return $this->city?->name ?? null;
+                })
                 ->required()
                 ->sortable(),
 

@@ -145,10 +145,6 @@ class Invoice extends Resource
             Text::make(__('Type'), 'debit')
                 ->displayUsing(fn ($value) => $value ? __('Invoice') : __('Credit note')),
 
-            //            Text::make(__('Type'), function () {
-            //                return $this->debit ? __('Invoice') : __('Credit note');
-            //            }),
-
             Text::make(__('Description'), 'description'),
 
             Text::make(__('Currency'), 'currency_code'),
@@ -165,7 +161,6 @@ class Invoice extends Resource
                 if ($this->paid_at === null) {
                     return __('Not paid');
                 }
-
                 return Carbon::parse($this->paid_at)->format('d-m-Y H:i:s');
             })
                 ->sortable(),

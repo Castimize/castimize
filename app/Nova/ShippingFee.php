@@ -3,7 +3,8 @@
 namespace App\Nova;
 
 use App\Traits\Nova\CommonMetaDataTrait;
-use Castimize\ColumnToggler\ColumnTogglerTrait;
+use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\ID;
@@ -15,8 +16,7 @@ use Laravel\Nova\Panel;
 
 class ShippingFee extends Resource
 {
-//    use ColumnTogglerTrait;
-    use CommonMetaDataTrait;
+    use ColumnTogglerTrait; use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -96,56 +96,47 @@ class ShippingFee extends Resource
                 ->step(1),
 
             Number::make(__('Cc threshold 1'), 'cc_threshold_1')
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Rate increase 1'), 'rate_increase_1')
                 ->help(__('In percentage'))
-//                ->sizeOnDetail('w-1/2')
                 ->step(0.01)
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 1'), function () {
-                return $this->rate_increase_1 ? $this->rate_increase_1.'%' : '';
+                return $this->rate_increase_1 ? $this->rate_increase_1 . '%' : '';
             })
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Number::make(__('Cc threshold 2'), 'cc_threshold_2')
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Rate increase 2'), 'rate_increase_2')
                 ->help(__('In percentage'))
-//                ->sizeOnDetail('w-1/2')
                 ->step(0.01)
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 2'), function () {
-                return $this->rate_increase_1 ? $this->rate_increase_1.'%' : '';
+                return $this->rate_increase_1 ? $this->rate_increase_1 . '%' : '';
             })
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Number::make(__('Cc threshold 3'), 'cc_threshold_3')
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->step(0.01),
 
             Number::make(__('Rate increase 3'), 'rate_increase_3')
                 ->help(__('In percentage'))
-//                ->sizeOnDetail('w-1/2')
                 ->step(0.01)
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 3'), function () {
-                return $this->rate_increase_3 ? $this->rate_increase_3.'%' : '';
+                return $this->rate_increase_3 ? $this->rate_increase_3 . '%' : '';
             })
-//                ->sizeOnDetail('w-1/2')
                 ->hideByDefault()
                 ->exceptOnForms(),
 
@@ -170,9 +161,7 @@ class ShippingFee extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [
-
-        ];
+        return [];
     }
 
     /**

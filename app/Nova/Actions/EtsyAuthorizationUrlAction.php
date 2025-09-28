@@ -15,7 +15,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class EtsyAuthorizationUrlAction extends Action
 {
-    use InteractsWithQueue, Queueable;
+    use InteractsWithQueue;
+    use Queueable;
 
     public function name()
     {

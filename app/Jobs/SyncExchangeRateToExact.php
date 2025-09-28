@@ -21,7 +21,11 @@ class SyncExchangeRateToExact implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private CurrencyHistoryRate $currencyHistoryRate, public ?int $logRequestId = null) {}
+    public function __construct(
+        private CurrencyHistoryRate $currencyHistoryRate,
+        public ?int $logRequestId = null,
+    ) {
+    }
 
     /**
      * Execute the job.
@@ -32,15 +36,14 @@ class SyncExchangeRateToExact implements ShouldQueue
 
         try {
             $exchangeRate = $exactOnlineService->syncExchangeRate($this->currencyHistoryRate);
-            //            Log::info(print_r($exchangeRate, true));
         } catch (Throwable $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $exchangeRate);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
         }
     }
 }

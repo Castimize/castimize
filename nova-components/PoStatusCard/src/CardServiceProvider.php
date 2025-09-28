@@ -19,8 +19,8 @@ class CardServiceProvider extends ServiceProvider
         });
 
         Nova::serving(function (ServingNova $event) {
-            Nova::script('po-status-card', __DIR__.'/../dist/js/card.js');
-            Nova::style('po-status-card', __DIR__.'/../dist/css/card.css');
+            Nova::script('po-status-card', __DIR__ . '/../dist/js/card.js');
+            Nova::style('po-status-card', __DIR__ . '/../dist/css/card.css');
         });
     }
 
@@ -35,7 +35,7 @@ class CardServiceProvider extends ServiceProvider
 
         Route::middleware(['nova'])
             ->prefix('nova-vendor/po-status-card')
-            ->group(__DIR__.'/../routes/api.php');
+            ->group(__DIR__ . '/../routes/api.php');
     }
 
     /**

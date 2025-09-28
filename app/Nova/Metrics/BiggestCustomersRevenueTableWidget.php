@@ -31,7 +31,8 @@ class BiggestCustomersRevenueTableWidget extends TableWidget
 
         $query = DB::table('orders')
             ->join('customers', 'customers.id', '=', 'orders.customer_id')
-            ->selectRaw("orders.customer_id,
+            ->selectRaw(
+                "orders.customer_id,
                                    CONCAT(orders.first_name, ' ', orders.last_name) as name,
                                    COUNT(DISTINCT orders.order_number) as orders,
                                    orders.currency_code,

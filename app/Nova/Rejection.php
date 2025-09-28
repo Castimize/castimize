@@ -5,7 +5,8 @@ namespace App\Nova;
 use App\Nova\Actions\AcceptRejectionAction;
 use App\Nova\Actions\DeclineRejectionAction;
 use App\Traits\Nova\CommonMetaDataTrait;
-use Castimize\ColumnToggler\ColumnTogglerTrait;
+use DigitalCreative\ColumnToggler\ColumnTogglerTrait;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
@@ -18,7 +19,7 @@ use WesselPerik\StatusField\StatusField;
 
 class Rejection extends Resource
 {
-//    use ColumnTogglerTrait;
+    use ColumnTogglerTrait;
     use CommonMetaDataTrait;
 
     /**
@@ -90,11 +91,11 @@ class Rejection extends Resource
                 ->disk('r2_private')
                 ->path('admin/rejections')
                 ->maxWidth(1024)
-                ->thumbnail(function ($value, $disk) {
-                    return 'data: image/png;base64,'.base64_encode(Storage::disk('r2_private')->get($value));
+                ->thumbnail(function($value, $disk) {
+                    return 'data: image/png;base64,' . base64_encode(Storage::disk('r2_private')->get($value));
                 })
-                ->preview(function ($value, $disk) {
-                    return 'data: image/png;base64,'.base64_encode(Storage::disk('r2_private')->get($value));
+                ->preview(function($value, $disk) {
+                    return 'data: image/png;base64,' . base64_encode(Storage::disk('r2_private')->get($value));
                 }),
 
             DateTime::make(__('Approved at'), 'approved_at')
@@ -124,14 +125,14 @@ class Rejection extends Resource
                 ->sortable(),
 
             Text::make(__('PO number'), function ($model) {
-                return '<span><a class="link-default" href="/admin/resources/order-queues/'.$model->order_queue_id.'">'.$model->order_queue_id.'</a></span>';
+                return '<span><a class="link-default" href="/admin/resources/order-queues/' . $model->order_queue_id . '">' . $model->order_queue_id . '</a></span>';
             })
                 ->asHtml()
                 ->sortable(),
 
             Text::make(__('Customer'), function ($model) {
                 return $model->order
-                    ? '<span><a class="link-default" href="/admin/resources/customers/'.$model->order->customer_id.'">'.$model->order->billing_name.'</a></span>'
+                    ? '<span><a class="link-default" href="/admin/resources/customers/' . $model->order->customer_id . '">' . $model->order->billing_name . '</a></span>'
                     : '';
             })
                 ->asHtml()

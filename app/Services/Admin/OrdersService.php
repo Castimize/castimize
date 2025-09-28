@@ -33,10 +33,10 @@ class OrdersService
 
     public function __construct()
     {
-        $this->customersService = new CustomersService;
+        $this->customersService = new CustomersService();
         $this->uploadsService = app(UploadsService::class);
-        $this->orderQueuesService = new OrderQueuesService;
-        $this->woocommerceApiService = new WoocommerceApiService;
+        $this->orderQueuesService = new OrderQueuesService();
+        $this->woocommerceApiService = new WoocommerceApiService();
     }
 
     public function storeOrderFromWpOrder($wpOrder)
@@ -106,7 +106,9 @@ class OrdersService
             'shipping_first_name' => $wpOrder['shipping']->first_name,
             'shipping_last_name' => $wpOrder['shipping']->last_name,
             'shipping_company' => $wpOrder['shipping']->company,
-            'shipping_phone_number' => ! empty($wpOrder['shipping']->phone) ? $wpOrder['shipping']->phone : $wpOrder['billing']->phone,
+            'shipping_phone_number' => ! empty($wpOrder['shipping']->phone)
+                ? $wpOrder['shipping']->phone
+                : $wpOrder['billing']->phone,
             'shipping_email' => $shippingEmail ?? $wpOrder['billing']->email,
             'shipping_address_line1' => $wpOrder['shipping']->address_1,
             'shipping_address_line2' => $wpOrder['shipping']->address_2,
@@ -149,7 +151,7 @@ class OrdersService
             customer: $customer,
             country: $country,
             currency: $currency,
-            isPaid: $isPaid
+            isPaid: $isPaid,
         );
 
         $order->order_customer_lead_time = $biggestCustomerLeadTime;
@@ -318,7 +320,7 @@ class OrdersService
             } else {
                 $refundAmount += $orderQueue->upload->total;
                 $refundTaxAmount += $orderQueue->upload->total_tax;
-                $lineItems[] = $this->orderQueuesService->getRefundLineItem($orderQueue, $orderQueue->upload->total, $wpOrder['line_items']);
+//                $lineItems[] = $this->orderQueuesService->getRefundLineItem($orderQueue, $orderQueue->upload->total, $wpOrder['line_items']);
                 $orderQueue->upload->total_refund = $refundAmount;
                 $orderQueue->upload->total_refund_tax = $orderQueue->upload->total_tax;
                 $orderQueue->upload->save();
@@ -341,13 +343,13 @@ class OrdersService
             $order->save();
         }
 
-        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string) $refundAmount, $lineItems);
+//        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string) $refundAmount, $lineItems);
 
         if ($cancelOrder) {
             $this->woocommerceApiService->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Cancelled->value);
         }
 
-        return $refundOrder;
+//        return $refundOrder;
     }
 
     public function handleStripeRefund(Order $order, Charge $charge): void
@@ -457,7 +459,7 @@ class OrdersService
                         Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
                     }
                 } catch (Exception $e) {
-                    Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+                    Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                 }
 
                 $model = Model::where('file_name', $withoutResizedFileName)->first();
@@ -593,7 +595,7 @@ class OrdersService
                         Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
                     }
                 } catch (Exception $e) {
-                    Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+                    Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                 }
 
                 $model = Model::where('file_name', $withoutResizedFileName)->first();
@@ -651,7 +653,6 @@ class OrdersService
                 $biggestCustomerLeadTime = $customerLeadTime;
             }
         }
-
         return now()->addBusinessDays($biggestCustomerLeadTime)->toFormattedDateString();
     }
 }

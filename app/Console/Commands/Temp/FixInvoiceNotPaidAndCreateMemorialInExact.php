@@ -26,7 +26,7 @@ class FixInvoiceNotPaidAndCreateMemorialInExact extends Command
     /**
      * Execute the console command.
      */
-    public function handle(InvoicesService $invoicesService): int
+    public function handle(InvoicesService $invoicesService)
     {
         if ($this->option('invoice-id')) {
             $invoicesQuery = Invoice::with(['customer', 'lines.order'])

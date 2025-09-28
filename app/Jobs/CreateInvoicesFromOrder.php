@@ -53,7 +53,6 @@ class CreateInvoicesFromOrder implements ShouldQueue
             if (property_exists($wpOrder['documents'], $creditNoteDocument)) {
                 $invoicesService->storeInvoiceFromWpOrder($customer, $order, false);
             }
-
         } catch (Throwable $e) {
             Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }

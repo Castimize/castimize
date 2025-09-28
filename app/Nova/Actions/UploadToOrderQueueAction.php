@@ -12,7 +12,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class UploadToOrderQueueAction extends Action
 {
-    use InteractsWithQueue, Queueable;
+    use InteractsWithQueue;
+    use Queueable;
 
     /**
      * The single value that should be used to represent the resource when being displayed.

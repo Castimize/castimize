@@ -17,8 +17,7 @@ use Etsy\Resources\ListingVideo;
 use Etsy\Resources\Review;
 use Etsy\Resources\Transaction;
 
-class Listing extends Resource
-{
+class Listing extends Resource {
     /**
      * @var array
      */
@@ -90,10 +89,9 @@ class Listing extends Resource
         $params = [
             'listing_ids' => $listing_ids,
         ];
-        if (count($includes) > 0) {
+        if(count($includes) > 0) {
             $params['includes'] = $includes;
         }
-
         return self::request(
             'GET',
             '/application/listings/batch',
@@ -198,7 +196,6 @@ class Listing extends Resource
         array $params = []
     ): Collection {
         $params['shop_section_ids'] = $section_ids;
-
         return self::request(
             'GET',
             "/application/shops/{$shop_id}/shop-sections/listings",
@@ -270,13 +267,12 @@ class Listing extends Resource
     public function save(
         ?array $data = null
     ): self {
-        if (! $data) {
+        if(! $data) {
             $data = $this->getSaveData(true);
         }
-        if (count($data) == 0) {
+        if(count($data) == 0) {
             return $this;
         }
-
         return $this->updateRequest(
             "/application/shops/{$shop_id}/listings/{$listing_id}",
             $data,
@@ -311,8 +307,7 @@ class Listing extends Resource
      *
      * @return Collection[Etsy\Resources\ListingProperty]
      */
-    public function properties(): Collection
-    {
+    public function properties(): Collection {
         return ListingProperty::all(
             $this->shop_id,
             $this->listing_id
@@ -324,8 +319,7 @@ class Listing extends Resource
      *
      * @return Collection[Etsy\Resources\ListingFile]
      */
-    public function files(): Collection
-    {
+    public function files(): Collection {
         return ListingFile::all(
             $this->shop_id,
             $this->listing_id
@@ -337,7 +331,8 @@ class Listing extends Resource
      */
     public function file(
         int $file_id
-    ): ?ListingFile {
+    ): ?ListingFile
+    {
         return ListingFile::get(
             $this->shop_id,
             $this->listing_id,
@@ -351,7 +346,8 @@ class Listing extends Resource
     public function linkFile(
         int $file_id,
         int $rank = 1
-    ): ?ListingFile {
+    ): ?ListingFile
+    {
         return ListingFile::create(
             $this->shop_id,
             $this->listing_id,
@@ -367,8 +363,7 @@ class Listing extends Resource
      *
      * @return Collection[\Etsy\Resources\ListingImage]
      */
-    public function images(): Collection
-    {
+    public function images(): Collection {
         return ListingImage::all(
             $this->listing_id
         );
@@ -379,7 +374,8 @@ class Listing extends Resource
      */
     public function image(
         int $image_id
-    ): ?ListingImage {
+    ): ?ListingImage
+    {
         return ListingImage::get(
             $this->listing_id,
             $image_id
@@ -392,9 +388,9 @@ class Listing extends Resource
     public function linkImage(
         int $image_id,
         array $options = []
-    ): ?ListingImage {
+    ): ?ListingImage
+    {
         $options['listing_image_id'] = $image_id;
-
         return ListingImage::create(
             $this->shop_id,
             $this->listing_id,
@@ -407,8 +403,7 @@ class Listing extends Resource
      *
      * @return Collection[\Etsy\Resources\ListingVariationImage]
      */
-    public function variationImages(): Collection
-    {
+    public function variationImages(): Collection {
         return ListingVariationImage::all(
             $this->shop_id,
             $this->listing_id
@@ -420,8 +415,7 @@ class Listing extends Resource
      *
      * @return Collection[\Etsy\Resources\ListingVideo]
      */
-    public function videos(): Collection
-    {
+    public function videos(): Collection {
         return ListingVideo::all(
             $this->listing_id
         );
@@ -432,7 +426,8 @@ class Listing extends Resource
      */
     public function video(
         int $video_id
-    ): ?ListingVideo {
+    ): ?ListingVideo
+    {
         return ListingVideo::get(
             $this->listing_id,
             $video_id
@@ -444,9 +439,9 @@ class Listing extends Resource
      */
     public function linkVideo(
         int $video_id
-    ): ?ListingVideo {
+    ): ?ListingVideo
+    {
         $data['video_id'] = $video_id;
-
         return ListingVideo::create(
             $this->shop_id,
             $this->listing_id,
@@ -470,7 +465,8 @@ class Listing extends Resource
      */
     public function product(
         int $product_id
-    ): ?ListingProduct {
+    ): ?ListingProduct
+    {
         return ListingProduct::get(
             $this->listing_id,
             $product_id
@@ -482,7 +478,8 @@ class Listing extends Resource
      */
     public function translation(
         string $language
-    ): ?ListingTranslation {
+    ): ?ListingTranslation
+    {
         return ListingTranslation::get(
             $this->shop_id,
             $this->listing_id,

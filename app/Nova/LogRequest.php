@@ -29,7 +29,12 @@ class LogRequest extends Resource
      */
     public function title()
     {
-        return sprintf('%s-%s %s', $this->id, $this->type, $this->path_info);
+        return sprintf(
+            '%s-%s %s',
+            $this->id,
+            $this->type,
+            $this->path_info
+        );
     }
 
     /**
