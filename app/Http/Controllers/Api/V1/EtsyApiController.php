@@ -154,7 +154,6 @@ class EtsyApiController extends ApiController
 
     public function createShippingProfile(int $customerId): JsonResponse
     {
-        $countries = Country::with(['logisticsZone.shippingFee'])->get();
         $customer = Customer::find($customerId);
         $shop = $customer->shopOwner->shops->first();
         $shopId = $shop->shop_oauth['shop_id'];
@@ -163,21 +162,6 @@ class EtsyApiController extends ApiController
             shop: $shop,
             shippingProfileDTO: ShippingProfileDTO::fromShop($shopId),
         );
-
-        foreach ($countries as $country) {
-            if ($country->has('logisticsZone')) {
-                $shippingProfileDestinationDTO = $this->etsyService->createShippingProfileDestination(
-                    shop: $shop,
-                    shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
-                        shopId: $shopId,
-                        country: $country,
-                        shippingProfileId: $shippingProfileDTO->shippingProfileId,
-                    ),
-                );
-
-                $shippingProfileDTO->shippingProfileDestinations->push($shippingProfileDestinationDTO);
-            }
-        }
 
         return response()->json($shippingProfileDTO);
     }

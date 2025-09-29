@@ -5,6 +5,7 @@ namespace App\Services\Etsy;
 use AllowDynamicProperties;
 use App\DTO\Shops\Etsy\ShippingProfileDestinationDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDTO;
+use App\Models\Country;
 use App\Models\Shop;
 use Etsy\Etsy;
 use Etsy\Resources\ShippingDestination;
@@ -36,6 +37,8 @@ class EtsyShippingProfileService
 
     public function createShippingProfile(ShippingProfileDTO $shippingProfileDTO): ShippingProfileDTO
     {
+        $countries = Country::with(['logisticsZone.shippingFee'])->get();
+
         $shippingProfile = ShippingProfile::create(
             shop_id: $this->shop->shop_oauth['shop_id'],
             data: [
@@ -54,6 +57,20 @@ class EtsyShippingProfileService
         );
 
         $shippingProfileDTO->shippingProfileId = $shippingProfile?->shipping_profile_id;
+
+        foreach ($countries as $country) {
+            if ($country->has('logisticsZone')) {
+                $shippingProfileDestinationDTO = $this->createShippingProfileDestination(
+                    shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
+                        shopId: $this->shop->shop_oauth['shop_id'],
+                        country: $country,
+                        shippingProfileId: $shippingProfileDTO->shippingProfileId,
+                    ),
+                );
+
+                $shippingProfileDTO->shippingProfileDestinations->push($shippingProfileDestinationDTO);
+            }
+        }
 
         $this->addShippingProfileToShopOwnerShop($shippingProfile);
 
