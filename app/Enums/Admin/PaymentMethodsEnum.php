@@ -96,9 +96,8 @@ enum PaymentMethodsEnum: string
     {
         return [
             self::SEPA_DEBIT->value,
-//            self::DIRECT_BANK_TRANSFER->value,
             self::ACH_DEBIT->value,
-//            self::CREDIT_CARD->value,
+            self::CREDIT_CARD->value,
         ];
     }
 }

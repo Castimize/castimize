@@ -7,6 +7,7 @@ use App\Enums\Shops\ShopOwnerShopsEnum;
 use App\Models\Shop;
 use App\Models\ShopOrder;
 use App\Services\Admin\OrdersService;
+use App\Services\Admin\PaymentService;
 use App\Services\Admin\ShopOrderService;
 use App\Services\Etsy\EtsyService;
 use App\Services\Payment\Stripe\StripeService;
@@ -41,7 +42,7 @@ class GetEtsyReceipts extends Command
         OrdersService $ordersService,
         WoocommerceApiService $woocommerceApiService,
         ShopOrderService $shopOrderService,
-        StripeService $stripeService,
+        PaymentService $paymentService,
     ) {
         $date = now()->subDays(14);
         $shops = Shop::with(['shopOwner.customer'])
@@ -80,7 +81,7 @@ class GetEtsyReceipts extends Command
                                 $newShopOrder = $shopOrderService->createShopOrder($shop, $receipt, $wcOrder);
                                 $this->info('Shop order created with id: ' . $newShopOrder->id);
 
-                                $paymentIntent = $stripeService->createPaymentIntent($orderDTO, $shop->shopOwner->customer);
+                                $paymentIntent = $paymentService->createStripePaymentIntent($orderDTO, $shop->shopOwner->customer);
                                 $this->info('Payment intent: ' . print_r($paymentIntent, true));
                                 if ($paymentIntent->status === 'succeeded') {
                                     $orderDTO->isPaid = true;

@@ -36,8 +36,9 @@ Route::group([
             Route::put('customers/{customerId}/shop-owner/update-active', 'ShopOwnersApiController@updateActive')->name('api.customers.shop-owners.update-active');
 
             // Shop owners Payments
-            Route::get('customers/{customerId}/payments/create-setup-intent', 'PaymentsApiController@createSetupIntent')->name('api.payments.create-setup-intent');
-            Route::post('customers/{customerId}/payments/cancel-mandate', 'PaymentsApiController@cancelMandate')->name('api.payments.cancel-mandate');
+            Route::get('customers/{customerId}/payments/create-setup-intent', 'PaymentsApiController@createSetupIntent')->name('api.customers.payments.create-setup-intent');
+            Route::post('customers/{customerId}/payments/attach-payment-method', 'PaymentsApiController@attachPaymentMethod')->name('api.customers.payments.attach-payment-method');
+            Route::post('customers/{customerId}/payments/cancel-mandate', 'PaymentsApiController@cancelMandate')->name('api.customers.payments.cancel-mandate');
 
             // Orders
             Route::post('orders/calculate-expected-delivery-date', 'OrdersApiController@calculateExpectedDeliveryDate')->name('api.orders.calculate-expected-delivery-date');

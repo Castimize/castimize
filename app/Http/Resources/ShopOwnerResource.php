@@ -30,17 +30,26 @@ class ShopOwnerResource extends JsonResource
             ];
         }
 
+        $stripeService = new StripeService();
         $mandate = [];
-        $stripeData = $this->customer->stripe_data;
-        if (is_array($stripeData) && array_key_exists('mandate_id', $stripeData) && $stripeData['mandate_id']) {
-            $stripeService = new StripeService();
+        $paymentMethodChargable = false;
+        $paymentMethod = null;
+        $paymentMethodAcceptedAt = null;
+        $stripeData = $this->customer->stripe_data ?? [];
+        if (isset($stripeData['mandate_id']) && $stripeData['mandate_id']) {
             $stripeMandate = $stripeService->getMandate($stripeData['mandate_id']);
             $paymentMethod = $stripeService->getPaymentMethod($stripeMandate->payment_method);
+            $paymentMethodChargable = true;
+            $paymentMethodAcceptedAt = Carbon::createFromTimestamp($stripeMandate->customer_acceptance->accepted_at)->toDateTimeString();
             $mandate = [
                 'id' => $this->customer->stripe_data['mandate_id'],
-                'accepted_at' => Carbon::createFromTimestamp($stripeMandate->customer_acceptance->accepted_at)->toDateTimeString(),
+                'accepted_at' => $paymentMethodAcceptedAt,
                 'payment_method' => $paymentMethod->type,
             ];
+        } elseif (isset($stripeData['payment_method_chargable']) && $stripeData['payment_method_chargable']) {
+            $paymentMethod = $stripeService->getPaymentMethod($stripeData['payment_method']);
+            $paymentMethodChargable = true;
+            $paymentMethodAcceptedAt = Carbon::createFromTimestamp($stripeData['payment_method_accepted_at'])->toDateTimeString();
         }
 
         return [
@@ -49,6 +58,9 @@ class ShopOwnerResource extends JsonResource
             'active' => $this->active,
             'vat_number' => $this->customer->vat_number,
             'stripe_id' => is_array($this->customer->stripe_data) && array_key_exists('stripe_id', $this->customer->stripe_data) ? $this->customer->stripe_data['stripe_id'] : null,
+            'payment_method' => $paymentMethod?->type,
+            'payment_method_chargable' => $paymentMethodChargable,
+            'payment_method_accepted_at' => $paymentMethodAcceptedAt,
             'mandate' => $mandate,
             'shops' => ShopResource::collection($this->shops)->keyBy->shop,
             'shops_list' => ShopOwnerShopsEnum::getList(),
