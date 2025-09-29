@@ -24,7 +24,7 @@ class EtsyShippingProfileService
     {
         return ShippingProfile::get(
             shop_id: $this->shop->shop_oauth['shop_id'],
-            profile_id: $this->shop->shop_oauth['shipping_profile_id'],
+            profile_id: $this->shop->shop_oauth['shop_shipping_profile_id'],
         );
     }
 
