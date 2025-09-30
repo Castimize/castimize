@@ -10,6 +10,7 @@ use App\Models\Shop;
 use Etsy\Etsy;
 use Etsy\Resources\ShippingDestination;
 use Etsy\Resources\ShippingProfile;
+use Exception;
 
 #[AllowDynamicProperties]
 class EtsyShippingProfileService
@@ -60,15 +61,19 @@ class EtsyShippingProfileService
 
         foreach ($countries as $country) {
             if ($country->has('logisticsZone')) {
-                $shippingProfileDestinationDTO = $this->createShippingProfileDestination(
-                    shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
-                        shopId: $this->shop->shop_oauth['shop_id'],
-                        country: $country,
-                        shippingProfileId: $shippingProfileDTO->shippingProfileId,
-                    ),
-                );
+                try {
+                    $shippingProfileDestinationDTO = $this->createShippingProfileDestination(
+                        shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
+                            shopId: $this->shop->shop_oauth['shop_id'],
+                            country: $country,
+                            shippingProfileId: $shippingProfileDTO->shippingProfileId,
+                        ),
+                    );
 
-                $shippingProfileDTO->shippingProfileDestinations->push($shippingProfileDestinationDTO);
+                    $shippingProfileDTO->shippingProfileDestinations->push($shippingProfileDestinationDTO);
+                } catch (Exception $exception) {
+                    // just continue with other countries
+                }
             }
         }
 

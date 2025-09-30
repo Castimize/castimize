@@ -63,13 +63,17 @@ class FixShippingProfileWithDestinations extends Command
 
                     foreach ($countries as $country) {
                         if ($country->has('logisticsZone')) {
-                            (new EtsyShippingProfileService(shop: $shop))->createShippingProfileDestination(
-                                shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
-                                    shopId: $shop->shop_oauth['shop_id'],
-                                    country: $country,
-                                    shippingProfileId: $shop->shop_oauth['shop_shipping_profile_id'],
-                                ),
-                            );
+                            try {
+                                (new EtsyShippingProfileService(shop: $shop))->createShippingProfileDestination(
+                                    shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
+                                        shopId: $shop->shop_oauth['shop_id'],
+                                        country: $country,
+                                        shippingProfileId: $shop->shop_oauth['shop_shipping_profile_id'],
+                                    ),
+                                );
+                            } catch (Exception $e) {
+                                // just continue
+                            }
                         }
                     }
                 }
