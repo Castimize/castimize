@@ -86,8 +86,7 @@ class GetEtsyReceipts extends Command
                                 if ($paymentIntent->status === 'succeeded') {
                                     $orderDTO->isPaid = true;
                                     $orderDTO->paidAt = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')
-                                        ?->setTimezone(env('APP_TIMEZONE'))
-                                        ->format('Y-m-d H:i:s');
+                                        ?->setTimezone(env('APP_TIMEZONE'));
                                 }
                                 $orderDTO->metaData[] = [
                                     'key' => '_payment_intent_id',
