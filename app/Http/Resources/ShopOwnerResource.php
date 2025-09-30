@@ -25,6 +25,8 @@ class ShopOwnerResource extends JsonResource
                 'vat_number' => null,
                 'stripe_id' => null,
                 'mandate' => [],
+                'payment_method_chargable' => false,
+                'payment_method_accepted_at' => null,
                 'shops' => [],
                 'shops_list' => ShopOwnerShopsEnum::getList(),
             ];
