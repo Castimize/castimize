@@ -8,6 +8,7 @@ use App\Models\Customer as CastimizeCustomer;
 use Exception;
 use Illuminate\Support\Str;
 use Stripe\Balance;
+use Stripe\BalanceTransaction;
 use Stripe\Charge;
 use Stripe\Collection;
 use Stripe\Customer;
@@ -49,6 +50,11 @@ class StripeService
         return Balance::retrieve([]);
     }
 
+    public function getCharge(string $chargeId): Charge
+    {
+        return Charge::retrieve($chargeId);
+    }
+
     public function createCharge(int $amount, string $currency, string $customerId, string $sourceId, string $description = ''): Charge
     {
         return Charge::create([
@@ -58,6 +64,11 @@ class StripeService
             'source' => $sourceId,
             'description' => $description,
         ]);
+    }
+
+    public function getBalanceTransaction(string $balanceTransactionId): BalanceTransaction
+    {
+        return BalanceTransaction::retrieve($balanceTransactionId);
     }
 
     public function getSetupIntent(string $setupIntentId): SetupIntent

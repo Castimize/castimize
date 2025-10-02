@@ -6,6 +6,7 @@ use App\Http\Controllers\Webhooks\WebhookController;
 use App\Jobs\CreateInvoicesFromOrder;
 use App\Jobs\SetOrderCanceled;
 use App\Jobs\SetOrderPaid;
+use App\Jobs\SetPaymentIntentForEtsyOrder;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
@@ -139,6 +140,7 @@ class StripeWebhookController extends WebhookController
 
         Bus::chain([
             new SetOrderPaid($paymentIntent, $logRequestId),
+            new SetPaymentIntentForEtsyOrder($paymentIntent, $logRequestId),
             new CreateInvoicesFromOrder($paymentIntent->metadata->order_id),
         ])
             ->onQueue('stripe')

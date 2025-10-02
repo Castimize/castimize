@@ -54,23 +54,34 @@ class FixShippingProfileWithDestinations extends Command
                 if ($shippingProfile) {
                     $existingShippingProfileDestinations = [];
                     foreach ($shippingProfile->shipping_profile_destinations as $shippingProfileDestination) {
-                        $existingShippingProfileDestinations[] = $shippingProfileDestination->destination_country_iso;
+                        $existingShippingProfileDestinations[$shippingProfileDestination->destination_country_iso] = $shippingProfileDestination->shipping_profile_destination_id;
                     }
 
                     $countries = Country::with(['logisticsZone.shippingFee'])
-                        ->whereNotIn('alpha2', $existingShippingProfileDestinations)
                         ->get();
 
                     foreach ($countries as $country) {
                         if ($country->has('logisticsZone')) {
                             try {
-                                (new EtsyShippingProfileService(shop: $shop))->createShippingProfileDestination(
-                                    shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
-                                        shopId: $shop->shop_oauth['shop_id'],
-                                        country: $country,
-                                        shippingProfileId: $shop->shop_oauth['shop_shipping_profile_id'],
-                                    ),
-                                );
+                                $shippingProfileDestinationService = new EtsyShippingProfileService(shop: $shop);
+                                if (! array_key_exists($country->alpha2, $existingShippingProfileDestinations)) {
+                                    $shippingProfileDestinationService->createShippingProfileDestination(
+                                        shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
+                                            shop: $shop,
+                                            country: $country,
+                                            shippingProfileId: $shop->shop_oauth['shop_shipping_profile_id'],
+                                        ),
+                                    );
+                                } else {
+                                    $shippingProfileDestinationService->updateShippingProfileDestination(
+                                        shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
+                                            shop: $shop,
+                                            country: $country,
+                                            shippingProfileId: $shop->shop_oauth['shop_shipping_profile_id'],
+                                            shippingProfileDestinationId: $existingShippingProfileDestinations[$country->alpha2],
+                                        ),
+                                    );
+                                }
                             } catch (Exception $e) {
                                 // just continue
                             }

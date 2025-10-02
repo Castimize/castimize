@@ -100,4 +100,13 @@ enum PaymentMethodsEnum: string
             self::CREDIT_CARD->value,
         ];
     }
+
+    public static function getWoocommercePaymentMethod(?string $stripePaymentMethod): string
+    {
+        return match($stripePaymentMethod) {
+            'sepa' => 'stripe_sepa',
+            'us_bank_account' => 'stripe_ach',
+            default => 'stripe_cc',
+        };
+    }
 }
