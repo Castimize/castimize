@@ -52,6 +52,7 @@ class Customer extends Model
         'device_platform',
         'device_type',
         'last_active',
+        'use_address_validation',
     ];
 
     /**
@@ -68,6 +69,7 @@ class Customer extends Model
             'last_active' => 'datetime',
             'name' => 'string',
             'stripe_data' => 'array',
+            'use_address_validation' => 'boolean',
         ];
     }
 

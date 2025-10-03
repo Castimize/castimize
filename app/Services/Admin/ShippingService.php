@@ -111,6 +111,7 @@ class ShippingService
             'address' => $address,
             'address_changed' => $addressChanged,
             'messages' => $errorMessages,
+            'use_address_validation' => 1,
         ];
     }
 

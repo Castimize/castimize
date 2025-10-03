@@ -282,6 +282,7 @@ CREATE TABLE `customers` (
   `device_platform` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `device_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `last_active` timestamp NULL DEFAULT NULL,
+  `use_address_validation` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `created_by` int unsigned DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -664,14 +665,14 @@ DROP TABLE IF EXISTS `material_model`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `material_model` (
-  `model_id` bigint unsigned NOT NULL,
   `material_id` bigint unsigned NOT NULL,
+  `model_id` bigint unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`model_id`,`material_id`),
-  KEY `model_material_material_id_foreign` (`material_id`),
-  CONSTRAINT `model_material_material_id_foreign` FOREIGN KEY (`material_id`) REFERENCES `materials` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `model_material_model_id_foreign` FOREIGN KEY (`model_id`) REFERENCES `models` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`material_id`,`model_id`),
+  KEY `material_model_model_id_foreign` (`model_id`),
+  CONSTRAINT `material_model_material_id_foreign` FOREIGN KEY (`material_id`) REFERENCES `materials` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `material_model_model_id_foreign` FOREIGN KEY (`model_id`) REFERENCES `models` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `materials`;
@@ -1056,6 +1057,29 @@ CREATE TABLE `password_reset_tokens` (
   `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `payment_fees`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `payment_fees` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `currency_id` bigint unsigned DEFAULT NULL,
+  `payment_method` enum('ach','affirm','afterpay','alipay','amazonpay','apple_pay','bancontact','becs','blik','boleto','cartes_bancaires','cod','cheque','card','bacs','eps','fpx','giropay','googlepay','grabpay','ideal','klarna','konbini','link','mobilepay','multibanco','oxxo','paynow','ppcp','promptpay','p24','revolut','sepa','sepa_debit','sofort','swish','twint','wechat','zip') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('fixed','percentage') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `fee` double NOT NULL,
+  `minimum_fee` double DEFAULT NULL,
+  `maximum_fee` double DEFAULT NULL,
+  `currency_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'USD',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `created_by` int unsigned DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `updated_by` int unsigned DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `deleted_by` int unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `payment_fees_currency_id_index` (`currency_id`),
+  CONSTRAINT `payment_fees_currency_id_foreign` FOREIGN KEY (`currency_id`) REFERENCES `currencies` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `permissions`;
@@ -1642,3 +1666,4 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (54,'2025_01_26_184
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (55,'2025_02_12_060538_create_shop_listing_models_table',9);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (56,'2025_04_11_063310_create_shop_orders_table',10);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (57,'2025_06_03_055219_create_material_model_table',11);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (58,'2025_07_08_181713_create_payment_fees_table',11);
