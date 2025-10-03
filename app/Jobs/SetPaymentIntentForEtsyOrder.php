@@ -6,9 +6,7 @@ use App\DTO\Order\OrderDTO;
 use App\Enums\Admin\PaymentMethodsEnum;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
-use App\Services\Admin\OrdersService;
 use App\Services\Admin\PaymentService;
-use App\Services\Admin\UploadsService;
 use App\Services\Woocommerce\WoocommerceApiService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,10 +24,6 @@ class SetPaymentIntentForEtsyOrder implements ShouldQueue
 
     public $timeout = 120;
 
-    private OrdersService $ordersService;
-
-    private UploadsService $uploadsService;
-
     /**
      * Create a new job instance.
      */
@@ -37,8 +31,6 @@ class SetPaymentIntentForEtsyOrder implements ShouldQueue
         public PaymentIntent $paymentIntent,
         public ?int $logRequestId = null,
     ) {
-        $this->ordersService = new OrdersService();
-        $this->uploadsService = app(UploadsService::class);
     }
 
     /**
@@ -47,8 +39,7 @@ class SetPaymentIntentForEtsyOrder implements ShouldQueue
     public function handle(
         WoocommerceApiService $woocommerceApiService,
         PaymentService $paymentService,
-    ): void
-    {
+    ): void {
         $order = null;
         try {
             if (isset($this->paymentIntent->metadata->source) && $this->paymentIntent->metadata->source === 'Etsy API') {
@@ -92,6 +83,8 @@ class SetPaymentIntentForEtsyOrder implements ShouldQueue
                     $request->replace(['id' => $this->paymentIntent->metadata->order_id]);
 
                     $orderDTO = OrderDTO::fromWpRequest($request);
+                    $orderDTO->transactionId = $this->paymentIntent->latest_charge;
+                    $orderDTO->paymentIntentId = $this->paymentIntent->id;
                     $orderDTO->paymentMethod = PaymentMethodsEnum::getWoocommercePaymentMethod($paymentMethod?->type);
                     $orderDTO->paymentIssuer = PaymentMethodsEnum::getWoocommercePaymentMethod($paymentMethod?->type);
                     $orderDTO->metaData = $metaData;
@@ -99,6 +92,12 @@ class SetPaymentIntentForEtsyOrder implements ShouldQueue
                     $orderDTO->paidAt = Carbon::createFromTimestamp($this->paymentIntent->created, 'GMT')
                         ?->setTimezone(env('APP_TIMEZONE'));
                     $woocommerceApiService->updateOrder($orderDTO);
+
+                    $order->payment_intent_id = $orderDTO->paymentIntentId;
+                    $order->payment_method = $orderDTO->paymentMethod;
+                    $order->payment_issuer = $orderDTO->paymentIssuer;
+                    $order->meta_data = $metaData;
+                    $order->save();
                 }
             }
         } catch (Throwable $e) {

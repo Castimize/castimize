@@ -92,12 +92,15 @@ class FixPaymentIntentFromEtsyOrder extends Command
                     $request->replace(['id' => $paymentIntent->metadata->order_id]);
 
                     $orderDTO = OrderDTO::fromWpRequest($request);
+                    $orderDTO->transactionId = $paymentIntent->latest_charge;
+                    $orderDTO->paymentIntentId = $paymentIntent->id;
                     $orderDTO->paymentMethod = PaymentMethodsEnum::getWoocommercePaymentMethod($paymentMethod?->type);
                     $orderDTO->paymentIssuer = PaymentMethodsEnum::getWoocommercePaymentMethod($paymentMethod?->type);
                     $orderDTO->metaData = $metaData;
                     $orderDTO->isPaid = true;
 
                     $woocommerceApiService->updateOrder($orderDTO);
+                    $order->payment_intent_id = $orderDTO->paymentIntentId;
                     $order->payment_method = $orderDTO->paymentMethod;
                     $order->payment_issuer = $orderDTO->paymentIssuer;
                     $order->meta_data = $metaData;

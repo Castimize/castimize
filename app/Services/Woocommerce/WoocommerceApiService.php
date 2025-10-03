@@ -144,6 +144,7 @@ class WoocommerceApiService
     public function updateOrder(OrderDTO $orderDTO)
     {
         $data = [
+            'transaction_id' => $orderDTO->transactionId,
             'payment_method' => $orderDTO->paymentMethod,
             'payment_method_title' => $orderDTO->paymentIssuer,
             'set_paid' => $orderDTO->isPaid,
