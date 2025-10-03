@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\DTO\Order\CalculateShippingFeeUploadDTO;
 use App\Http\Resources\CalculatedShippingFeeResource;
+use App\Models\Customer;
 use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ShippingService;
@@ -17,6 +18,19 @@ class AddressApiController extends ApiController
 {
     public function validate(Request $request): JsonResponse
     {
+        if ($request->customer_id && !empty($request->customer_id)) {
+            $customer = Customer::where('wp_id', $request->customer_id)->first();
+            if ($customer && ! $customer->use_address_validation) {
+                $response = [
+                    'valid' => true,
+                    'address' => [],
+                    'address_changed' => 0,
+                    'messages' => [],
+                    'use_address_validation' => 0,
+                ];
+            }
+        }
+
         $addressData = [
             'name' => $request->name,
             'company' => $request->company ?? null,
@@ -35,6 +49,7 @@ class AddressApiController extends ApiController
                 'address' => [],
                 'address_changed' => 0,
                 'messages' => [],
+                'use_address_validation' => 1,
             ];
             LogRequestService::addResponse($request, $response);
             return response()->json($response);
