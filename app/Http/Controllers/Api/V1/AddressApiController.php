@@ -28,6 +28,9 @@ class AddressApiController extends ApiController
                     'messages' => [],
                     'use_address_validation' => 0,
                 ];
+
+                LogRequestService::addResponse($request, $response);
+                return response()->json($response);
             }
         }
 
