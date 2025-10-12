@@ -57,6 +57,8 @@ class ModelsService
                     $query = str_replace(['{{{order}}}'], [' ORDER BY order_model_name ASC '], $query);
                 } elseif ($mapper[$orderColumn] === 'name') {
                     $query = str_replace(['{{{order}}}'], [" ORDER BY order_model_name {$orderDir} "], $query);
+                } elseif ($mapper[$orderColumn] === 'material_name') {
+                    $query = str_replace(['{{{order}}}'], [" ORDER BY materials.name {$orderDir} "], $query);
                 } else {
                     $query = str_replace(['{{{order}}}'], [" ORDER BY {$mapper[$orderColumn]} {$orderDir} "], $query);
                 }
