@@ -47,22 +47,20 @@ class GetEtsyReceipts extends Command
         $date = now()->subDays(14);
         $shops = Shop::with(['shopOwner.customer'])
             ->where('active', true)
-            ->where('id', 2)
             ->where('shop', ShopOwnerShopsEnum::Etsy->value)
             ->get();
 
         foreach ($shops as $shop) {
             try {
-//                $receipts = $etsyService->getShopReceipts($shop, [
-//                    'min_created' => $date,
-//                ]);
-//                $this->info(sprintf('Found %s receipts for %s', $receipts->count(), $shop->id));
-//                foreach ($receipts->data as $receipt) {
-                $receipt = $etsyService->getShopReceipt($shop, 3815571529);
+                $receipts = $etsyService->getShopReceipts($shop, [
+                    'min_created' => $date,
+                ]);
+                $this->info(sprintf('Found %s receipts for %s', $receipts->count(), $shop->id));
+                foreach ($receipts->data as $receipt) {
                     $this->info(sprintf('Receipt %s', $receipt->receipt_id));
                     // Check if order already in shop_orders
                     $shopOrder = ShopOrder::where('shop_receipt_id', $receipt->receipt_id)->first();
-//                    if ($shopOrder === null) {
+                    if ($shopOrder === null) {
                         $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
                         if (count($lines) > 0) {
                             DB::beginTransaction();
@@ -70,12 +68,6 @@ class GetEtsyReceipts extends Command
                             try {
                                 // Create OrderDTO from Etsy receipt
                                 $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
-                                $total = $orderDTO->total;
-//                                dd($orderDTO->paymentFees);
-                                foreach ($orderDTO->paymentFees as $paymentFee) {
-                                    $total = $total->add($paymentFee->total);
-                                }
-                                dd($total->getValue());
                                 // Use mandate to pay the order
                                 $wcOrder = $woocommerceApiService->createOrder($orderDTO);
                                 $this->info('Woocommerce order created with id: ' . $wcOrder['id']);
@@ -118,10 +110,10 @@ class GetEtsyReceipts extends Command
                                 dd($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString());
                             }
                         }
-//                    } else {
-//                        $this->info('Shop order found with id: ' . $shopOrder->id);
-//                    }
-//                }
+                    } else {
+                        $this->info('Shop order found with id: ' . $shopOrder->id);
+                    }
+                }
             } catch (Exception $e) {
                 Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getLine());
             }
