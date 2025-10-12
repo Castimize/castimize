@@ -99,8 +99,12 @@ class StripeService
     public function createPaymentIntent(OrderDTO $orderDTO, CastimizeCustomer $customer): PaymentIntent
     {
         $paymentMethod = $this->getPaymentMethod($customer->stripe_data['payment_method']);
+        $total = $orderDTO->total;
+        foreach ($orderDTO->paymentFees as $paymentFee) {
+            $total = $total->add($paymentFee->total);
+        }
         return PaymentIntent::create([
-            'amount' => $orderDTO->total->getValue(),
+            'amount' => $total->getValue(),
             'currency' => strtolower($orderDTO->currencyCode),
             'customer' => $orderDTO->customerStripeId,
             'payment_method' => $customer->stripe_data['payment_method'],

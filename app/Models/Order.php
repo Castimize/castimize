@@ -79,6 +79,8 @@ class Order extends Model
         'shipping_fee_tax',
         'discount_fee',
         'discount_fee_tax',
+        'payment_fee',
+        'payment_fee_tax',
         'total',
         'total_tax',
         'total_refund',

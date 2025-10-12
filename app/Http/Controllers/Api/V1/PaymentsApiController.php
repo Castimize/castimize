@@ -22,8 +22,9 @@ class PaymentsApiController extends ApiController
     public function createSetupIntent(int $customerId): JsonResponse
     {
 //        dd($this->paymentService->getStripePaymentMethods());
-//        dd($this->paymentService->getStripePaymentMethod('pm_1S3AQP0004dOynzNFm4eHlBU'));
-//        dd($this->paymentService->getStripeMandate('mandate_1SC6lJ0004dOynzNAm8FpUfz'));
+//        dd($this->paymentService->getStripeBalanceTransaction('txn_3SBI4p0004dOynzN13DH3Rus'));
+//        dd($this->paymentService->getStripeCharge('py_3SBI4p0004dOynzN1mLpwQFP'));
+//        dd($this->paymentService->getStripeMandate('mandate_1Ro02b0004dOynzNmfF1jUAz'));
 //        dd($this->paymentService->getStripeSetupIntent('seti_1SB23Q0004dOynzNEqPH5qkD'));
 
         $customer = Customer::where('wp_id', $customerId)->first();

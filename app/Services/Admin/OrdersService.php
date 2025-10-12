@@ -188,6 +188,21 @@ class OrdersService
             $currency = Currency::where('code', 'USD')->first();
         }
 
+        $paymentFee = null;
+        $paymentFeeTax = null;
+        foreach ($orderDto->paymentFees as $orderPaymentFee) {
+            if ($paymentFee === null) {
+                $paymentFee = $orderPaymentFee->total;
+            } else {
+                $paymentFee = $paymentFee->add($orderPaymentFee->total);
+            }
+            if ($paymentFeeTax === null) {
+                $paymentFeeTax = $orderPaymentFee->totalTax;
+            } else {
+                $paymentFeeTax = $paymentFeeTax->add($orderPaymentFee->totalTax);
+            }
+        }
+
         $order = Order::create([
             'wp_id' => $orderDto->wpId,
             'customer_id' => $customer?->id,
@@ -228,6 +243,8 @@ class OrdersService
             'shipping_fee_tax' => $orderDto->shippingFeeTax?->toFloat(),
             'discount_fee' => $orderDto->discountFee?->toFloat(),
             'discount_fee_tax' => $orderDto->discountFeeTax?->toFloat(),
+            'payment_fee' => $paymentFee?->toFloat(),
+            'payment_fee_tax' => $paymentFee?->toFloat(),
             'total' => $orderDto->total->toFloat(),
             'total_tax' => $orderDto->totalTax?->toFloat(),
             'production_cost' => null,
