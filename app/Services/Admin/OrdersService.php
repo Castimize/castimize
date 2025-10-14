@@ -190,16 +190,18 @@ class OrdersService
 
         $paymentFee = null;
         $paymentFeeTax = null;
-        foreach ($orderDto->paymentFees as $orderPaymentFee) {
-            if ($paymentFee === null) {
-                $paymentFee = $orderPaymentFee->total;
-            } else {
-                $paymentFee = $paymentFee->add($orderPaymentFee->total);
-            }
-            if ($paymentFeeTax === null) {
-                $paymentFeeTax = $orderPaymentFee->totalTax;
-            } else {
-                $paymentFeeTax = $paymentFeeTax->add($orderPaymentFee->totalTax);
+        if (is_array($orderDto->paymentFees)) {
+            foreach ($orderDto->paymentFees as $orderPaymentFee) {
+                if ($paymentFee === null) {
+                    $paymentFee = $orderPaymentFee->total;
+                } else {
+                    $paymentFee = $paymentFee->add($orderPaymentFee->total);
+                }
+                if ($paymentFeeTax === null) {
+                    $paymentFeeTax = $orderPaymentFee->totalTax;
+                } else {
+                    $paymentFeeTax = $paymentFeeTax->add($orderPaymentFee->totalTax);
+                }
             }
         }
 
