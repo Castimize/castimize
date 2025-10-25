@@ -10,7 +10,9 @@ use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\State;
 use App\Services\Woocommerce\WoocommerceApiService;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class CustomersService
@@ -135,7 +137,11 @@ class CustomersService
             'updated_by' => 1,
         ]);
 
-        $this->attachAddressesFromWpCustomer($wpCustomer, $customer);
+        try {
+            $this->attachAddressesFromWpCustomer($wpCustomer, $customer);
+        } catch (Exception $e) {
+            Log::error($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getLine() . PHP_EOL . $e->getTraceAsString());
+        }
 
         return $customer;
     }
@@ -169,7 +175,11 @@ class CustomersService
         $customer->phone = $wpCustomer['billing']->phone ?? null;
         $customer->save();
 
-        $this->attachAddressesFromWpCustomer($wpCustomer, $customer);
+        try {
+            $this->attachAddressesFromWpCustomer($wpCustomer, $customer);
+        } catch (Exception $e) {
+            Log::error($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getLine() . PHP_EOL . $e->getTraceAsString());
+        }
 
         return $customer;
     }
@@ -346,7 +356,7 @@ class CustomersService
             if ($stateName) {
                 $state = State::firstOrCreate(
                     [
-                        'name' => $stateName,
+                        'slug' => Str::slug($stateName),
                     ],
                     [
                         'name' => $stateName,
@@ -360,7 +370,7 @@ class CustomersService
             if ($cityName) {
                 $city = City::firstOrCreate(
                     [
-                        'name' => $cityName,
+                        'slug' => Str::slug($cityName),
                     ],
                     [
                         'name' => $cityName,
