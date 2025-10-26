@@ -396,7 +396,7 @@ class Order extends Model
 
     public function shopOrder(): HasOne
     {
-        return $this->hasOne(ShopOwner::class, 'order_number', 'order_number');
+        return $this->hasOne(ShopOrder::class, 'order_number', 'order_number');
     }
 
     public function scopeRemoveTestEmailAddresses($query, string $column)
