@@ -373,7 +373,7 @@ class OrdersService
 
     public function handleStripeRefund(Order $order, Charge $charge): void
     {
-        if ($order !== null && $charge->status === 'succeeded' && $charge->refunded) {
+        if ($order !== null && $charge->status === 'succeeded') {
             $order->total_refund = ($charge->amount_refunded / 100);
             if ($order->total === $order->total_refund) {
                 $order->total_refund_tax = $order->total_tax;
