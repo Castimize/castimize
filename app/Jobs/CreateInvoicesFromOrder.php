@@ -34,7 +34,7 @@ class CreateInvoicesFromOrder implements ShouldQueue
     public function handle(InvoicesService $invoicesService): void
     {
         $order = Order::with('customer')->where('wp_id', $this->wpOrderId)->first();
-        if ($order === null) {
+        if ($order === null || $order->paid_at === null) {
             return;
         }
         $customer = $order->customer;
