@@ -6,6 +6,7 @@ namespace App\Services\Etsy;
 
 use App\DTO\Shops\Etsy\ListingDTO;
 use App\DTO\Shops\Etsy\ListingImageDTO;
+use App\DTO\Shops\Etsy\ReceiptTrackingDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDestinationDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDTO;
 use App\Enums\Etsy\EtsyListingStatesEnum;
@@ -647,6 +648,20 @@ class EtsyService
         return Receipt::all(
             shop_id: $shop->shop_oauth['shop_id'],
             params: $params,
+        );
+    }
+
+    public function updateShopReceiptTracking(Shop $shop, int $receiptId, ReceiptTrackingDTO $receiptTrackingDTO)
+    {
+        $this->refreshAccessToken($shop);
+        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+
+        (new EtsyReceiptTrackingService(
+            shop: $shop,
+        ))->updateTracking(
+            shopId: $shop->shop_oauth['shop_id'],
+            receiptId: $receiptId,
+            receiptTrackingDTO: $receiptTrackingDTO,
         );
     }
 
