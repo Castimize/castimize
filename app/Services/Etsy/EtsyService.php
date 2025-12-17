@@ -23,6 +23,7 @@ use Etsy\Resources\ListingImage;
 use Etsy\Resources\Receipt;
 use Etsy\Resources\ReturnPolicy;
 use Etsy\Resources\SellerTaxonomy;
+use Etsy\Resources\Shipment;
 use Etsy\Resources\ShippingCarrier;
 use Etsy\Resources\ShippingProfile;
 use Etsy\Resources\Shop as EtsyShop;
@@ -660,18 +661,31 @@ class EtsyService
         );
     }
 
-    public function updateShopReceiptTracking(Shop $shop, int $receiptId, ReceiptTrackingDTO $receiptTrackingDTO): void
+    public function updateShopReceiptTracking(Shop $shop, int $receiptId, ReceiptTrackingDTO $receiptTrackingDTO): ?Shipment
     {
         $this->refreshAccessToken($shop);
         new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
 
-        (new EtsyReceiptTrackingService(
-            shop: $shop,
-        ))->updateTracking(
-            shopId: $shop->shop_oauth['shop_id'],
-            receiptId: $receiptId,
-            receiptTrackingDTO: $receiptTrackingDTO,
+        $payload = [
+            'tracking_code' => $receiptTrackingDTO->trackingCode,
+            'carrier_name' => $receiptTrackingDTO->carrier,
+            'send_bcc' => $receiptTrackingDTO->sendBcc,
+            'note_to_buyer' => $receiptTrackingDTO->noteToBuyer,
+        ];
+
+        return Shipment::create(
+            shop_id: $shop->shop_oauth['shop_id'],
+            receipt_id: $receiptId,
+            data: $payload,
         );
+
+//        (new EtsyReceiptTrackingService(
+//            shop: $shop,
+//        ))->updateTracking(
+//            shopId: $shop->shop_oauth['shop_id'],
+//            receiptId: $receiptId,
+//            receiptTrackingDTO: $receiptTrackingDTO,
+//        );
     }
 
     public function getShopListingsFromReceipt(Shop $shop, Receipt $receipt): array
