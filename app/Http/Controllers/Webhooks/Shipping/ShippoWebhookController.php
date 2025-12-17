@@ -114,7 +114,8 @@ class ShippoWebhookController extends WebhookController
                     $orders = Order::has('shopOrder')->whereIn('id', $orderIds)->get();
                     foreach ($orders as $order) {
                         if ($order->shopOrder) {
-                            (new EtsyService())->updateShopReceiptTracking(
+                            $etsyService = new EtsyService();
+                            $etsyService->updateShopReceiptTracking(
                                 shop: $order->shopOrder->shop_id,
                                 receiptId: $order->shopOrder->shop_receipt_id,
                                 receiptTrackingDTO: ReceiptTrackingDTO::from(
@@ -122,10 +123,17 @@ class ShippoWebhookController extends WebhookController
                                     noteToBuyer: $shipment->tracking_url,
                                 )
                             );
+                            $etsyService->updateShopReceipt(
+                                shop: $order->shopOrder->shop_id,
+                                receiptId: $order->shopOrder->shop_receipt_id,
+                                data: [
+                                    'was_shipped' => true,
+                                ],
+                            );
                         }
                     }
                 } catch (Exception $e) {
-                    Log::error('Shippo top Etsy tracking error:' . PHP_EOL . $e->getMessage() .PHP_EOL . $e->getFile() . PHP_EOL . $e->getLine() . PHP_EOL . $e->getTraceAsString());
+                    Log::error('Shippo to Etsy tracking error:' . PHP_EOL . $e->getMessage() .PHP_EOL . $e->getFile() . PHP_EOL . $e->getLine() . PHP_EOL . $e->getTraceAsString());
                 }
             }
         }

@@ -651,7 +651,16 @@ class EtsyService
         );
     }
 
-    public function updateShopReceiptTracking(Shop $shop, int $receiptId, ReceiptTrackingDTO $receiptTrackingDTO)
+    public function updateShopReceipt(Shop $shop, int $receiptId, array $data): ?Receipt
+    {
+        return Receipt::update(
+            shop_id: $shop->shop_oath['shop_id'],
+            receipt_id: $receiptId,
+            data: $data,
+        );
+    }
+
+    public function updateShopReceiptTracking(Shop $shop, int $receiptId, ReceiptTrackingDTO $receiptTrackingDTO): void
     {
         $this->refreshAccessToken($shop);
         new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
