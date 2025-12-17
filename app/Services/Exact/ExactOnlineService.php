@@ -152,7 +152,7 @@ class ExactOnlineService
             $account = $this->updateAccount($account, $customer);
             $account->save();
         } catch (Exception $exception) {
-            dd($customer->wp_id, $account, $exception->getMessage());
+            Log::error('Customer WP id: ' . $customer->wp_id . PHP_EOL . 'Error: ' . $exception->getMessage() . PHP_EOL . print_r($account, true));
         }
 
         $customer->exact_online_guid = $account->ID;
