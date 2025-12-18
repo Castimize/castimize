@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use App\Nova\Actions\ExportLineItemsV1Action;
+use App\Nova\Actions\PoAcceptedAtDcStatusAction;
 use App\Nova\Actions\PoCanceledStatusAction;
 use App\Nova\Actions\PoChangeStatusOrderManualAction;
 use App\Nova\Actions\PoReprintByDcAction;
@@ -320,6 +321,7 @@ class OrderQueue extends Resource
     public function actions(NovaRequest $request)
     {
         return [
+            PoAcceptedAtDcStatusAction::make()->withoutConfirmation(),
             PoReprintByDcAction::make()
                 ->confirmText(__('Are you sure you want to reprint the selected PO\'s?'))
                 ->confirmButtonText(__('Confirm'))
