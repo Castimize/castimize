@@ -45,7 +45,17 @@ class SyncInvoiceToExact implements ShouldQueue
 
         try {
             if ($customer->exact_online_guid === null) {
-                throw new Exception('Customer exact_online_guid is null');
+                $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($this->wpCustomerId);
+                if ($wpCustomer === null) {
+                    return;
+                }
+                $customer->wpCustomer = $wpCustomer;
+                $exactOnlineService->syncCustomer($customer);
+
+                $customer->refresh();
+                if ($customer->exact_online_guid === null) {
+                    throw new Exception('Customer exact_online_guid is null');
+                }
             }
 
             $exactOnlineService->syncInvoice($this->invoice);
