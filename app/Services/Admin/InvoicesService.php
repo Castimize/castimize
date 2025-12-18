@@ -88,19 +88,35 @@ class InvoicesService
         ]);
 
         if ($debit) {
-            foreach ($order->uploads as $upload) {
+            if ($order->uploads()->count() > 0) {
+                foreach ($order->uploads as $upload) {
+                    $invoice->lines()->create([
+                        'order_id' => $order->id,
+                        'upload_id' => $upload->id,
+                        'customer_id' => $customer->id,
+                        'currency_id' => $upload->currency_id,
+                        'upload_name' => $upload->name,
+                        'material_name' => $upload->material_name,
+                        'quantity' => $upload->quantity,
+                        'total' => $upload->total,
+                        'total_tax' => $upload->total_tax,
+                        'currency_code' => $upload->currency_code,
+                        'meta_data' => $upload->meta_data,
+                    ]);
+                }
+            } else {
                 $invoice->lines()->create([
                     'order_id' => $order->id,
-                    'upload_id' => $upload->id,
+                    'upload_id' => null,
                     'customer_id' => $customer->id,
-                    'currency_id' => $upload->currency_id,
-                    'upload_name' => $upload->name,
-                    'material_name' => $upload->material_name,
-                    'quantity' => $upload->quantity,
-                    'total' => $upload->total,
-                    'total_tax' => $upload->total_tax,
-                    'currency_code' => $upload->currency_code,
-                    'meta_data' => $upload->meta_data,
+                    'currency_id' => $order->currency_id,
+                    'upload_name' => 'Fee',
+                    'material_name' => '-',
+                    'quantity' => 1,
+                    'total' => $total,
+                    'total_tax' => $totalTax,
+                    'currency_code' => $order->currency_code,
+                    'meta_data' => null,
                 ]);
             }
         } else {

@@ -47,6 +47,7 @@ class Invoice extends Model
         'postal_code',
         'city',
         'country',
+        'tax_percentage',
         'vat',
         'iban',
         'bic',
@@ -56,6 +57,8 @@ class Invoice extends Model
         'paid',
         'paid_at',
         'meta_data',
+        'created_by',
+        'updated_by',
     ];
 
     /**
