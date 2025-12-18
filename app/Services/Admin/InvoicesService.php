@@ -39,8 +39,8 @@ class InvoicesService
             $totalTax = $wpOrder['total_tax'];
         } else {
             $creditNoteDocument = WcOrderDocumentTypesEnum::CreditNote->value;
-            $invoiceNumber = $wpOrder['documents']->$creditNoteDocument->number;
-            $invoiceDate = Carbon::createFromTimestamp($wpOrder['documents']->$creditNoteDocument->date_timestamp);
+            $invoiceNumber = $wpOrder['documents']->$creditNoteDocument[0]->number;
+            $invoiceDate = Carbon::createFromTimestamp($wpOrder['documents']->$creditNoteDocument[0]->date_timestamp);
             $total = 0.00;
             foreach ($wpOrder['refunds'] as $refund) {
                 $total += abs($refund->total);
