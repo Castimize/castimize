@@ -65,6 +65,16 @@ class Customer extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'user',
+        'orders',
+        'models',
+        'complaints',
+    ];
+
+    /**
      * @return Builder
      */
     public static function indexQuery(NovaRequest $request, $query)
