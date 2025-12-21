@@ -72,6 +72,9 @@ class Customer extends Resource
         'orders',
         'models',
         'complaints',
+        'creator',
+        'editor',
+        'destroyer',
     ];
 
     /**
