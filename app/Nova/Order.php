@@ -67,6 +67,7 @@ class Order extends Resource
         'country',
         'currency',
         'uploads',
+        'shopOrder.shopWithTrashed',
     ];
 
     /**
