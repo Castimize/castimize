@@ -54,6 +54,11 @@ class ShopOrder extends Model
         return $this->belongsTo(Shop::class);
     }
 
+    public function shopWithTrashed(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class)->withTrashed();
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_number', 'order_number');
