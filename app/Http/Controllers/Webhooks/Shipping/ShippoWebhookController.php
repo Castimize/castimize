@@ -116,7 +116,7 @@ class ShippoWebhookController extends WebhookController
                         if ($order->shopOrder) {
                             $etsyService = new EtsyService();
                             $etsyService->updateShopReceiptTracking(
-                                shop: $order->shopOrder->shop_id,
+                                shop: $order->shopOrder->shop,
                                 receiptId: $order->shopOrder->shop_receipt_id,
                                 receiptTrackingDTO: ReceiptTrackingDTO::from(
                                     trackingCode: $shipment->tracking_number,
@@ -124,7 +124,7 @@ class ShippoWebhookController extends WebhookController
                                 )
                             );
                             $etsyService->updateShopReceipt(
-                                shop: $order->shopOrder->shop_id,
+                                shop: $order->shopOrder->shop,
                                 receiptId: $order->shopOrder->shop_receipt_id,
                                 data: [
                                     'was_shipped' => true,
