@@ -19,7 +19,7 @@ class EtsyListingService
     ) {
         $this->etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-            shared_secret: $shop->shop_oauth['client_secret'],
+//            shared_secret: $shop->shop_oauth['client_secret'],
             api_key: $shop->shop_oauth['access_token'],
         );
     }

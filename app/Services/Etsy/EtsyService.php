@@ -32,6 +32,7 @@ use Etsy\Resources\User;
 use Etsy\Utils\PermissionScopes;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 
@@ -48,8 +49,12 @@ class EtsyService
 
     public function getAuthorizationUrl(Shop $shop): string
     {
-        if (! isset($shop->shop_oauth['shared_secret'])) {
-            $this->storeSharedSecret($shop);
+        if (! isset($shop->shop_oauth['client_id'])) {
+            $this->storeClientId($shop);
+        }
+
+        if (! isset($shop->shop_oauth['client_secret'])) {
+            $this->storeClientSecret($shop);
         }
 
         $this->client = new Client(
@@ -86,8 +91,12 @@ class EtsyService
         if ($shop === null) {
             throw new Exception(__('Shop not found'));
         }
-        if (! isset($shop->shop_oauth['shared_secret'])) {
-            $this->storeSharedSecret($shop);
+        if (! isset($shop->shop_oauth['client_id'])) {
+            $this->storeClientId($shop);
+        }
+
+        if (! isset($shop->shop_oauth['client_secret'])) {
+            $this->storeClientSecret($shop);
         }
 
         $this->client = new Client(
@@ -127,8 +136,12 @@ class EtsyService
                 'shopOwner' => $shop->shop_owner_id,
             ]));
         }
-        if (! isset($shop->shop_oauth['shared_secret'])) {
-            $this->storeSharedSecret($shop);
+        if (! isset($shop->shop_oauth['client_id'])) {
+            $this->storeClientId($shop);
+        }
+
+        if (! isset($shop->shop_oauth['client_secret'])) {
+            $this->storeClientSecret($shop);
         }
 
         $this->client = new Client(
@@ -809,13 +822,23 @@ class EtsyService
         return $shop;
     }
 
-    private function storeSharedSecret(Shop $shop): Shop
+    private function storeClientSecret(Shop $shop): Shop
     {
         $shopOauth = $shop->shop_oauth;
-        $shopOauth['shared_secret'] = config('services.shops.etsy.client_secret');
+        $shopOauth['client_secret'] = Crypt::encryptString(config('services.shops.etsy.client_secret'));
 
         $shop->shop_oauth = $shopOauth;
-        $shop->active = true;
+        $shop->save();
+
+        return $shop;
+    }
+
+    private function storeClientId(Shop $shop): Shop
+    {
+        $shopOauth = $shop->shop_oauth;
+        $shopOauth['client_id'] = config('services.shops.etsy.client_id');
+
+        $shop->shop_oauth = $shopOauth;
         $shop->save();
 
         return $shop;
