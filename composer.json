@@ -57,7 +57,7 @@
         "psr/simple-cache": "^2.0",
         "ranium/laravel-seedonce": "^1.6",
         "reedware/nova-text-filter": "^2.0",
-        "rhysnhall/etsy-php-sdk": "^1.2",
+        "rhysnhall/etsy-php-sdk": "1.0",
         "rpj/daterangepicker": "^0.0.8",
         "saumini/count": "^1.0",
         "sentry/sentry-laravel": "^4.8",
