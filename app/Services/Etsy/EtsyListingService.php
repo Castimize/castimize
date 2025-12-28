@@ -17,7 +17,11 @@ class EtsyListingService
     public function __construct(
         protected Shop $shop,
     ) {
-        $this->etsy = new Etsy($this->shop->shop_oauth['client_id'], $this->shop->shop_oauth['access_token']);
+        $this->etsy = new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['client_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
     }
 
     public function getListings(): Collection

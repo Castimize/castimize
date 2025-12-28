@@ -10,6 +10,7 @@
     "require": {
         "php": "^8.2",
         "ext-bcmath": "*",
+        "ext-intl": "*",
         "ext-zip": "*",
         "abordage/nova-html-card": "^0.3.1",
         "alexwenzel/nova-dependency-container": "^1.12",
@@ -56,7 +57,7 @@
         "psr/simple-cache": "^2.0",
         "ranium/laravel-seedonce": "^1.6",
         "reedware/nova-text-filter": "^2.0",
-        "rhysnhall/etsy-php-sdk": "^1.0",
+        "rhysnhall/etsy-php-sdk": "^1.2",
         "rpj/daterangepicker": "^0.0.8",
         "saumini/count": "^1.0",
         "sentry/sentry-laravel": "^4.8",
@@ -81,7 +82,7 @@
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "laravel/pint": "^1.13",
-        "laravel/sail": "^1.26",
+        "laravel/sail": "^1.51",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
         "phpecs/phpecs": "^2.2",

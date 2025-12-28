@@ -48,7 +48,14 @@ class EtsyService
 
     public function getAuthorizationUrl(Shop $shop): string
     {
-        $this->client = new Client(client_id: $shop->shop_oauth['client_id']);
+        if (! isset($shop->shop_oauth['shared_secret'])) {
+            $this->storeSharedSecret($shop);
+        }
+
+        $this->client = new Client(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+        );
         $scopes = PermissionScopes::ALL_SCOPES;
 //        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
 
@@ -79,8 +86,14 @@ class EtsyService
         if ($shop === null) {
             throw new Exception(__('Shop not found'));
         }
+        if (! isset($shop->shop_oauth['shared_secret'])) {
+            $this->storeSharedSecret($shop);
+        }
 
-        $this->client = new Client(client_id: $shop->shop_oauth['client_id']);
+        $this->client = new Client(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+        );
 
         $response = $this->client->requestAccessToken(
             redirect_uri: $this->getRedirectUri(),
@@ -90,7 +103,11 @@ class EtsyService
 
         $shop = $this->storeAccessToken($shop, $response);
 
-        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         $etsyShop = $this->addShopToShopOwnerShop($shop);
 
@@ -110,8 +127,13 @@ class EtsyService
                 'shopOwner' => $shop->shop_owner_id,
             ]));
         }
+        if (! isset($shop->shop_oauth['shared_secret'])) {
+            $this->storeSharedSecret($shop);
+        }
+
         $this->client = new Client(
             client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
         );
         $response = $this->client->refreshAccessToken($shop->shop_oauth['refresh_token']);
 
@@ -121,7 +143,11 @@ class EtsyService
     public function getShop(Shop $shop): EtsyShop|null
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        $etsy = new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         return $this->addShopToShopOwnerShop($shop);
     }
@@ -129,7 +155,11 @@ class EtsyService
     public function getShopReturnPolicy(Shop $shop, int $returnPolicyId): ReturnPolicy
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        $etsy = new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         return ReturnPolicy::get(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -140,7 +170,11 @@ class EtsyService
     public function getShopReturnPolicies(Shop $shop): Collection
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        $etsy = new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         return ReturnPolicy::all(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -150,7 +184,11 @@ class EtsyService
     public function createShopReturnPolicy(Shop $shop): ReturnPolicy
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        $etsy = new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         $shopReturnPolicy = ReturnPolicy::create(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -198,12 +236,16 @@ class EtsyService
     public function getSellerTaxonomy(Shop $shop): Collection
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        $etsy = new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         return SellerTaxonomy::all();
     }
 
-    public function checkExistingShippingProfile(int $shopId, Shop $shop)
+    public function checkExistingShippingProfile(int $shopId, Shop $shop): void
     {
         $shippingProfileDTO = ShippingProfileDTO::fromShop($shopId);
         $shippingProfiles = $this->getShippingProfiles($shop);
@@ -373,7 +415,11 @@ class EtsyService
     public function getListingImages(Shop $shop, int $listingId): Collection
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        $etsy = new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         return ListingImage::all(
             listing_id: $listingId,
@@ -383,7 +429,11 @@ class EtsyService
     public function getShippingCarriers(Shop $shop): Collection
     {
         $this->refreshAccessToken($shop);
-        $etsy = new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        $etsy = new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         return ShippingCarrier::all('NL');
     }
@@ -623,7 +673,11 @@ class EtsyService
     public function getShopPaymentAccountLedgerEntries(Shop $shop)
     {
         $this->refreshAccessToken($shop);
-        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         return LedgerEntry::all(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -633,7 +687,11 @@ class EtsyService
     public function getShopReceipt(Shop $shop, int $receiptId)
     {
         $this->refreshAccessToken($shop);
-        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         return Receipt::get(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -644,7 +702,11 @@ class EtsyService
     public function getShopReceipts(Shop $shop, array $params = [])
     {
         $this->refreshAccessToken($shop);
-        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         return Receipt::all(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -664,7 +726,11 @@ class EtsyService
     public function updateShopReceiptTracking(Shop $shop, int $receiptId, ReceiptTrackingDTO $receiptTrackingDTO): ?Shipment
     {
         $this->refreshAccessToken($shop);
-        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         $payload = [
             'tracking_code' => $receiptTrackingDTO->trackingCode,
@@ -717,7 +783,11 @@ class EtsyService
     public function getTransactions(Shop $shop, int $listingId)
     {
         $this->refreshAccessToken($shop);
-        new Etsy($shop->shop_oauth['client_id'], $shop->shop_oauth['access_token']);
+        new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: $shop->shop_oauth['shared_secret'],
+            api_key: $shop->shop_oauth['access_token'],
+        );
 
         return Transaction::allByListing(
             shop_id: $shop->shop_oauth['shop_id'],
@@ -730,6 +800,18 @@ class EtsyService
         $shopOauth = $shop->shop_oauth;
         $shopOauth['access_token'] = $response['access_token'];
         $shopOauth['refresh_token'] = $response['refresh_token'];
+
+        $shop->shop_oauth = $shopOauth;
+        $shop->active = true;
+        $shop->save();
+
+        return $shop;
+    }
+
+    private function storeSharedSecret(Shop $shop): Shop
+    {
+        $shopOauth = $shop->shop_oauth;
+        $shopOauth['shared_secret'] = config('services.shops.etsy.client_secret');
 
         $shop->shop_oauth = $shopOauth;
         $shop->active = true;

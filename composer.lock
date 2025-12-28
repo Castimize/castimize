@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d9e1d79630d40757ebf4989d2fc4a550",
+    "content-hash": "5814e3f3098358f77ec7ac281d885902",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -7923,16 +7923,16 @@
         },
         {
             "name": "rhysnhall/etsy-php-sdk",
-            "version": "1.0.1",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rhysnhall/etsy-php-sdk.git",
-                "reference": "c56bbda8bda048e64444e35f7c42798e1f3e5506"
+                "reference": "7f8a913e2d2498cef9108e286744915bb89e8476"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rhysnhall/etsy-php-sdk/zipball/c56bbda8bda048e64444e35f7c42798e1f3e5506",
-                "reference": "c56bbda8bda048e64444e35f7c42798e1f3e5506",
+                "url": "https://api.github.com/repos/rhysnhall/etsy-php-sdk/zipball/7f8a913e2d2498cef9108e286744915bb89e8476",
+                "reference": "7f8a913e2d2498cef9108e286744915bb89e8476",
                 "shasum": ""
             },
             "require": {
@@ -7965,9 +7965,9 @@
             ],
             "support": {
                 "issues": "https://github.com/rhysnhall/etsy-php-sdk/issues",
-                "source": "https://github.com/rhysnhall/etsy-php-sdk/tree/v1.0.1"
+                "source": "https://github.com/rhysnhall/etsy-php-sdk/tree/v1.2.0"
             },
-            "time": "2024-07-17T22:47:26+00:00"
+            "time": "2025-12-05T09:27:12+00:00"
         },
         {
             "name": "rpj/daterangepicker",
@@ -13197,16 +13197,16 @@
         },
         {
             "name": "laravel/sail",
-            "version": "v1.44.0",
+            "version": "v1.51.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/sail.git",
-                "reference": "a09097bd2a8a38e23ac472fa6a6cf5b0d1c1d3fe"
+                "reference": "1c74357df034e869250b4365dd445c9f6ba5d068"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/sail/zipball/a09097bd2a8a38e23ac472fa6a6cf5b0d1c1d3fe",
-                "reference": "a09097bd2a8a38e23ac472fa6a6cf5b0d1c1d3fe",
+                "url": "https://api.github.com/repos/laravel/sail/zipball/1c74357df034e869250b4365dd445c9f6ba5d068",
+                "reference": "1c74357df034e869250b4365dd445c9f6ba5d068",
                 "shasum": ""
             },
             "require": {
@@ -13219,7 +13219,7 @@
             },
             "require-dev": {
                 "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0",
-                "phpstan/phpstan": "^1.10"
+                "phpstan/phpstan": "^2.0"
             },
             "bin": [
                 "bin/sail"
@@ -13256,7 +13256,7 @@
                 "issues": "https://github.com/laravel/sail/issues",
                 "source": "https://github.com/laravel/sail"
             },
-            "time": "2025-07-04T16:17:06+00:00"
+            "time": "2025-12-09T13:33:49+00:00"
         },
         {
             "name": "mockery/mockery",
@@ -16001,6 +16001,7 @@
     "platform": {
         "php": "^8.2",
         "ext-bcmath": "*",
+        "ext-intl": "*",
         "ext-zip": "*"
     },
     "platform-dev": {},
