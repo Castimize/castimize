@@ -456,7 +456,8 @@ class EtsyService
     {
         // Get the authenticated user.
         $user = User::me();
-//        $userGet = User::get($user->user_id);
+        $userGet = User::get($user->user_id);
+        dd($userGet);
 
         // Get the users shop.
         $etsyShop = EtsyShop::get($user->shop_id);
