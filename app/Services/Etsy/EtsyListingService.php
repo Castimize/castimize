@@ -9,6 +9,7 @@ use App\Services\Etsy\Resources\Listing;
 use Etsy\Collection;
 use Etsy\Etsy;
 use Exception;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 
 #[AllowDynamicProperties]
@@ -19,7 +20,7 @@ class EtsyListingService
     ) {
         $this->etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['client_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
     }

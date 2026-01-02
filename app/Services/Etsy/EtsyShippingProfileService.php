@@ -11,6 +11,7 @@ use Etsy\Etsy;
 use Etsy\Resources\ShippingDestination;
 use Etsy\Resources\ShippingProfile;
 use Exception;
+use Illuminate\Support\Facades\Crypt;
 
 #[AllowDynamicProperties]
 class EtsyShippingProfileService
@@ -20,7 +21,7 @@ class EtsyShippingProfileService
     ) {
         $this->etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['client_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
     }

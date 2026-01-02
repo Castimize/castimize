@@ -59,7 +59,7 @@ class EtsyService
 
         $this->client = new Client(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
         );
         $scopes = PermissionScopes::ALL_SCOPES;
 //        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
@@ -101,7 +101,7 @@ class EtsyService
 
         $this->client = new Client(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
         );
 
         $response = $this->client->requestAccessToken(
@@ -114,7 +114,7 @@ class EtsyService
 
         new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -146,7 +146,7 @@ class EtsyService
 
         $this->client = new Client(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($this->shop->shop_oauth['client_secret']),
         );
 
         $response = $this->client->refreshAccessToken($shop->shop_oauth['refresh_token']);
@@ -159,7 +159,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -171,7 +171,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -186,7 +186,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -200,7 +200,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -252,7 +252,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -431,7 +431,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -445,7 +445,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -689,7 +689,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -703,7 +703,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -718,7 +718,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -742,7 +742,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -799,7 +799,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-//            shared_secret: $shop->shop_oauth['shared_secret'],
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
             api_key: $shop->shop_oauth['access_token'],
         );
 
@@ -822,10 +822,10 @@ class EtsyService
         return $shop;
     }
 
-    private function storeClientSecret(Shop $shop): Shop
+    private function storeClientId(Shop $shop): Shop
     {
         $shopOauth = $shop->shop_oauth;
-        $shopOauth['client_secret'] = Crypt::encryptString(config('services.shops.etsy.client_secret'));
+        $shopOauth['client_id'] = config('services.shops.etsy.client_id');
 
         $shop->shop_oauth = $shopOauth;
         $shop->save();
@@ -833,10 +833,10 @@ class EtsyService
         return $shop;
     }
 
-    private function storeClientId(Shop $shop): Shop
+    private function storeClientSecret(Shop $shop): Shop
     {
         $shopOauth = $shop->shop_oauth;
-        $shopOauth['client_id'] = config('services.shops.etsy.client_id');
+        $shopOauth['client_secret'] = Crypt::encryptString(config('services.shops.etsy.client_secret'));
 
         $shop->shop_oauth = $shopOauth;
         $shop->save();
