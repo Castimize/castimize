@@ -454,7 +454,11 @@ class EtsyService
 
     private function addShopToShopOwnerShop(Shop $shop): EtsyShop|null
     {
-        $etsyShop = User::getShop();
+        // Get the authenticated user.
+        $user = User::me();
+
+        // Get the users shop.
+        $etsyShop = $user->shop();
 
         $shopOauth = $shop->shop_oauth;
         if ($etsyShop && ! array_key_exists('shop_id', $shopOauth)) {
