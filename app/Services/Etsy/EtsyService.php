@@ -458,7 +458,7 @@ class EtsyService
         $user = User::me();
 
         // Get the users shop.
-        $etsyShop = $user->shop();
+        $etsyShop = EtsyShop::getByUserId($user->user_id);
 
         $shopOauth = $shop->shop_oauth;
         if ($etsyShop && ! array_key_exists('shop_id', $shopOauth)) {
