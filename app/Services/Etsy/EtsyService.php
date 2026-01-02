@@ -146,7 +146,7 @@ class EtsyService
 
         $this->client = new Client(
             client_id: $shop->shop_oauth['client_id'],
-            shared_secret: Crypt::decryptString($this->shop->shop_oauth['client_secret']),
+            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
         );
 
         $response = $this->client->refreshAccessToken($shop->shop_oauth['refresh_token']);
