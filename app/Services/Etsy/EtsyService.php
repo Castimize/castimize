@@ -456,6 +456,8 @@ class EtsyService
     {
         // Get the authenticated user.
         $user = User::me();
+        $userGet = User::get($user->user_id);
+        dd($user, $userGet);
 
         // Get the users shop.
         $etsyShop = EtsyShop::getByUserId($user->user_id);
@@ -815,7 +817,7 @@ class EtsyService
 
     private function storeAccessToken(Shop $shop, array $response): Shop
     {
-        $shopOauth = $shop->shop_oauth;
+        $shopOauth = $shop->shop_oauth ?? [];
         $shopOauth['access_token'] = $response['access_token'];
         $shopOauth['refresh_token'] = $response['refresh_token'];
 
@@ -828,7 +830,7 @@ class EtsyService
 
     private function storeClientId(Shop $shop): Shop
     {
-        $shopOauth = $shop->shop_oauth;
+        $shopOauth = $shop->shop_oauth ?? [];
         $shopOauth['client_id'] = config('services.shops.etsy.client_id');
 
         $shop->shop_oauth = $shopOauth;
@@ -839,7 +841,7 @@ class EtsyService
 
     private function storeClientSecret(Shop $shop): Shop
     {
-        $shopOauth = $shop->shop_oauth;
+        $shopOauth = $shop->shop_oauth ?? [];
         $shopOauth['client_secret'] = Crypt::encryptString(config('services.shops.etsy.client_secret'));
 
         $shop->shop_oauth = $shopOauth;
