@@ -21,7 +21,7 @@ class EtsyVariationService
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->shop->shop_oauth['access_token'],
 //                'x-api-key' => $this->shop->shop_oauth['client_id'],
-                'x-api-key' => $this->shop->shop_oauth['client_id'] . ':' . Crypt::decryptString($this->shop->shop_oauth['client_secret']),
+                'x-api-key' => $this->shop->shop_oauth['client_id'] . ':' . config('services.shops.etsy.client_secret'),
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
             ],

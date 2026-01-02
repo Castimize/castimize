@@ -21,7 +21,7 @@ class EtsyShippingProfileService
     ) {
         $this->etsy = new Etsy(
             client_id: $shop->shop_oauth['client_id'],
-            shared_secret: Crypt::decryptString($shop->shop_oauth['client_secret']),
+            shared_secret: config('services.shops.etsy.client_secret'),
             api_key: $shop->shop_oauth['access_token'],
         );
     }
