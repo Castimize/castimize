@@ -43,7 +43,7 @@ class EtsyApiController extends ApiController
 
     public function getShopAuthorizationUrl(Request $request, int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
+        $customer = Customer::where('wp_id', $customerId)->first();
         $shop = $customer->shopOwner?->shops?->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
         if ($shop === null) {
             LogRequestService::addResponse($request, [
