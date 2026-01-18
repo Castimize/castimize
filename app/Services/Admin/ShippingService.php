@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\DTO\Shipping\AddressDTO;
 use App\Enums\Shippo\ShippoCustomsDeclarationContentTypesEnum;
 use App\Models\Country;
 use App\Models\CustomerShipment;
@@ -12,7 +13,6 @@ use App\Nova\Settings\Shipping\GeneralSettings;
 use App\Services\Shippo\ShippoService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use JsonException;
 use RuntimeException;
@@ -27,55 +27,56 @@ class ShippingService
 
     protected $_toAddress;
 
-    public function getFromAddress(): array
+    public function getFromAddress(): array|AddressDTO
     {
         return $this->_fromAddress;
     }
 
-    /**
-     * @return ShippingService
-     */
-    public function setFromAddress(array $address): static
+    public function setFromAddress(array|AddressDTO $address): static
     {
+        if (is_array($address)) {
+            $address = AddressDTO::fromArray($address);
+        }
         $this->_fromAddress = $address;
+
         return $this;
     }
 
-    public function getToAddress(): array
+    public function getToAddress(): array|AddressDTO
     {
         return $this->_toAddress;
     }
 
-    /**
-     * @return $this
-     */
-    public function setToAddress(array $address): static
+    public function setToAddress(array|AddressDTO $address): static
     {
+        if (is_array($address)) {
+            $address = AddressDTO::fromArray($address);
+        }
         $this->_toAddress = $address;
+
         return $this;
     }
 
     public function __construct(
         public GeneralSettings $generalSettings,
         public DcSettings $dcSettings
-    )
-    {
+    ) {
         $this->_shippoService = app(ShippoService::class);
     }
 
     public function createShippoAddress(string $type = 'From'): Shippo_Object
     {
-        $getAddressMethod = 'get' . $type . 'Address';
-        $getShipmentAddressMethod = 'getShipment' . $type . 'Address';
-        $setAddressMethod = 'set' . $type . 'Address';
-        $createAddressMethod = 'create' . $type . 'Address';
+        $getAddressMethod = 'get'.$type.'Address';
+        $getShipmentAddressMethod = 'getShipment'.$type.'Address';
+        $setAddressMethod = 'set'.$type.'Address';
+        $createAddressMethod = 'create'.$type.'Address';
         $cacheKey = $this->_shippoService->getCacheKey($this->$getAddressMethod());
 
-        //return Cache::remember($cacheKey . '_v3', 31556926, function() use ($getAddressMethod, $setAddressMethod, $createAddressMethod, $getShipmentAddressMethod) {
-            return $this->_shippoService->$setAddressMethod($this->$getAddressMethod())
-                ->$createAddressMethod(true)
-                ->$getShipmentAddressMethod();
-        //});
+        // return Cache::remember($cacheKey . '_v3', 31556926, function() use ($getAddressMethod, $setAddressMethod, $createAddressMethod, $getShipmentAddressMethod) {
+        return $this->_shippoService->$setAddressMethod($this->$getAddressMethod())
+            ->$createAddressMethod(true)
+            ->$getShipmentAddressMethod();
+        // });
     }
 
     /**
@@ -83,52 +84,51 @@ class ShippingService
      */
     public function validateAddress(string $type = 'From'): array
     {
-        $getAddressMethod = 'get' . $type . 'Address';
+        $getAddressMethod = 'get'.$type.'Address';
         $shippoAddress = $this->createShippoAddress($type);
         $address = $this->$getAddressMethod();
         [$valid, $errorMessages] = $this->checkAddressValid($shippoAddress['validation_results']);
         $addressChanged = false;
-        $address['object_id'] = $shippoAddress['object_id'];
+
+        $addressArray = $address instanceof AddressDTO ? $address->toArray() : $address;
+        $addressArray['object_id'] = $shippoAddress['object_id'];
 
         if (
             ! empty($shippoAddress['street_no']) ||
-            $address['street1'] !== $shippoAddress['street1'] ||
-            $address['city'] !== $shippoAddress['city'] ||
-            $address['state'] !== $shippoAddress['state'] ||
-            $address['zip'] !== $shippoAddress['zip'] ||
-            $address['country'] !== $shippoAddress['country']
+            ($address instanceof AddressDTO ? $address->street1 : $address['street1']) !== $shippoAddress['street1'] ||
+            ($address instanceof AddressDTO ? $address->city : $address['city']) !== $shippoAddress['city'] ||
+            ($address instanceof AddressDTO ? $address->state : $address['state']) !== $shippoAddress['state'] ||
+            ($address instanceof AddressDTO ? $address->zip : $address['zip']) !== $shippoAddress['zip'] ||
+            ($address instanceof AddressDTO ? $address->country : $address['country']) !== $shippoAddress['country']
         ) {
             $addressChanged = true;
-            $address['street1'] = $shippoAddress['street1'] . (! empty($shippoAddress['street_no']) ? ' ' . $shippoAddress['street_no'] : '');
-            $address['city'] = $shippoAddress['city'];
-            $address['state'] = $shippoAddress['state'];
-            $address['zip'] = $shippoAddress['zip'];
-            $address['country'] = $shippoAddress['country'];
+            $addressArray['street1'] = $shippoAddress['street1'].(! empty($shippoAddress['street_no']) ? ' '.$shippoAddress['street_no'] : '');
+            $addressArray['city'] = $shippoAddress['city'];
+            $addressArray['state'] = $shippoAddress['state'];
+            $addressArray['zip'] = $shippoAddress['zip'];
+            $addressArray['country'] = $shippoAddress['country'];
         }
 
         return [
             'valid' => $valid,
-            'address' => $address,
+            'address' => $addressArray,
             'address_changed' => $addressChanged,
             'messages' => $errorMessages,
         ];
     }
 
-    /**
-     * @throws Shippo_ApiError
-     */
     public function createShippoCustomerOrder(Order $order): void
     {
-        $fromAddress = $this->mapDcDefaultToShippoAddress();
-        $toAddress = $this->mapToShippoAddress($order->shipping_address);
+        $fromAddress = $this->mapDcDefaultToAddressDTO();
+        $toAddress = $this->mapToAddressDTO($order->shipping_address);
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
         [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results'], $shippoToAddress['test']);
         if (! $valid) {
-            $message = __('The shipping to address is invalid with the following messages') . PHP_EOL;
+            $message = __('The shipping to address is invalid with the following messages').PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
-                $message .= $errorMessage['text'] . PHP_EOL;
+                $message .= $errorMessage['text'].PHP_EOL;
             }
             throw new RuntimeException($message);
         }
@@ -141,20 +141,20 @@ class ShippingService
     }
 
     /**
-     * @throws Shippo_ApiError
+     * @throws Shippo_ApiError|JsonException
      */
     public function createShippoCustomerShipment(CustomerShipment $customerShipment): array
     {
-        $fromAddress = $this->mapToShippoAddress($customerShipment->fromAddress);
-        $toAddress = $this->mapToShippoAddress($customerShipment->toAddress);
+        $fromAddress = $this->mapToAddressDTO($customerShipment->fromAddress);
+        $toAddress = $this->mapToAddressDTO($customerShipment->toAddress);
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
         [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results'], $shippoToAddress['test'], false);
         if (! $valid) {
-            $message = __('The shipping to address is invalid with the following messages') . PHP_EOL;
+            $message = __('The shipping to address is invalid with the following messages').PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
-                $message .= $errorMessage['text'] . PHP_EOL;
+                $message .= $errorMessage['text'].PHP_EOL;
             }
             throw new RuntimeException($message);
         }
@@ -186,11 +186,10 @@ class ShippingService
                 'importer_reference' => $orderNumber,
                 'currency' => $currency,
                 'contents_type' => $contentsType,
-                //'eori_number' => strtoupper($customerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
+                // 'eori_number' => strtoupper($customerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
             ])
             ->createShipment();
         $shippoShipment = $this->_shippoService->getShipment();
-//        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 
         if ($rate === null) {
@@ -235,20 +234,20 @@ class ShippingService
     }
 
     /**
-     * @throws Shippo_ApiError
+     * @throws Shippo_ApiError|JsonException
      */
     public function createShippoManufacturerShipment(ManufacturerShipment $manufacturerShipment): array
     {
-        $fromAddress = $this->mapToShippoAddress($manufacturerShipment->fromAddress);
-        $toAddress = $this->mapToShippoAddress($manufacturerShipment->toAddress);
+        $fromAddress = $this->mapToAddressDTO($manufacturerShipment->fromAddress);
+        $toAddress = $this->mapToAddressDTO($manufacturerShipment->toAddress);
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
         [$valid, $errorMessages] = $this->checkAddressValid($shippoFromAddress['validation_results'], $shippoFromAddress['test'], false);
         if (! $valid) {
-            $message = __('The shipping from address is invalid with the following messages') . PHP_EOL;
+            $message = __('The shipping from address is invalid with the following messages').PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
-                $message .= $errorMessage['text'] . PHP_EOL;
+                $message .= $errorMessage['text'].PHP_EOL;
             }
             throw new RuntimeException($message);
         }
@@ -285,11 +284,10 @@ class ShippingService
                 'exporter_reference' => $manufacturerShipment->id,
                 'importer_reference' => $orderNumber,
                 'currency' => $currency,
-                //'eori_number' => $this->generalSettings->eoriNumber,
+                // 'eori_number' => $this->generalSettings->eoriNumber,
             ])
             ->createShipment($extra);
         $shippoShipment = $this->_shippoService->getShipment();
-//        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
 
         if ($rate === null) {
@@ -314,7 +312,7 @@ class ShippingService
             ->createLabel($manufacturerShipment->id, $rate['object_id']);
         $transaction = $this->_shippoService->getTransaction();
 
-        //Log::info(print_r($transaction, true));
+        // Log::info(print_r($transaction, true));
         if ($transaction && $transaction['status'] === 'SUCCESS') {
             return $this->_shippoService->toArray();
         }
@@ -352,36 +350,38 @@ class ShippingService
         dd($shippoPickup);
     }
 
-    private function mapToShippoAddress(array $address): array
+    private function mapToAddressDTO(array $address): AddressDTO
     {
-        return [
-            'name' => $address['name'],
-            'company' => $address['company'],
-            'street1' => $address['address_line1'],
-            'street2' => $address['address_line2'],
-            'city' => $address['city'],
+        return AddressDTO::fromArray([
+            'name' => $address['name'] ?? '',
+            'company' => $address['company'] ?? '',
+            'street1' => $address['address_line1'] ?? '',
+            'street2' => $address['address_line2'] ?? null,
+            'street3' => $address['address_line3'] ?? null,
+            'city' => $address['city'] ?? '',
             'state' => $address['state'] ?? null,
-            'zip' => $address['postal_code'],
-            'country' => $address['country'],
-            'email' => $address['email'],
-            'phone' => $address['phone'],
-        ];
+            'zip' => $address['postal_code'] ?? '',
+            'country' => $address['country'] ?? '',
+            'email' => $address['email'] ?? '',
+            'phone' => $address['phone'] ?? '',
+        ]);
     }
 
-    private function mapDcDefaultToShippoAddress(): array
+    private function mapDcDefaultToAddressDTO(): AddressDTO
     {
-        return [
-            'name' => $this->dcSettings->name,
-            'company' => $this->dcSettings->company,
-            'street1' => $this->dcSettings->addressLine1,
-            'street2' => $this->dcSettings->addressLine2,
-            'city' => $this->dcSettings->city,
-            'state' => $this->dcSettings->state,
-            'zip' => $this->dcSettings->postalCode,
-            'country' => $this->dcSettings->country,
-            'email' => $this->dcSettings->email,
-            'phone' => $this->dcSettings->phone,
-        ];
+        return new AddressDTO(
+            name: $this->dcSettings->name,
+            company: $this->dcSettings->company,
+            street1: $this->dcSettings->addressLine1,
+            street2: $this->dcSettings->addressLine2,
+            street3: null,
+            city: $this->dcSettings->city,
+            state: $this->dcSettings->state,
+            zip: $this->dcSettings->postalCode,
+            country: $this->dcSettings->country,
+            email: $this->dcSettings->email,
+            phone: $this->dcSettings->phone,
+        );
     }
 
     private function getCustomerShipmentRate($shippoShipment, string $shippingCountry): mixed
@@ -407,6 +407,7 @@ class ShippingService
     private function getServicelevelToken(string $shippingCountry): string
     {
         $country = Country::with('logisticsZone')->where('alpha2', $shippingCountry)->first();
+
         return $country->logisticsZone->shipping_servicelevel_token;
     }
 
@@ -432,6 +433,7 @@ class ShippingService
                 ];
             }
         }
+
         return [$valid, $errorMessages];
     }
 }

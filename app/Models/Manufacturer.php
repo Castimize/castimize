@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\DTO\Shipping\AddressDTO;
 use App\Observers\ManufacturerObserver;
 use App\Services\Admin\ShippingService;
 use App\Traits\Models\ModelHasAddresses;
@@ -131,19 +132,21 @@ class Manufacturer extends Model
 
     public function validateAddress(): void
     {
-        $addressData = [
-            'name' => $this->contact_name1,
-            'company' => $this->name,
-            'street1' => $this->address_line1,
-            'street2' => $this->address_line2,
-            'city' => $this->city?->name,
-            'state' => $this->state?->name,
-            'zip' => $this->postal_code,
-            'country' => $this->country_code,
-            'email' => $this->email ?? $this->billing_email,
-        ];
+        $addressDTO = new AddressDTO(
+            name: $this->contact_name1,
+            company: $this->name,
+            street1: $this->address_line1,
+            street2: $this->address_line2,
+            street3: null,
+            city: $this->city?->name ?? '',
+            state: $this->state?->name,
+            zip: $this->postal_code,
+            country: $this->country_code,
+            email: $this->email ?? $this->billing_email ?? '',
+            phone: $this->phone_1 ?? '',
+        );
 
-        $response = app(ShippingService::class)->setFromAddress($addressData)->validateAddress('From');
+        $response = app(ShippingService::class)->setFromAddress($addressDTO)->validateAddress('From');
         if (! $response['valid']) {
             $messages = [];
             foreach ($response['messages'] as $message) {

@@ -2,6 +2,7 @@
 
 namespace App\Services\Shippo;
 
+use App\DTO\Shipping\AddressDTO;
 use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Shippo\ShippoCustomsDeclarationContentTypesEnum;
 use App\Enums\Shippo\ShippoCustomsDeclarationIncoTermsEnum;
@@ -64,8 +65,7 @@ class ShippoService
         public CustomsItemSettings $customsItemSettings,
         public DcSettings $dcSettings,
         public PickupSettings $pickupSettings
-    )
-    {
+    ) {
         $this->initPackageTypes();
         $this->initCarriers();
         $this->initServices();
@@ -86,9 +86,14 @@ class ShippoService
         return $this->_fromAddress;
     }
 
-    public function setFromAddress(array $address): static
+    public function setFromAddress(array|AddressDTO $address): static
     {
-        $this->_fromAddress = $address;
+        if ($address instanceof AddressDTO) {
+            $this->_fromAddress = $address->toShippoArray();
+        } else {
+            $this->_fromAddress = $address;
+        }
+
         return $this;
     }
 
@@ -97,12 +102,18 @@ class ShippoService
         return $this->_toAddress;
     }
 
-    /**
-     * @return $this
-     */
-    public function setToAddress(array $address): static
+    public function setToAddress(array|AddressDTO $address): static
     {
-        $this->_toAddress = $address;
+        if ($address instanceof AddressDTO) {
+            // Sanitize Japanese addresses for UPS compliance
+            if ($address->isJapan()) {
+                $address = $this->sanitizeJapaneseAddress($address);
+            }
+            $this->_toAddress = $address->toShippoArray();
+        } else {
+            $this->_toAddress = $address;
+        }
+
         return $this;
     }
 
@@ -111,12 +122,10 @@ class ShippoService
         return $this->_shipmentFromAddress;
     }
 
-    /**
-     * @return $this
-     */
     public function setShipmentFromAddress(Shippo_Object $shipmentFromAddress): static
     {
         $this->_shipmentFromAddress = $shipmentFromAddress;
+
         return $this;
     }
 
@@ -125,12 +134,10 @@ class ShippoService
         return $this->_shipmentToAddress;
     }
 
-    /**
-     * @return $this
-     */
     public function setShipmentToAddress(Shippo_Object $shipmentToAddress): static
     {
         $this->_shipmentToAddress = $shipmentToAddress;
+
         return $this;
     }
 
@@ -185,6 +192,7 @@ class ShippoService
             request: $this->_fromAddress,
             response: json_decode($this->_shipmentFromAddress, true, 512, JSON_THROW_ON_ERROR),
         );
+
         return $this;
     }
 
@@ -201,6 +209,7 @@ class ShippoService
             request: $this->_toAddress,
             response: json_decode($this->_shipmentToAddress, true, 512, JSON_THROW_ON_ERROR),
         );
+
         return $this;
     }
 
@@ -223,9 +232,6 @@ class ShippoService
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function createOrder(Order $order): static
     {
         $weight = 0;
@@ -262,6 +268,7 @@ class ShippoService
             'mass_unit' => $params['mass_unit'],
             'weight' => $params['weight'],
         ]);
+
         return $this;
     }
 
@@ -291,6 +298,7 @@ class ShippoService
         ]);
 
         $this->_customsItems[] = $customsItem;
+
         return $this;
     }
 
@@ -309,7 +317,7 @@ class ShippoService
             //            'b13a_filing_option' => 'NOT_REQUIRED',
             'currency' => $params['currency'],
             'exporter_identification' => [
-                //'eori_number' => $params['eori_number'],
+                // 'eori_number' => $params['eori_number'],
                 'tax_id' => [
                     'number' => $this->generalSettings->taxNumber,
                     'type' => $this->generalSettings->taxType,
@@ -317,6 +325,7 @@ class ShippoService
             ],
             'items' => $this->_customsItems,
         ]);
+
         return $this;
     }
 
@@ -371,23 +380,23 @@ class ShippoService
         return $this;
     }
 
-//    /**
-//     * Create the shipping label transaction
-//     *
-//     * @param $shippoShipment
-//     * @param int $customerShipmentId
-//     * @param string $servicelevelToken
-//     * @return Shippo_Object
-//     */
-//    public function createLabelInstant($shippoShipment, int $customerShipmentId, string $servicelevelToken): Shippo_Object
-//    {
-//        return Shippo_Transaction::create([
-//            'shipment' => $shippoShipment,
-//            'label_file_type' => 'PDF',
-//            'metadata' => sprintf('customer_shipment:%s', $customerShipmentId),
-//            'servicelevel_token' => $servicelevelToken,
-//        ]);
-//    }
+    //    /**
+    //     * Create the shipping label transaction
+    //     *
+    //     * @param $shippoShipment
+    //     * @param int $customerShipmentId
+    //     * @param string $servicelevelToken
+    //     * @return Shippo_Object
+    //     */
+    //    public function createLabelInstant($shippoShipment, int $customerShipmentId, string $servicelevelToken): Shippo_Object
+    //    {
+    //        return Shippo_Transaction::create([
+    //            'shipment' => $shippoShipment,
+    //            'label_file_type' => 'PDF',
+    //            'metadata' => sprintf('customer_shipment:%s', $customerShipmentId),
+    //            'servicelevel_token' => $servicelevelToken,
+    //        ]);
+    //    }
 
     public function createPickup(array $params): Shippo_Object
     {
@@ -423,13 +432,145 @@ class ShippoService
     {
         $headers = (new Shippo_ApiRequestor(''))->getRequestHeaders();
         LogRequestService::logRequestOutgoing(
-            pathInfo: 'https://api.goshippo.com/' . $pathInfo,
-            requestUri: 'https://api.goshippo.com/' . $requestUri,
+            pathInfo: 'https://api.goshippo.com/'.$pathInfo,
+            requestUri: 'https://api.goshippo.com/'.$requestUri,
             userAgent: 'Shippo/v1 PHPBindings/0.0.1',
             method: $method,
             headers: $headers,
             request: $request,
             response: $response,
+        );
+    }
+
+    /**
+     * Sanitize Japanese address for UPS compliance
+     * UPS requires max 35 characters per line and alphanumeric characters only
+     */
+    private function sanitizeJapaneseAddress(AddressDTO $address): AddressDTO
+    {
+        // Step 1: Transliterate Japanese characters to Latin script
+        $transliterator = \Transliterator::create('Any-Latin; Latin-ASCII');
+
+        if (! $transliterator) {
+            \Log::warning('Transliterator unavailable for Japanese address, using fallback sanitization');
+
+            return $this->fallbackSanitizeAddress($address);
+        }
+
+        // Step 2: Collect and transliterate all address lines
+        $addressLines = array_filter([
+            $address->street1,
+            $address->street2,
+            $address->street3,
+        ]);
+
+        $fullAddress = implode(' ', $addressLines);
+        $romanized = $transliterator->transliterate($fullAddress);
+
+        // Step 3: Remove non-alphanumeric characters (except spaces, hyphens, periods, slashes)
+        $cleaned = preg_replace('/[^a-zA-Z0-9\s\-\.\/]/', '', $romanized);
+        $cleaned = preg_replace('/\s+/', ' ', trim($cleaned));
+
+        // Step 4: Intelligently split into 35-character chunks
+        $chunks = $this->chunkAddress($cleaned, 35);
+
+        // Step 5: Validate total length
+        if (count($chunks) > 3) {
+            \Log::error('Japanese address exceeds UPS 3-line limit after transliteration', [
+                'original_address' => $fullAddress,
+                'romanized_address' => $cleaned,
+                'chunks_count' => count($chunks),
+            ]);
+
+            throw new \RuntimeException(
+                'Japanese address exceeds UPS 3-line limit after transliteration. '.
+                'Original length: '.strlen($fullAddress).', '.
+                'Romanized length: '.strlen($cleaned)
+            );
+        }
+
+        // Step 6: Create a new AddressDTO with sanitized address lines
+        return new AddressDTO(
+            name: $address->name,
+            company: $address->company,
+            street1: $chunks[0] ?? '',
+            street2: $chunks[1] ?? null,
+            street3: $chunks[2] ?? null,
+            city: $address->city,
+            state: $address->state,
+            zip: $address->zip,
+            country: $address->country,
+            email: $address->email,
+            phone: $address->phone,
+            objectId: $address->objectId,
+        );
+    }
+
+    /**
+     * Chunk address string into segments respecting word boundaries
+     */
+    private function chunkAddress(string $address, int $maxLength): array
+    {
+        $chunks = [];
+        $words = explode(' ', $address);
+        $currentChunk = '';
+
+        foreach ($words as $word) {
+            $testChunk = $currentChunk === '' ? $word : $currentChunk.' '.$word;
+
+            if (strlen($testChunk) <= $maxLength) {
+                $currentChunk = $testChunk;
+            } elseif (strlen($word) > $maxLength) {
+                if ($currentChunk !== '') {
+                    $chunks[] = $currentChunk;
+                    $currentChunk = '';
+                }
+                $chunks[] = substr($word, 0, $maxLength);
+                $remaining = substr($word, $maxLength);
+                if ($remaining) {
+                    $currentChunk = $remaining;
+                }
+            } else {
+                $chunks[] = $currentChunk;
+                $currentChunk = $word;
+            }
+        }
+
+        if ($currentChunk !== '') {
+            $chunks[] = $currentChunk;
+        }
+
+        return $chunks;
+    }
+
+    /**
+     * Fallback sanitization if Transliterator is unavailable
+     */
+    private function fallbackSanitizeAddress(AddressDTO $address): AddressDTO
+    {
+        $sanitizeField = function (?string $field): ?string {
+            if ($field === null || $field === '') {
+                return $field;
+            }
+            // Remove non-ASCII characters and truncate
+            $cleaned = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $field);
+
+            return substr($cleaned, 0, 35);
+        };
+
+        return new AddressDTO(
+            name: $address->name,
+            company: $address->company,
+            street1: $sanitizeField($address->street1),
+            street2: $sanitizeField($address->street2),
+            street3: $sanitizeField($address->street3),
+            city: $address->city,
+            state: $address->state,
+            zip: $address->zip,
+            country: $address->country,
+            email: $address->email,
+            phone: $address->phone,
+            objectId: $address->objectId,
         );
     }
 

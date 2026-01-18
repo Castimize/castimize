@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\DTO\Order\CalculateShippingFeeUploadDTO;
+use App\DTO\Shipping\AddressDTO;
 use App\Http\Resources\CalculatedShippingFeeResource;
 use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\LogRequestService;
@@ -17,19 +18,7 @@ class AddressApiController extends ApiController
 {
     public function validate(Request $request): JsonResponse
     {
-        $addressData = [
-            'name' => $request->name,
-            'company' => $request->company ?? null,
-            'street1' => $request->address_1,
-            'street2' => $request->address_2 ?? null,
-            'city' => $request->city,
-            'state' => $request->state ?? null,
-            'zip' => $request->postal_code,
-            'country' => $request->country,
-            'email' => $request->email,
-        ];
-
-        if (empty($addressData['country'])) {
+        if (empty($request->country)) {
             $response = [
                 'valid' => false,
                 'address' => [],
@@ -37,11 +26,26 @@ class AddressApiController extends ApiController
                 'messages' => [],
             ];
             LogRequestService::addResponse($request, $response);
+
             return response()->json($response);
         }
 
+        $addressDTO = new AddressDTO(
+            name: $request->name ?? '',
+            company: $request->company ?? '',
+            street1: $request->address_1 ?? '',
+            street2: $request->address_2 ?? null,
+            street3: null,
+            city: $request->city ?? '',
+            state: $request->state ?? null,
+            zip: $request->postal_code ?? '',
+            country: $request->country,
+            email: $request->email ?? '',
+            phone: $request->phone ?? '',
+        );
+
         $shippingService = app(ShippingService::class);
-        $response = $shippingService->setFromAddress($addressData)->validateAddress('From');
+        $response = $shippingService->setFromAddress($addressDTO)->validateAddress('From');
         LogRequestService::addResponse($request, $response);
 
         return response()->json($response);
@@ -52,7 +56,7 @@ class AddressApiController extends ApiController
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         try {
-            $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
+            $shippingFee = (new CalculatePricesService)->calculateShippingFeeNew(
                 countryIso: $request->country,
                 uploads: collect($request->uploads)->map(fn ($upload) => CalculateShippingFeeUploadDTO::fromWpRequest($upload)),
             );
@@ -62,6 +66,7 @@ class AddressApiController extends ApiController
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ], $e->getCode());
+
             return response()->json([
                 'errors' => $e->getMessage(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -69,6 +74,7 @@ class AddressApiController extends ApiController
 
         $response = new CalculatedShippingFeeResource($shippingFee);
         LogRequestService::addResponse($request, $response);
+
         return $response;
     }
 }

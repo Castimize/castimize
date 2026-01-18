@@ -6,7 +6,6 @@ namespace Tests\Feature\Services\Admin;
 
 use App\Enums\Woocommerce\WcOrderStatesEnum;
 use App\Services\Admin\OrdersService;
-use Codexshaper\WooCommerce\Facades\Order;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
@@ -39,7 +38,6 @@ class OrdersServiceTest extends TestCase
     #[Test]
     public function it_creates_order_from_wp(): void
     {
-//        $wpOrder = Order::find(3324);
         $wpOrder = $this->getWoocommerceOrder(3324, WcOrderStatesEnum::Processing);
         dd($wpOrder);
         $this->ordersService->storeOrderFromWpOrder($wpOrder);
