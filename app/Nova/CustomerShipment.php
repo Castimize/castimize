@@ -64,6 +64,7 @@ class CustomerShipment extends Resource
      */
     public static $search = [
         'id',
+        'tracking_number',
     ];
 
     /**
