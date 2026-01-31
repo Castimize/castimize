@@ -15,9 +15,7 @@ use Illuminate\Support\Facades\Bus;
 
 class InvoicesService
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function storeInvoiceFromWpOrder(Customer $customer, Order $order, bool $debit = true)
     {
@@ -50,6 +48,16 @@ class InvoicesService
 
         $invoice = Invoice::where('invoice_number', $invoiceNumber)->first();
         if ($invoice) {
+            // If invoice exists but hasn't been synced to Exact, trigger sync
+            if ($invoice->exactSalesEntries()->count() === 0) {
+                Bus::chain([
+                    new SyncCustomerToExact($customer->wp_id),
+                    new SyncInvoiceToExact($invoice, $customer->wp_id),
+                ])
+                    ->onQueue('exact')
+                    ->dispatch();
+            }
+
             return $invoice;
         }
 
@@ -68,7 +76,7 @@ class InvoicesService
                 'orderNumber' => $wpOrder['id'],
             ]),
             'email' => $wpOrder['billing']->email,
-            'contact_person' => $wpOrder['billing']->first_name . ' ' . $wpOrder['billing']->last_name,
+            'contact_person' => $wpOrder['billing']->first_name.' '.$wpOrder['billing']->last_name,
             'address_line1' => $wpOrder['billing']->address_1,
             'address_line2' => $wpOrder['billing']->address_2,
             'postal_code' => $wpOrder['billing']->postcode,
