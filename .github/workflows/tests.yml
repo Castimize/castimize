@@ -83,6 +83,21 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
+      - name: Configure Nova authentication
+        env:
+          NOVA_USERNAME: ${{ secrets.NOVA_USERNAME }}
+          NOVA_LICENSE_KEY: ${{ secrets.NOVA_LICENSE_KEY }}
+        run: |
+          if [ -z "$NOVA_USERNAME" ]; then
+            echo "::error::NOVA_USERNAME secret is not set"
+            exit 1
+          fi
+          if [ -z "$NOVA_LICENSE_KEY" ]; then
+            echo "::error::NOVA_LICENSE_KEY secret is not set"
+            exit 1
+          fi
+          composer config http-basic.nova.laravel.com "${NOVA_USERNAME}" "${NOVA_LICENSE_KEY}"
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
