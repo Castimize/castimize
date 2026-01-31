@@ -10,7 +10,6 @@ use App\Services\Admin\OrdersService;
 use App\Services\Admin\PaymentService;
 use App\Services\Admin\ShopOrderService;
 use App\Services\Etsy\EtsyService;
-use App\Services\Payment\Stripe\StripeService;
 use App\Services\Woocommerce\WoocommerceApiService;
 use Carbon\Carbon;
 use Exception;
@@ -70,19 +69,19 @@ class GetEtsyReceipts extends Command
                                 $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
                                 // Use mandate to pay the order
                                 $wcOrder = $woocommerceApiService->createOrder($orderDTO);
-                                $this->info('Woocommerce order created with id: ' . $wcOrder['id']);
+                                $this->info('Woocommerce order created with id: '.$wcOrder['id']);
 
                                 $orderDTO->orderNumber = (int) $wcOrder['number'];
                                 $orderDTO->wpId = (int) $wcOrder['id'];
 
                                 $order = $ordersService->storeOrderFromDto($orderDTO);
-                                $this->info('Castimize order created with id: ' . $order->id);
+                                $this->info('Castimize order created with id: '.$order->id);
 
                                 $newShopOrder = $shopOrderService->createShopOrder($shop, $receipt, $wcOrder);
-                                $this->info('Shop order created with id: ' . $newShopOrder->id);
+                                $this->info('Shop order created with id: '.$newShopOrder->id);
 
                                 $paymentIntent = $paymentService->createStripePaymentIntent($orderDTO, $shop->shopOwner->customer);
-                                $this->info('Payment intent: ' . print_r($paymentIntent, true));
+                                $this->info('Payment intent: '.print_r($paymentIntent, true));
                                 if ($paymentIntent->status === 'succeeded') {
                                     $orderDTO->isPaid = true;
                                     $orderDTO->paidAt = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')
@@ -107,15 +106,17 @@ class GetEtsyReceipts extends Command
                                 }
 
                                 DB::rollBack();
-                                dd($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString());
+                                dd($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getTraceAsString());
                             }
                         }
                     } else {
-                        $this->info('Shop order found with id: ' . $shopOrder->id);
+                        $this->info('Shop order found with id: '.$shopOrder->id);
                     }
                 }
             } catch (Exception $e) {
-                Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getLine());
+                $shopName = $shop->shop_oauth['shop_name'] ?? $shop->shop_oauth['shop_id'] ?? 'unknown';
+                Log::error("GetEtsyReceipts failed for shop '{$shopName}' (ID: {$shop->id}): ".$e->getMessage().PHP_EOL.$e->getTraceAsString());
+                $this->error("Failed for shop '{$shopName}' (ID: {$shop->id}): ".$e->getMessage());
             }
         }
 

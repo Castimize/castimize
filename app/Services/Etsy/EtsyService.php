@@ -62,7 +62,7 @@ class EtsyService
             shared_secret: config('services.shops.etsy.client_secret'),
         );
         $scopes = PermissionScopes::ALL_SCOPES;
-//        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
+        //        $scopes = ['listings_d', 'listings_r', 'listings_w', 'profile_r'];
 
         [$verifier, $code_challenge] = $this->client->generateChallengeCode();
         $nonce = $this->client->createNonce();
@@ -149,12 +149,21 @@ class EtsyService
             shared_secret: config('services.shops.etsy.client_secret'),
         );
 
-        $response = $this->client->refreshAccessToken($shop->shop_oauth['refresh_token']);
+        try {
+            $response = $this->client->refreshAccessToken($shop->shop_oauth['refresh_token']);
+        } catch (\Throwable $e) {
+            $shopName = $shop->shop_oauth['shop_name'] ?? $shop->shop_oauth['shop_id'] ?? 'unknown';
+            throw new Exception(
+                "Etsy token refresh failed for shop '{$shopName}' (ID: {$shop->id}, shop_owner_id: {$shop->shop_owner_id}): ".$e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
 
         $this->storeAccessToken($shop, $response);
     }
 
-    public function getShop(Shop $shop): EtsyShop|null
+    public function getShop(Shop $shop): ?EtsyShop
     {
         $this->refreshAccessToken($shop);
         $etsy = new Etsy(
@@ -319,6 +328,7 @@ class EtsyService
     public function getListing(Shop $shop, int $listingId)
     {
         $this->refreshAccessToken($shop);
+
         return (new EtsyListingService(
             shop: $shop,
         ))->getListing(
@@ -329,6 +339,7 @@ class EtsyService
     public function getListings(Shop $shop): Collection
     {
         $this->refreshAccessToken($shop);
+
         return (new EtsyListingService(
             shop: $shop,
         ))->getListings();
@@ -339,7 +350,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $properties = $this->client->get("/application/listings/{$listingId}/properties/6231");
 
-        Log::info('Listing properties: ' . print_r($properties, true));
+        Log::info('Listing properties: '.print_r($properties, true));
 
         return $properties;
     }
@@ -349,7 +360,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $properties = $this->client->get("/application/shops/{$shop->shop_oauth['shop_id']}/listings/{$listingId}/properties");
 
-        Log::info('Listing properties: ' . print_r($properties, true));
+        Log::info('Listing properties: '.print_r($properties, true));
 
         return $properties;
     }
@@ -359,7 +370,7 @@ class EtsyService
         $this->refreshAccessToken($shop);
         $properties = $this->client->get("/application/seller-taxonomy/nodes/{$shop->shop_oauth['default_taxonomy_id']}/properties");
 
-        Log::info('Taxonomy properties: ' . print_r($properties, true));
+        Log::info('Taxonomy properties: '.print_r($properties, true));
 
         return $properties;
     }
@@ -394,7 +405,7 @@ class EtsyService
                 $listingDTOs->push($listingDTO);
             }
         } catch (Exception $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getFile() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getFile().PHP_EOL.$exception->getTraceAsString());
         }
 
         return $listingDTOs;
@@ -411,7 +422,7 @@ class EtsyService
 
             return $this->createListing($shop, $model);
         } catch (Exception $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getFile() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getFile().PHP_EOL.$exception->getTraceAsString());
 
             return null;
         }
@@ -452,12 +463,12 @@ class EtsyService
         return ShippingCarrier::all('NL');
     }
 
-    private function addShopToShopOwnerShop(Shop $shop): EtsyShop|null
+    private function addShopToShopOwnerShop(Shop $shop): ?EtsyShop
     {
         // Get the authenticated user.
         $user = User::me();
         $userGet = User::get($user->user_id);
-//        dd($userGet);
+        //        dd($userGet);
 
         // Get the users shop.
         $etsyShop = EtsyShop::get($user->shop_id);
@@ -513,13 +524,13 @@ class EtsyService
         try {
             $listing = $etsyListingService->createDraftListing($listingDTO);
         } catch (Exception $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getFile() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getFile().PHP_EOL.$exception->getTraceAsString());
         }
 
         if ($listing) {
             $listingDTO->listingId = $listing->listing_id;
             $listingDTO->state = $listing->state;
-            $shopListingModel = (new ShopListingModelService())->createShopListingModel($shop, $model, $listingDTO);
+            $shopListingModel = (new ShopListingModelService)->createShopListingModel($shop, $model, $listingDTO);
 
             // Create imageDTO because needed to set listing active
             $listingImageDTO = ListingImageDTO::fromModel($shop->shop_oauth['shop_id'], $model);
@@ -534,7 +545,7 @@ class EtsyService
                     $listingImageDTO->listingImageId = $listingImage->listing_image_id;
                     $listingDTO->listingImages = collect([$listingImage]);
                 } else {
-                    throw new Exception('Listing image not created: ' . print_r($listingImageDTO, true));
+                    throw new Exception('Listing image not created: '.print_r($listingImageDTO, true));
                 }
 
                 // Create variations for materials for listing and add inventory
@@ -553,7 +564,7 @@ class EtsyService
                 $listingDTO->state = EtsyListingStatesEnum::Active->value;
             }
         } else {
-            throw new Exception('Listing not created: ' . print_r($listingDTO, true));
+            throw new Exception('Listing not created: '.print_r($listingDTO, true));
         }
 
         return $listingDTO;
@@ -572,7 +583,7 @@ class EtsyService
             listing: $listing,
         );
 
-        Log::info('Update listing: ' . $listingDTO->listingId);
+        Log::info('Update listing: '.$listingDTO->listingId);
 
         // Update inventory with variations, first get existing inventory so we can keep the existing intact
         $inventory = $this->getListingInventory($shop, $listingDTO->listingId);
@@ -601,14 +612,14 @@ class EtsyService
             data: $data,
         );
 
-        (new ShopListingModelService())->updateShopListingModel($model->shopListingModel, $listingDTO);
+        (new ShopListingModelService)->updateShopListingModel($model->shopListingModel, $listingDTO);
 
         return $listingDTO;
     }
 
     public function updateListingInventory(Shop $shop, ListingDTO $listingDTO, array $existingInventory): void
     {
-        Log::info('Listing inventory creating: ' . $listingDTO->listingId);
+        Log::info('Listing inventory creating: '.$listingDTO->listingId);
         $listingId = $listingDTO->listingId;
 
         $variations = [];
@@ -659,7 +670,7 @@ class EtsyService
                 }
             }
         } catch (Exception $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
@@ -669,9 +680,9 @@ class EtsyService
                 listingId: $listingId,
                 products: $variations,
             );
-            Log::info('Listing inventory created: ' . print_r($inventoryResponse, true));
+            Log::info('Listing inventory created: '.print_r($inventoryResponse, true));
         } catch (Exception $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getTraceAsString());
         }
     }
 
@@ -765,13 +776,13 @@ class EtsyService
             data: $payload,
         );
 
-//        (new EtsyReceiptTrackingService(
-//            shop: $shop,
-//        ))->updateTracking(
-//            shopId: $shop->shop_oauth['shop_id'],
-//            receiptId: $receiptId,
-//            receiptTrackingDTO: $receiptTrackingDTO,
-//        );
+        //        (new EtsyReceiptTrackingService(
+        //            shop: $shop,
+        //        ))->updateTracking(
+        //            shopId: $shop->shop_oauth['shop_id'],
+        //            receiptId: $receiptId,
+        //            receiptTrackingDTO: $receiptTrackingDTO,
+        //        );
     }
 
     public function getShopListingsFromReceipt(Shop $shop, Receipt $receipt): array
