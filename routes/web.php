@@ -9,7 +9,6 @@ use App\Http\Controllers\Webhooks\Shipping\ShippoWebhookController;
 use App\Http\Middleware\RequestLogger;
 use App\Http\Middleware\VerifyShippoWebhookSignature;
 use App\Http\Middleware\VerifyStripeWebhookSignature;
-use App\Services\Exact\ExactOnlineService;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -28,14 +27,6 @@ Route::group([
         'as' => 'exact.callback',
         'uses' => 'ExactOnlineController@appCallback',
     ]);
-    Route::post('callback-webhook', [
-        'as' => 'exact.webhook',
-        'uses' => 'ExactOnlineController@appCallbackWebhook',
-    ]);
-
-    Route::get('test', function () {
-        dd((new ExactOnlineService())->getGlAccounts());
-    });
 });
 
 Route::group([
