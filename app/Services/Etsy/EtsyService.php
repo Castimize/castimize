@@ -748,7 +748,7 @@ class EtsyService
     public function updateShopReceipt(Shop $shop, int $receiptId, array $data): ?Receipt
     {
         return Receipt::update(
-            shop_id: $shop->shop_oath['shop_id'],
+            shop_id: $shop->shop_oauth['shop_id'],
             receipt_id: $receiptId,
             data: $data,
         );

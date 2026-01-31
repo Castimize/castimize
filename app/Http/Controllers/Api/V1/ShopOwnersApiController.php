@@ -17,8 +17,7 @@ class ShopOwnersApiController extends ApiController
     public function __construct(
         private ShopOwnersService $shopOwnersService,
         private CustomersService $customersService,
-    ) {
-    }
+    ) {}
 
     public function show(int $customerId): ShopOwnerResource
     {
@@ -33,6 +32,7 @@ class ShopOwnersApiController extends ApiController
 
         $response = new ShopOwnerResource($customer->shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -51,6 +51,7 @@ class ShopOwnersApiController extends ApiController
             if ($s->shop === $shop) {
                 $response = new ShopResource($s);
                 LogRequestService::addResponse(request(), $response);
+
                 return $response;
             }
         }
@@ -85,6 +86,7 @@ class ShopOwnersApiController extends ApiController
 
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -100,7 +102,7 @@ class ShopOwnersApiController extends ApiController
 
         $shopOwner = $customer->shopOwner;
 
-        if ($request->billing_eu_vat_number && $request->billing_eu_vat_number !== $customer->vat_numnber) {
+        if ($request->billing_eu_vat_number && $request->billing_eu_vat_number !== $customer->vat_number) {
             $this->customersService->updateCustomer(
                 request: $request,
                 customer: $customer,
@@ -120,6 +122,7 @@ class ShopOwnersApiController extends ApiController
         $shopOwner->refresh();
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -148,6 +151,7 @@ class ShopOwnersApiController extends ApiController
 
         $response = new ShopOwnerResource($shopOwner);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -171,11 +175,12 @@ class ShopOwnersApiController extends ApiController
             if ($s->shop === $shop) {
                 $s = $this->shopOwnersService->setShopActiveState(
                     shop: $s,
-                    active: (bool) ($request->active === "1" ? 1 : 0),
+                    active: (bool) ($request->active === '1' ? 1 : 0),
                 );
 
                 $response = new ShopResource($s);
                 LogRequestService::addResponse(request(), $response);
+
                 return $response;
             }
         }

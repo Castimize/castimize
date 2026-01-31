@@ -20,9 +20,9 @@ class Shop extends Model
     use SoftDeletes;
     use Userstamps;
 
-    public $oathKey;
+    public $oauthKey;
 
-    public $oathSecret;
+    public $oauthSecret;
 
     protected $revisionForceDeleteEnabled = true;
 
@@ -33,7 +33,7 @@ class Shop extends Model
      *
      * @var array<int, string>
      */
-    protected  $fillable = [
+    protected $fillable = [
         'shop_owner_id',
         'shop',
         'shop_oauth',
