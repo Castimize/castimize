@@ -4,24 +4,42 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Services\Admin;
 
+use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Woocommerce\WcOrderStatesEnum;
+use App\Jobs\CreateInvoicesFromOrder;
+use App\Models\Country;
+use App\Models\Currency;
+use App\Models\LogisticsZone;
+use App\Models\Material;
+use App\Models\MaterialGroup;
+use App\Models\Order;
+use App\Models\ShippingFee;
 use App\Services\Admin\OrdersService;
-use Codexshaper\WooCommerce\Facades\Order;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Codexshaper\WooCommerce\Facades\Customer as WooCommerceCustomer;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
-use JsonException;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
+use stdClass;
 use Tests\TestCase;
 use Tests\Traits\NeedsWoocommerceModel;
 
 class OrdersServiceTest extends TestCase
 {
+    use DatabaseTransactions;
     use NeedsWoocommerceModel;
-    use RefreshDatabase;
 
     private OrdersService $ordersService;
+
+    private Currency $currency;
+
+    private Country $country;
+
+    private Material $material;
+
+    private LogisticsZone $logisticsZone;
 
     protected function setUp(): void
     {
@@ -31,30 +49,386 @@ class OrdersServiceTest extends TestCase
         Bus::fake();
         Queue::fake();
         Event::fake();
+        Storage::fake('s3');
+
+        $this->setUpTestData();
     }
 
-    /**
-     * @throws JsonException
-     */
-    #[Test]
-    public function it_creates_order_from_wp(): void
+    private function setUpTestData(): void
     {
-//        $wpOrder = Order::find(3324);
-        $wpOrder = $this->getWoocommerceOrder(3324, WcOrderStatesEnum::Processing);
-        dd($wpOrder);
-        $this->ordersService->storeOrderFromWpOrder($wpOrder);
+        $this->currency = Currency::firstOrCreate(
+            ['code' => CurrencyEnum::USD->value],
+            ['name' => 'US Dollar']
+        );
 
-        $this->assertDatabaseCount('orders', 1);
+        $this->logisticsZone = LogisticsZone::first() ?? LogisticsZone::factory()->create();
+
+        ShippingFee::firstOrCreate(
+            ['logistics_zone_id' => $this->logisticsZone->id],
+            [
+                'currency_id' => $this->currency->id,
+                'name' => 'Standard Shipping',
+                'default_rate' => 500,
+                'currency_code' => CurrencyEnum::USD->value,
+                'default_lead_time' => 3,
+            ]
+        );
+
+        $this->country = Country::firstOrCreate(
+            ['alpha2' => 'nl'],
+            [
+                'logistics_zone_id' => $this->logisticsZone->id,
+                'name' => 'Netherlands',
+                'alpha3' => 'NLD',
+            ]
+        );
+
+        $this->material = Material::firstOrCreate(
+            ['wp_id' => 5],
+            [
+                'material_group_id' => MaterialGroup::first()?->id ?? MaterialGroup::factory()->create()->id,
+                'currency_id' => $this->currency->id,
+                'name' => '14k Yellow Gold Plated Brass',
+                'dc_lead_time' => 10,
+                'fast_delivery_lead_time' => 5,
+                'fast_delivery_fee' => 10000,
+                'currency_code' => CurrencyEnum::USD->value,
+                'minimum_x_length' => 0.1,
+                'maximum_x_length' => 10,
+                'minimum_y_length' => 0.1,
+                'maximum_y_length' => 10,
+                'minimum_z_length' => 0.1,
+                'maximum_z_length' => 10,
+                'minimum_volume' => 0.02,
+                'maximum_volume' => 1500,
+                'minimum_box_volume' => 0.05,
+                'maximum_box_volume' => 1500,
+                'density' => 8.5,
+            ]
+        );
+    }
+
+    private function createMockWpCustomer(array $overrides = []): array
+    {
+        $billingData = new stdClass;
+        $billingData->first_name = $overrides['first_name'] ?? 'Piet';
+        $billingData->last_name = $overrides['last_name'] ?? 'de Tester';
+        $billingData->company = 'Castimize';
+        $billingData->phone = '+31612345678';
+        $billingData->email = $overrides['email'] ?? 'castimize@gmail.com';
+        $billingData->country = $overrides['country'] ?? 'NL';
+        $billingData->state = 'NH';
+        $billingData->city = 'Amsterdam';
+        $billingData->postcode = '1111AA';
+        $billingData->address_1 = 'Teststraat 1';
+        $billingData->address_2 = '';
+
+        $shippingData = new stdClass;
+        $shippingData->first_name = $overrides['first_name'] ?? 'Piet';
+        $shippingData->last_name = $overrides['last_name'] ?? 'de Tester';
+        $shippingData->company = 'Castimize';
+        $shippingData->phone = $overrides['shipping_phone'] ?? '+31612345678';
+        $shippingData->country = $overrides['country'] ?? 'NL';
+        $shippingData->state = 'NH';
+        $shippingData->city = 'Amsterdam';
+        $shippingData->postcode = '1111AA';
+        $shippingData->address_1 = 'Teststraat 1';
+        $shippingData->address_2 = '';
+
+        return [
+            'id' => $overrides['id'] ?? 125,
+            'first_name' => $overrides['first_name'] ?? 'Piet',
+            'last_name' => $overrides['last_name'] ?? 'de Tester',
+            'email' => $overrides['email'] ?? 'castimize@gmail.com',
+            'phone' => '+31612345678',
+            'billing' => $billingData,
+            'shipping' => $shippingData,
+            'meta_data' => $overrides['meta_data'] ?? [],
+        ];
+    }
+
+    #[Test]
+    public function it_creates_order_from_woocommerce_order(): void
+    {
+        // Arrange
+        $wpCustomer = $this->createMockWpCustomer();
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $wpOrder = $this->getWoocommerceOrder(
+            orderNumber: 3324,
+            wcOrderStatesEnum: WcOrderStatesEnum::Processing,
+            currencyEnum: CurrencyEnum::USD,
+        );
+
+        // Act
+        $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        // Assert
         $this->assertDatabaseHas('orders', [
-            'order_number' => $wpOrder['number'],
+            'wp_id' => 3324,
+            'order_number' => 3324,
+            'status' => WcOrderStatesEnum::Processing->value,
+            'billing_first_name' => 'Piet',
+            'billing_last_name' => 'de Tester',
+            'billing_country' => 'NL',
+            'currency_code' => CurrencyEnum::USD->value,
+        ]);
+
+        $this->assertDatabaseHas('uploads', [
+            'order_id' => $order->id,
+            'material_id' => $this->material->id,
+            'quantity' => 4,
+        ]);
+
+        $this->assertNotNull($order->customer_id);
+        $this->assertEquals($this->country->id, $order->country_id);
+        $this->assertEquals($this->currency->id, $order->currency_id);
+    }
+
+    #[Test]
+    public function it_falls_back_to_nl_country_when_billing_country_not_found(): void
+    {
+        // Arrange
+        $wpCustomer = $this->createMockWpCustomer(['country' => 'XX']);
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $wpOrder = $this->getWoocommerceOrder(orderNumber: 3325);
+        // Override billing country to non-existent country
+        $wpOrder['billing']->country = 'XX';
+
+        // Act
+        $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        // Assert - should fall back to NL
+        $this->assertEquals($this->country->id, $order->country_id);
+        $this->assertEquals('XX', $order->billing_country);
+    }
+
+    #[Test]
+    public function it_falls_back_to_usd_currency_when_currency_not_found(): void
+    {
+        // Arrange
+        $wpCustomer = $this->createMockWpCustomer();
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $wpOrder = $this->getWoocommerceOrder(orderNumber: 3326);
+        // Override currency to non-existent currency
+        $wpOrder['currency'] = 'XXX';
+
+        // Act
+        $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        // Assert - should fall back to USD
+        $this->assertEquals($this->currency->id, $order->currency_id);
+        $this->assertEquals('XXX', $order->currency_code);
+    }
+
+    #[Test]
+    public function it_does_not_add_to_queue_when_date_paid_is_null(): void
+    {
+        // Arrange
+        $wpCustomer = $this->createMockWpCustomer();
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $wpOrder = $this->getWoocommerceOrder(orderNumber: 3327);
+        // Set date_paid to null for unpaid order
+        $wpOrder['date_paid'] = null;
+
+        // Act
+        $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        // Assert - paid_at should be null when date_paid is null
+        $this->assertNull($order->paid_at);
+
+        // Upload should exist but no order_queue should be created when date_paid is null
+        $this->assertDatabaseHas('uploads', [
+            'order_id' => $order->id,
+        ]);
+
+        $this->assertDatabaseMissing('order_queue', [
+            'upload_id' => $order->uploads->first()?->id,
         ]);
     }
 
-    /**
-     * @throws JsonException
-     */
-    private function getWPOrderData()
+    #[Test]
+    public function it_extracts_vat_number_from_meta_data(): void
     {
-        return json_decode(file_get_contents(storage_path('tests/wp-order.json')), false, 512, JSON_THROW_ON_ERROR);
+        // Arrange
+        $wpCustomer = $this->createMockWpCustomer();
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $wpOrder = $this->getWoocommerceOrder(orderNumber: 3328);
+
+        // Act
+        $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        // Assert - VAT number should be extracted from meta_data
+        $this->assertDatabaseHas('orders', [
+            'wp_id' => 3328,
+            'billing_vat_number' => 'NL866959300B01',
+        ]);
+    }
+
+    #[Test]
+    public function it_extracts_shipping_email_from_meta_data(): void
+    {
+        // Arrange
+        $wpCustomer = $this->createMockWpCustomer();
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $wpOrder = $this->getWoocommerceOrder(orderNumber: 3329);
+
+        // Act
+        $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        // Assert - shipping email should be extracted from meta_data
+        $this->assertDatabaseHas('orders', [
+            'wp_id' => 3329,
+            'shipping_email' => 'castimize@gmail.com',
+        ]);
+    }
+
+    #[Test]
+    public function it_uses_billing_phone_when_shipping_phone_is_empty(): void
+    {
+        // Arrange
+        $wpCustomer = $this->createMockWpCustomer(['shipping_phone' => '']);
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $wpOrder = $this->getWoocommerceOrder(orderNumber: 3330);
+        // Set shipping phone to empty
+        $wpOrder['shipping']->phone = '';
+
+        // Act
+        $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        // Assert - should use billing phone as fallback
+        $this->assertDatabaseHas('orders', [
+            'wp_id' => 3330,
+            'shipping_phone_number' => '+31612345678', // billing phone
+        ]);
+    }
+
+    #[Test]
+    public function it_dispatches_create_invoices_job(): void
+    {
+        // Arrange
+        $wpCustomer = $this->createMockWpCustomer();
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $wpOrder = $this->getWoocommerceOrder(orderNumber: 3331);
+
+        // Act
+        $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        // Assert
+        Bus::assertDispatched(CreateInvoicesFromOrder::class, function ($job) use ($order) {
+            return $job->wpOrderId === $order->wp_id;
+        });
+    }
+
+    #[Test]
+    public function it_calculates_customer_lead_time_from_material_and_shipping(): void
+    {
+        // Arrange
+        $wpCustomer = $this->createMockWpCustomer();
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $wpOrder = $this->getWoocommerceOrder(orderNumber: 3332);
+
+        // Act
+        $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        // Assert - lead time should be material dc_lead_time + shipping default_lead_time
+        $shippingLeadTime = $this->logisticsZone->shippingFee?->default_lead_time ?? 0;
+        $expectedLeadTime = $this->material->dc_lead_time + $shippingLeadTime;
+        $this->assertEquals($expectedLeadTime, $order->order_customer_lead_time);
+        $this->assertNotNull($order->due_date);
+    }
+
+    #[Test]
+    public function it_creates_order_with_different_statuses(): void
+    {
+        // Arrange
+        $wpCustomer = $this->createMockWpCustomer();
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $statuses = [
+            WcOrderStatesEnum::Pending,
+            WcOrderStatesEnum::OnHold,
+            WcOrderStatesEnum::Completed,
+        ];
+
+        foreach ($statuses as $index => $status) {
+            $wpOrder = $this->getWoocommerceOrder(
+                orderNumber: 3340 + $index,
+                wcOrderStatesEnum: $status,
+            );
+
+            // Act
+            $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+            // Assert
+            $this->assertEquals($status->value, $order->status);
+        }
+    }
+
+    #[Test]
+    public function it_fails_when_customer_id_is_empty(): void
+    {
+        // Arrange
+        $wpOrder = $this->getWoocommerceOrder(orderNumber: 3350);
+        $wpOrder['customer_id'] = null;
+
+        // Act & Assert
+        $this->expectException(\ErrorException::class);
+        $this->ordersService->storeOrderFromWpOrder($wpOrder);
+    }
+
+    #[Test]
+    public function it_creates_order_with_eur_currency(): void
+    {
+        // Arrange
+        $eurCurrency = Currency::firstOrCreate(
+            ['code' => CurrencyEnum::EUR->value],
+            ['name' => 'Euro']
+        );
+
+        $wpCustomer = $this->createMockWpCustomer();
+        WooCommerceCustomer::shouldReceive('find')
+            ->with(125)
+            ->andReturn($wpCustomer);
+
+        $wpOrder = $this->getWoocommerceOrder(
+            orderNumber: 3351,
+            currencyEnum: CurrencyEnum::EUR,
+        );
+
+        // Act
+        $order = $this->ordersService->storeOrderFromWpOrder($wpOrder);
+
+        // Assert
+        $this->assertEquals($eurCurrency->id, $order->currency_id);
+        $this->assertEquals(CurrencyEnum::EUR->value, $order->currency_code);
     }
 }
