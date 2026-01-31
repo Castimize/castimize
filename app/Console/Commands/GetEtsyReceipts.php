@@ -42,8 +42,8 @@ class GetEtsyReceipts extends Command
         WoocommerceApiService $woocommerceApiService,
         ShopOrderService $shopOrderService,
         PaymentService $paymentService,
-    ) {
-        $date = now()->subDays(14);
+    ): int {
+        $minCreatedTimestamp = now()->subDays(14)->timestamp;
         $shops = Shop::with(['shopOwner.customer'])
             ->where('active', true)
             ->where('shop', ShopOwnerShopsEnum::Etsy->value)
@@ -52,7 +52,7 @@ class GetEtsyReceipts extends Command
         foreach ($shops as $shop) {
             try {
                 $receipts = $etsyService->getShopReceipts($shop, [
-                    'min_created' => $date,
+                    'min_created' => $minCreatedTimestamp,
                 ]);
                 $this->info(sprintf('Found %s receipts for %s', $receipts->count(), $shop->id));
                 foreach ($receipts->data as $receipt) {
@@ -85,7 +85,7 @@ class GetEtsyReceipts extends Command
                                 if ($paymentIntent->status === 'succeeded') {
                                     $orderDTO->isPaid = true;
                                     $orderDTO->paidAt = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')
-                                        ?->setTimezone(env('APP_TIMEZONE'));
+                                        ?->setTimezone(config('app.timezone'));
                                 }
                                 $orderDTO->metaData[] = [
                                     'key' => '_payment_intent_id',
@@ -106,8 +106,11 @@ class GetEtsyReceipts extends Command
                                 }
 
                                 DB::rollBack();
-                                dd($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getTraceAsString());
+                                Log::error("GetEtsyReceipts: Failed to process receipt {$receipt->receipt_id}: ".$e->getMessage().PHP_EOL.$e->getTraceAsString());
+                                $this->error("Failed to process receipt {$receipt->receipt_id}: ".$e->getMessage());
                             }
+                        } else {
+                            $this->warn("Receipt {$receipt->receipt_id} has no matching listings, skipping");
                         }
                     } else {
                         $this->info('Shop order found with id: '.$shopOrder->id);
@@ -120,6 +123,6 @@ class GetEtsyReceipts extends Command
             }
         }
 
-        return true;
+        return self::SUCCESS;
     }
 }
