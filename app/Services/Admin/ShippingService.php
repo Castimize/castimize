@@ -169,6 +169,7 @@ class ShippingService
         $currency = null;
         $shippingCountry = null;
         $contentsType = ShippoCustomsDeclarationContentTypesEnum::GIFT->value;
+        $validItemsCount = 0;
         foreach ($customerShipment->selectedPOs as $selectedPO) {
             if ($selectedPO->upload === null) {
                 continue;
@@ -182,6 +183,11 @@ class ShippingService
                 $contentsType = ShippoCustomsDeclarationContentTypesEnum::MERCHANDISE->value;
             }
             $this->_shippoService->createCustomsItem($selectedPO->upload);
+            $validItemsCount++;
+        }
+
+        if ($validItemsCount === 0 || $orderNumber === null) {
+            throw new RuntimeException(__('Cannot create shipment: no valid order queue items with uploads found.'));
         }
 
         $this->_shippoService
