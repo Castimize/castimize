@@ -54,6 +54,13 @@ class Material extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'materialGroup',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array

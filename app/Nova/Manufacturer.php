@@ -61,6 +61,9 @@ class Manufacturer extends Resource
         'city',
         'country',
         'user',
+        'language',
+        'currency',
+        'state',
     ];
 
     /**

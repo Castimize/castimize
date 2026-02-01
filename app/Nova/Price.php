@@ -69,6 +69,14 @@ class Price extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'material',
+        'country',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array

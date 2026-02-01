@@ -46,6 +46,13 @@ class ShopListingModel extends Resource
         'id' => 'desc',
     ];
 
+    /**
+     * @var string[]
+     */
+    public static $with = [
+        'model',
+    ];
+
     public static function authorizedToCreate(Request $request)
     {
         return false;

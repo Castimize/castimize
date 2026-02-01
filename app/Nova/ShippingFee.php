@@ -54,6 +54,13 @@ class ShippingFee extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'logisticsZone',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array

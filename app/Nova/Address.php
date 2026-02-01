@@ -54,6 +54,15 @@ class Address extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'city',
+        'state',
+        'country',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array

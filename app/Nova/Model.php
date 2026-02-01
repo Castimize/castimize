@@ -55,6 +55,13 @@ class Model extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'customer',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array

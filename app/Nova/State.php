@@ -49,6 +49,13 @@ class State extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'country',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array
