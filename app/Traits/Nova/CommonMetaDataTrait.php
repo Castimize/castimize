@@ -3,6 +3,7 @@
 namespace App\Traits\Nova;
 
 use App\Models\User;
+use App\Nova\User as NovaUser;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Trix;
@@ -19,7 +20,7 @@ trait CommonMetaDataTrait
         if (! $showCreatedAtOnIndex) {
             $createdAt->onlyOnDetail();
         }
-        $creator = BelongsTo::make(__('By'), 'creator', __CLASS__)
+        $creator = BelongsTo::make(__('By'), 'creator', NovaUser::class)
             ->displayUsing(fn ($user) => $user ? $user->name : '-')
             ->hideWhenCreating()
             ->hideWhenUpdating()
@@ -34,7 +35,7 @@ trait CommonMetaDataTrait
         if (! $showUpdatedAtOnIndex) {
             $updatedAt->onlyOnDetail();
         }
-        $editor = BelongsTo::make(__('By'), 'editor', __CLASS__)
+        $editor = BelongsTo::make(__('By'), 'editor', NovaUser::class)
             ->displayUsing(fn ($user) => $user ? $user->name : '-')
             ->hideWhenCreating()
             ->hideWhenUpdating()
@@ -55,7 +56,7 @@ trait CommonMetaDataTrait
                 ->hideWhenUpdating()
                 ->onlyOnDetail(),
 
-            BelongsTo::make(__('By'), 'destroyer', __CLASS__)
+            BelongsTo::make(__('By'), 'destroyer', NovaUser::class)
                 ->displayUsing(fn ($user) => $user ? $user->name : '-')
                 ->hideWhenCreating()
                 ->hideWhenUpdating()
