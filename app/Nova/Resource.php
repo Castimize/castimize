@@ -25,11 +25,18 @@ abstract class Resource extends NovaResource
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
-        // Eager load editor relationship to prevent N+1 queries from CommonMetaDataTrait
-        // Only if the model has the editor relationship (from Userstamps trait)
+        // Eager load userstamp relationships to prevent N+1 queries from CommonMetaDataTrait
+        // Only if the model has these relationships (from Userstamps trait)
         $model = $query->getModel();
-        if (method_exists($model, 'editor')) {
-            $query->with(['editor']);
+        if (method_exists($model, 'editor') || method_exists($model, 'creator')) {
+            $eagerLoad = [];
+            if (method_exists($model, 'editor')) {
+                $eagerLoad[] = 'editor';
+            }
+            if (method_exists($model, 'creator')) {
+                $eagerLoad[] = 'creator';
+            }
+            $query->with($eagerLoad);
         }
 
         if ($request->has('orderBy') && empty($request->get('orderBy'))) {
