@@ -23,6 +23,8 @@ class ShippingService
 {
     protected $_shippoService;
 
+    protected $_transliterationService;
+
     protected $_fromAddress;
 
     protected $_toAddress;
@@ -62,6 +64,7 @@ class ShippingService
         public DcSettings $dcSettings
     ) {
         $this->_shippoService = app(ShippoService::class);
+        $this->_transliterationService = app(AddressTransliterationService::class);
     }
 
     public function createShippoAddress(string $type = 'From'): Shippo_Object
@@ -364,13 +367,15 @@ class ShippingService
 
     private function mapToShippoAddress(array $address): array
     {
+        $transliteratedAddress = $this->_transliterationService->transliterateAddress($address);
+
         return [
-            'name' => $address['name'],
-            'company' => $address['company'],
-            'street1' => $address['address_line1'],
-            'street2' => $address['address_line2'],
-            'city' => $address['city'],
-            'state' => $address['state'] ?? null,
+            'name' => $transliteratedAddress['name'],
+            'company' => $transliteratedAddress['company'],
+            'street1' => $transliteratedAddress['address_line1'],
+            'street2' => $transliteratedAddress['address_line2'],
+            'city' => $transliteratedAddress['city'],
+            'state' => $transliteratedAddress['state'] ?? null,
             'zip' => $address['postal_code'],
             'country' => $address['country'],
             'email' => $address['email'],
