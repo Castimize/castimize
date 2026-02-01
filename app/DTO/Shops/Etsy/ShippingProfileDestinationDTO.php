@@ -39,7 +39,7 @@ class ShippingProfileDestinationDTO extends Data
         }
 
         return new self(
-            shopId: $shop->shop_oauth['shop_id'],
+            shopId: (int) $shop->shop_oauth['shop_id'],
             shippingProfileId: $shippingProfileId,
             shippingProfileDestinationId: $shippingProfileDestinationId,
             primaryCost: $rate,

@@ -47,9 +47,9 @@ class CustomerDTO extends Data
     {
         return new self(
             id: $customer->id,
-            wpId: $request->wp_id ?? $customer->wp_id ?? null,
-            countryId: $request->country ?? null,
-            currencyId: $request->currency ?? null,
+            wpId: isset($request->wp_id) ? (int) $request->wp_id : ($customer->wp_id ?? null),
+            countryId: isset($request->country) ? (int) $request->country : null,
+            currencyId: isset($request->currency) ? (int) $request->currency : null,
             firstName: $request->firstName ?? null,
             lastName: $request->lastName ?? null,
             company: $request->company ?? null,
