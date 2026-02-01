@@ -82,7 +82,7 @@ class CustomerShipment extends Resource
     public static $with = [
         'customer',
         'currency',
-        'orderQueues',
+        'orderQueues.order',
     ];
 
     /**
