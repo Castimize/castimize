@@ -7,6 +7,7 @@ use App\Services\Admin\OrderQueuesService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\Heading;
@@ -61,7 +62,7 @@ class PoChangeStatusOrderManualAction extends Action
                 ->asHtml(),
             Select::make(__('Status'), 'order_status')
                 ->options(
-                    OrderStatus::all()->pluck('status', 'slug')->toArray()
+                    Cache::remember('order_statuses_options', 3600, fn () => OrderStatus::pluck('status', 'slug')->toArray())
                 )->displayUsingLabels(),
         ];
     }

@@ -54,7 +54,7 @@ class EtsySyncModelsAction extends Action
      */
     public function fields(NovaRequest $request)
     {
-        $customer = Customer::find(8);
+        $customer = Customer::with('shopOwner.shops')->find(8);
         $shop = $customer->shopOwner->shops->first();
         $taxonomyAsSelect = (new EtsyService)->getTaxonomyAsSelect($shop);
 

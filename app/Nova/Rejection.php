@@ -66,6 +66,8 @@ class Rejection extends Resource
     public static $with = [
         'order',
         'manufacturer',
+        'orderQueue',
+        'rejectionReason',
     ];
 
     /**

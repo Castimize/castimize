@@ -10,6 +10,7 @@ use App\Services\Admin\OrderQueuesService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
@@ -98,12 +99,12 @@ class PoReprintByDcAction extends Action
         return [
             Select::make(__('Reprint culprit'), 'reprint_culprit_id')
                 ->options(
-                    ReprintCulprit::all()->pluck('culprit', 'id')->toArray()
+                    Cache::remember('reprint_culprits_options', 3600, fn () => ReprintCulprit::pluck('culprit', 'id')->toArray())
                 )->displayUsingLabels(),
 
             Select::make(__('Reprint reason'), 'reprint_reason_id')
                 ->options(
-                    ReprintReason::all()->pluck('reason', 'id')->toArray()
+                    Cache::remember('reprint_reasons_options', 3600, fn () => ReprintReason::pluck('reason', 'id')->toArray())
                 )->displayUsingLabels(),
 
             Textarea::make(__('Reason'), 'reason')
