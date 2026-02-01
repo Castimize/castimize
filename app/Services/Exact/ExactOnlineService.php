@@ -257,6 +257,22 @@ class ExactOnlineService
 
         // Sync customer to Exact Online if not yet synced
         if (empty($invoice->customer->exact_online_guid)) {
+            if ($invoice->customer->wp_id === null) {
+                throw new RuntimeException(sprintf(
+                    'Customer #%s has no wp_id, cannot sync to Exact',
+                    $invoice->customer->id
+                ));
+            }
+
+            $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($invoice->customer->wp_id);
+            if ($wpCustomer === null) {
+                throw new RuntimeException(sprintf(
+                    'WooCommerce customer not found for wp_id %s',
+                    $invoice->customer->wp_id
+                ));
+            }
+
+            $invoice->customer->wpCustomer = $wpCustomer;
             $this->syncCustomer($invoice->customer);
             $invoice->customer->refresh();
         }
