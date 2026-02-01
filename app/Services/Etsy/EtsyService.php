@@ -153,6 +153,13 @@ class EtsyService
             $response = $this->client->refreshAccessToken($shop->shop_oauth['refresh_token']);
         } catch (\Throwable $e) {
             $shopName = $shop->shop_oauth['shop_name'] ?? $shop->shop_oauth['shop_id'] ?? 'unknown';
+
+            // Deactivate shop if token has been revoked
+            if (str_contains($e->getMessage(), 'invalid_grant') || str_contains($e->getMessage(), 'revoked')) {
+                $shop->active = false;
+                $shop->save();
+            }
+
             throw new Exception(
                 "Etsy token refresh failed for shop '{$shopName}' (ID: {$shop->id}, shop_owner_id: {$shop->shop_owner_id}): ".$e->getMessage(),
                 $e->getCode(),
