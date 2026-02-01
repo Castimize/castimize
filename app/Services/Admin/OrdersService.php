@@ -528,9 +528,19 @@ class OrdersService
 
     private function updateUploads($uploads): void
     {
+        // Get all wp_ids from the upload DTOs
+        $wpIds = collect($uploads)->pluck('wpId')->filter()->values()->toArray();
+
+        if (empty($wpIds)) {
+            return;
+        }
+
+        // Load all uploads in one query and index by wp_id
+        $existingUploads = Upload::whereIn('wp_id', $wpIds)->get()->keyBy('wp_id');
+
         /** @var UploadDTO $uploadDto */
         foreach ($uploads as $uploadDto) {
-            $upload = Upload::where('wp_id', $uploadDto->wpId)->first();
+            $upload = $existingUploads->get($uploadDto->wpId);
             if ($upload) {
                 $upload->update([
                     'quantity' => $uploadDto->quantity,
