@@ -62,7 +62,8 @@ class AtDc extends Lens
     public static function query(LensRequest $request, $query)
     {
         return $request->withOrdering($request->withFilters(
-            $query->whereHasLastOrderQueueStatus(OrderStatusesEnum::AtDc->value)
+            $query->with(['orderQueueStatuses', 'manufacturerCost', 'upload.material.materialGroup'])
+                ->whereHasLastOrderQueueStatus(OrderStatusesEnum::AtDc->value)
                 ->where('manufacturer_id', auth()->user()->manufacturer?->id)
                 ->whereHas('order', function (Builder $query) {
                     $query->removeTestEmailAddresses('email')
