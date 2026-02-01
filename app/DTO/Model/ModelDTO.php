@@ -215,7 +215,7 @@ class ModelDTO extends Data
             $fileHeaders = get_headers($fileThumb);
             if (str_contains($fileHeaders[0], '404')) {
                 $model = Model::where('file_name', 'like', '%'.str_replace('_resized', '', $request->file_name).'%')->first();
-                if ($model) {
+                if ($model && $model->thumb_name !== null) {
                     $thumbName = str_replace(config('app.stl_upload_dir'), '', $model->thumb_name);
                 }
             }
