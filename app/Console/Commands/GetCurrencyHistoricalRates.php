@@ -53,12 +53,16 @@ class GetCurrencyHistoricalRates extends Command
             }
 
             foreach ($result as $convertCurrency => $rate) {
-                $currencyHistoryRate = CurrencyHistoryRate::create([
-                    'base_currency' => $baseCurrency,
-                    'convert_currency' => $convertCurrency,
-                    'rate' => $rate,
-                    'historical_date' => $historicalDate->format('Y-m-d'),
-                ]);
+                $currencyHistoryRate = CurrencyHistoryRate::updateOrCreate(
+                    [
+                        'base_currency' => $baseCurrency,
+                        'convert_currency' => $convertCurrency,
+                        'historical_date' => $historicalDate->format('Y-m-d'),
+                    ],
+                    [
+                        'rate' => $rate,
+                    ]
+                );
                 if ($currencyHistoryRate->convert_currency === 'EUR') {
                     SyncExchangeRateToExact::dispatch($currencyHistoryRate)->onQueue('exact');
                 }
