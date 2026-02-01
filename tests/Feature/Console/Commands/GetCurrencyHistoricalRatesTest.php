@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Console\Commands;
 
+use App\Enums\Admin\CurrencyEnum;
 use App\Jobs\SyncExchangeRateToExact;
 use App\Models\CurrencyHistoryRate;
 use AshAllenDesign\LaravelExchangeRates\Classes\ExchangeRate;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Queue;
 use Mockery;
@@ -44,7 +44,7 @@ class GetCurrencyHistoricalRatesTest extends TestCase
             ->shouldReceive('exchangeRate')
             ->once()
             ->andReturn([
-                'EUR' => 0.92,
+                CurrencyEnum::EUR->value => 0.92,
                 'GBP' => 0.79,
             ]);
 
@@ -53,7 +53,7 @@ class GetCurrencyHistoricalRatesTest extends TestCase
 
         $this->assertDatabaseHas('currency_history_rates', [
             'base_currency' => config('app.currency'),
-            'convert_currency' => 'EUR',
+            'convert_currency' => CurrencyEnum::EUR->value,
             'rate' => 0.92,
         ]);
 
@@ -73,7 +73,7 @@ class GetCurrencyHistoricalRatesTest extends TestCase
             ->shouldReceive('exchangeRate')
             ->once()
             ->andReturn([
-                'EUR' => 0.91,
+                CurrencyEnum::EUR->value => 0.91,
             ]);
 
         $this->artisan('castimize:get-currency-historical-rates', [
@@ -82,7 +82,7 @@ class GetCurrencyHistoricalRatesTest extends TestCase
 
         $this->assertDatabaseHas('currency_history_rates', [
             'base_currency' => config('app.currency'),
-            'convert_currency' => 'EUR',
+            'convert_currency' => CurrencyEnum::EUR->value,
             'rate' => 0.91,
             'historical_date' => $historicalDate,
         ]);
@@ -97,7 +97,7 @@ class GetCurrencyHistoricalRatesTest extends TestCase
         // Create an existing rate
         CurrencyHistoryRate::factory()->create([
             'base_currency' => $baseCurrency,
-            'convert_currency' => 'EUR',
+            'convert_currency' => CurrencyEnum::EUR->value,
             'rate' => 0.90,
             'historical_date' => $historicalDate,
         ]);
@@ -105,7 +105,7 @@ class GetCurrencyHistoricalRatesTest extends TestCase
         // Verify we have 1 record
         $this->assertEquals(1, CurrencyHistoryRate::where([
             'base_currency' => $baseCurrency,
-            'convert_currency' => 'EUR',
+            'convert_currency' => CurrencyEnum::EUR->value,
             'historical_date' => $historicalDate,
         ])->count());
 
@@ -113,7 +113,7 @@ class GetCurrencyHistoricalRatesTest extends TestCase
             ->shouldReceive('exchangeRate')
             ->once()
             ->andReturn([
-                'EUR' => 0.92, // New rate
+                CurrencyEnum::EUR->value => 0.92, // New rate
             ]);
 
         // Run command with same date
@@ -124,14 +124,14 @@ class GetCurrencyHistoricalRatesTest extends TestCase
         // Should still have only 1 record (updated, not duplicated)
         $this->assertEquals(1, CurrencyHistoryRate::where([
             'base_currency' => $baseCurrency,
-            'convert_currency' => 'EUR',
+            'convert_currency' => CurrencyEnum::EUR->value,
             'historical_date' => $historicalDate,
         ])->count());
 
         // Rate should be updated to new value
         $this->assertDatabaseHas('currency_history_rates', [
             'base_currency' => $baseCurrency,
-            'convert_currency' => 'EUR',
+            'convert_currency' => CurrencyEnum::EUR->value,
             'rate' => 0.92,
             'historical_date' => $historicalDate,
         ]);
@@ -144,7 +144,7 @@ class GetCurrencyHistoricalRatesTest extends TestCase
             ->shouldReceive('exchangeRate')
             ->once()
             ->andReturn([
-                'EUR' => 0.92,
+                CurrencyEnum::EUR->value => 0.92,
                 'GBP' => 0.79,
             ]);
 
@@ -183,7 +183,7 @@ class GetCurrencyHistoricalRatesTest extends TestCase
             ->shouldReceive('exchangeRate')
             ->once()
             ->andReturn([
-                'EUR' => 0.92,
+                CurrencyEnum::EUR->value => 0.92,
                 'GBP' => 0.79,
                 'CAD' => 1.35,
                 'AUD' => 1.52,

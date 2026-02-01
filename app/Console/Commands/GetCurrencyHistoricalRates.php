@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\Admin\CurrencyEnum;
 use App\Jobs\SyncExchangeRateToExact;
 use App\Models\CurrencyHistoryRate;
 use AshAllenDesign\LaravelExchangeRates\Classes\ExchangeRate;
@@ -63,7 +64,7 @@ class GetCurrencyHistoricalRates extends Command
                         'rate' => $rate,
                     ]
                 );
-                if ($currencyHistoryRate->convert_currency === 'EUR') {
+                if ($currencyHistoryRate->convert_currency === CurrencyEnum::EUR->value) {
                     SyncExchangeRateToExact::dispatch($currencyHistoryRate)->onQueue('exact');
                 }
             }
