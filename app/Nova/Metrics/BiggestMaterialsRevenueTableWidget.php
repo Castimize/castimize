@@ -56,6 +56,10 @@ class BiggestMaterialsRevenueTableWidget extends TableWidget
 
         $rows = $query->get();
 
+        // Preload currency rates for all unique currencies
+        $currencies = $rows->pluck('currency_code')->unique()->filter()->values()->toArray();
+        $currencyService->preloadRates($currencies);
+
         $data = [];
 
         foreach ($rows as $row) {
