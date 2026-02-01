@@ -223,8 +223,11 @@ class ModelsService
                 Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
             }
             // Check file thumb exists on local storage of site and not on R2
-            if (! $modelDTO->uploadedThumb && ! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileNameThumb)) {
-                Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
+            if (! $modelDTO->uploadedThumb && ! Storage::disk('s3')->exists($fileNameThumb)) {
+                $thumbHeaders = @get_headers($fileThumb);
+                if ($thumbHeaders !== false && ! str_contains($thumbHeaders[0], '404')) {
+                    Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
+                }
             }
         } catch (Exception $e) {
             Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
