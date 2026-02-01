@@ -22,16 +22,18 @@ class ApiController extends Controller
     {
         $totals = [];
 
+        $isManufacturer = auth()->user()->hasRole('manufacturer');
+        $manufacturerId = $isManufacturer ? auth()->user()->manufacturer->id : null;
+
         foreach ($request->statuses as $slug => $status) {
-            $query = OrderQueue::with(['order', 'orderQueueStatuses'])
-                ->whereHasLastOrderQueueStatus($slug)
+            $query = OrderQueue::whereHasLastOrderQueueStatus($slug)
                 ->whereHas('order', function (Builder $query) {
                     $query->removeTestEmailAddresses('email')
                         ->removeTestCustomerIds('customer_id');
                 });
 
-            if (auth()->user()->hasRole('manufacturer')) {
-                $query->where('manufacturer_id', auth()->user()->manufacturer->id);
+            if ($isManufacturer) {
+                $query->where('manufacturer_id', $manufacturerId);
             }
             $totals[$slug] = $query->count();
         }
