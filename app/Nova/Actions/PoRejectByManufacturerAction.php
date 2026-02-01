@@ -6,6 +6,7 @@ use App\Models\OrderQueue;
 use App\Models\RejectionReason;
 use App\Services\Admin\OrderQueuesService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
@@ -87,7 +88,7 @@ class PoRejectByManufacturerAction extends Action
         return [
             Select::make(__('Reason'), 'rejection_reason_id')
                 ->options(
-                    RejectionReason::all()->pluck('reason', 'id')->toArray()
+                    Cache::remember('rejection_reasons_options', 3600, fn () => RejectionReason::pluck('reason', 'id')->toArray())
                 )->displayUsingLabels(),
 
             Textarea::make(__('Extra note'), 'note_manufacturer'),
