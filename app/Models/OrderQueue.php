@@ -314,15 +314,20 @@ class OrderQueue extends Model
     public function getOverviewItem(bool $isCustomerShipment = true): array
     {
         if ($this->upload === null) {
-            return [
+            $data = [
                 'material' => '',
                 'id' => $this->id,
                 'parts' => 0,
                 'box_volume_cm3' => 0,
                 'weight' => 0,
                 'costs' => currencyFormatter(0, $this->currency_code ?? 'USD'),
-                'remarks' => $isCustomerShipment ? ($this->remarks ?? '') : null,
             ];
+
+            if ($isCustomerShipment) {
+                $data['remarks'] = $this->remarks ?? '';
+            }
+
+            return $data;
         }
 
         $customsItemSettings = app(CustomsItemSettings::class);

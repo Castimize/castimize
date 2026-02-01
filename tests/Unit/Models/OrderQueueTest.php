@@ -178,4 +178,77 @@ class OrderQueueTest extends TestCase
         $this->assertInstanceOf(HasOne::class, $orderQueue->reprint());
         $this->assertEquals(Reprint::class, $orderQueue->reprint()->getRelated()::class);
     }
+
+    #[Test]
+    public function it_returns_default_values_in_get_overview_item_when_upload_is_null(): void
+    {
+        $orderQueue = new OrderQueue;
+        $orderQueue->id = 123;
+        $orderQueue->currency_code = 'USD';
+        $orderQueue->remarks = 'Test remarks';
+        // upload is null by default
+
+        $result = $orderQueue->getOverviewItem();
+
+        $this->assertEquals('', $result['material']);
+        $this->assertEquals(123, $result['id']);
+        $this->assertEquals(0, $result['parts']);
+        $this->assertEquals(0, $result['box_volume_cm3']);
+        $this->assertEquals(0, $result['weight']);
+        $this->assertArrayHasKey('costs', $result);
+        $this->assertEquals('Test remarks', $result['remarks']);
+    }
+
+    #[Test]
+    public function it_returns_default_values_without_remarks_when_is_customer_shipment_is_false_and_upload_is_null(): void
+    {
+        $orderQueue = new OrderQueue;
+        $orderQueue->id = 456;
+        $orderQueue->currency_code = 'EUR';
+        $orderQueue->remarks = 'Should not appear';
+
+        $result = $orderQueue->getOverviewItem(false);
+
+        $this->assertEquals('', $result['material']);
+        $this->assertEquals(456, $result['id']);
+        $this->assertEquals(0, $result['parts']);
+        $this->assertArrayNotHasKey('remarks', $result);
+    }
+
+    #[Test]
+    public function it_skips_null_uploads_in_get_overview_footer(): void
+    {
+        // Create collection with mix of items - some with null uploads
+        $orderQueueWithNullUpload = new OrderQueue;
+        $orderQueueWithNullUpload->id = 1;
+        $orderQueueWithNullUpload->currency_code = 'USD';
+        $orderQueueWithNullUpload->manufacturer_costs = 10.00;
+        // upload is null
+
+        $items = collect([$orderQueueWithNullUpload]);
+
+        // Should not throw exception and return valid footer
+        $footer = OrderQueue::getOverviewFooter($items);
+
+        $this->assertEquals(0, $footer['parts']);
+        $this->assertEquals(0, $footer['box_volume_cm3']);
+        $this->assertEquals(0, $footer['weight']);
+        $this->assertArrayHasKey('costs', $footer);
+    }
+
+    #[Test]
+    public function it_includes_manufacturer_costs_for_null_upload_items_in_footer_when_not_customer_shipment(): void
+    {
+        $orderQueueWithNullUpload = new OrderQueue;
+        $orderQueueWithNullUpload->id = 1;
+        $orderQueueWithNullUpload->currency_code = 'USD';
+        $orderQueueWithNullUpload->setRawAttributes(['manufacturer_costs' => 5000]); // 50.00 in cents
+
+        $items = collect([$orderQueueWithNullUpload]);
+
+        $footer = OrderQueue::getOverviewFooter($items, false);
+
+        $this->assertEquals(0, $footer['parts']);
+        $this->assertArrayNotHasKey('remarks', $footer);
+    }
 }
