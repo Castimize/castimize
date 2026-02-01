@@ -264,6 +264,7 @@ class OrderQueue extends Model
                 'all_at_dc' => $ordersAllAtDc[$orderQueue->order_id],
             ];
         }
+
         return $options;
     }
 
@@ -288,6 +289,7 @@ class OrderQueue extends Model
                 'group' => $orderQueue->upload->material->materialGroup->name,
             ];
         }
+
         return $options;
     }
 
@@ -311,8 +313,21 @@ class OrderQueue extends Model
 
     public function getOverviewItem(bool $isCustomerShipment = true): array
     {
+        if ($this->upload === null) {
+            return [
+                'material' => '',
+                'id' => $this->id,
+                'parts' => 0,
+                'box_volume_cm3' => 0,
+                'weight' => 0,
+                'costs' => currencyFormatter(0, $this->currency_code ?? 'USD'),
+                'remarks' => $isCustomerShipment ? ($this->remarks ?? '') : null,
+            ];
+        }
+
         $customsItemSettings = app(CustomsItemSettings::class);
-        $netWeight = ($this->upload->model_volume_cc * $this->upload->material->density + $customsItemSettings->bag) * $this->upload->quantity;
+        $density = $this->upload->material?->density ?? 0;
+        $netWeight = ($this->upload->model_volume_cc * $density + $customsItemSettings->bag) * $this->upload->quantity;
         $costs = $isCustomerShipment ? (float) $this->upload->total : (float) $this->manufacturer_costs;
         $currencyCode = $isCustomerShipment ? $this->upload->currency_code : $this->currency_code;
         $data = [
@@ -341,10 +356,18 @@ class OrderQueue extends Model
         $currencyCode = 'USD';
 
         foreach ($items as $item) {
+            if ($item->upload === null) {
+                $totalCosts += $isCustomerShipment ? 0 : (float) $item->manufacturer_costs;
+                $currencyCode = $item->currency_code ?? 'USD';
+
+                continue;
+            }
+
+            $density = $item->upload->material?->density ?? 0;
             $totalParts += ($item->upload->model_parts * $item->upload->quantity);
             $totalBoxVolume += ($item->upload->model_box_volume * $item->upload->quantity);
-            $totalWeight += (($item->upload->model_volume_cc * $item->upload->material->density + $customsItemSettings->bag) * $item->upload->quantity);
-            $totalCosts += $isCustomerShipment ? (float) $item->upload->total : (float) $item->manufacturer_costs; ;
+            $totalWeight += (($item->upload->model_volume_cc * $density + $customsItemSettings->bag) * $item->upload->quantity);
+            $totalCosts += $isCustomerShipment ? (float) $item->upload->total : (float) $item->manufacturer_costs;
             $currencyCode = $isCustomerShipment ? $item->upload->currency_code : $item->currency_code;
         }
 
@@ -389,6 +412,7 @@ class OrderQueue extends Model
         }
         $availableForShippingStatusDateCheck = Carbon::parse($lastStatus->created_at)
             ->addBusinessDays(2);
+
         return $targetDate->lt($availableForShippingStatusDateCheck)
             ? $targetDate
             : $availableForShippingStatusDateCheck;
@@ -406,6 +430,7 @@ class OrderQueue extends Model
         }
         $inTransitToDcStatusDateCheck = Carbon::parse($this->manufacturerShipment->sent_at)
             ->addBusinessDays($this->manufacturerCost->shipment_lead_time);
+
         return $targetDate->lt($inTransitToDcStatusDateCheck)
             ? $targetDate
             : $inTransitToDcStatusDateCheck;
