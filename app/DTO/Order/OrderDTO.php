@@ -112,7 +112,7 @@ class OrderDTO extends Data
 
         $taxPercentage = null;
         if (count($wpOrder['tax_lines']) > 0) {
-            $taxPercentage = $wpOrder['tax_lines'][0]->rate_percent;
+            $taxPercentage = (float) $wpOrder['tax_lines'][0]->rate_percent;
         }
 
         return new self(

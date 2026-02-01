@@ -21,16 +21,16 @@ class CalculateShippingFeeUploadDTO extends Data
         }
 
         return new self(
-            modelBoxVolume: $upload['3dp_options']['model_stats_raw']['model']['box_volume'],
-            quantity: $upload['quantity'],
+            modelBoxVolume: (float) ($upload['3dp_options']['model_stats_raw']['model']['box_volume'] ?? 0),
+            quantity: (int) ($upload['quantity'] ?? 1),
         );
     }
 
     public static function fromEtsyLine(array $line): self
     {
         return new self(
-            modelBoxVolume: $line['shop_listing_model']->model->model_box_volume,
-            quantity: $line['transaction']->quantity,
+            modelBoxVolume: (float) ($line['shop_listing_model']->model->model_box_volume ?? 0),
+            quantity: (int) ($line['transaction']->quantity ?? 1),
         );
     }
 }
