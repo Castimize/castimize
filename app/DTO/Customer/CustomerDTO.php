@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO\Customer;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Spatie\LaravelData\Data;
 
-readonly class CustomerDTO
+class CustomerDTO extends Data
 {
     public function __construct(
         public ?int $id,
@@ -38,8 +41,7 @@ readonly class CustomerDTO
         public ?string $shippingCity,
         public ?string $shippingState,
         public ?string $shippingCountry,
-    ) {
-    }
+    ) {}
 
     public static function fromApiRequest(Customer $customer, Request $request): self
     {
@@ -75,10 +77,5 @@ readonly class CustomerDTO
             shippingState: $request->shippingState ?? null,
             shippingCountry: $request->shippingCountry ?? null,
         );
-    }
-
-    public static function fromWpCustomer(int $wpId): CustomerDTO
-    {
-        $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($wpId);
     }
 }

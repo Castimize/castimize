@@ -8,8 +8,9 @@ use App\Enums\Admin\CurrencyEnum;
 use App\Models\Country;
 use App\Models\Shop;
 use App\Services\Admin\CurrencyService;
+use Spatie\LaravelData\Data;
 
-class ShippingProfileDestinationDTO
+class ShippingProfileDestinationDTO extends Data
 {
     public function __construct(
         public int $shopId,
@@ -20,12 +21,12 @@ class ShippingProfileDestinationDTO
         public string $destinationCountryIso,
         public int $minDeliveryDays,
         public int $maxDeliveryDays,
-    ) {
-    }
+    ) {}
 
     public static function fromCountry(Shop $shop, Country $country, int $shippingProfileId, ?int $shippingProfileDestinationId = null): self
     {
         $rate = $country->logisticsZone->shippingFee->default_rate;
+
         if (
             app()->environment() === 'production' &&
             array_key_exists('shop_currency', $shop->shop_oauth) &&

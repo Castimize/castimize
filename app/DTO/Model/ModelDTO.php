@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO\Model;
 
 use App\Models\Material;
 use App\Models\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Spatie\LaravelData\Data;
 
-readonly class ModelDTO
+class ModelDTO extends Data
 {
     public function __construct(
         public string $wpId,
@@ -33,10 +36,9 @@ readonly class ModelDTO
         public ?float $modelScale,
         public ?array $categories,
         public ?array $metaData,
-    ) {
-    }
+    ) {}
 
-    public static function fromApiRequest(Request $request, ?int $customerId = null): ModelDTO
+    public static function fromApiRequest(Request $request, ?int $customerId = null): self
     {
         $material = Material::where('wp_id', $request->wp_id)->first();
         $categories = null;
@@ -78,7 +80,7 @@ readonly class ModelDTO
         );
     }
 
-    public static function fromWpRequest(Request $request, int $customerId): ModelDTO
+    public static function fromWpRequest(Request $request, int $customerId): self
     {
         $material = Material::where('wp_id', $request->wp_id)->first();
 
@@ -98,8 +100,8 @@ readonly class ModelDTO
             $thumbFileName = $file->getClientOriginalName();
             $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
             $thumbFileExtension = $file->getClientOriginalExtension();
-            $thumbName = time() . '_' . str_replace(' ', '_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
-            Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
+            $thumbName = time().'_'.str_replace(' ', '_', $thumbFileNameWithoutExt).'.'.$thumbFileExtension;
+            Storage::disk('s3')->putFileAs(config('app.stl_upload_dir'), $file, $thumbName);
         } else {
             $uploadedThumb = false;
             $thumbName = self::defineThumbImageName($request);
@@ -132,7 +134,7 @@ readonly class ModelDTO
         );
     }
 
-    public static function fromWpUpdateRequest(Request $request, Model $model, int $customerId): ModelDTO
+    public static function fromWpUpdateRequest(Request $request, Model $model, int $customerId): self
     {
         $categories = null;
         if ($request->categories) {
@@ -151,8 +153,8 @@ readonly class ModelDTO
             $thumbFileName = $file->getClientOriginalName();
             $thumbFileNameWithoutExt = pathinfo($thumbFileName, PATHINFO_FILENAME);
             $thumbFileExtension = $file->getClientOriginalExtension();
-            $thumbName = time() . '_' . str_replace(' ', '_', $thumbFileNameWithoutExt) . '.' . $thumbFileExtension;
-            Storage::disk('s3')->putFileAs(env('APP_SITE_STL_UPLOAD_DIR'), $file, $thumbName);
+            $thumbName = time().'_'.str_replace(' ', '_', $thumbFileNameWithoutExt).'.'.$thumbFileExtension;
+            Storage::disk('s3')->putFileAs(config('app.stl_upload_dir'), $file, $thumbName);
         }
 
         return new self(
@@ -182,9 +184,6 @@ readonly class ModelDTO
         );
     }
 
-    /**
-     * @return array|string|string[]
-     */
     private static function defineThumbImageName(Request $request): string|array
     {
         $thumbName = sprintf(
@@ -197,8 +196,8 @@ readonly class ModelDTO
             'mm',
         );
 
-        $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
-        $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
+        $fileNameThumb = sprintf('%s%s', config('app.stl_upload_dir'), $thumbName);
+        $fileThumb = sprintf('%s/%s', config('app.site_url'), $fileNameThumb);
         $fileHeaders = get_headers($fileThumb);
         if (str_contains($fileHeaders[0], '404')) {
             $thumbName = sprintf(
@@ -211,16 +210,17 @@ readonly class ModelDTO
                 'mm',
             );
 
-            $fileNameThumb = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $thumbName);
-            $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
+            $fileNameThumb = sprintf('%s%s', config('app.stl_upload_dir'), $thumbName);
+            $fileThumb = sprintf('%s/%s', config('app.url'), $fileNameThumb);
             $fileHeaders = get_headers($fileThumb);
             if (str_contains($fileHeaders[0], '404')) {
-                $model = Model::where('file_name', 'like', '%' . str_replace('_resized', '', $request->file_name) . '%')->first();
+                $model = Model::where('file_name', 'like', '%'.str_replace('_resized', '', $request->file_name).'%')->first();
                 if ($model) {
-                    $thumbName = str_replace(env('APP_SITE_STL_UPLOAD_DIR'), '', $model->thumb_name);
+                    $thumbName = str_replace(config('app.stl_upload_dir'), '', $model->thumb_name);
                 }
             }
         }
+
         return $thumbName;
     }
 }
