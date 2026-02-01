@@ -16,7 +16,8 @@ use Laravel\Nova\Panel;
 
 class ShippingFee extends Resource
 {
-    use ColumnTogglerTrait; use CommonMetaDataTrait;
+    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -105,7 +106,7 @@ class ShippingFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 1'), function () {
-                return $this->rate_increase_1 ? $this->rate_increase_1 . '%' : '';
+                return $this->rate_increase_1 ? $this->rate_increase_1.'%' : '';
             })
                 ->hideByDefault()
                 ->exceptOnForms(),
@@ -120,7 +121,7 @@ class ShippingFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 2'), function () {
-                return $this->rate_increase_1 ? $this->rate_increase_1 . '%' : '';
+                return $this->rate_increase_1 ? $this->rate_increase_1.'%' : '';
             })
                 ->hideByDefault()
                 ->exceptOnForms(),
@@ -135,7 +136,7 @@ class ShippingFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Rate increase 3'), function () {
-                return $this->rate_increase_3 ? $this->rate_increase_3 . '%' : '';
+                return $this->rate_increase_3 ? $this->rate_increase_3.'%' : '';
             })
                 ->hideByDefault()
                 ->exceptOnForms(),

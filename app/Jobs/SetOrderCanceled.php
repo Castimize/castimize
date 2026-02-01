@@ -34,7 +34,7 @@ class SetOrderCanceled implements ShouldQueue
      */
     public function handle(): void
     {
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         $order = Order::with(['uploads', 'orderQueues'])
             ->where('order_number', $this->paymentIntent->metadata->order_id)
             ->first();
@@ -52,14 +52,14 @@ class SetOrderCanceled implements ShouldQueue
             }
             $order->delete();
         } catch (Throwable $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
             $this->fail($e->getMessage());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

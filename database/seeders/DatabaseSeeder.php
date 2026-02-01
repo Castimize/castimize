@@ -8,6 +8,7 @@ use Ranium\SeedOnce\Traits\SeedOnce;
 class DatabaseSeeder extends Seeder
 {
     use SeedOnce;
+
     /**
      * Seed the application's database.
      */
@@ -22,7 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call(MaterialsTableSeeder::class);
         $this->call(OrderStatusSeeder::class);
 
-        if (env('APP_ENV') === 'local' || env('APP_ENV') === 'testing') {
+        if (app()->environment(['local', 'testing'])) {
             $this->call(TestDataSeeder::class);
         }
     }

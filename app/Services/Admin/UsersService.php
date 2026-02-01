@@ -19,10 +19,10 @@ class UsersService
         if ($user === null) {
             $user = User::create([
                 'wp_id' => $request->wp_id,
-                'username' => $request->username ?? Str::slug($request->first_name . ' ' . $request->last_name) . Str::random(4),
+                'username' => $request->username ?? Str::slug($request->first_name.' '.$request->last_name).Str::random(4),
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
-                'email' => Str::random(10) . '@castimize.com',
+                'email' => Str::random(10).'@castimize.com',
                 'password' => $password,
             ]);
             $user->assignRole('customer');

@@ -37,8 +37,8 @@ class PoCanceledStatusAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService();
-        $ordersService = new OrdersService();
+        $orderQueuesService = new OrderQueuesService;
+        $ordersService = new OrdersService;
 
         foreach ($models as $model) {
             $hasAlreadyCanceled = [];

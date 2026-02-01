@@ -28,28 +28,28 @@ class VerifyStripeWebhookSignature
 
         try {
             $event = Webhook::constructEvent($payload, $sig_header, $endpoint_secret);
-        } catch(UnexpectedValueException $e) {
+        } catch (UnexpectedValueException $e) {
             // Invalid payload
             return response()->json([
                 'message' => 'Invalid payload',
             ], 400);
-        } catch(SignatureVerificationException $e) {
+        } catch (SignatureVerificationException $e) {
             // Invalid signature
             return response()->json([
                 'message' => 'Invalid signature',
             ], 403);
         }
 
-//        try {
-//            WebhookSignature::verifyHeader(
-//                $request->getContent(),
-//                $request->header('stripe-signature'),
-//                config('services.stripe.webhook.secret'),
-//                config('services.stripe.webhook.tolerance')
-//            );
-//        } catch (SignatureVerificationException $exception) {
-//            throw new AccessDeniedHttpException($exception->getMessage(), $exception);
-//        }
+        //        try {
+        //            WebhookSignature::verifyHeader(
+        //                $request->getContent(),
+        //                $request->header('stripe-signature'),
+        //                config('services.stripe.webhook.secret'),
+        //                config('services.stripe.webhook.tolerance')
+        //            );
+        //        } catch (SignatureVerificationException $exception) {
+        //            throw new AccessDeniedHttpException($exception->getMessage(), $exception);
+        //        }
 
         return $next($request);
     }

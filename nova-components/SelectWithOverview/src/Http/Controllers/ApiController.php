@@ -10,7 +10,6 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 /**
  * Class ApiController.
  *
- * @package Castimize\SelectWithOverview\Http\Controllers
  * @date    06/05/2024
  */
 class ApiController extends Controller
@@ -22,6 +21,7 @@ class ApiController extends Controller
     {
         $orderQueue = OrderQueue::find($request->id);
         $overviewItem = $orderQueue->getOverviewItem();
+
         return response()->json([
             'item' => $overviewItem,
         ]);
@@ -31,6 +31,7 @@ class ApiController extends Controller
     {
         $orderQueues = OrderQueue::whereIn('id', $request->ids)->get();
         $overviewFooter = OrderQueue::getOverviewFooter($orderQueues);
+
         return response()->json([
             'footer' => $overviewFooter,
         ]);

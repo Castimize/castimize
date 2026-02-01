@@ -32,7 +32,7 @@ class ShopOwnerResource extends JsonResource
             ];
         }
 
-        $stripeService = new StripeService();
+        $stripeService = new StripeService;
         $mandate = [];
         $paymentMethodChargable = false;
         $paymentMethod = null;

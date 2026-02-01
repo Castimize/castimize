@@ -17,7 +17,8 @@ use Laravel\Nova\Panel;
 
 class Material extends Resource
 {
-    use ColumnTogglerTrait; use CommonMetaDataTrait;
+    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -178,25 +179,25 @@ class Material extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Discount'), function () {
-                return $this->discount ? $this->discount . '%' : '';
+                return $this->discount ? $this->discount.'%' : '';
             })
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Text::make(__('Bulk discount 10'), function () {
-                return $this->bulk_discount_10 ? $this->bulk_discount_10 . '%' : '';
+                return $this->bulk_discount_10 ? $this->bulk_discount_10.'%' : '';
             })
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Text::make(__('Bulk discount 25'), function () {
-                return $this->bulk_discount_25 ? $this->bulk_discount_25 . '%' : '';
+                return $this->bulk_discount_25 ? $this->bulk_discount_25.'%' : '';
             })
                 ->hideByDefault()
                 ->exceptOnForms(),
 
             Text::make(__('Bulk discount 50'), function () {
-                return $this->bulk_discount_50 ? $this->bulk_discount_50 . '%' : '';
+                return $this->bulk_discount_50 ? $this->bulk_discount_50.'%' : '';
             })
                 ->hideByDefault()
                 ->exceptOnForms(),

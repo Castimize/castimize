@@ -95,7 +95,7 @@ class UploadFactory extends Factory
                     'key' => '_p3d_stats_material_volume',
                     'value' => round($modelVolumeCc, 2),
                     'display_key' => 'Material Volume',
-                    'display_value' => round($modelVolumeCc, 2) . 'cm3',
+                    'display_value' => round($modelVolumeCc, 2).'cm3',
                 ],
                 [
                     'key' => '_p3d_stats_print_time',
@@ -107,19 +107,19 @@ class UploadFactory extends Factory
                     'key' => '_p3d_stats_surface_area',
                     'value' => round($modelSurfaceArea, 2),
                     'display_key' => 'Surface Area',
-                    'display_value' => round($modelSurfaceArea, 2) . 'cm2',
+                    'display_value' => round($modelSurfaceArea, 2).'cm2',
                 ],
                 [
                     'key' => '_p3d_stats_weight',
                     'value' => round($metaDataWeight, 2),
                     'display_key' => 'Model Weight',
-                    'display_value' => round($metaDataWeight, 2) . 'g',
+                    'display_value' => round($metaDataWeight, 2).'g',
                 ],
                 [
                     'key' => '_p3d_stats_box_volume',
                     'value' => round($modelBoxVolume, 2),
                     'display_key' => 'Box Volume',
-                    'display_value' => round($modelBoxVolume, 2) . 'cm3',
+                    'display_value' => round($modelBoxVolume, 2).'cm3',
                 ],
             ],
         ];

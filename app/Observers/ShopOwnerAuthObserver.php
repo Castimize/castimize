@@ -12,14 +12,14 @@ class ShopOwnerAuthObserver
      */
     public function creating(Shop $shopOwnerAuth): void
     {
-//        if ($shopOwnerAuth->shop === 'etsy') {
-//            $shopOwnerAuth->shop_oauth = [
-//                'client_id' => $shopOwnerAuth->oathKey,
-//                'client_secret' => Crypt::encryptString($shopOwnerAuth->oathSecret),
-//            ];
-//        }
-//        $shopOwnerAuth->('oathKey');
-//        $shopOwnerAuth->unset('oathSecret');
-//        dd($shopOwnerAuth);
+        //        if ($shopOwnerAuth->shop === 'etsy') {
+        //            $shopOwnerAuth->shop_oauth = [
+        //                'client_id' => $shopOwnerAuth->oathKey,
+        //                'client_secret' => Crypt::encryptString($shopOwnerAuth->oathSecret),
+        //            ];
+        //        }
+        //        $shopOwnerAuth->('oathKey');
+        //        $shopOwnerAuth->unset('oathSecret');
+        //        dd($shopOwnerAuth);
     }
 }

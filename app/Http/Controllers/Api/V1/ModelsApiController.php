@@ -21,8 +21,7 @@ class ModelsApiController extends ApiController
 {
     public function __construct(
         private ModelsService $modelsService,
-    ) {
-    }
+    ) {}
 
     public function show(int $customerId, Model $model): ModelResource
     {
@@ -33,6 +32,7 @@ class ModelsApiController extends ApiController
 
         $response = new ModelResource($model);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -67,6 +67,7 @@ class ModelsApiController extends ApiController
 
         $response = ModelResource::collection($models->keyBy->id);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -83,6 +84,7 @@ class ModelsApiController extends ApiController
         $response = $this->modelsService->getModelsPaginated($request, $customer);
 
         LogRequestService::addResponse(request(), $response['items']);
+
         return response()->json([
             'items' => $response['items'],
             'total' => $response['total'],
@@ -150,7 +152,7 @@ class ModelsApiController extends ApiController
                 $newUploads[$itemKey] = $upload;
                 if ($model) {
                     if ($model->thumb_name) {
-                        $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(env('FILESYSTEM_DISK'))->exists($model->thumb_name) ? sprintf('%s/%s', env('AWS_URL'), $model->thumb_name) : '/' . $model->thumb_name;
+                        $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(config('filesystems.default'))->exists($model->thumb_name) ? sprintf('%s/%s', config('filesystems.disks.s3.url'), $model->thumb_name) : '/'.$model->thumb_name;
                     }
                     $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
                 }
@@ -158,6 +160,7 @@ class ModelsApiController extends ApiController
         }
 
         LogRequestService::addResponse($request, $newUploads);
+
         return response()->json($newUploads);
     }
 
@@ -176,6 +179,7 @@ class ModelsApiController extends ApiController
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
+
         return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
@@ -190,6 +194,7 @@ class ModelsApiController extends ApiController
 
         $response = new ModelResource($model);
         LogRequestService::addResponse($request, $response);
+
         return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }

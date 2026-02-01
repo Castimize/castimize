@@ -10,8 +10,7 @@ class RemoveTestEmailAddressesFilter
 {
     public function __construct(
         private string $column,
-    ) {
-    }
+    ) {}
 
     public function __invoke(Builder $query): void
     {

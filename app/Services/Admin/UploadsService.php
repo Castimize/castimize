@@ -11,12 +11,11 @@ class UploadsService
 {
     public function __construct(
         private OrderQueuesService $orderQueuesService,
-    ) {
-    }
+    ) {}
 
     public function setUploadToOrderQueue(Upload $upload): void
     {
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         $manufacturer = Manufacturer::with(['costs'])->orderBy('id')->first();
 
         $orderQueues = $orderQueuesService->storeFromUpload($upload, [$manufacturer]);

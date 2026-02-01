@@ -25,8 +25,7 @@ class CreateRefundInvoicesFromOrder implements ShouldQueue
     public function __construct(
         public int $wpOrderId,
         public ?int $logRequestId = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -53,13 +52,13 @@ class CreateRefundInvoicesFromOrder implements ShouldQueue
             }
 
         } catch (Throwable $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

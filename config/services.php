@@ -61,4 +61,7 @@ return [
             'name' => 'Mailgun sandbox',
         ],
     ],
+    'woocommerce' => [
+        'key' => env('WOOCOMMERCE_KEY'),
+    ],
 ];

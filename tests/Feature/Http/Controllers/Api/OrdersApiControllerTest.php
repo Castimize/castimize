@@ -11,10 +11,10 @@ class OrdersApiControllerTest extends BaseTestCase
 {
     use RefreshDatabase;
 
-    public function testItStoresOrder(): void
+    public function test_it_stores_order(): void
     {
-//        $response = $this->postJson(route('api.api.orders.store-order-wp'), $this->getWPOrderData());
-//        dd($response);
+        //        $response = $this->postJson(route('api.api.orders.store-order-wp'), $this->getWPOrderData());
+        //        dd($response);
     }
 
     private function getWPOrderData()

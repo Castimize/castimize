@@ -37,6 +37,7 @@ class AddressApiController extends ApiController
                 'messages' => [],
             ];
             LogRequestService::addResponse($request, $response);
+
             return response()->json($response);
         }
 
@@ -52,7 +53,7 @@ class AddressApiController extends ApiController
         abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         try {
-            $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
+            $shippingFee = (new CalculatePricesService)->calculateShippingFeeNew(
                 countryIso: $request->country,
                 uploads: collect($request->uploads)->map(fn ($upload) => CalculateShippingFeeUploadDTO::fromWpRequest($upload)),
             );
@@ -62,6 +63,7 @@ class AddressApiController extends ApiController
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ], $e->getCode());
+
             return response()->json([
                 'errors' => $e->getMessage(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -69,6 +71,7 @@ class AddressApiController extends ApiController
 
         $response = new CalculatedShippingFeeResource($shippingFee);
         LogRequestService::addResponse($request, $response);
+
         return $response;
     }
 }

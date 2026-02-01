@@ -16,8 +16,7 @@ class CustomersApiController extends ApiController
 {
     public function __construct(
         private CustomersService $customersService,
-    ) {
-    }
+    ) {}
 
     public function show(Customer $customer): CustomerResource
     {
@@ -25,6 +24,7 @@ class CustomersApiController extends ApiController
 
         $response = new CustomerResource($customer);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -41,6 +41,7 @@ class CustomersApiController extends ApiController
         }
         $response = new CustomerResource($customer);
         LogRequestService::addResponse($request, $response);
+
         return $response;
     }
 
@@ -51,6 +52,7 @@ class CustomersApiController extends ApiController
 
         $response = new CustomerResource($customer);
         LogRequestService::addResponse($request, $response);
+
         return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }

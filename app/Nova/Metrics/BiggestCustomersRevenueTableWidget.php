@@ -27,7 +27,7 @@ class BiggestCustomersRevenueTableWidget extends TableWidget
 
     public function value(Filters $filters): Collection
     {
-        $currencyService = new CurrencyService();
+        $currencyService = new CurrencyService;
 
         $query = DB::table('orders')
             ->join('customers', 'customers.id', '=', 'orders.customer_id')

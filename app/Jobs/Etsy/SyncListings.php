@@ -16,12 +16,11 @@ class SyncListings implements ShouldQueue
 
     public function __construct(
         private Shop $shopOwnerAuth,
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {
-        $etsyService = (new EtsyService());
+        $etsyService = (new EtsyService);
         /** @var Customer $customer */
         $customer = $this->shopOwnerAuth->shopOwner->customer;
         $customerModels = $customer->models()->doesntHave('shopListingModel')->get();

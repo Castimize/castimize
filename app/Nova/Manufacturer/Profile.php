@@ -159,8 +159,8 @@ class Profile extends Resource
                 ->sortable(),
 
             Text::make(__('City'), 'cityName', function () {
-                    return $this->city?->name ?? null;
-                })
+                return $this->city?->name ?? null;
+            })
                 ->required()
                 ->sortable(),
 

@@ -17,7 +17,8 @@ use Laravel\Nova\Panel;
 
 class Model extends Resource
 {
-    use ColumnTogglerTrait; use CommonMetaDataTrait;
+    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.

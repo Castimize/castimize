@@ -9,7 +9,6 @@ use App\Services\Etsy\Resources\Listing;
 use Etsy\Collection;
 use Etsy\Etsy;
 use Exception;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 
 #[AllowDynamicProperties]
@@ -63,7 +62,8 @@ class EtsyListingService
                 ],
             );
         } catch (Exception $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getTraceAsString());
+
             return null;
         }
     }

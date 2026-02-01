@@ -38,7 +38,7 @@ class PoAvailableForShippingAndDownloadPoLabelsStatusAction extends Action
         $labelFileName = sprintf('po-labels-%s.pdf', time());
         $orderQueueIds = [];
 
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         foreach ($models as $model) {
             $hasEndStatus = [];
             /** @var $model OrderQueue */

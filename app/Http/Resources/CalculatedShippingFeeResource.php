@@ -14,6 +14,7 @@ class CalculatedShippingFeeResource extends JsonResource
     public function toArray(Request $request): array
     {
         $currencyService = app(CurrencyService::class);
+
         return [
             'logistics_zone_id' => $this->logistics_zone_id,
             'currency_id' => $this->currency_id,

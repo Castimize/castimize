@@ -28,7 +28,7 @@ class WoocommerceApiService
     public function createOrder(OrderDTO $orderDTO)
     {
         $data = [
-            //'status' => $orderDTO->status,
+            // 'status' => $orderDTO->status,
             'customer_id' => $orderDTO->customerId,
             'currency' => $orderDTO->currencyCode,
             'prices_include_tax' => false,
@@ -117,10 +117,10 @@ class WoocommerceApiService
             $data['fee_lines'] = [];
             /** @var PaymentFeeDTO $paymentFeeDTO */
             foreach ($orderDTO->paymentFees as $paymentFeeDTO) {
-//                $total = $paymentFeeDTO->total;
-//                if ($paymentFeeDTO->totalTax) {
-//                    $total = $total->subtract($paymentFeeDTO->totalTax);
-//                }
+                //                $total = $paymentFeeDTO->total;
+                //                if ($paymentFeeDTO->totalTax) {
+                //                    $total = $total->subtract($paymentFeeDTO->totalTax);
+                //                }
                 $data['fee_lines'][] = [
                     'name' => $paymentFeeDTO->name,
                     'tax_class' => $paymentFeeDTO->taxClass,
@@ -150,6 +150,7 @@ class WoocommerceApiService
             'set_paid' => $orderDTO->isPaid,
             'meta_data' => $orderDTO->metaData,
         ];
+
         return Order::update($orderDTO->orderNumber, $data);
     }
 
@@ -183,6 +184,6 @@ class WoocommerceApiService
 
         return null;
 
-//        return Order::createRefund($wpOrderId, $data);
+        //        return Order::createRefund($wpOrderId, $data);
     }
 }

@@ -161,6 +161,7 @@ class Invoice extends Resource
                 if ($this->paid_at === null) {
                     return __('Not paid');
                 }
+
                 return Carbon::parse($this->paid_at)->format('d-m-Y H:i:s');
             })
                 ->sortable(),

@@ -36,7 +36,7 @@ class EtsyAuthorizationUrlAction extends Action
             'client_secret' => Crypt::encryptString($fields->oathSecret),
         ];
 
-        $url = (new EtsyService())->getAuthorizationUrl($shop);
+        $url = (new EtsyService)->getAuthorizationUrl($shop);
 
         return ActionResponse::openInNewTab($url);
     }

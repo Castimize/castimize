@@ -33,7 +33,7 @@ class DeclineRejectionAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         // New line in order queue status with slug in_production
         foreach ($models as $model) {
             $model->declined_at = now();
@@ -41,6 +41,7 @@ class DeclineRejectionAction extends Action
 
             $orderQueuesService->setStatus($model->orderQueue);
         }
+
         return ActionResponse::message(__('Selected rejections declined and PO put back in queue on status in-production'));
     }
 

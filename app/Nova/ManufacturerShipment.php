@@ -127,21 +127,23 @@ class ManufacturerShipment extends Resource
     public static function detailQuery(NovaRequest $request, $query)
     {
         $query->withCount('orderQueues as order_queues_count');
+
         return parent::detailQuery($request, $query);
     }
 
     /**
      * Return the location to redirect the user after creation.
      *
-     * @param resource $resource
+     * @param  resource  $resource
      * @return string
      */
     public static function redirectAfterCreate(NovaRequest $request, $resource)
     {
         if ($request->viaRelationship()) {
-            return '/resources/' . app($request->viaResource())::uriKey() . '/' . $request->viaResourceId;
+            return '/resources/'.app($request->viaResource())::uriKey().'/'.$request->viaResourceId;
         }
-        return '/resources/' . static::uriKey() . '/' . $resource->getKey();
+
+        return '/resources/'.static::uriKey().'/'.$resource->getKey();
     }
 
     /**
@@ -161,9 +163,10 @@ class ManufacturerShipment extends Resource
                 $links = [];
                 foreach ($model->orderQueues as $orderQueue) {
                     if (! array_key_exists($orderQueue->order->order_number, $links)) {
-                        $links[$orderQueue->order->order_number] = '<a class="link-default" href="/admin/resources/orders/' . $orderQueue->order_id . '" target="_blank">' . $orderQueue->order->order_number . '</a>';
+                        $links[$orderQueue->order->order_number] = '<a class="link-default" href="/admin/resources/orders/'.$orderQueue->order_id.'" target="_blank">'.$orderQueue->order->order_number.'</a>';
                     }
                 }
+
                 return implode(', ', $links);
             })
                 ->asHtml()
@@ -174,6 +177,7 @@ class ManufacturerShipment extends Resource
                 if (empty($this->tracking_url)) {
                     return $this->tracking_number;
                 }
+
                 return sprintf('<a class="link-default" href="%s" target="_blank">%s</a>', $this->tracking_url, $this->tracking_number);
             })
                 ->asHtml()
@@ -184,7 +188,8 @@ class ManufacturerShipment extends Resource
                 if (empty($this->label_url)) {
                     return '';
                 }
-                return '<a class="link-default" href="' . $this->label_url . '" target="_blank">' . __('Label') . '</a>';
+
+                return '<a class="link-default" href="'.$this->label_url.'" target="_blank">'.__('Label').'</a>';
             })
                 ->asHtml()
                 ->exceptOnForms()
@@ -194,7 +199,8 @@ class ManufacturerShipment extends Resource
                 if (empty($this->commercial_invoice_url)) {
                     return '';
                 }
-                return '<a class="link-default" href="' . $this->commercial_invoice_url . '" target="_blank">' . __('Commercial invoice') . '</a>';
+
+                return '<a class="link-default" href="'.$this->commercial_invoice_url.'" target="_blank">'.__('Commercial invoice').'</a>';
             })
                 ->asHtml()
                 ->onlyOnDetail()
@@ -204,7 +210,8 @@ class ManufacturerShipment extends Resource
                 if (empty($this->qr_code_url)) {
                     return '';
                 }
-                return '<a class="link-default" href="' . $this->qr_code_url . '" target="_blank">' . __('QR code') . '</a>';
+
+                return '<a class="link-default" href="'.$this->qr_code_url.'" target="_blank">'.__('QR code').'</a>';
             })
                 ->asHtml()
                 ->onlyOnDetail()
@@ -259,8 +266,8 @@ class ManufacturerShipment extends Resource
      */
     public function fieldsForCreate(NovaRequest $request)
     {
-        $dcSettings = (new DcSettings());
-        $parcelSettings = (new ParcelSettings());
+        $dcSettings = (new DcSettings);
+        $parcelSettings = (new ParcelSettings);
 
         return [
             BelongsTo::make(__('Manufacturer'), 'manufacturer', Manufacturer::class)
@@ -273,13 +280,13 @@ class ManufacturerShipment extends Resource
                 ->options(\App\Models\OrderQueue::getAvailableForShippingOrderQueueOptions())
                 ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders(false)),
 
-            Heading::make('<h3 class="font-normal text-xl">' . __('General') . '</h3>')
+            Heading::make('<h3 class="font-normal text-xl">'.__('General').'</h3>')
                 ->asHtml()
                 ->dependsOn(
                     ['manufacturer'],
                     function (Heading $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             if ($manufacturer && $manufacturer->can_handle_own_shipping) {
@@ -297,7 +304,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Boolean $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             if ($manufacturer && $manufacturer->can_handle_own_shipping) {
@@ -310,7 +317,7 @@ class ManufacturerShipment extends Resource
                 ),
 
             DependencyContainer::make([
-                Heading::make('<h3 class="font-normal text-xl">' . __('Tracking') . '</h3>')
+                Heading::make('<h3 class="font-normal text-xl">'.__('Tracking').'</h3>')
                     ->asHtml(),
 
                 Text::make(__('Tracking number'), 'tracking_number'),
@@ -318,7 +325,7 @@ class ManufacturerShipment extends Resource
                 Text::make(__('Tracking url'), 'tracking_url'),
             ])->dependsOn('handles_own_shipping', true),
 
-            Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')
+            Heading::make('<h3 class="font-normal text-xl">'.__('From address').'</h3>')
                 ->asHtml(),
 
             Text::make(__('Name'), 'from_address_name')
@@ -326,7 +333,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             $field->setValue($manufacturer->contact_name_1);
@@ -339,7 +346,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             $field->setValue($manufacturer->name);
@@ -352,7 +359,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             $field->setValue($manufacturer->address_line1);
@@ -365,7 +372,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             $field->setValue($manufacturer->address_line2);
@@ -378,7 +385,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             $field->setValue($manufacturer->postal_code);
@@ -391,7 +398,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             $field->setValue($manufacturer->city?->name);
@@ -404,7 +411,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             $field->setValue($manufacturer->state?->name);
@@ -417,7 +424,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             $field->setValue($manufacturer->country?->alpha2);
@@ -430,7 +437,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             $field->setValue($manufacturer->phone_1);
@@ -443,7 +450,7 @@ class ManufacturerShipment extends Resource
                     ['manufacturer'],
                     function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData->manufacturer) {
-                            $manufacturer = Cache::remember('manufacturer-shipment-' . $formData->manufacturer . '-create', 10, function () use ($formData, $field) {
+                            $manufacturer = Cache::remember('manufacturer-shipment-'.$formData->manufacturer.'-create', 10, function () use ($formData) {
                                 return \App\Models\Manufacturer::find($formData->manufacturer);
                             });
                             $field->setValue($manufacturer->email);
@@ -451,7 +458,7 @@ class ManufacturerShipment extends Resource
                     }
                 ),
 
-            Heading::make('<h3 class="font-normal text-xl">' . __('To address') . '</h3>')
+            Heading::make('<h3 class="font-normal text-xl">'.__('To address').'</h3>')
                 ->asHtml(),
 
             Text::make(__('Name'), 'to_address_name')
@@ -494,7 +501,7 @@ class ManufacturerShipment extends Resource
                 ->readonly()
                 ->default($dcSettings->email),
 
-            Heading::make('<h3 class="font-normal text-xl">' . __('Parcel settings') . '</h3>')
+            Heading::make('<h3 class="font-normal text-xl">'.__('Parcel settings').'</h3>')
                 ->asHtml(),
 
             Select::make(__('Distance unit'), 'parcel_distance_unit')
