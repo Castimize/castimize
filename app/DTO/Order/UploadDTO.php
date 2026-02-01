@@ -77,7 +77,7 @@ class UploadDTO extends Data
         }
 
         return new self(
-            wpId: $lineItem->id ?? null,
+            wpId: $lineItem->id ? ((string) $lineItem->id) : null,
             materialId: $material?->id,
             materialName: $material?->name,
             name: $name,
@@ -149,7 +149,7 @@ class UploadDTO extends Data
         ];
 
         return new self(
-            wpId: $model->wp_id ?? null,
+            wpId: $model->wp_id ? ((string) $model->wp_id) : null,
             materialId: $material->id,
             materialName: $material->name,
             name: $model->name,
