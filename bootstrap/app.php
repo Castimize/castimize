@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: '/api',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
         $middleware->redirectGuestsTo(fn () => route('nova.login'));
         $middleware->validateCsrfTokens(
             // Specify the routes to exclude from CSRF protection

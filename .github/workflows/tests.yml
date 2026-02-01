@@ -8,6 +8,43 @@ on:
 
 # Allow bypass via [skip tests] in commit message or 'bypass-tests' label on PR
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Configure Nova authentication
+        env:
+          NOVA_USERNAME: ${{ secrets.NOVA_USERNAME }}
+          NOVA_LICENSE_KEY: ${{ secrets.NOVA_LICENSE_KEY }}
+        run: |
+          composer config http-basic.nova.laravel.com "${NOVA_USERNAME}" "${NOVA_LICENSE_KEY}"
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run Pint
+        run: vendor/bin/pint --test
+
   check-bypass:
     runs-on: ubuntu-latest
     outputs:
@@ -132,17 +169,23 @@ jobs:
   # This job always succeeds - needed for branch protection when tests are skipped
   tests-status:
     runs-on: ubuntu-latest
-    needs: [check-bypass, tests]
+    needs: [lint, check-bypass, tests]
     if: always()
     steps:
       - name: Check status
         run: |
+          # Lint must always pass
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then
+            echo "Linting failed"
+            exit 1
+          fi
+
           if [[ "${{ needs.check-bypass.outputs.should_skip }}" == "true" ]]; then
-            echo "Tests were bypassed"
+            echo "Tests were bypassed, linting passed"
             exit 0
           fi
           if [[ "${{ needs.tests.result }}" == "success" ]]; then
-            echo "Tests passed"
+            echo "Tests and linting passed"
             exit 0
           fi
           echo "Tests failed"
