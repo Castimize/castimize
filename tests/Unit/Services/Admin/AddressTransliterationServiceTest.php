@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services\Admin;
 
 use App\Services\Admin\AddressTransliterationService;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -151,5 +152,79 @@ class AddressTransliterationServiceTest extends TestCase
         $this->assertTrue($this->service->isAscii($result['city']));
         $this->assertArrayNotHasKey('company', $result);
         $this->assertArrayNotHasKey('state', $result);
+    }
+
+    #[Test]
+    public function it_throws_exception_when_address_line_exceeds_35_characters(): void
+    {
+        $address = [
+            'name' => 'John Doe',
+            'address_line2' => 'This is a very long address line 2 that exceeds the UPS maximum of 35 characters',
+            'city' => 'New York',
+            'postal_code' => '10001',
+            'country' => 'US',
+        ];
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('address_line2 exceeds maximum length of 35 characters');
+
+        $this->service->transliterateAddress($address);
+    }
+
+    #[Test]
+    public function it_throws_exception_when_city_exceeds_30_characters(): void
+    {
+        $address = [
+            'name' => 'John Doe',
+            'city' => 'This Is An Extremely Long City Name That Exceeds Limit',
+            'postal_code' => '10001',
+            'country' => 'US',
+        ];
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('city exceeds maximum length of 30 characters');
+
+        $this->service->transliterateAddress($address);
+    }
+
+    #[Test]
+    public function it_includes_all_field_errors_in_exception_message(): void
+    {
+        $address = [
+            'name' => 'This is a very long name that exceeds the maximum',
+            'address_line1' => 'This is a very long address that exceeds maximum',
+            'city' => 'New York',
+            'postal_code' => '10001',
+            'country' => 'US',
+        ];
+
+        $this->expectException(InvalidArgumentException::class);
+
+        try {
+            $this->service->transliterateAddress($address);
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('name exceeds maximum length of 35', $e->getMessage());
+            $this->assertStringContainsString('address_line1 exceeds maximum length of 35', $e->getMessage());
+            throw $e;
+        }
+    }
+
+    #[Test]
+    public function it_allows_address_fields_within_limits(): void
+    {
+        $address = [
+            'name' => 'John Doe',
+            'company' => 'Test Company Inc',
+            'address_line1' => '123 Main Street',
+            'address_line2' => 'Apt 4B',
+            'city' => 'New York',
+            'state' => 'NY',
+            'postal_code' => '10001',
+            'country' => 'US',
+        ];
+
+        $result = $this->service->transliterateAddress($address);
+
+        $this->assertEquals($address, $result);
     }
 }

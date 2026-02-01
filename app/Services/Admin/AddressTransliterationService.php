@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Admin;
 
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 
 class AddressTransliterationService
 {
@@ -17,10 +18,20 @@ class AddressTransliterationService
         'state',
     ];
 
+    private const FIELD_MAX_LENGTHS = [
+        'name' => 35,
+        'company' => 35,
+        'address_line1' => 35,
+        'address_line2' => 35,
+        'city' => 30,
+        'state' => 35,
+    ];
+
     public function transliterateAddress(array $address): array
     {
         $modified = false;
         $originalFields = [];
+        $fieldLengthErrors = [];
 
         foreach (self::TRANSLITERABLE_FIELDS as $field) {
             if (isset($address[$field]) && is_string($address[$field])) {
@@ -31,7 +42,32 @@ class AddressTransliterationService
                     $modified = true;
                     $originalFields[$field] = $original;
                 }
+
+                $maxLength = self::FIELD_MAX_LENGTHS[$field] ?? null;
+                if ($maxLength !== null && mb_strlen($address[$field]) > $maxLength) {
+                    $fieldLengthErrors[$field] = [
+                        'value' => $address[$field],
+                        'length' => mb_strlen($address[$field]),
+                        'max_length' => $maxLength,
+                    ];
+                }
             }
+        }
+
+        if (! empty($fieldLengthErrors)) {
+            $errorMessages = [];
+            foreach ($fieldLengthErrors as $field => $error) {
+                $errorMessages[] = sprintf(
+                    '%s exceeds maximum length of %d characters (current: %d)',
+                    $field,
+                    $error['max_length'],
+                    $error['length']
+                );
+            }
+
+            throw new InvalidArgumentException(
+                'Address validation failed: '.implode('; ', $errorMessages)
+            );
         }
 
         if ($modified) {
