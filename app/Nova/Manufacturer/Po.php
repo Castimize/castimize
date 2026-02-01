@@ -28,7 +28,9 @@ use SLASH2NL\NovaBackButton\NovaBackButton;
 
 class Po extends Resource
 {
-    use CommonMetaDataTrait; use OrderQueueStatusFieldTrait; use ManufacturerPOFieldsTrait;
+    use CommonMetaDataTrait;
+    use ManufacturerPOFieldsTrait;
+    use OrderQueueStatusFieldTrait;
 
     /**
      * The model the resource corresponds to.
@@ -181,15 +183,16 @@ class Po extends Resource
      * Get the filters available for the resource.
      *
      * @return array
+     *
      * @throws Exception
      */
     public function filters(NovaRequest $request)
     {
         return [
-            (new MaterialFilter()),
+            (new MaterialFilter),
             EntryDateDaterangepickerFilter::make(),
             ContractDateDaterangepickerFilter::make(),
-            (new OrderQueueOrderStatusFilter()),
+            (new OrderQueueOrderStatusFilter),
         ];
     }
 

@@ -29,10 +29,10 @@ class StoreCustomerRequest extends FormRequest
             'wp_id' => 'nullable',
             'date_created' => 'nullable',
             'date_modified' => 'nullable',
-            'email' => 'required', //|unique:users
+            'email' => 'required', // |unique:users
             'first_name' => 'nullable',
             'last_name' => 'nullable',
-            'username' => 'required', //|unique:users
+            'username' => 'required', // |unique:users
             'avatar' => 'nullable',
             'billing.first_name' => 'nullable',
             'billing.last_name' => 'nullable',

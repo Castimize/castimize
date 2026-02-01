@@ -40,7 +40,7 @@ use App\Nova\ShippingFee;
 use App\Nova\ShopOwner;
 use App\Nova\State;
 use App\Nova\User;
-//use CodencoDev\NovaGridSystem\NovaGridSystem;
+// use CodencoDev\NovaGridSystem\NovaGridSystem;
 use Devloops\NovaSystemSettings\NovaSystemSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -65,11 +65,12 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         parent::boot();
 
-//        Nova::withBreadcrumbs();
+        //        Nova::withBreadcrumbs();
 
         Nova::mainMenu(function (Request $request) {
             if ($request->user()->isManufacturer()) {
                 Nova::withoutGlobalSearch();
+
                 return [
                     MenuSection::dashboard(ManufacturerDashboard::class)
                         ->icon('chart-bar'),
@@ -85,6 +86,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     ])->icon('cog'),
                 ];
             }
+
             return [
                 MenuSection::dashboard(CastimizeDashboard::class)
                     ->icon('chart-bar'),
@@ -206,8 +208,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     }),
 
                 MenuSection::make(__('Queue'), [
-                    MenuItem::resource(Job::class)->withBadge(fn() => \Kaiserkiwi\NovaQueueManagement\Models\Job::count()),
-                    MenuItem::resource(FailedJob::class)->withBadge(fn() => \Kaiserkiwi\NovaQueueManagement\Models\FailedJob::count()),
+                    MenuItem::resource(Job::class)->withBadge(fn () => \Kaiserkiwi\NovaQueueManagement\Models\Job::count()),
+                    MenuItem::resource(FailedJob::class)->withBadge(fn () => \Kaiserkiwi\NovaQueueManagement\Models\FailedJob::count()),
                     MenuItem::resource(LogRequest::class),
                 ])->icon('collection')
 //                    ->collapsable()
@@ -268,11 +270,11 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function tools()
     {
         return [
-            (new NovaPermissions())->canSee(function ($request) {
+            (new NovaPermissions)->canSee(function ($request) {
                 return $request->user()->isSuperAdmin();
             }),
             //            new NovaGridSystem(),
-            new Tool(),
+            new Tool,
             NovaSystemSettings::make([
                 // General
 

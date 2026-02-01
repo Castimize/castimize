@@ -73,7 +73,7 @@ class AppServiceProvider extends ServiceProvider
         // You can select one of our official list
         $baseList = 'nl-national'; // or region such as 'us-il'
 
-// You can add/remove days (optional):
+        // You can add/remove days (optional):
         $additionalHolidays = [
             //            'independence-day' => null, // Even if it's holiday, you can force it to null to make your business open
             //            'boss-birthday'    => '09-26', // Close the office on September 26th

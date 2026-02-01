@@ -134,21 +134,23 @@ class Shipment extends Resource
         }
 
         $query->withCount('orderQueues as order_queues_count');
+
         return parent::detailQuery($request, $query);
     }
 
     /**
      * Return the location to redirect the user after creation.
      *
-     * @param resource $resource
+     * @param  resource  $resource
      * @return string
      */
     public static function redirectAfterCreate(NovaRequest $request, $resource)
     {
         if ($request->viaRelationship()) {
-            return '/resources/' . app($request->viaResource())::uriKey() . '/' . $request->viaResourceId;
+            return '/resources/'.app($request->viaResource())::uriKey().'/'.$request->viaResourceId;
         }
-        return '/resources/' . static::uriKey() . '/' . $resource->getKey();
+
+        return '/resources/'.static::uriKey().'/'.$resource->getKey();
     }
 
     /**
@@ -165,6 +167,7 @@ class Shipment extends Resource
                 if (empty($this->tracking_url)) {
                     return $this->tracking_number;
                 }
+
                 return sprintf('<a class="link-default" href="%s" target="_blank">%s</a>', $this->tracking_url, $this->tracking_number);
             })
                 ->asHtml()
@@ -175,7 +178,8 @@ class Shipment extends Resource
                 if (empty($this->label_url)) {
                     return '';
                 }
-                return '<a class="link-default" href="' . $this->label_url . '" target="_blank">' . __('Label') . '</a>';
+
+                return '<a class="link-default" href="'.$this->label_url.'" target="_blank">'.__('Label').'</a>';
             })
                 ->asHtml()
                 ->exceptOnForms()
@@ -185,7 +189,8 @@ class Shipment extends Resource
                 if (empty($this->commercial_invoice_url)) {
                     return '';
                 }
-                return '<a class="link-default" href="' . $this->commercial_invoice_url . '" target="_blank">' . __('Commercial invoice') . '</a>';
+
+                return '<a class="link-default" href="'.$this->commercial_invoice_url.'" target="_blank">'.__('Commercial invoice').'</a>';
             })
                 ->asHtml()
                 ->onlyOnDetail()
@@ -195,7 +200,8 @@ class Shipment extends Resource
                 if (empty($this->qr_code_url)) {
                     return '';
                 }
-                return '<a class="link-default" href="' . $this->qr_code_url . '" target="_blank">' . __('QR code') . '</a>';
+
+                return '<a class="link-default" href="'.$this->qr_code_url.'" target="_blank">'.__('QR code').'</a>';
             })
                 ->asHtml()
                 ->onlyOnDetail()
@@ -248,8 +254,8 @@ class Shipment extends Resource
         } else {
             $manufacturer = auth()->user()->manufacturer;
         }
-        $dcSettings = (new DcSettings());
-        $parcelSettings = (new ParcelSettings());
+        $dcSettings = (new DcSettings);
+        $parcelSettings = (new ParcelSettings);
 
         return [
             SelectManufacturerWithOverview::make('PO\'s', 'selectedPOs')
@@ -259,7 +265,7 @@ class Shipment extends Resource
                 ->options(\App\Models\OrderQueue::getAvailableForShippingOrderQueueOptions())
                 ->overviewHeaders(\App\Models\OrderQueue::getOverviewHeaders()),
 
-            Heading::make('<h3 class="font-normal text-xl">' . __('General') . '</h3>')
+            Heading::make('<h3 class="font-normal text-xl">'.__('General').'</h3>')
                 ->asHtml()
                 ->canSee(function ($request) use ($manufacturer) {
                     return $manufacturer->can_handle_own_shipping;
@@ -275,7 +281,7 @@ class Shipment extends Resource
                 }),
 
             DependencyContainer::make([
-                Heading::make('<h3 class="font-normal text-xl">' . __('Tracking') . '</h3>')
+                Heading::make('<h3 class="font-normal text-xl">'.__('Tracking').'</h3>')
                     ->asHtml(),
 
                 Text::make(__('Tracking number'), 'tracking_number'),
@@ -284,7 +290,7 @@ class Shipment extends Resource
             ])->dependsOn('handles_own_shipping', true),
 
             DependencyContainer::make([
-                Heading::make('<h3 class="font-normal text-xl">' . __('From address') . '</h3>')
+                Heading::make('<h3 class="font-normal text-xl">'.__('From address').'</h3>')
                     ->asHtml(),
 
                 Text::make(__('Name'), 'from_address_name')
@@ -317,7 +323,7 @@ class Shipment extends Resource
                 Text::make(__('Email'), 'from_address_email')
                     ->default($manufacturer->email),
 
-                Heading::make('<h3 class="font-normal text-xl">' . __('To address') . '</h3>')
+                Heading::make('<h3 class="font-normal text-xl">'.__('To address').'</h3>')
                     ->asHtml(),
 
                 Text::make(__('Name'), 'to_address_name')
@@ -360,7 +366,7 @@ class Shipment extends Resource
                     ->readonly()
                     ->default($dcSettings->email),
 
-                Heading::make('<h3 class="font-normal text-xl">' . __('Parcel settings') . '</h3>')
+                Heading::make('<h3 class="font-normal text-xl">'.__('Parcel settings').'</h3>')
                     ->asHtml(),
 
                 Select::make(__('Distance unit'), 'parcel_distance_unit')

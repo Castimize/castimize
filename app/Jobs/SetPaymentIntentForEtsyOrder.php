@@ -30,8 +30,7 @@ class SetPaymentIntentForEtsyOrder implements ShouldQueue
     public function __construct(
         public PaymentIntent $paymentIntent,
         public ?int $logRequestId = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -79,7 +78,7 @@ class SetPaymentIntentForEtsyOrder implements ShouldQueue
                         'value' => (string) ($balanceTransaction->amount / 100),
                     ];
 
-                    $request = new Request();
+                    $request = new Request;
                     $request->replace(['id' => $this->paymentIntent->metadata->order_id]);
 
                     $orderDTO = OrderDTO::fromWpRequest($request);
@@ -90,7 +89,7 @@ class SetPaymentIntentForEtsyOrder implements ShouldQueue
                     $orderDTO->metaData = $metaData;
                     $orderDTO->isPaid = true;
                     $orderDTO->paidAt = Carbon::createFromTimestamp($this->paymentIntent->created, 'GMT')
-                        ?->setTimezone(env('APP_TIMEZONE'));
+                        ?->setTimezone(config('app.timezone'));
                     $woocommerceApiService->updateOrder($orderDTO);
 
                     $order->payment_intent_id = $orderDTO->paymentIntentId;
@@ -101,13 +100,13 @@ class SetPaymentIntentForEtsyOrder implements ShouldQueue
                 }
             }
         } catch (Throwable $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

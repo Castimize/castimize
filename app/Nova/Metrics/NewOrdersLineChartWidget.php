@@ -18,15 +18,15 @@ class NewOrdersLineChartWidget extends LineChartWidget
          * These set the title and the button on the top-right if there are multiple "tabs" on this view
          */
         $this->title(__('New orders per day'));
-//        $this->buttonTitle();
+        //        $this->buttonTitle();
         $this->backgroundColor(dark: 'rgb(30 41 59)', light: 'rgb(203 213 225)');
 
         $this->padding(top: 30, bottom: 5);
 
-//        $this->tooltip([]); // https://www.chartjs.org/docs/latest/configuration/tooltip.html#tooltip
-//        $this->scales([]);  // https://www.chartjs.org/docs/latest/axes/#axes
-//        $this->legend([]);  // https://www.chartjs.org/docs/latest/configuration/legend.html#legend
-//        $this->elements();  // https://www.chartjs.org/docs/latest/configuration/elements.html#elements
+        //        $this->tooltip([]); // https://www.chartjs.org/docs/latest/configuration/tooltip.html#tooltip
+        //        $this->scales([]);  // https://www.chartjs.org/docs/latest/axes/#axes
+        //        $this->legend([]);  // https://www.chartjs.org/docs/latest/configuration/legend.html#legend
+        //        $this->elements();  // https://www.chartjs.org/docs/latest/configuration/elements.html#elements
     }
 
     public function value(Filters $filters): mixed
@@ -42,7 +42,7 @@ class NewOrdersLineChartWidget extends LineChartWidget
             )
             ->whereNotNull('orders.paid_at')
             ->whereNull('orders.deleted_at')
-            ->whereRaw("DATE(orders.created_at) in ('" . implode("','", $dateRanges) . "')")
+            ->whereRaw("DATE(orders.created_at) in ('".implode("','", $dateRanges)."')")
             ->orderBy('entry_date')
             ->groupBy('entry_date');
         $query = $this->removeTestEmailAddresses('email', $query);
@@ -61,7 +61,7 @@ class NewOrdersLineChartWidget extends LineChartWidget
         }
 
         foreach ($dateRanges as $date) {
-                $labels[] = $date;
+            $labels[] = $date;
             if (array_key_exists($date, $converted)) {
                 $totals[] = (int) $converted[$date]['total'];
             } else {

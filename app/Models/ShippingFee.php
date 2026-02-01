@@ -29,7 +29,7 @@ class ShippingFee extends Model
      *
      * @var array<int, string>
      */
-    protected  $fillable = [
+    protected $fillable = [
         'logistics_zone_id',
         'currency_id',
         'name',

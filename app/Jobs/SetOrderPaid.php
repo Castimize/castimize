@@ -32,7 +32,7 @@ class SetOrderPaid implements ShouldQueue
         public PaymentIntent $paymentIntent,
         public ?int $logRequestId = null,
     ) {
-        $this->ordersService = new OrdersService();
+        $this->ordersService = new OrdersService;
         $this->uploadsService = app(UploadsService::class);
     }
 
@@ -56,7 +56,7 @@ class SetOrderPaid implements ShouldQueue
 
             $order->status = 'processing';
             $order->is_paid = true;
-            $order->paid_at = Carbon::createFromTimestamp($this->paymentIntent->created, 'GMT')?->setTimezone(env('APP_TIMEZONE'))->format('Y-m-d H:i:s');
+            $order->paid_at = Carbon::createFromTimestamp($this->paymentIntent->created, 'GMT')?->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s');
             $order->save();
 
             foreach ($order->uploads as $upload) {
@@ -66,13 +66,13 @@ class SetOrderPaid implements ShouldQueue
                 }
             }
         } catch (Throwable $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

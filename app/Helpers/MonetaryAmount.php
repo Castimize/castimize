@@ -13,8 +13,7 @@ final class MonetaryAmount implements Stringable
 
     public function __construct(
         private int $value = 0,
-    ) {
-    }
+    ) {}
 
     public function __toString(): string
     {
@@ -23,7 +22,7 @@ final class MonetaryAmount implements Stringable
 
     public static function zero(): self
     {
-        return new self();
+        return new self;
     }
 
     public static function fromCents(int $cents): self
@@ -168,7 +167,7 @@ final class MonetaryAmount implements Stringable
     private static function validate(string $input): void
     {
         if (! (bool) preg_match(self::VALID_REGEX_PATTERN, $input)) {
-            //throw new InvalidArgumentException("'{$input}' is not a valid monetary value");
+            // throw new InvalidArgumentException("'{$input}' is not a valid monetary value");
         }
     }
 }

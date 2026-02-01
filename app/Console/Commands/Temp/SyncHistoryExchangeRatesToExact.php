@@ -71,7 +71,7 @@ class SyncHistoryExchangeRatesToExact extends Command
                             SyncExchangeRateToExact::dispatch($currencyHistoryRate);
                         }
                     }
-                } else if ($currencyHistoryRate->exact_online_guid === null) {
+                } elseif ($currencyHistoryRate->exact_online_guid === null) {
                     SyncExchangeRateToExact::dispatch($currencyHistoryRate);
                 }
 
@@ -80,7 +80,7 @@ class SyncHistoryExchangeRatesToExact extends Command
             }
             $progressBar->finish();
         } catch (Exception $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
     }
 }

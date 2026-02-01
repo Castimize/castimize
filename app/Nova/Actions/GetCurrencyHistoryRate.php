@@ -42,7 +42,7 @@ class GetCurrencyHistoryRate extends Action
             return ActionResponse::danger(__('Currency history rate already exists.'));
         }
 
-        Artisan::call('castimize:get-currency-historical-rates --historical-date=' . $historicalDate->format('Y-m-d'));
+        Artisan::call('castimize:get-currency-historical-rates --historical-date='.$historicalDate->format('Y-m-d'));
 
         return ActionResponse::message(__('Currency history rate is being added.'));
     }

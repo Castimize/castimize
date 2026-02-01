@@ -75,7 +75,8 @@ class AvailableForShipping extends Lens
     public function fields(NovaRequest $request)
     {
         $fields = $this->manufacturerPOFields();
-//        $fields[] = BelongsTo::make()
+
+        //        $fields[] = BelongsTo::make()
         return $fields;
     }
 
@@ -107,10 +108,10 @@ class AvailableForShipping extends Lens
     public function filters(NovaRequest $request)
     {
         return [
-            (new MaterialFilter()),
-            (new EntryDateDaterangepickerFilter( DateHelper::ALL)),
-            (new ContractDateDaterangepickerFilter( DateHelper::ALL)),
-            (new OrderQueueOrderStatusFilter()),
+            (new MaterialFilter),
+            (new EntryDateDaterangepickerFilter(DateHelper::ALL)),
+            (new ContractDateDaterangepickerFilter(DateHelper::ALL)),
+            (new OrderQueueOrderStatusFilter),
         ];
     }
 

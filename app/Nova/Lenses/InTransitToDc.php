@@ -104,10 +104,10 @@ class InTransitToDc extends Lens
     public function filters(NovaRequest $request)
     {
         return [
-            (new MaterialFilter()),
-            (new EntryDateDaterangepickerFilter( DateHelper::ALL)),
-            (new ContractDateDaterangepickerFilter( DateHelper::ALL)),
-            (new OrderQueueOrderStatusFilter()),
+            (new MaterialFilter),
+            (new EntryDateDaterangepickerFilter(DateHelper::ALL)),
+            (new ContractDateDaterangepickerFilter(DateHelper::ALL)),
+            (new OrderQueueOrderStatusFilter),
         ];
     }
 

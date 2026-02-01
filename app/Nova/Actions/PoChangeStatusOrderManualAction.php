@@ -35,7 +35,7 @@ class PoChangeStatusOrderManualAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         foreach ($models as $model) {
             if ($fields->order_status === 'in-production') {
                 $model->contract_date = now()->addBusinessDays($model->manufacturerCost->shipment_lead_time, 'add')->format('Y-m-d H:i:s');
@@ -56,7 +56,7 @@ class PoChangeStatusOrderManualAction extends Action
     public function fields(NovaRequest $request)
     {
         return [
-            Heading::make('<div class="text-secondary">' . __('NOTE! This will override the automatic flow') . '</div>')
+            Heading::make('<div class="text-secondary">'.__('NOTE! This will override the automatic flow').'</div>')
                 ->textAlign('center')
                 ->asHtml(),
             Select::make(__('Status'), 'order_status')

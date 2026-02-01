@@ -39,7 +39,7 @@ class PoReprintByDcAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         foreach ($models as $model) {
             $hasEndStatus = [];
             /** @var $model OrderQueue */

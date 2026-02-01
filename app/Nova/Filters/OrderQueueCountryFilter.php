@@ -37,8 +37,8 @@ class OrderQueueCountryFilter extends Filter
     public function apply(NovaRequest $request, $query, $value)
     {
         return $query->whereHas('order', function ($q) use ($value) {
-                $q->where('country_id', $value);
-            });
+            $q->where('country_id', $value);
+        });
     }
 
     /**
@@ -54,6 +54,7 @@ class OrderQueueCountryFilter extends Filter
         foreach ($countries as $country) {
             $array[$country->alpha2] = $country->id;
         }
+
         return $array;
     }
 }

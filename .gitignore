@@ -1,5 +1,8 @@
 /.phpunit.cache
-/node_modules
+node_modules
+nova-components/*/vendor
+nova-components/*/composer.lock
+nova-components/*/package-lock.json
 /public/build
 /public/hot
 /public/storage
@@ -23,3 +26,13 @@ yarn-error.log
 
 # Local SSL certificates
 docker/ssl/
+
+# AI/IDE generated files
+CLAUDE.md
+.junie/
+
+# Generated stubs
+stubs/
+
+# Generated API docs
+storage/api-docs/

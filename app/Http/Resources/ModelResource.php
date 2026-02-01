@@ -25,17 +25,17 @@ class ModelResource extends JsonResource
         $material = $this->materials->where('wp_id', $request->wp_id)->first();
         $price = $material?->prices->first();
         if ($price) {
-            $calculatedTotal = (new CalculatePricesService())->calculatePriceOfModel($price, $this->model_volume_cc, $this->model_surface_area_cm2);
+            $calculatedTotal = (new CalculatePricesService)->calculatePriceOfModel($price, $this->model_volume_cc, $this->model_surface_area_cm2);
         }
 
-        $siteThumb = sprintf('%s/%s', env('APP_SITE_URL'), $thumb);
-        if (Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb)) {
-            $fileThumbnail = sprintf('%s/%s', env('AWS_URL'), $thumb);
+        $siteThumb = sprintf('%s/%s', config('app.site_url'), $thumb);
+        if (Storage::disk(config('filesystems.default'))->exists($thumb)) {
+            $fileThumbnail = sprintf('%s/%s', config('filesystems.disks.s3.url'), $thumb);
         } else {
-            $fileThumbnail = '/' . $thumb;
+            $fileThumbnail = '/'.$thumb;
         }
 
-        $thumbnailKey = '3' . $request->wp_id . $this->model_scale . 'mm';
+        $thumbnailKey = '3'.$request->wp_id.$this->model_scale.'mm';
 
         $isShopOwner = 0;
         if ($this->customer && $this->customer->shopOwner) {
@@ -53,17 +53,17 @@ class ModelResource extends JsonResource
             'name' => $this->name,
             'file_name' => $this->file_name,
             'raw_file_name' => str_replace('wp-content/uploads/p3d/', '', $this->file_name),
-            'file_url' => sprintf('%s/%s', env('AWS_URL'), str_replace('_resized', '', $this->file_name)),
-            'file_url_site' => sprintf('%s/%s', env('APP_SITE_URL'), str_replace('_resized', '', $this->file_name)),
+            'file_url' => sprintf('%s/%s', config('filesystems.disks.s3.url'), str_replace('_resized', '', $this->file_name)),
+            'file_url_site' => sprintf('%s/%s', config('app.site_url'), str_replace('_resized', '', $this->file_name)),
             'file_thumbnail' => $fileThumbnail,
             'thumbnail_key' => $thumbnailKey,
             'model_volume_cc' => $this->model_volume_cc,
-            'model_volume_cc_display' => round($this->model_volume_cc, 2) . 'cm3',
+            'model_volume_cc_display' => round($this->model_volume_cc, 2).'cm3',
             'model_x_length' => $this->model_x_length,
             'model_y_length' => $this->model_y_length,
             'model_z_length' => $this->model_z_length,
             'model_surface_area_cm2' => $this->model_surface_area_cm2,
-            'model_surface_area_cm2_display' => round($this->model_surface_area_cm2, 2) . 'cm3',
+            'model_surface_area_cm2_display' => round($this->model_surface_area_cm2, 2).'cm3',
             'model_parts' => $this->model_parts,
             'model_box_volume' => $this->model_box_volume,
             'model_scale' => $this->model_scale,

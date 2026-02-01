@@ -26,7 +26,7 @@ class ShopOwner extends Model
      *
      * @var array<int, string>
      */
-    protected  $fillable = [
+    protected $fillable = [
         'customer_id',
         'active',
     ];

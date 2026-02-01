@@ -20,8 +20,7 @@ class PaymentService
 {
     public function __construct(
         private readonly StripeService $stripeService,
-    ) {
-    }
+    ) {}
 
     public function getStripeCharge(string $chargeId): Charge
     {
@@ -37,7 +36,7 @@ class PaymentService
         );
     }
 
-    public function getStripePaymentMethod(string $paymentMethodId): null|PaymentMethod
+    public function getStripePaymentMethod(string $paymentMethodId): ?PaymentMethod
     {
         return $this->stripeService->getPaymentMethod(
             paymentMethodId: $paymentMethodId,

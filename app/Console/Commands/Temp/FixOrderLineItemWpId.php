@@ -44,7 +44,7 @@ class FixOrderLineItemWpId extends Command
                     $lineItemWpId = null;
                     foreach ($wpOrder['line_items'] as $lineItem) {
                         foreach ($lineItem->meta_data as $metaData) {
-                            $fileName = 'wp-content/uploads/p3d/' . $metaData->value;
+                            $fileName = 'wp-content/uploads/p3d/'.$metaData->value;
                             if ($metaData->key === 'pa_p3d_model' && $upload->file_name === $fileName) {
                                 $lineItemWpId = $lineItem->id;
                             }

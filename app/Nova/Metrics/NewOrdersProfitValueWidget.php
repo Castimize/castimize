@@ -20,7 +20,7 @@ class NewOrdersProfitValueWidget extends ValueWidget
 
     public function value(Filters $filters): mixed
     {
-        $currencyService = new CurrencyService();
+        $currencyService = new CurrencyService;
         $orders = $filters->applyToQueryBuilder(
             Order::with(['uploads.orderQueue'])
                 ->whereNotNull('paid_at')

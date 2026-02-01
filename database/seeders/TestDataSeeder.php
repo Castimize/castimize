@@ -9,7 +9,6 @@ use App\Models\Country;
 use App\Models\Customer;
 use App\Models\LogisticsZone;
 use App\Models\Manufacturer;
-use App\Models\MaterialGroup;
 use App\Models\Service;
 use App\Models\State;
 use App\Models\User;
@@ -25,7 +24,6 @@ class TestDataSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * @return void
      * @throws JsonException
      */
     public function run(): void
@@ -143,7 +141,7 @@ class TestDataSeeder extends Seeder
             'created_by' => $systemUser->id,
         ]);
 
-        $pivotData = [ 'default_billing' => 1, 'default_shipping' => 1, 'contact_name' => 'Test contact' ];
+        $pivotData = ['default_billing' => 1, 'default_shipping' => 1, 'contact_name' => 'Test contact'];
         $customer->addresses()->attach($address, $pivotData);
 
         $service = Service::create([

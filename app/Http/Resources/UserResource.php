@@ -11,7 +11,7 @@ class UserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'avatar' => sprintf('%s/%s', env('AWS_URL'), $this->avatar),
+            'avatar' => sprintf('%s/%s', config('filesystems.disks.s3.url'), $this->avatar),
             'name' => $this->name,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,

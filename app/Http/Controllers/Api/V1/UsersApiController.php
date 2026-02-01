@@ -17,8 +17,7 @@ class UsersApiController extends ApiController
 {
     public function __construct(
         private UsersService $usersService,
-    ) {
-    }
+    ) {}
 
     public function show(): UserResource
     {
@@ -26,6 +25,7 @@ class UsersApiController extends ApiController
 
         $response = new UserResource(auth()->user());
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
@@ -44,6 +44,7 @@ class UsersApiController extends ApiController
 
         $response = new UserResource($user);
         LogRequestService::addResponse($request, $response);
+
         return $response->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }

@@ -12,8 +12,7 @@ class ExportLineItemsV1 implements FromCollection, ShouldAutoSize
 {
     public function __construct(
         private $lineItems,
-    )
-    {
+    ) {
         $this->data = collect();
     }
 
@@ -65,10 +64,10 @@ class ExportLineItemsV1 implements FromCollection, ShouldAutoSize
                     $lineItem->manufacturing_costs,
                     $lineItem->manufacturing_costs / $lineItem->upload->quantity,
                     $lineItem->manufacturing_costs,
-                    sprintf('%s/%s', env('APP_SITE_URL'), $lineItem->upload->file_name),
+                    sprintf('%s/%s', config('app.site_url'), $lineItem->upload->file_name),
                 ]);
             } catch (Exception $e) {
-                Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
             }
         }
     }

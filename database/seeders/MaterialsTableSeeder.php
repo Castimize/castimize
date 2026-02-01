@@ -15,12 +15,11 @@ class MaterialsTableSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * @return void
      * @throws JsonException
      */
     public function run(): void
     {
-        $json = json_decode(file_get_contents(__DIR__ . '/data/MaterialGroups.json'), true, 512, JSON_THROW_ON_ERROR);
+        $json = json_decode(file_get_contents(__DIR__.'/data/MaterialGroups.json'), true, 512, JSON_THROW_ON_ERROR);
         $systemUser = User::where('email', 'matthijs.bon1@gmail.com')->first();
 
         foreach ($json as $materialGroups) {
@@ -32,7 +31,7 @@ class MaterialsTableSeeder extends Seeder
                 ]);
         }
 
-        $json = json_decode(file_get_contents(__DIR__ . '/data/Materials.json'), true, 512, JSON_THROW_ON_ERROR);
+        $json = json_decode(file_get_contents(__DIR__.'/data/Materials.json'), true, 512, JSON_THROW_ON_ERROR);
         $systemUser = User::where('email', 'matthijs.bon1@gmail.com')->first();
 
         foreach ($json as $material) {
@@ -60,7 +59,7 @@ class MaterialsTableSeeder extends Seeder
                     'minimum_x_length' => $material['minimum_x_length'],
                     'maximum_x_length' => $material['maximum_x_length'],
                     'minimum_y_length' => $material['minimum_y_length'],
-                    'maximum_y_length' =>$material['maximum_y_length'],
+                    'maximum_y_length' => $material['maximum_y_length'],
                     'minimum_z_length' => $material['minimum_z_length'],
                     'maximum_z_length' => $material['maximum_z_length'],
                     'minimum_volume' => $material['minimum_volume'],
@@ -73,7 +72,7 @@ class MaterialsTableSeeder extends Seeder
                 ]);
         }
 
-        $json = json_decode(file_get_contents(__DIR__ . '/data/Prices.json'), true, 512, JSON_THROW_ON_ERROR);
+        $json = json_decode(file_get_contents(__DIR__.'/data/Prices.json'), true, 512, JSON_THROW_ON_ERROR);
         $systemUser = User::where('email', 'matthijs.bon1@gmail.com')->first();
 
         foreach ($json as $price) {

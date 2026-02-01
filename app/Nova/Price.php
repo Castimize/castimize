@@ -17,7 +17,9 @@ use Titasgailius\SearchRelations\SearchesRelations;
 
 class Price extends Resource
 {
-    use ColumnTogglerTrait; use CommonMetaDataTrait; use SearchesRelations;
+    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
+    use SearchesRelations;
 
     /**
      * The model the resource corresponds to.

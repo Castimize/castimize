@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Class ApiController.
  *
- * @package Castimize\InlineTextEdit\Http\Controllers
  * @date    06/05/2024
  */
 class ApiController extends Controller

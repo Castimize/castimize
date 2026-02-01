@@ -15,7 +15,6 @@ class LogisticsZonesTableSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * @return void
      * @throws JsonException
      */
     public function run(): void

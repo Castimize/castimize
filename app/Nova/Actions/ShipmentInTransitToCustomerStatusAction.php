@@ -34,7 +34,7 @@ class ShipmentInTransitToCustomerStatusAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         foreach ($models as $model) {
             $model->sent_at = $fields->sent_at ?? now();
             foreach ($model->orderQueues as $orderQueue) {

@@ -95,6 +95,7 @@ class User extends Resource
     public function fields(NovaRequest $request)
     {
         $timezones = DateTimeZone::listIdentifiers();
+
         return [
             ID::make()->sortable(),
 
@@ -103,7 +104,7 @@ class User extends Resource
 
             Avatar::make(__('Avatar'), 'avatar')
                 ->maxWidth(50)
-                ->disk(env('FILESYSTEM_DISK'))
+                ->disk(config('filesystems.default'))
                 ->path('admin/users'),
 
             Text::make(__('Role'), function () {

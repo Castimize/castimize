@@ -28,8 +28,7 @@ class SyncInvoicePaidToExact implements ShouldQueue
         public int $wpCustomerId,
         protected $removeOld = false,
         public ?int $logRequestId = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -49,13 +48,13 @@ class SyncInvoicePaidToExact implements ShouldQueue
 
             $exactOnlineService->syncInvoicePaid($this->invoice);
         } catch (Throwable $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $this->invoice);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

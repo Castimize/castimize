@@ -7,9 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class WebhookController extends Controller
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Handle successful calls on the controller.

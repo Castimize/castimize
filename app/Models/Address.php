@@ -55,17 +55,17 @@ class Address extends Model
 
     public function getFullAddressAttribute(): ?string
     {
-        return $this->address_line1 . ' ' . $this->address_line2 . ', ' . $this->postal_code . ' ' . $this->city->name . ', ' . $this->country->name;
+        return $this->address_line1.' '.$this->address_line2.', '.$this->postal_code.' '.$this->city->name.', '.$this->country->name;
     }
 
     public function getFullAddressWithBreaksAttribute(): ?string
     {
-        return $this->address_line1 . "<br>" . $this->address_line2 . "<br>" . $this->postal_code . ' ' . $this->city->name . "<br>" . $this->country->name;
+        return $this->address_line1.'<br>'.$this->address_line2.'<br>'.$this->postal_code.' '.$this->city->name.'<br>'.$this->country->name;
     }
 
     public function getFullAddressWithNewLinesAttribute(): ?string
     {
-        return $this->address_line1 . "\n" . $this->address_line2 . "\n" . $this->postal_code . ' ' . $this->city->name . "\n" . $this->country->name;
+        return $this->address_line1."\n".$this->address_line2."\n".$this->postal_code.' '.$this->city->name."\n".$this->country->name;
     }
 
     public function city(): BelongsTo

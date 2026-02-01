@@ -213,6 +213,7 @@ class Customer extends Resource
      * Get the filters available for the resource.
      *
      * @return array
+     *
      * @throws Exception
      */
     public function filters(NovaRequest $request)

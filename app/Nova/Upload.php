@@ -20,7 +20,8 @@ use Laravel\Nova\Panel;
 
 class Upload extends Resource
 {
-    use CommonMetaDataTrait; use OrderQueueStatusFieldTrait;
+    use CommonMetaDataTrait;
+    use OrderQueueStatusFieldTrait;
 
     /**
      * The model the resource corresponds to.
@@ -100,7 +101,7 @@ class Upload extends Resource
                 ),
 
             Text::make(__('Manufacturer discount'), function () {
-                return $this->manufacturer_discount ? $this->manufacturer_discount . '%' : '';
+                return $this->manufacturer_discount ? $this->manufacturer_discount.'%' : '';
             })
                 ->hideByDefault()
                 ->onlyOnDetail(),
@@ -112,9 +113,9 @@ class Upload extends Resource
 
             Text::make(__('Manufacturer'), function () {
                 return $this->orderQueue?->manufacturer
-                    ? '<span><a class="link-default" href="/admin/resources/maufacturers/' . $this->orderQueue->manufacturer->id . '">' . $this->orderQueue->manufacturer->name . '</a></span>'
+                    ? '<span><a class="link-default" href="/admin/resources/maufacturers/'.$this->orderQueue->manufacturer->id.'">'.$this->orderQueue->manufacturer->name.'</a></span>'
                     : '';
-                })
+            })
                 ->asHtml()
                 ->sortable(),
 
@@ -159,7 +160,7 @@ class Upload extends Resource
 
             Text::make(__('Manufacturer'), function () {
                 return $this->orderQueue?->manufacturer
-                    ? '<span><a class="link-default" href="/admin/resources/maufacturers/' . $this->orderQueue->manufacturer->id . '">' . $this->orderQueue->manufacturer->name . '</a></span>'
+                    ? '<span><a class="link-default" href="/admin/resources/maufacturers/'.$this->orderQueue->manufacturer->id.'">'.$this->orderQueue->manufacturer->name.'</a></span>'
                     : '';
             })
                 ->asHtml()
@@ -171,6 +172,7 @@ class Upload extends Resource
 
             Text::make(__('Completed at'), function () {
                 $completedAt = $this->completed_at;
+
                 return $completedAt ? $completedAt->format('d-m-Y H:i:s') : '-';
             }),
 

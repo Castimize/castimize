@@ -27,7 +27,7 @@ class FixCustomerNames extends Command
      */
     public function handle()
     {
-//        $wpCustomers = \Codexshaper\WooCommerce\Facades\Customer::all();
+        //        $wpCustomers = \Codexshaper\WooCommerce\Facades\Customer::all();
         $customers = Customer::whereNotNull('wp_id')->orderByDesc('id')->get();
         $totalCustomers = $customers->count();
         $progressBar = $this->output->createProgressBar($totalCustomers);

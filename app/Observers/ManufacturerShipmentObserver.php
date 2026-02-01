@@ -16,7 +16,7 @@ class ManufacturerShipmentObserver
      */
     public function creating(ManufacturerShipment $manufacturerShipment): void
     {
-        $dcSettings = (new DcSettings());
+        $dcSettings = (new DcSettings);
         $manufacturerShipment->fromAddress = [
             'name' => $manufacturerShipment->from_address_name ?? '',
             'company' => $manufacturerShipment->from_address_company ?? '',
@@ -99,7 +99,7 @@ class ManufacturerShipmentObserver
 
     public function created(ManufacturerShipment $manufacturerShipment): void
     {
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         if ($manufacturerShipment->selectedPOs) {
             foreach ($manufacturerShipment->selectedPOs as $selectedPO) {
                 $selectedPO->manufacturer_shipment_id = $manufacturerShipment->id;
@@ -131,7 +131,7 @@ class ManufacturerShipmentObserver
 
     public function deleted(ManufacturerShipment $manufacturerShipment): void
     {
-        $orderQueuesService = new OrderQueuesService();
+        $orderQueuesService = new OrderQueuesService;
         foreach ($manufacturerShipment->orderQueues as $orderQueue) {
             $orderQueuesService->setStatus($orderQueue, 'available-for-shipping');
             $orderQueue->manufacturer_shipment_id = null;

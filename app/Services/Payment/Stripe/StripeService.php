@@ -103,16 +103,17 @@ class StripeService
         foreach ($orderDTO->paymentFees as $paymentFee) {
             $total = $total->add($paymentFee->total);
         }
+
         return PaymentIntent::create([
             'amount' => $total->getValue(),
             'currency' => strtolower($orderDTO->currencyCode),
             'customer' => $orderDTO->customerStripeId,
             'payment_method' => $customer->stripe_data['payment_method'],
             'mandate' => $customer->stripe_data['mandate_id'],
-            'description' => 'Order ' . $orderDTO->wpId . ' from Castimize',
+            'description' => 'Order '.$orderDTO->wpId.' from Castimize',
             'confirm' => true,
             'off_session' => true,
-            'return_url' => env('APP_SITE_URL'),
+            'return_url' => config('app.site_url'),
             'payment_method_types' => [
                 $paymentMethod->type,
             ],
@@ -145,14 +146,14 @@ class StripeService
 
                 return [
                     'success' => true,
-                    'status'  => 'usable',
+                    'status' => 'usable',
                     'message' => 'Kaart is bruikbaar voor off-session betalingen.',
                 ];
             }
 
             return [
                 'success' => false,
-                'status'  => $intent->status,
+                'status' => $intent->status,
                 'message' => 'Onverwachte status ontvangen.',
             ];
         } catch (CardException $e) {
@@ -161,20 +162,20 @@ class StripeService
             if ($error?->code === 'authentication_required') {
                 return [
                     'success' => false,
-                    'status'  => 'requires_authentication',
+                    'status' => 'requires_authentication',
                     'message' => 'Kaart vereist SCA, niet bruikbaar off-session.',
                 ];
             }
 
             return [
                 'success' => false,
-                'status'  => $error?->code ?? 'card_error',
+                'status' => $error?->code ?? 'card_error',
                 'message' => $error?->message,
             ];
         } catch (Exception $e) {
             return [
                 'success' => false,
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => $e->getMessage(),
             ];
         }
@@ -185,6 +186,7 @@ class StripeService
         if (Str::startsWith($paymentMethodId, 'pm_')) {
             return PaymentMethod::retrieve($paymentMethodId);
         }
+
         return null;
     }
 
