@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO\Order;
 
 use App\Enums\Admin\CurrencyEnum;
 use App\Enums\Woocommerce\WcOrderStatesEnum;
-use app\Helpers\MonetaryAmount;
+use App\Helpers\MonetaryAmount;
 use App\Models\Country;
 use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
@@ -13,9 +15,12 @@ use App\Services\Admin\OrdersService;
 use Carbon\Carbon;
 use Etsy\Resources\Receipt;
 use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
 use TheIconic\NameParser\Parser;
 
-class OrderDTO
+class OrderDTO extends Data
 {
     public function __construct(
         public int $customerId,
@@ -76,15 +81,11 @@ class OrderDTO
         public ?Carbon $paidAt,
         public ?Carbon $createdAt,
         public ?Carbon $updatedAt,
-        public Collection $uploads,
-        public ?Collection $paymentFees,
-    ) {
-    }
-
-    public static function fromApiRequest($request)
-    {
-
-    }
+        #[DataCollectionOf(UploadDTO::class)]
+        public DataCollection|Collection $uploads,
+        #[DataCollectionOf(PaymentFeeDTO::class)]
+        public DataCollection|Collection|null $paymentFees,
+    ) {}
 
     public static function fromWpRequest($request): self
     {
@@ -93,6 +94,7 @@ class OrderDTO
         $stripePaymentId = null;
         $billingVatNumber = null;
         $shippingEmail = null;
+
         foreach ($wpOrder['meta_data'] as $orderMetaData) {
             if ($orderMetaData->key === '_billing_eu_vat_number') {
                 $billingVatNumber = $orderMetaData->value;
@@ -105,9 +107,8 @@ class OrderDTO
             }
         }
 
-        $isPaid = ! empty($wpOrder['date_paid']);
-        $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $wpOrder['date_created_gmt']), 'GMT')?->setTimezone(env('APP_TIMEZONE'));
-        $updatedAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $wpOrder['date_modified_gmt']), 'GMT')?->setTimezone(env('APP_TIMEZONE'));
+        $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $wpOrder['date_created_gmt']), 'GMT')?->setTimezone(config('app.timezone'));
+        $updatedAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $wpOrder['date_modified_gmt']), 'GMT')?->setTimezone(config('app.timezone'));
 
         $taxPercentage = null;
         if (count($wpOrder['tax_lines']) > 0) {
@@ -174,14 +175,13 @@ class OrderDTO
             createdAt: $createdAt,
             updatedAt: $updatedAt,
             uploads: collect($wpOrder['line_items'])->map(fn ($lineItem) => UploadDTO::fromWpRequest($lineItem, $wpOrder['shipping']->country)),
-//            paymentFees: collect($wpOrder['fee_lines'])->map(fn ($feeLine) => PaymentFeeDTO::fromWpRequest($wpOrder['payment_method'], $feeLine)),
             paymentFees: null,
         );
     }
 
-    public static function fromEtsyReceipt(Shop $shop, Receipt $receipt, array $lines): OrderDTO
+    public static function fromEtsyReceipt(Shop $shop, Receipt $receipt, array $lines): self
     {
-        $parser = new Parser();
+        $parser = new Parser;
 
         $customer = $shop->shopOwner->customer;
         $billingAddress = $customer->addresses()->wherePivot('default_billing', 1)->first();
@@ -203,7 +203,7 @@ class OrderDTO
             $vatExempt = 'no';
         }
 
-        $shippingFee = (new CalculatePricesService())->calculateShippingFeeNew(
+        $shippingFee = (new CalculatePricesService)->calculateShippingFeeNew(
             countryIso: $receipt->country_iso,
             uploads: collect($lines)->map(fn ($line) => CalculateShippingFeeUploadDTO::fromEtsyLine($line)),
         )->calculated_total;
@@ -223,6 +223,7 @@ class OrderDTO
         $totalItems = 0;
         $totalItemsTax = 0;
         $uploads = collect($lines)->map(fn ($line) => UploadDTO::fromEtsyReceipt($shop, $receipt, $line, $taxPercentage));
+
         /** @var UploadDTO $upload */
         foreach ($uploads as $upload) {
             $totalItems += $upload->total->toFloat();
@@ -234,65 +235,31 @@ class OrderDTO
         }
 
         $country = Country::where('alpha2', $receipt->country_iso)->first();
-        $expectedDeliveryDate = (new OrdersService())->calculateExpectedDeliveryDate($uploads, $country);
+        $expectedDeliveryDate = (new OrdersService)->calculateExpectedDeliveryDate($uploads, $country);
 
         $metaData = [
-            [
-                'key' => '_shipping_email',
-                'value' => $shippingEmail,
-            ],
-            [
-                'key' => '_wc_order_attribution_utm_source',
-                'value' => 'Etsy',
-            ],
-            [
-                'key' => '_wc_stripe_mode',
-                'value' => 'live',
-            ],
-            [
-                'key' => 'is_vat_exempt',
-                'value' => $vatExempt,
-            ],
-            [
-                'key' => 'wcpdf_order_locale',
-                'value' => 'en_US',
-            ],
-            [
-                'key' => '_expected_delivery_date',
-                'value' => $expectedDeliveryDate,
-            ],
+            ['key' => '_shipping_email', 'value' => $shippingEmail],
+            ['key' => '_wc_order_attribution_utm_source', 'value' => 'Etsy'],
+            ['key' => '_wc_stripe_mode', 'value' => 'live'],
+            ['key' => 'is_vat_exempt', 'value' => $vatExempt],
+            ['key' => 'wcpdf_order_locale', 'value' => 'en_US'],
+            ['key' => '_expected_delivery_date', 'value' => $expectedDeliveryDate],
         ];
 
         if ($billingVatNumber) {
-            $metaData[] = [
-                'key' => '_billing_eu_vat_number',
-                'value' => $billingVatNumber,
-            ];
+            $metaData[] = ['key' => '_billing_eu_vat_number', 'value' => $billingVatNumber];
             $metaData[] = [
                 'key' => 'billing_eu_vat_number_details',
                 'value' => [
-                    'vat_number' => [
-                        'data' => $billingVatNumber ? substr($billingVatNumber, 0, 2) : null,
-                        'label' => 'VAT Number',
-                    ],
-                    'country_code' => [
-                        'data' => $billingVatNumber ? substr($billingVatNumber, 2) : null,
-                        'label' => 'Country Code',
-                    ],
-                    'business_name' => [
-                        'data' => $customer->company,
-                        'label' => 'Business Name',
-                    ],
-                    'business_address' => [
-                        'data' => $billingAddress->full_address_with_new_lines,
-                        'label' => 'Business Address',
-                    ],
+                    'vat_number' => ['data' => $billingVatNumber ? substr($billingVatNumber, 0, 2) : null, 'label' => 'VAT Number'],
+                    'country_code' => ['data' => $billingVatNumber ? substr($billingVatNumber, 2) : null, 'label' => 'Country Code'],
+                    'business_name' => ['data' => $customer->company, 'label' => 'Business Name'],
+                    'business_address' => ['data' => $billingAddress->full_address_with_new_lines, 'label' => 'Business Address'],
                 ],
             ];
         }
 
         $stripeData = $customer->stripe_data ?? [];
-
         $total = $totalItems + $shippingFee;
         $totalTax = $totalItemsTax + $shippingFeeTax;
 
@@ -306,7 +273,7 @@ class OrderDTO
             orderKey: $receipt->receipt_id,
             status: $receipt->status ?? WcOrderStatesEnum::Pending->value,
             firstName: $name->getFirstname(),
-            lastName: $name->getMiddlename() !== '' ? $name->getMiddlename() . ' ' . $name->getLastName() : $name->getLastName(),
+            lastName: $name->getMiddlename() !== '' ? $name->getMiddlename().' '.$name->getLastName() : $name->getLastName(),
             email: $billingEmail,
             billingFirstName: $customer->first_name,
             billingLastName: $customer->last_name,
@@ -321,7 +288,7 @@ class OrderDTO
             billingCountry: $billingAddress->country->alpha2,
             billingVatNumber: $billingVatNumber,
             shippingFirstName: $name->getFirstname(),
-            shippingLastName: $name->getMiddlename() !== '' ? $name->getMiddlename() . ' ' . $name->getLastName() : $name->getLastName(),
+            shippingLastName: $name->getMiddlename() !== '' ? $name->getMiddlename().' '.$name->getLastName() : $name->getLastName(),
             shippingCompany: null,
             shippingPhoneNumber: $customer->phone,
             shippingEmail: $shippingEmail,
@@ -349,7 +316,7 @@ class OrderDTO
             customerIpAddress: null,
             customerUserAgent: 'Etsy API',
             metaData: $metaData,
-            comments: 'Etsy receipt: ' . $receipt->receipt_id . '\n' . $receipt->message_from_buyer,
+            comments: 'Etsy receipt: '.$receipt->receipt_id.'\n'.$receipt->message_from_buyer,
             promoCode: null,
             isPaid: $isPaid,
             paidAt: null,
@@ -362,7 +329,7 @@ class OrderDTO
                     totalReceipt: $totalItems,
                     taxPercentage: $taxPercentage,
                 ),
-            ])
+            ]),
         );
     }
 }

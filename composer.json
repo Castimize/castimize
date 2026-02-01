@@ -64,6 +64,7 @@
         "sereny/nova-permissions": "^1.6",
         "shippo/shippo-php": "1.*",
         "slash2nl/nova-back-button": "^2.0",
+        "spatie/laravel-data": "^4.19",
         "spatie/laravel-pdf": "*",
         "spatie/laravel-permission": "^6.9",
         "stechstudio/laravel-zipstream": "^5.1",
