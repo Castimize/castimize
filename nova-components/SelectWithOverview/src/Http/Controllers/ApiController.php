@@ -19,17 +19,20 @@ class ApiController extends Controller
      */
     public function getOverviewItem(NovaRequest $request): JsonResponse
     {
-        $orderQueue = OrderQueue::find($request->id);
-        $overviewItem = $orderQueue->getOverviewItem();
+        $orderQueue = OrderQueue::with('upload.material')->find($request->id);
+
+        if ($orderQueue === null) {
+            return response()->json(['item' => null]);
+        }
 
         return response()->json([
-            'item' => $overviewItem,
+            'item' => $orderQueue->getOverviewItem(),
         ]);
     }
 
     public function getOverviewFooter(NovaRequest $request): JsonResponse
     {
-        $orderQueues = OrderQueue::whereIn('id', $request->ids)->get();
+        $orderQueues = OrderQueue::with('upload.material')->whereIn('id', $request->ids)->get();
         $overviewFooter = OrderQueue::getOverviewFooter($orderQueues);
 
         return response()->json([
