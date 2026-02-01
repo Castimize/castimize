@@ -90,7 +90,7 @@ class ListingDTO extends Data
         ));
 
         return new self(
-            shopId: $shopOauth['shop_id'],
+            shopId: (int) $shopOauth['shop_id'],
             listingId: $listing ? $listing->listing_id : ($listingId ?? $model->shopListingModel?->shop_listing_id ?? null),
             state: $listing ? $listing->state : null,
             quantity: $listing ? $listing->quantity : 1,

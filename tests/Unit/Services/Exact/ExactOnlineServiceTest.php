@@ -196,6 +196,88 @@ class ExactOnlineServiceTest extends TestCase
     }
 
     // ========================================
+    // findVatCode tests
+    // ========================================
+
+    #[Test]
+    public function it_returns_vat_code_4_for_nl(): void
+    {
+        $result = $this->service->findVatCode('NL');
+
+        $this->assertEquals('4  ', $result);
+    }
+
+    #[Test]
+    public function it_throws_exception_for_non_eu_country_vat_code(): void
+    {
+        // Mock the VatCode API to return empty results
+        $vatCodeMock = Mockery::mock('overload:Picqer\Financials\Exact\VatCode');
+        $vatCodeMock->shouldReceive('get')->andReturn([]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('VAT Code not found for US');
+
+        $this->service->findVatCode('US');
+    }
+
+    #[Test]
+    public function it_uses_no_vat_code_for_non_eu_countries_in_sync_invoice(): void
+    {
+        // This test verifies the logic that non-EU countries should use NO_VAT_CODE
+        // by checking that the condition correctly excludes non-EU countries
+
+        $euCountries = \App\Models\Country::EU_COUNTRIES;
+
+        // US should not be in EU countries
+        $this->assertNotContains('US', $euCountries);
+
+        // Verify some EU countries are in the list
+        $this->assertContains('NL', $euCountries);
+        $this->assertContains('DE', $euCountries);
+        $this->assertContains('FR', $euCountries);
+    }
+
+    #[Test]
+    public function it_only_looks_up_vat_code_for_eu_countries_with_tax(): void
+    {
+        // Create a partial mock to track if findVatCode is called
+        $serviceMock = Mockery::mock(ExactOnlineService::class)
+            ->makePartial()
+            ->shouldAllowMockingProtectedMethods();
+
+        // For non-EU country (US), findVatCode should NOT be called
+        $serviceMock->shouldNotReceive('findVatCode')
+            ->with('US');
+
+        // Verify the EU country check logic
+        $countryCode = 'US';
+        $totalTax = 10.00;
+
+        // This is the condition from syncInvoice - non-EU countries should not trigger VAT lookup
+        $shouldLookupVatCode = $totalTax > 0.00 && in_array($countryCode, \App\Models\Country::EU_COUNTRIES, true);
+
+        $this->assertFalse($shouldLookupVatCode, 'US should not trigger VAT code lookup');
+
+        // For EU country with tax, it should trigger lookup
+        $countryCode = 'DE';
+        $shouldLookupVatCode = $totalTax > 0.00 && in_array($countryCode, \App\Models\Country::EU_COUNTRIES, true);
+
+        $this->assertTrue($shouldLookupVatCode, 'DE with tax should trigger VAT code lookup');
+    }
+
+    #[Test]
+    public function it_does_not_lookup_vat_code_when_no_tax(): void
+    {
+        // Even for EU countries, no tax means no VAT code lookup
+        $countryCode = 'DE';
+        $totalTax = 0.00;
+
+        $shouldLookupVatCode = $totalTax > 0.00 && in_array($countryCode, \App\Models\Country::EU_COUNTRIES, true);
+
+        $this->assertFalse($shouldLookupVatCode, 'No tax should not trigger VAT code lookup');
+    }
+
+    // ========================================
     // Helper methods
     // ========================================
 

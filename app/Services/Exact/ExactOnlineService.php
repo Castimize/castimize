@@ -173,6 +173,7 @@ class ExactOnlineService
             $minAmount = $invoice->debit ? '' : '-';
 
             // Revenue
+            $countryCode = strtoupper($orderIdLines->first()->order->shipping_country ?? $invoice->country);
             $revenueLine = [
                 'AmountFC' => $minAmount.number_format($this->getTotalInEuro($invoice, $invoice->total, Carbon::parse($invoice->invoice_date)), 2, '.', ''),
                 'Description' => __('Order #:orderNumber', [
@@ -182,8 +183,9 @@ class ExactOnlineService
                 'VATCode' => self::NO_VAT_CODE,
                 'Quantity' => $invoice->debit ? -1 : 1,
             ];
-            if ($invoice->total_tax !== null && $invoice->total_tax > 0.00) {
-                $revenueLine['VATCode'] = $this->findVatCode(strtoupper($orderIdLines->first()->order->shipping_country ?? $invoice->country));
+            // Only look up VAT code for EU countries (OSS system)
+            if ($invoice->total_tax !== null && $invoice->total_tax > 0.00 && in_array($countryCode, Country::EU_COUNTRIES, true)) {
+                $revenueLine['VATCode'] = $this->findVatCode($countryCode);
             }
             $salesEntryLines[] = $revenueLine;
         }
