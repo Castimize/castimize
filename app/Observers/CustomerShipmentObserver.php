@@ -11,6 +11,7 @@ class CustomerShipmentObserver
 {
     /**
      * Handle the CustomerShipment "creating" event.
+     *
      * @throws JsonException
      */
     public function creating(CustomerShipment $customerShipment): void
@@ -84,6 +85,9 @@ class CustomerShipmentObserver
             $totalParts = 0;
             $totalCosts = 0;
             foreach ($orderQueues as $orderQueue) {
+                if ($orderQueue->upload === null) {
+                    continue;
+                }
                 $totalParts += $orderQueue->upload->model_parts;
                 $totalCosts += $orderQueue->upload->total;
             }
@@ -122,8 +126,8 @@ class CustomerShipmentObserver
 
     public function deleted(CustomerShipment $customerShipment): void
     {
-       $customerShipment->orderQueues()->update([
-           'customer_shipment_id' => null,
-       ]);
+        $customerShipment->orderQueues()->update([
+            'customer_shipment_id' => null,
+        ]);
     }
 }
