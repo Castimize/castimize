@@ -58,6 +58,14 @@ class Upload extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'orderQueue.manufacturer',
+        'material',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array
