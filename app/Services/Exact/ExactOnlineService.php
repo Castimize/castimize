@@ -325,6 +325,8 @@ class ExactOnlineService
         $account->Phone = $wpCustomer['billing']->phone;
         $account->SecurityLevel = 100;
         $account->VATNumber = $billingVatNumber;
+        // Unset ShowRemarkForSales to avoid "Ongeldige waarde: Opmerkingen weergeven" error
+        unset($account->ShowRemarkForSales);
 
         return $account;
     }

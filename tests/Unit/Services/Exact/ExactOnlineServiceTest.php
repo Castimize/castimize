@@ -278,6 +278,106 @@ class ExactOnlineServiceTest extends TestCase
     }
 
     // ========================================
+    // updateAccount tests
+    // ========================================
+
+    #[Test]
+    public function it_sets_correct_customer_data_on_account(): void
+    {
+        $account = Mockery::mock('Picqer\Financials\Exact\Account')->shouldIgnoreMissing();
+
+        $customer = new Customer;
+        $customer->wpCustomer = [
+            'id' => 456,
+            'first_name' => 'Jane',
+            'last_name' => 'Smith',
+            'email' => 'jane@example.com',
+            'meta_data' => [
+                (object) ['key' => 'billing_eu_vat_number', 'value' => 'NL123456789B01'],
+            ],
+            'billing' => (object) [
+                'address_1' => 'Main Street 10',
+                'address_2' => 'Suite 5',
+                'city' => 'Rotterdam',
+                'country' => 'nl',
+                'postcode' => '5678CD',
+                'phone' => '+31612345678',
+            ],
+        ];
+
+        $result = $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer]);
+
+        $this->assertEquals(456, $result->Code);
+        $this->assertEquals('Main Street 10', $result->AddressLine1);
+        $this->assertEquals('Suite 5', $result->AddressLine2);
+        $this->assertEquals('Rotterdam', $result->City);
+        $this->assertEquals('NL', $result->Country);
+        $this->assertEquals('Jane Smith', $result->Name);
+        $this->assertEquals('5678CD', $result->Postcode);
+        $this->assertEquals('jane@example.com', $result->Email);
+        $this->assertEquals('+31612345678', $result->Phone);
+        $this->assertEquals('NL123456789B01', $result->VATNumber);
+    }
+
+    #[Test]
+    public function it_extracts_vat_number_from_wp_customer_meta_data(): void
+    {
+        $account = Mockery::mock('Picqer\Financials\Exact\Account')->shouldIgnoreMissing();
+
+        $customer = new Customer;
+        $customer->wpCustomer = [
+            'id' => 789,
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'email' => 'test@example.com',
+            'meta_data' => [
+                (object) ['key' => 'other_field', 'value' => 'other_value'],
+                (object) ['key' => 'billing_eu_vat_number', 'value' => 'DE987654321'],
+                (object) ['key' => 'another_field', 'value' => 'another_value'],
+            ],
+            'billing' => (object) [
+                'address_1' => 'Test Street',
+                'address_2' => '',
+                'city' => 'Berlin',
+                'country' => 'DE',
+                'postcode' => '12345',
+                'phone' => '+49123456789',
+            ],
+        ];
+
+        $result = $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer]);
+
+        $this->assertEquals('DE987654321', $result->VATNumber);
+    }
+
+    #[Test]
+    public function it_sets_vat_number_to_null_when_not_in_meta_data(): void
+    {
+        $account = Mockery::mock('Picqer\Financials\Exact\Account')->shouldIgnoreMissing();
+
+        $customer = new Customer;
+        $customer->wpCustomer = [
+            'id' => 111,
+            'first_name' => 'No',
+            'last_name' => 'Vat',
+            'email' => 'novat@example.com',
+            'meta_data' => [],
+            'billing' => (object) [
+                'address_1' => 'Street',
+                'address_2' => '',
+                'city' => 'City',
+                'country' => 'US',
+                'postcode' => '12345',
+                'phone' => '+1234567890',
+            ],
+        ];
+
+        $result = $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer]);
+
+        $this->assertNull($result->VATNumber);
+    }
+
+    // ========================================
     // Helper methods
     // ========================================
 
