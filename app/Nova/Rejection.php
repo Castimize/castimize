@@ -61,6 +61,14 @@ class Rejection extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'order',
+        'manufacturer',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array

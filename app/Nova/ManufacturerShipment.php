@@ -78,7 +78,7 @@ class ManufacturerShipment extends Resource
     public static $with = [
         'manufacturer',
         'currency',
-        'orderQueues',
+        'orderQueues.order',
     ];
 
     /**

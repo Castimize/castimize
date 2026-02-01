@@ -87,11 +87,11 @@ class OrderQueue extends Resource
     public static $with = [
         'manufacturer',
         'upload',
-        'order',
+        'order.country',
         'shippingFee',
         'manufacturerShipment',
         'customerShipment',
-        'orderQueueStatuses',
+        'orderQueueStatuses.orderStatus',
     ];
 
     /**

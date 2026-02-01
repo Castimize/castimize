@@ -55,6 +55,15 @@ class Manufacturer extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'city',
+        'country',
+        'user',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array
