@@ -313,6 +313,22 @@ class ExactOnlineService
                 $billingVatNumber = $metaData->value;
             }
         }
+
+        // Build name with fallbacks
+        $name = trim(($wpCustomer['first_name'] ?? '').' '.($wpCustomer['last_name'] ?? ''));
+        if ($name === '') {
+            $name = trim(($wpCustomer['billing']->first_name ?? '').' '.($wpCustomer['billing']->last_name ?? ''));
+        }
+        if ($name === '') {
+            $name = $wpCustomer['billing']->company ?? '';
+        }
+        if ($name === '') {
+            $name = $wpCustomer['username'] ?? '';
+        }
+        if ($name === '') {
+            throw new Exception("Cannot sync customer to Exact: Name is empty for wp_id {$wpCustomer['id']}");
+        }
+
         $account->Code = $wpCustomer['id'];
         $account->AddressLine1 = $wpCustomer['billing']->address_1;
         $account->AddressLine2 = $wpCustomer['billing']->address_2;
@@ -320,7 +336,7 @@ class ExactOnlineService
         $account->City = $wpCustomer['billing']->city;
         $account->Country = mb_strtoupper($wpCustomer['billing']->country);
         $account->IsSales = 'true';
-        $account->Name = $wpCustomer['first_name'].' '.$wpCustomer['last_name'];
+        $account->Name = $name;
         $account->Postcode = $wpCustomer['billing']->postcode;
         $account->Status = 'C';
         $account->Email = $wpCustomer['email'];

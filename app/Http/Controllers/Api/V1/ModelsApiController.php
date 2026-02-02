@@ -133,11 +133,29 @@ class ModelsApiController extends ApiController
             }
         }
 
+        $uploads = json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR);
+
+        // Pre-load all materials to avoid N+1 queries
+        $materialWpIds = collect($uploads)
+            ->filter(fn ($upload) => isset($upload['3dp_options']))
+            ->map(function ($upload) {
+                [$materialId] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
+
+                return $upload['3dp_options']['material_id'] ?? $materialId;
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $materials = Material::whereIn('wp_id', $materialWpIds)->get()->keyBy('wp_id');
+
         $newUploads = [];
-        foreach (json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR) as $itemKey => $upload) {
+        foreach ($uploads as $itemKey => $upload) {
             if (isset($upload['3dp_options'])) {
                 [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
-                $material = Material::where('wp_id', ($upload['3dp_options']['material_id'] ?? $materialId))->first();
+                $materialWpId = $upload['3dp_options']['material_id'] ?? $materialId;
+                $material = $materials->get($materialWpId);
                 $model = null;
                 if ($material) {
                     $model = $customer->models()

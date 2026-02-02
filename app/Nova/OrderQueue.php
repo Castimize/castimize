@@ -86,7 +86,7 @@ class OrderQueue extends Resource
      */
     public static $with = [
         'manufacturer',
-        'upload',
+        'upload.material',
         'order.country',
         'shippingFee',
         'manufacturerShipment',

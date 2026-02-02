@@ -58,7 +58,7 @@ class InQueue extends Lens
     public static function query(LensRequest $request, $query)
     {
         return $request->withOrdering($request->withFilters(
-            $query->with(['orderQueueStatuses', 'manufacturerCost', 'upload.material.materialGroup'])
+            $query->with(['orderQueueStatuses', 'manufacturerCost', 'upload.material.materialGroup', 'order'])
                 ->whereHasLastOrderQueueStatus(OrderStatusesEnum::InQueue->value)
                 ->where('manufacturer_id', auth()->user()->manufacturer->id)
                 ->whereHas('order', function (Builder $query) {
