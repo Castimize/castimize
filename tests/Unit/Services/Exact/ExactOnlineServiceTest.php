@@ -377,6 +377,128 @@ class ExactOnlineServiceTest extends TestCase
         $this->assertNull($result->VATNumber);
     }
 
+    #[Test]
+    public function it_falls_back_to_billing_name_when_first_last_name_empty(): void
+    {
+        $account = Mockery::mock('Picqer\Financials\Exact\Account')->shouldIgnoreMissing();
+
+        $customer = new Customer;
+        $customer->wpCustomer = [
+            'id' => 222,
+            'first_name' => '',
+            'last_name' => '',
+            'email' => 'test@example.com',
+            'meta_data' => [],
+            'billing' => (object) [
+                'first_name' => 'Billing',
+                'last_name' => 'Name',
+                'address_1' => 'Street',
+                'address_2' => '',
+                'city' => 'City',
+                'country' => 'NL',
+                'postcode' => '12345',
+                'phone' => '+31612345678',
+            ],
+        ];
+
+        $result = $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer]);
+
+        $this->assertEquals('Billing Name', $result->Name);
+    }
+
+    #[Test]
+    public function it_falls_back_to_company_when_names_empty(): void
+    {
+        $account = Mockery::mock('Picqer\Financials\Exact\Account')->shouldIgnoreMissing();
+
+        $customer = new Customer;
+        $customer->wpCustomer = [
+            'id' => 333,
+            'first_name' => '',
+            'last_name' => '',
+            'email' => 'company@example.com',
+            'meta_data' => [],
+            'billing' => (object) [
+                'first_name' => '',
+                'last_name' => '',
+                'company' => 'ACME Corporation',
+                'address_1' => 'Street',
+                'address_2' => '',
+                'city' => 'City',
+                'country' => 'NL',
+                'postcode' => '12345',
+                'phone' => '+31612345678',
+            ],
+        ];
+
+        $result = $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer]);
+
+        $this->assertEquals('ACME Corporation', $result->Name);
+    }
+
+    #[Test]
+    public function it_falls_back_to_username_when_all_names_empty(): void
+    {
+        $account = Mockery::mock('Picqer\Financials\Exact\Account')->shouldIgnoreMissing();
+
+        $customer = new Customer;
+        $customer->wpCustomer = [
+            'id' => 444,
+            'first_name' => '',
+            'last_name' => '',
+            'username' => 'john_doe_123',
+            'email' => 'user@example.com',
+            'meta_data' => [],
+            'billing' => (object) [
+                'first_name' => '',
+                'last_name' => '',
+                'company' => '',
+                'address_1' => 'Street',
+                'address_2' => '',
+                'city' => 'City',
+                'country' => 'NL',
+                'postcode' => '12345',
+                'phone' => '+31612345678',
+            ],
+        ];
+
+        $result = $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer]);
+
+        $this->assertEquals('john_doe_123', $result->Name);
+    }
+
+    #[Test]
+    public function it_throws_exception_when_all_name_fields_empty(): void
+    {
+        $account = Mockery::mock('Picqer\Financials\Exact\Account')->shouldIgnoreMissing();
+
+        $customer = new Customer;
+        $customer->wpCustomer = [
+            'id' => 555,
+            'first_name' => '',
+            'last_name' => '',
+            'username' => '',
+            'email' => 'noname@example.com',
+            'meta_data' => [],
+            'billing' => (object) [
+                'first_name' => '',
+                'last_name' => '',
+                'company' => '',
+                'address_1' => 'Street',
+                'address_2' => '',
+                'city' => 'City',
+                'country' => 'NL',
+                'postcode' => '12345',
+                'phone' => '+31612345678',
+            ],
+        ];
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Cannot sync customer to Exact: Name is empty for wp_id 555');
+
+        $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer]);
+    }
+
     // ========================================
     // Helper methods
     // ========================================
