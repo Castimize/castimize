@@ -13,17 +13,13 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
+use Tests\Traits\NeedsApiUser;
 
 class ModelsApiControllerTest extends TestCase
 {
     use DatabaseTransactions;
-
-    private User $user;
-
-    private Role $role;
+    use NeedsApiUser;
 
     private Currency $currency;
 
@@ -33,25 +29,8 @@ class ModelsApiControllerTest extends TestCase
     {
         parent::setUp();
 
-        $this->setUpUserWithPermissions();
+        $this->setUpApiUserWithPermissions(['viewModel']);
         $this->setUpSharedDependencies();
-    }
-
-    private function setUpUserWithPermissions(): void
-    {
-        $this->role = Role::firstOrCreate(['name' => 'api-user', 'guard_name' => 'web']);
-
-        $permissions = [
-            'viewModel',
-        ];
-
-        foreach ($permissions as $permissionName) {
-            $permission = Permission::firstOrCreate(['name' => $permissionName, 'guard_name' => 'web']);
-            $this->role->givePermissionTo($permission);
-        }
-
-        $this->user = User::factory()->create();
-        $this->user->assignRole($this->role);
     }
 
     private function setUpSharedDependencies(): void
@@ -96,7 +75,7 @@ class ModelsApiControllerTest extends TestCase
         $customer = Customer::factory()->create();
         $model = $this->createModel(['customer_id' => $customer->id]);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->getJson(route('api.api.models.show', [
             'customerId' => $customer->wp_id,
@@ -143,7 +122,7 @@ class ModelsApiControllerTest extends TestCase
         $customer2 = Customer::factory()->create();
         $model = $this->createModel(['customer_id' => $customer2->id]);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->getJson(route('api.api.models.show', [
             'customerId' => $customer1->wp_id,
@@ -165,7 +144,7 @@ class ModelsApiControllerTest extends TestCase
         $this->createModel(['customer_id' => $customer->id]);
         $this->createModel(['customer_id' => $customer->id]);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->getJson(route('api.api.models.show-customer-wp-models', [
             'customerId' => $customer->wp_id,
@@ -187,7 +166,7 @@ class ModelsApiControllerTest extends TestCase
     #[Test]
     public function it_returns_404_when_customer_not_found(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->getJson(route('api.api.models.show-customer-wp-models', [
             'customerId' => 99999,
@@ -225,7 +204,7 @@ class ModelsApiControllerTest extends TestCase
             'model_volume_cc' => 99.9,
         ]);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->getJson(route('api.api.models.show-customer-wp-models', [
             'customerId' => $customer->wp_id,
@@ -256,7 +235,7 @@ class ModelsApiControllerTest extends TestCase
         ]);
         $model->materials()->attach($material->id);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $uploads = [
             'item_1' => [
@@ -293,7 +272,7 @@ class ModelsApiControllerTest extends TestCase
         $material1 = $this->createMaterial(['wp_id' => 101]);
         $material2 = $this->createMaterial(['wp_id' => 102]);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $uploads = [
             'item_1' => [
@@ -328,7 +307,7 @@ class ModelsApiControllerTest extends TestCase
     {
         $customer = Customer::factory()->create();
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $uploads = [
             'item_1' => [
@@ -373,7 +352,7 @@ class ModelsApiControllerTest extends TestCase
         ]);
         $model->materials()->attach($material->id);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $upload = [
             '3dp_options' => [
@@ -397,7 +376,7 @@ class ModelsApiControllerTest extends TestCase
     {
         $customer = Customer::factory()->create();
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $upload = [
             '3dp_options' => [
@@ -426,7 +405,7 @@ class ModelsApiControllerTest extends TestCase
         $customer = Customer::factory()->create();
         $model = $this->createModel(['customer_id' => $customer->id]);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->postJson(route('api.api.models.delete', [
             'customerId' => $customer->wp_id,
@@ -444,7 +423,7 @@ class ModelsApiControllerTest extends TestCase
         $customer2 = Customer::factory()->create();
         $model = $this->createModel(['customer_id' => $customer2->id]);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->postJson(route('api.api.models.delete', [
             'customerId' => $customer1->wp_id,

@@ -9,40 +9,19 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
+use Tests\Traits\NeedsApiUser;
 
 class CustomersApiControllerTest extends TestCase
 {
     use DatabaseTransactions;
-
-    private User $user;
-
-    private Role $role;
+    use NeedsApiUser;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->setUpUserWithPermissions();
-    }
-
-    private function setUpUserWithPermissions(): void
-    {
-        $this->role = Role::firstOrCreate(['name' => 'api-user', 'guard_name' => 'web']);
-
-        $permissions = [
-            'viewCustomer',
-        ];
-
-        foreach ($permissions as $permissionName) {
-            $permission = Permission::firstOrCreate(['name' => $permissionName, 'guard_name' => 'web']);
-            $this->role->givePermissionTo($permission);
-        }
-
-        $this->user = User::factory()->create();
-        $this->user->assignRole($this->role);
+        $this->setUpApiUserWithPermissions(['viewCustomer']);
     }
 
     #[Test]
@@ -50,7 +29,7 @@ class CustomersApiControllerTest extends TestCase
     {
         $customer = Customer::factory()->create();
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->getJson(route('api.api.customers.show', ['customer' => $customer->id]));
 
@@ -97,7 +76,7 @@ class CustomersApiControllerTest extends TestCase
     {
         $customer = Customer::factory()->create(['wp_id' => 12345]);
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->getJson(route('api.api.customers.show-customer-wp', ['wp_id' => 12345]));
 
@@ -109,7 +88,7 @@ class CustomersApiControllerTest extends TestCase
     #[Test]
     public function it_returns_404_when_customer_wp_id_not_found(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->getJson(route('api.api.customers.show-customer-wp', ['wp_id' => 99999]));
 
@@ -121,7 +100,7 @@ class CustomersApiControllerTest extends TestCase
     {
         $customer = Customer::factory()->create();
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->apiUser);
 
         $response = $this->getJson(route('api.api.customers.show-customer-wp', ['wp_id' => $customer->wp_id]));
 
