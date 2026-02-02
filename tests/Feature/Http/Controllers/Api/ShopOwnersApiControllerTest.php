@@ -26,28 +26,6 @@ class ShopOwnersApiControllerTest extends TestCase
         $this->setUpApiUserWithPermissions(['viewCustomer']);
     }
 
-    private function createCustomerWithShopOwner(): Customer
-    {
-        $customer = Customer::factory()->create();
-        $shopOwner = ShopOwner::create([
-            'customer_id' => $customer->id,
-            'active' => true,
-        ]);
-        $customer->setRelation('shopOwner', $shopOwner);
-
-        return $customer;
-    }
-
-    private function createShopForOwner(ShopOwner $shopOwner, string $shopType = 'etsy'): Shop
-    {
-        return Shop::create([
-            'shop_owner_id' => $shopOwner->id,
-            'shop' => $shopType,
-            'shop_oauth' => ['shop_id' => 12345],
-            'active' => true,
-        ]);
-    }
-
     // ========================================
     // show() tests
     // ========================================
@@ -55,7 +33,8 @@ class ShopOwnersApiControllerTest extends TestCase
     #[Test]
     public function it_returns_shop_owner_for_customer(): void
     {
-        $customer = $this->createCustomerWithShopOwner();
+        $customer = Customer::factory()->create();
+        ShopOwner::factory()->create(['customer_id' => $customer->id]);
 
         Sanctum::actingAs($this->apiUser);
 
@@ -87,7 +66,8 @@ class ShopOwnersApiControllerTest extends TestCase
     #[Test]
     public function it_returns_403_when_user_lacks_permission(): void
     {
-        $customer = $this->createCustomerWithShopOwner();
+        $customer = Customer::factory()->create();
+        ShopOwner::factory()->create(['customer_id' => $customer->id]);
 
         $userWithoutPermission = User::factory()->create();
         Sanctum::actingAs($userWithoutPermission);
@@ -106,8 +86,9 @@ class ShopOwnersApiControllerTest extends TestCase
     #[Test]
     public function it_returns_shop_for_customer(): void
     {
-        $customer = $this->createCustomerWithShopOwner();
-        $this->createShopForOwner($customer->shopOwner, 'etsy');
+        $customer = Customer::factory()->create();
+        $shopOwner = ShopOwner::factory()->create(['customer_id' => $customer->id]);
+        Shop::factory()->etsy()->create(['shop_owner_id' => $shopOwner->id]);
 
         Sanctum::actingAs($this->apiUser);
 
@@ -130,7 +111,8 @@ class ShopOwnersApiControllerTest extends TestCase
     #[Test]
     public function it_returns_404_when_shop_not_found(): void
     {
-        $customer = $this->createCustomerWithShopOwner();
+        $customer = Customer::factory()->create();
+        ShopOwner::factory()->create(['customer_id' => $customer->id]);
 
         Sanctum::actingAs($this->apiUser);
 
@@ -181,7 +163,8 @@ class ShopOwnersApiControllerTest extends TestCase
     #[Test]
     public function it_returns_400_when_shop_owner_already_exists(): void
     {
-        $customer = $this->createCustomerWithShopOwner();
+        $customer = Customer::factory()->create();
+        ShopOwner::factory()->create(['customer_id' => $customer->id]);
 
         Sanctum::actingAs($this->apiUser);
 
@@ -217,7 +200,8 @@ class ShopOwnersApiControllerTest extends TestCase
     #[Test]
     public function it_updates_shop_owner_active_state(): void
     {
-        $customer = $this->createCustomerWithShopOwner();
+        $customer = Customer::factory()->create();
+        ShopOwner::factory()->create(['customer_id' => $customer->id, 'active' => true]);
 
         Sanctum::actingAs($this->apiUser);
 

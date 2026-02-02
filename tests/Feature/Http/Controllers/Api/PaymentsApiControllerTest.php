@@ -34,7 +34,7 @@ class PaymentsApiControllerTest extends TestCase
         parent::tearDown();
     }
 
-    private function createCustomerWithShopOwner(): Customer
+    private function createCustomerWithShopOwnerAndMandate(): Customer
     {
         $customer = Customer::factory()->create([
             'stripe_data' => [
@@ -42,17 +42,8 @@ class PaymentsApiControllerTest extends TestCase
                 'mandate_id' => 'mandate_test123',
             ],
         ]);
-        $shopOwner = ShopOwner::create([
-            'customer_id' => $customer->id,
-            'active' => true,
-        ]);
-        Shop::create([
-            'shop_owner_id' => $shopOwner->id,
-            'shop' => 'etsy',
-            'shop_oauth' => ['shop_id' => 12345],
-            'active' => true,
-        ]);
-        $customer->load('shopOwner.shops');
+        $shopOwner = ShopOwner::factory()->create(['customer_id' => $customer->id]);
+        Shop::factory()->etsy()->create(['shop_owner_id' => $shopOwner->id]);
 
         return $customer;
     }
@@ -117,7 +108,7 @@ class PaymentsApiControllerTest extends TestCase
     #[Test]
     public function it_attaches_payment_method_to_customer(): void
     {
-        $customer = $this->createCustomerWithShopOwner();
+        $customer = $this->createCustomerWithShopOwnerAndMandate();
 
         // Mock the PaymentService
         $this->mock(PaymentService::class, function (MockInterface $mock) {

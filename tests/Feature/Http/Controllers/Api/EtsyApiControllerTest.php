@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Controllers\Api;
 
-use App\Enums\Shops\ShopOwnerShopsEnum;
 use App\Models\Customer;
 use App\Models\Shop;
 use App\Models\ShopOwner;
@@ -38,19 +37,14 @@ class EtsyApiControllerTest extends TestCase
     private function createCustomerWithEtsyShop(): Customer
     {
         $customer = Customer::factory()->create();
-        $shopOwner = ShopOwner::create([
-            'customer_id' => $customer->id,
-            'active' => true,
-        ]);
-        Shop::create([
+        $shopOwner = ShopOwner::factory()->create(['customer_id' => $customer->id]);
+        Shop::factory()->etsy()->create([
             'shop_owner_id' => $shopOwner->id,
-            'shop' => ShopOwnerShopsEnum::Etsy->value,
             'shop_oauth' => [
                 'shop_id' => 12345678,
                 'access_token' => 'test_token',
                 'refresh_token' => 'test_refresh',
             ],
-            'active' => true,
         ]);
         $customer->load('shopOwner.shops');
 
@@ -77,10 +71,7 @@ class EtsyApiControllerTest extends TestCase
     public function it_returns_404_when_customer_has_no_etsy_shop(): void
     {
         $customer = Customer::factory()->create();
-        ShopOwner::create([
-            'customer_id' => $customer->id,
-            'active' => true,
-        ]);
+        ShopOwner::factory()->create(['customer_id' => $customer->id]);
 
         Sanctum::actingAs($this->apiUser);
 
