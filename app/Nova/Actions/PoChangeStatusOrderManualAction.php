@@ -36,6 +36,9 @@ class PoChangeStatusOrderManualAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
+        // Eager load relationships to avoid N+1 queries
+        $models->load('manufacturerCost');
+
         $orderQueuesService = new OrderQueuesService;
         foreach ($models as $model) {
             if ($fields->order_status === 'in-production') {

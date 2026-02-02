@@ -35,6 +35,9 @@ class PoInProductionStatusAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
+        // Eager load relationships to avoid N+1 queries
+        $models->load(['manufacturerCost', 'upload', 'orderQueueStatuses.orderStatus']);
+
         $orderQueuesService = new OrderQueuesService;
         foreach ($models as $model) {
             $hasEndStatus = [];
