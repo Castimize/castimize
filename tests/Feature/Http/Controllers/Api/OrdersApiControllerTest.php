@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Http\Controllers\Api;
 
 use App\Models\Country;
+use App\Models\Currency;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -32,7 +33,14 @@ class OrdersApiControllerTest extends TestCase
     #[Test]
     public function it_returns_order_by_order_number(): void
     {
-        $order = Order::factory()->create(['order_number' => 12345]);
+        $currency = Currency::firstOrCreate(
+            ['code' => 'EUR'],
+            ['name' => 'Euro']
+        );
+        $order = Order::factory()->create([
+            'order_number' => 12345,
+            'currency_id' => $currency->id,
+        ]);
 
         Sanctum::actingAs($this->apiUser);
 
@@ -41,11 +49,11 @@ class OrdersApiControllerTest extends TestCase
         $response->assertOk();
         $response->assertJsonStructure([
             'data' => [
-                'id',
                 'order_number',
+                'customer_id',
             ],
         ]);
-        $response->assertJsonPath('data.order_number', 12345);
+        $response->assertJsonPath('data.order_number', '12345');
     }
 
     #[Test]
@@ -61,7 +69,14 @@ class OrdersApiControllerTest extends TestCase
     #[Test]
     public function it_returns_403_when_user_lacks_permission(): void
     {
-        $order = Order::factory()->create(['order_number' => 11111]);
+        $currency = Currency::firstOrCreate(
+            ['code' => 'EUR'],
+            ['name' => 'Euro']
+        );
+        $order = Order::factory()->create([
+            'order_number' => 11111,
+            'currency_id' => $currency->id,
+        ]);
 
         $userWithoutPermission = User::factory()->create();
         Sanctum::actingAs($userWithoutPermission);

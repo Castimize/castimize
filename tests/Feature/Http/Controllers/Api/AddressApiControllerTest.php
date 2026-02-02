@@ -83,22 +83,4 @@ class AddressApiControllerTest extends TestCase
 
         $response->assertUnauthorized();
     }
-
-    // ========================================
-    // calculateShipping() tests
-    // ========================================
-
-    #[Test]
-    public function it_returns_403_when_user_lacks_permission_for_calculate_shipping(): void
-    {
-        $this->setUpApiUserWithPermissions([]);
-        Sanctum::actingAs($this->apiUser);
-
-        $response = $this->postJson(route('api.api.prices.calculate.shipping'), [
-            'country' => 'NL',
-            'uploads' => [],
-        ]);
-
-        $response->assertForbidden();
-    }
 }

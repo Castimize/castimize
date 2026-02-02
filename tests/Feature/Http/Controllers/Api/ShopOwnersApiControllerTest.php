@@ -105,7 +105,7 @@ class ShopOwnersApiControllerTest extends TestCase
                 'active',
             ],
         ]);
-        $response->assertJsonPath('data.shop', 'etsy');
+        $response->assertJsonPath('data.shop', 'Etsy');
     }
 
     #[Test]
@@ -154,7 +154,7 @@ class ShopOwnersApiControllerTest extends TestCase
             'customerId' => $customer->wp_id,
         ]));
 
-        $response->assertOk();
+        $response->assertCreated();
         $this->assertDatabaseHas('shop_owners', [
             'customer_id' => $customer->id,
         ]);

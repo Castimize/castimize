@@ -78,6 +78,7 @@ class UsersApiControllerTest extends TestCase
     {
         $userToDelete = User::factory()->create(['wp_id' => 54321]);
 
+        $this->setUpApiUserWithPermissions(['viewUser', 'deleteUser']);
         Sanctum::actingAs($this->apiUser);
 
         $response = $this->deleteJson(route('api.api.users.delete-user-wp'), [
@@ -91,6 +92,7 @@ class UsersApiControllerTest extends TestCase
     #[Test]
     public function it_returns_404_when_deleting_nonexistent_user(): void
     {
+        $this->setUpApiUserWithPermissions(['viewUser', 'deleteUser']);
         Sanctum::actingAs($this->apiUser);
 
         $response = $this->deleteJson(route('api.api.users.delete-user-wp'), [
