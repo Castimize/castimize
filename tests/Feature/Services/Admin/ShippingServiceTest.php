@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Services\Admin;
 
+use App\Models\Country;
 use App\Models\CustomerShipment;
+use App\Models\LogisticsZone;
 use App\Models\Order;
 use App\Models\OrderQueue;
 use App\Models\Upload;
@@ -34,6 +36,26 @@ class ShippingServiceTest extends TestCase
         $this->app->instance(ShippoService::class, $this->shippoServiceMock);
 
         $this->shippingService = app(ShippingService::class);
+
+        // Ensure NL country with logistics zone exists for shipping service
+        $this->setUpShippingData();
+    }
+
+    private function setUpShippingData(): void
+    {
+        $logisticsZone = LogisticsZone::firstOrCreate(
+            ['name' => 'Europe'],
+            ['shipping_servicelevel_token' => 'ups_standard']
+        );
+
+        Country::firstOrCreate(
+            ['alpha2' => 'NL'],
+            [
+                'name' => 'Netherlands',
+                'alpha3' => 'NLD',
+                'logistics_zone_id' => $logisticsZone->id,
+            ]
+        );
     }
 
     #[Test]

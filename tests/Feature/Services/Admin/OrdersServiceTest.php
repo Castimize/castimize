@@ -62,6 +62,9 @@ class OrdersServiceTest extends TestCase
 
     private function setUpTestData(): void
     {
+        // Ensure system user (ID 1) exists - required by OrdersService
+        $this->getSystemUser();
+
         $this->currency = Currency::firstOrCreate(
             ['code' => CurrencyEnum::USD->value],
             ['name' => 'US Dollar']
