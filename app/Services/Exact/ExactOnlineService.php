@@ -64,16 +64,6 @@ class ExactOnlineService
         $this->connection = app()->make('Exact\Connection');
     }
 
-    public function test(): void
-    {
-        $glAccount = new GLAccount($this->connection);
-        $glAccount = $glAccount->filter("Code eq '8000'", '', '', [
-            '$top' => 1,
-        ]);
-
-        dd($glAccount);
-    }
-
     public function getGlAccounts(): array
     {
         $glAccounts = new GLAccount($this->connection);
@@ -402,10 +392,22 @@ class ExactOnlineService
         $vatCodes = (new VatCode($this->connection))->get();
         /** @var VatCode $vatCode */
         foreach ($vatCodes as $vatCode) {
-            if (trim($vatCode->OssCountry) === $countryCode) {
+            $ossCountry = trim((string) $vatCode->OssCountry);
+            // Match on OssCountry (case-insensitive)
+            if (strcasecmp($ossCountry, $countryCode) === 0) {
+                Log::channel('exact')->info("Found VAT code for {$countryCode}: {$vatCode->Code} (OssCountry: {$ossCountry})");
+
                 return $vatCode->Code;
             }
         }
+
+        // Log available VAT codes for debugging
+        $availableCodes = [];
+        foreach ($vatCodes as $vatCode) {
+            $availableCodes[] = "Code: {$vatCode->Code}, OssCountry: ".($vatCode->OssCountry ?? 'null');
+        }
+        Log::channel('exact')->warning("VAT Code not found for {$countryCode}. Available codes: ".implode('; ', $availableCodes));
+
         throw new RuntimeException(__('VAT Code not found for :countryCode', [
             'countryCode' => $countryCode,
         ]));
