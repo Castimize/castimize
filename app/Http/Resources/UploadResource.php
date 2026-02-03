@@ -2,10 +2,14 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Upload;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @mixin Upload
+ */
 class UploadResource extends JsonResource
 {
     public function toArray(Request $request): array

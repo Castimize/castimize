@@ -528,6 +528,8 @@ class EtsyService
             shop: $shop,
         );
         $listingDTO = ListingDTO::fromModel($shop, $model);
+        $listing = null;
+
         try {
             $listing = $etsyListingService->createDraftListing($listingDTO);
         } catch (Exception $exception) {

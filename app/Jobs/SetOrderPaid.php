@@ -41,6 +41,8 @@ class SetOrderPaid implements ShouldQueue
      */
     public function handle(): void
     {
+        $order = null;
+
         try {
             $order = Order::with(['uploads'])
                 ->where('wp_id', $this->paymentIntent->metadata->order_id)

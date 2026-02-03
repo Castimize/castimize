@@ -132,7 +132,7 @@ class Manufacturer extends Model
     public function validateAddress(): void
     {
         $addressData = [
-            'name' => $this->contact_name1,
+            'name' => $this->contact_name_1,
             'company' => $this->name,
             'street1' => $this->address_line1,
             'street2' => $this->address_line2,
@@ -183,7 +183,7 @@ class Manufacturer extends Model
                     'name' => $cityName,
                 ], [
                     'name' => $cityName,
-                    'slug' => Str::slug($stateName),
+                    'slug' => Str::slug($cityName),
                     'state_id' => $this->state_id,
                     'country_id' => $this->country_id,
                 ]);

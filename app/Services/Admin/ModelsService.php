@@ -53,7 +53,7 @@ class ModelsService
                     'link' => 'id',
                 ];
 
-                if (! isset($mapper, $orderColumn)) {
+                if (! isset($mapper[$orderColumn])) {
                     $query = str_replace(['{{{order}}}'], [' ORDER BY order_model_name ASC '], $query);
                 } elseif ($mapper[$orderColumn] === 'name') {
                     $query = str_replace(['{{{order}}}'], [" ORDER BY order_model_name {$orderDir} "], $query);
@@ -151,7 +151,7 @@ class ModelsService
 
         if ($customer) {
             $model = $customer->models->where('name', $request->original_file_name)
-                ->where('model_scale', $scale ?? 1)
+                ->where('model_scale', $scale)
                 ->first();
 
             if ($model) {
@@ -160,7 +160,7 @@ class ModelsService
         } else {
             $model = Model::where('name', $request->original_file_name)
                 ->where('file_name', 'wp-content/uploads/p3d/'.$fileName)
-                ->where('model_scale', $scale ?? 1)
+                ->where('model_scale', $scale)
                 ->first();
         }
 
@@ -365,7 +365,7 @@ class ModelsService
                 ->first();
             if ($shop) {
                 $shopListingId = $modelDTO->shopListingId ?? $model->shopListingModel->shop_listing_id ?? null;
-                if ($shopListingId && ! empty($shopListingId)) {
+                if ($shopListingId) {
                     $listing = $etsyService->getListing($shop, $shopListingId);
                     if (! $listing) {
                         Log::error('Listing not found');

@@ -7,6 +7,9 @@ use App\Services\Admin\CurrencyService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin ShippingFee
+ */
 class CalculatedShippingFeeResource extends JsonResource
 {
     public $collects = ShippingFee::class;

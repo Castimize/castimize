@@ -1,0 +1,439 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/DTO/Order/OrderDTO.php
+
+		-
+			message: '#^Access to an undefined property App\\Exports\\ExportLineItemsV1\:\:\$data\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Exports/ExportLineItemsV1.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Http/Controllers/Api/V1/CustomersApiController.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Http/Controllers/Api/V1/ModelsApiController.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 4
+			path: app/Http/Controllers/Api/V1/OrdersApiController.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\AddressResource\:\:\$address_line_1\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/AddressResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\AddressResource\:\:\$address_line_2\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/AddressResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\AddressResource\:\:\$pivot\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Resources/AddressResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CalculatedPriceResource\:\:\$calculated_total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CalculatedPriceResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CalculatedShippingFeeResource\:\:\$calculated_total\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/CalculatedShippingFeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CalculatedShippingFeeResource\:\:\$default_rate\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CalculatedShippingFeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CalculatedShippingFeeResource\:\:\$rate_increase_1\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CalculatedShippingFeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CalculatedShippingFeeResource\:\:\$rate_increase_2\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CalculatedShippingFeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CalculatedShippingFeeResource\:\:\$rate_increase_3\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CalculatedShippingFeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$discount_fee\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$discount_fee_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$production_cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$production_cost_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$service_fee\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$service_fee_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$shipping_fee\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$shipping_fee_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$total_refund\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$total_refund_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\OrderResource\:\:\$total_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/OrderResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UploadResource\:\:\$subtotal\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UploadResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UploadResource\:\:\$subtotal_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UploadResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UploadResource\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UploadResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UploadResource\:\:\$total_refund\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UploadResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UploadResource\:\:\$total_refund_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UploadResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UploadResource\:\:\$total_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UploadResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$creator\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$destroyer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$editor\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/CreateInvoicesFromOrder.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/CreateOrderFromWp.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/CreateRefundInvoicesFromOrder.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/SetOrderPaid.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/SetPaymentIntentForEtsyOrder.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/SyncCustomerToExact.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/SyncInvoiceToExact.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Manufacturer\:\:\$city_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Manufacturer.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Manufacturer\:\:\$state_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Manufacturer.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$billing_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$billing_state\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$shipping_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$shipping_state\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\OrderQueue\:\:\$manufacturer_costs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/OrderQueue.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\OrderQueue\:\:\$target_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/OrderQueue.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Upload\:\:\$status_created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Upload.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Upload\:\:\$status_slug\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Upload.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Upload\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Upload.php
+
+		-
+			message: '#^Access to an undefined property \$this\(App\\Nova\\CustomerShipment\)\:\:\$tracking_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Nova/CustomerShipment.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Nova/Filters/ManufacturerFilter.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Nova/Filters/MaterialFilter.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Nova/Filters/OrderQueueMaterialFilter.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Nova/Filters/OrderQueueOrderStatusFilter.php
+
+		-
+			message: '#^Access to an undefined static property static\(App\\Nova\\Manufacturer\\ManufacturerResource\)\:\:\$sort\.$#'
+			identifier: staticProperty.notFound
+			count: 2
+			path: app/Nova/Manufacturer/ManufacturerResource.php
+
+		-
+			message: '#^Access to an undefined property \$this\(App\\Nova\\Manufacturer\\Shipment\)\:\:\$tracking_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Nova/Manufacturer/Shipment.php
+
+		-
+			message: '#^Access to an undefined property \$this\(App\\Nova\\ManufacturerShipment\)\:\:\$tracking_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Nova/ManufacturerShipment.php
+
+		-
+			message: '#^Access to an undefined static property static\(App\\Nova\\Resource\)\:\:\$sort\.$#'
+			identifier: staticProperty.notFound
+			count: 2
+			path: app/Nova/Resource.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Nova/Settings/Billing/AddressSettings.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Nova/Settings/Shipping/DcSettings.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 2
+			path: app/Services/Admin/OrdersService.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 2
+			path: app/Services/Admin/OrdersService.php
+
+		-
+			message: '#^Call to protected static method refunds\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Services/Admin/UploadsService.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Services/Etsy/EtsyVariationService.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Services/Exact/ExactOnlineService.php
+
+		-
+			message: '#^Call to protected static method create\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Services/Woocommerce/WoocommerceApiService.php
+
+		-
+			message: '#^Call to protected static method delete\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Services/Woocommerce/WoocommerceApiService.php
+
+		-
+			message: '#^Call to protected static method update\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Services/Woocommerce/WoocommerceApiService.php
+
+		-
+			message: '#^Call to protected static method update\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 2
+			path: app/Services/Woocommerce/WoocommerceApiService.php

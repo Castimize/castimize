@@ -17,6 +17,10 @@ use Etsy\Resources\ListingVideo;
 use Etsy\Resources\Review;
 use Etsy\Resources\Transaction;
 
+/**
+ * @property int $listing_id
+ * @property int $shop_id
+ */
 class Listing extends Resource
 {
     /**
@@ -278,7 +282,7 @@ class Listing extends Resource
         }
 
         return $this->updateRequest(
-            "/application/shops/{$shop_id}/listings/{$listing_id}",
+            "/application/shops/{$this->shop_id}/listings/{$this->listing_id}",
             $data,
             'PATCH'
         );

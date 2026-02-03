@@ -15,6 +15,8 @@ use Exception;
 #[AllowDynamicProperties]
 class EtsyShippingProfileService
 {
+    private Etsy $etsy;
+
     public function __construct(
         protected Shop $shop,
     ) {

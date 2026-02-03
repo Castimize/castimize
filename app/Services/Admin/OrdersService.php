@@ -458,12 +458,13 @@ class OrdersService
                 ->first();
 
             if ($model === null) {
+                $fileNameThumb = sprintf('%s%s.thumb.png', config('app.stl_upload_dir'), str_replace('_resized', '', $uploadDto->fileName));
+                $fileName = sprintf('%s%s', config('app.stl_upload_dir'), $uploadDto->fileName);
+                $fileUrl = sprintf('%s/%s', config('app.site_url'), $fileName);
+                $fileThumb = sprintf('%s/%s', config('app.site_url'), $fileNameThumb);
+                $withoutResizedFileName = str_replace('_resized', '', $fileName);
+
                 try {
-                    $fileNameThumb = sprintf('%s%s.thumb.png', config('app.stl_upload_dir'), str_replace('_resized', '', $uploadDto->fileName));
-                    $fileName = sprintf('%s%s', config('app.stl_upload_dir'), $uploadDto->fileName);
-                    $fileUrl = sprintf('%s/%s', config('app.site_url'), $fileName);
-                    $fileThumb = sprintf('%s/%s', config('app.site_url'), $fileNameThumb);
-                    $withoutResizedFileName = str_replace('_resized', '', $fileName);
                     $fileHeaders = get_headers($fileUrl);
                     // Check files exists on local storage of site and not on R2
                     if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileName)) {
