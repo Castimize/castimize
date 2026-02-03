@@ -45,6 +45,9 @@ jobs:
       - name: Run Pint
         run: vendor/bin/pint --test
 
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=1G
+
   check-bypass:
     runs-on: ubuntu-latest
     outputs:
@@ -184,18 +187,18 @@ jobs:
     steps:
       - name: Check status
         run: |
-          # Lint must always pass
+          # Lint and static analysis must always pass
           if [[ "${{ needs.lint.result }}" != "success" ]]; then
-            echo "Linting failed"
+            echo "Linting or static analysis failed"
             exit 1
           fi
 
           if [[ "${{ needs.check-bypass.outputs.should_skip }}" == "true" ]]; then
-            echo "Tests were bypassed, linting passed"
+            echo "Tests were bypassed, linting and static analysis passed"
             exit 0
           fi
           if [[ "${{ needs.tests.result }}" == "success" ]]; then
-            echo "Tests and linting passed"
+            echo "All checks passed"
             exit 0
           fi
           echo "Tests failed"
