@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\DTO\Order\OrderDTO;
+use App\Enums\Admin\PaymentMethodsEnum;
 use App\Enums\Shops\ShopOwnerShopsEnum;
+use App\Models\Order;
 use App\Models\Shop;
 use App\Models\ShopOrder;
 use App\Services\Admin\OrdersService;
@@ -62,9 +64,9 @@ class GetEtsyReceipts extends Command
                     if ($shopOrder === null) {
                         $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
                         if (count($lines) > 0) {
-                            DB::beginTransaction();
                             $wcOrder = null;
                             try {
+                                DB::beginTransaction();
                                 // Create OrderDTO from Etsy receipt
                                 $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
                                 // Use mandate to pay the order
@@ -74,18 +76,40 @@ class GetEtsyReceipts extends Command
                                 $orderDTO->orderNumber = (int) $wcOrder['number'];
                                 $orderDTO->wpId = (int) $wcOrder['id'];
 
-                                $order = $ordersService->storeOrderFromDto($orderDTO);
-                                $this->info('Castimize order created with id: '.$order->id);
+                                // Check if order already exists (may have been created by WooCommerce webhook)
+                                $order = Order::where('wp_id', $orderDTO->wpId)->first();
+                                if ($order === null) {
+                                    $order = $ordersService->storeOrderFromDto($orderDTO);
+                                    $this->info('Castimize order created with id: '.$order->id);
+                                } else {
+                                    $this->info('Castimize order already exists with id: '.$order->id.' (created by webhook)');
+                                }
 
                                 $newShopOrder = $shopOrderService->createShopOrder($shop, $receipt, $wcOrder);
                                 $this->info('Shop order created with id: '.$newShopOrder->id);
 
                                 $paymentIntent = $paymentService->createStripePaymentIntent($orderDTO, $shop->shopOwner->customer);
                                 $this->info('Payment intent: '.print_r($paymentIntent, true));
+
+                                // Get the actual Stripe payment method type and map to WooCommerce payment issuer
+                                $stripePaymentMethodType = $paymentIntent->payment_method_types[0] ?? 'card';
+                                $paymentIssuer = PaymentMethodsEnum::getWoocommercePaymentMethod($stripePaymentMethodType);
+
+                                // Update local order with correct Stripe payment issuer
+                                $order->update([
+                                    'payment_method' => 'Stripe',
+                                    'payment_issuer' => $paymentIssuer,
+                                    'payment_intent_id' => $paymentIntent->id,
+                                ]);
+
                                 if ($paymentIntent->status === 'succeeded') {
                                     $orderDTO->isPaid = true;
                                     $orderDTO->paidAt = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')
                                         ?->setTimezone(config('app.timezone'));
+                                    $order->update([
+                                        'is_paid' => true,
+                                        'paid_at' => $orderDTO->paidAt,
+                                    ]);
                                 }
                                 $orderDTO->metaData[] = [
                                     'key' => '_payment_intent_id',

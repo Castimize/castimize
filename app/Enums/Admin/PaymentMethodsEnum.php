@@ -104,7 +104,7 @@ enum PaymentMethodsEnum: string
     public static function getWoocommercePaymentMethod(?string $stripePaymentMethod): string
     {
         return match ($stripePaymentMethod) {
-            'sepa' => 'stripe_sepa',
+            'sepa', 'sepa_debit' => 'stripe_sepa',
             'us_bank_account' => 'stripe_ach',
             default => 'stripe_cc',
         };
