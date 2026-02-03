@@ -39,18 +39,18 @@ class SyncInvoiceToExact implements ShouldQueue
         $customer = Customer::where('wp_id', $this->wpCustomerId)->first();
 
         if ($customer === null) {
-            Log::warning("SyncInvoiceToExact: Customer not found for wp_id {$this->wpCustomerId}");
+            Log::channel('exact')->warning("SyncInvoiceToExact: Customer not found for wp_id {$this->wpCustomerId}");
 
             return;
         }
 
         $invoiceType = $this->invoice->debit ? 'invoice' : 'credit note';
-        Log::info("SyncInvoiceToExact: Syncing {$invoiceType} {$this->invoice->invoice_number} to Exact");
+        Log::channel('exact')->info("SyncInvoiceToExact: Syncing {$invoiceType} {$this->invoice->invoice_number} to Exact");
 
         if ($customer->exact_online_guid === null) {
             $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($this->wpCustomerId);
             if ($wpCustomer === null) {
-                Log::warning("SyncInvoiceToExact: WP Customer not found for wp_id {$this->wpCustomerId}");
+                Log::channel('exact')->warning("SyncInvoiceToExact: WP Customer not found for wp_id {$this->wpCustomerId}");
 
                 return;
             }
@@ -64,18 +64,18 @@ class SyncInvoiceToExact implements ShouldQueue
         }
 
         $exactOnlineService->syncInvoice($this->invoice);
-        Log::info("SyncInvoiceToExact: {$invoiceType} {$this->invoice->invoice_number} synced to Exact (sales entry)");
+        Log::channel('exact')->info("SyncInvoiceToExact: {$invoiceType} {$this->invoice->invoice_number} synced to Exact (sales entry)");
 
         if ($this->invoice->paid && $this->invoice->lines->first()?->order?->payment_issuer !== PaymentMethodsEnum::DIRECT_BANK_TRANSFER->value) {
             sleep(2);
             $exactOnlineService->syncInvoicePaid($this->invoice);
-            Log::info("SyncInvoiceToExact: {$invoiceType} {$this->invoice->invoice_number} payment synced to Exact (memorial)");
+            Log::channel('exact')->info("SyncInvoiceToExact: {$invoiceType} {$this->invoice->invoice_number} payment synced to Exact (memorial)");
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $this->invoice);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::channel('exact')->error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

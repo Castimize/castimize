@@ -45,13 +45,13 @@ class SyncCustomerToExact implements ShouldQueue
             $customer->wpCustomer = $wpCustomer;
             $exactOnlineService->syncCustomer($customer);
         } catch (Throwable $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            Log::channel('exact')->error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $customer);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::channel('exact')->error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

@@ -34,17 +34,17 @@ class CreateInvoicesFromOrder implements ShouldQueue
     {
         $order = Order::with('customer')->where('wp_id', $this->wpOrderId)->first();
         if ($order === null) {
-            Log::info("CreateInvoicesFromOrder: Order not found for wp_id {$this->wpOrderId}");
+            Log::channel('orders')->info("CreateInvoicesFromOrder: Order not found for wp_id {$this->wpOrderId}");
 
             return;
         }
         if ($order->paid_at === null) {
-            Log::info("CreateInvoicesFromOrder: Order {$this->wpOrderId} has no paid_at date, skipping");
+            Log::channel('orders')->info("CreateInvoicesFromOrder: Order {$this->wpOrderId} has no paid_at date, skipping");
 
             return;
         }
         if (empty($order->payment_issuer)) {
-            Log::info("CreateInvoicesFromOrder: Order {$this->wpOrderId} has no payment_issuer, skipping invoice creation");
+            Log::channel('orders')->info("CreateInvoicesFromOrder: Order {$this->wpOrderId} has no payment_issuer, skipping invoice creation");
 
             return;
         }
@@ -52,7 +52,7 @@ class CreateInvoicesFromOrder implements ShouldQueue
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($this->wpOrderId);
         if ($wpOrder === null) {
-            Log::warning("CreateInvoicesFromOrder: WP Order not found for wp_id {$this->wpOrderId}");
+            Log::channel('orders')->warning("CreateInvoicesFromOrder: WP Order not found for wp_id {$this->wpOrderId}");
 
             return;
         }
@@ -60,20 +60,20 @@ class CreateInvoicesFromOrder implements ShouldQueue
 
         $invoiceDocument = WcOrderDocumentTypesEnum::Invoice->value;
         if (property_exists($wpOrder['documents'], $invoiceDocument)) {
-            Log::info("CreateInvoicesFromOrder: Creating invoice for order {$this->wpOrderId}");
+            Log::channel('orders')->info("CreateInvoicesFromOrder: Creating invoice for order {$this->wpOrderId}");
             $invoicesService->storeInvoiceFromWpOrder($customer, $order);
         }
 
         $creditNoteDocument = WcOrderDocumentTypesEnum::CreditNote->value;
         if (property_exists($wpOrder['documents'], $creditNoteDocument)) {
-            Log::info("CreateInvoicesFromOrder: Creating credit note for order {$this->wpOrderId}");
+            Log::channel('orders')->info("CreateInvoicesFromOrder: Creating credit note for order {$this->wpOrderId}");
             $invoicesService->storeInvoiceFromWpOrder($customer, $order, false);
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::channel('orders')->error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

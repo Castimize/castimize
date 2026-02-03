@@ -130,7 +130,7 @@ class GetEtsyReceipts extends Command
                                 }
 
                                 DB::rollBack();
-                                Log::error("GetEtsyReceipts: Failed to process receipt {$receipt->receipt_id}: ".$e->getMessage().PHP_EOL.$e->getTraceAsString());
+                                Log::channel('etsy')->error("GetEtsyReceipts: Failed to process receipt {$receipt->receipt_id}: ".$e->getMessage().PHP_EOL.$e->getTraceAsString());
                                 $this->error("Failed to process receipt {$receipt->receipt_id}: ".$e->getMessage());
                             }
                         } else {
@@ -142,7 +142,7 @@ class GetEtsyReceipts extends Command
                 }
             } catch (Exception $e) {
                 $shopName = $shop->shop_oauth['shop_name'] ?? $shop->shop_oauth['shop_id'] ?? 'unknown';
-                Log::error("GetEtsyReceipts failed for shop '{$shopName}' (ID: {$shop->id}): ".$e->getMessage().PHP_EOL.$e->getTraceAsString());
+                Log::channel('etsy')->error("GetEtsyReceipts failed for shop '{$shopName}' (ID: {$shop->id}): ".$e->getMessage().PHP_EOL.$e->getTraceAsString());
                 $this->error("Failed for shop '{$shopName}' (ID: {$shop->id}): ".$e->getMessage());
             }
         }

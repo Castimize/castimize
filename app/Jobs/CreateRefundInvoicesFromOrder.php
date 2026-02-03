@@ -34,12 +34,12 @@ class CreateRefundInvoicesFromOrder implements ShouldQueue
     {
         $order = Order::with('customer')->where('wp_id', $this->wpOrderId)->first();
         if ($order === null) {
-            Log::info("CreateRefundInvoicesFromOrder: Order not found for wp_id {$this->wpOrderId}");
+            Log::channel('orders')->info("CreateRefundInvoicesFromOrder: Order not found for wp_id {$this->wpOrderId}");
 
             return;
         }
         if (empty($order->payment_issuer)) {
-            Log::info("CreateRefundInvoicesFromOrder: Order {$this->wpOrderId} has no payment_issuer, skipping");
+            Log::channel('orders')->info("CreateRefundInvoicesFromOrder: Order {$this->wpOrderId} has no payment_issuer, skipping");
 
             return;
         }
@@ -58,13 +58,13 @@ class CreateRefundInvoicesFromOrder implements ShouldQueue
             }
 
         } catch (Throwable $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            Log::channel('orders')->error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::channel('orders')->error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

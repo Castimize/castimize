@@ -50,7 +50,7 @@ class CreateOrderFromDTO implements ShouldQueue
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            Log::channel('orders')->error($e->getMessage().PHP_EOL.$e->getTraceAsString());
             $title = 'Order creation failed for order number: '.$this->orderDto->orderNumber;
             $mailgunService->send(
                 to: config('mail.from.address'),
@@ -70,7 +70,7 @@ class CreateOrderFromDTO implements ShouldQueue
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::channel('orders')->error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

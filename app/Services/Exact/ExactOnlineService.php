@@ -153,7 +153,7 @@ class ExactOnlineService
             $account = $this->updateAccount($account, $customer, isNewAccount: true);
             $account->save();
         } catch (Exception $exception) {
-            Log::error('Customer WP id: '.$customer->wp_id.PHP_EOL.'Error: '.$exception->getMessage().PHP_EOL.print_r($account, true));
+            Log::channel('exact')->error('Customer WP id: '.$customer->wp_id.PHP_EOL.'Error: '.$exception->getMessage().PHP_EOL.print_r($account, true));
 
             throw $exception;
         }
@@ -373,7 +373,7 @@ class ExactOnlineService
 
     private function findGlAccountForPaymentMethod(string $paymentIssuer): ?string
     {
-        Log::info($paymentIssuer);
+        Log::channel('exact')->info("Finding GL account for payment issuer: {$paymentIssuer}");
         if (in_array($paymentIssuer, PaymentIssuersEnum::getStripeMethods(), true)) {
             return self::GL_1103;
         }

@@ -100,13 +100,13 @@ class SetPaymentIntentForEtsyOrder implements ShouldQueue
                 }
             }
         } catch (Throwable $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+            Log::channel('etsy')->error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
+            Log::channel('etsy')->error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }
