@@ -15,6 +15,12 @@ use Spatie\Permission\Traits\HasRoles;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property int $id
+ * @property User|null $creator
+ * @property User|null $editor
+ * @property User|null $destroyer
+ */
 #[ObservedBy([UserObserver::class])]
 class User extends Authenticatable
 {
