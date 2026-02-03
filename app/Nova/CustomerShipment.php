@@ -29,6 +29,10 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Rpj\Daterangepicker\DateHelper;
 
+/**
+ * @property string|null $tracking_number
+ * @property string|null $tracking_url
+ */
 class CustomerShipment extends Resource
 {
     use CommonMetaDataTrait;

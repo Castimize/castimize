@@ -47,6 +47,6 @@ class OrderQueueMaterialFilter extends Filter
      */
     public function options(NovaRequest $request)
     {
-        return Material::all()->pluck('name', 'id')->toArray();
+        return Material::pluck('name', 'id')->toArray();
     }
 }

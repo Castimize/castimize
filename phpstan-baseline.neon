@@ -67,66 +67,6 @@ parameters:
 			path: app/Jobs/SyncInvoiceToExact.php
 
 		-
-			message: '#^Access to an undefined property \$this\(App\\Nova\\CustomerShipment\)\:\:\$tracking_number\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Nova/CustomerShipment.php
-
-		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: app/Nova/Filters/MaterialFilter.php
-
-		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: app/Nova/Filters/OrderQueueMaterialFilter.php
-
-		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: app/Nova/Filters/OrderQueueOrderStatusFilter.php
-
-		-
-			message: '#^Access to an undefined static property static\(App\\Nova\\Manufacturer\\ManufacturerResource\)\:\:\$sort\.$#'
-			identifier: staticProperty.notFound
-			count: 2
-			path: app/Nova/Manufacturer/ManufacturerResource.php
-
-		-
-			message: '#^Access to an undefined property \$this\(App\\Nova\\Manufacturer\\Shipment\)\:\:\$tracking_number\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Nova/Manufacturer/Shipment.php
-
-		-
-			message: '#^Access to an undefined property \$this\(App\\Nova\\ManufacturerShipment\)\:\:\$tracking_number\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Nova/ManufacturerShipment.php
-
-		-
-			message: '#^Access to an undefined static property static\(App\\Nova\\Resource\)\:\:\$sort\.$#'
-			identifier: staticProperty.notFound
-			count: 2
-			path: app/Nova/Resource.php
-
-		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: app/Nova/Settings/Billing/AddressSettings.php
-
-		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: app/Nova/Settings/Shipping/DcSettings.php
-
-		-
 			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
 			identifier: staticMethod.protected
 			count: 2
@@ -143,12 +83,6 @@ parameters:
 			identifier: staticMethod.protected
 			count: 1
 			path: app/Services/Admin/UploadsService.php
-
-		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: app/Services/Etsy/EtsyVariationService.php
 
 		-
 			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
