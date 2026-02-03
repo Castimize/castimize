@@ -8,7 +8,7 @@ on:
 
 # Allow bypass via [skip tests] in commit message or 'bypass-tests' label on PR
 jobs:
-  lint:
+  backend-linting:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -44,6 +44,40 @@ jobs:
 
       - name: Run Pint
         run: vendor/bin/pint --test
+
+  backend-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Configure Nova authentication
+        env:
+          NOVA_USERNAME: ${{ secrets.NOVA_USERNAME }}
+          NOVA_LICENSE_KEY: ${{ secrets.NOVA_LICENSE_KEY }}
+        run: |
+          composer config http-basic.nova.laravel.com "${NOVA_USERNAME}" "${NOVA_LICENSE_KEY}"
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --memory-limit=1G
@@ -182,19 +216,25 @@ jobs:
   # This job always succeeds - needed for branch protection when tests are skipped
   tests-status:
     runs-on: ubuntu-latest
-    needs: [lint, check-bypass, tests]
+    needs: [backend-linting, backend-quality, check-bypass, tests]
     if: always()
     steps:
       - name: Check status
         run: |
-          # Lint and static analysis must always pass
-          if [[ "${{ needs.lint.result }}" != "success" ]]; then
-            echo "Linting or static analysis failed"
+          # Linting must always pass
+          if [[ "${{ needs.backend-linting.result }}" != "success" ]]; then
+            echo "Backend linting failed"
+            exit 1
+          fi
+
+          # Static analysis must always pass
+          if [[ "${{ needs.backend-quality.result }}" != "success" ]]; then
+            echo "Backend quality (PHPStan) failed"
             exit 1
           fi
 
           if [[ "${{ needs.check-bypass.outputs.should_skip }}" == "true" ]]; then
-            echo "Tests were bypassed, linting and static analysis passed"
+            echo "Tests were bypassed, linting and quality checks passed"
             exit 0
           fi
           if [[ "${{ needs.tests.result }}" == "success" ]]; then
