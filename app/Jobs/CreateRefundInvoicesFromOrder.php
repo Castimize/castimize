@@ -33,11 +33,17 @@ class CreateRefundInvoicesFromOrder implements ShouldQueue
     public function handle(InvoicesService $invoicesService): void
     {
         $order = Order::with('customer')->where('wp_id', $this->wpOrderId)->first();
-        $customer = $order->customer;
-
         if ($order === null) {
+            Log::info("CreateRefundInvoicesFromOrder: Order not found for wp_id {$this->wpOrderId}");
+
             return;
         }
+        if (empty($order->payment_issuer)) {
+            Log::info("CreateRefundInvoicesFromOrder: Order {$this->wpOrderId} has no payment_issuer, skipping");
+
+            return;
+        }
+        $customer = $order->customer;
 
         try {
             $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($this->wpOrderId);

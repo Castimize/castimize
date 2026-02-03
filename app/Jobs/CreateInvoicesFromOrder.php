@@ -43,6 +43,11 @@ class CreateInvoicesFromOrder implements ShouldQueue
 
             return;
         }
+        if (empty($order->payment_issuer)) {
+            Log::info("CreateInvoicesFromOrder: Order {$this->wpOrderId} has no payment_issuer, skipping invoice creation");
+
+            return;
+        }
         $customer = $order->customer;
 
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($this->wpOrderId);
