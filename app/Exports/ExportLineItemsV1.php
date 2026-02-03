@@ -10,6 +10,8 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class ExportLineItemsV1 implements FromCollection, ShouldAutoSize
 {
+    private Collection $data;
+
     public function __construct(
         private $lineItems,
     ) {

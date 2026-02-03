@@ -16,6 +16,12 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property int $id
+ * @property int|null $city_id
+ * @property int|null $state_id
+ * @property string|null $contact_name_1
+ */
 #[ObservedBy([ManufacturerObserver::class])]
 class Manufacturer extends Model
 {

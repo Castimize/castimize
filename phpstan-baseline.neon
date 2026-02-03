@@ -7,12 +7,6 @@ parameters:
 			path: app/DTO/Order/OrderDTO.php
 
 		-
-			message: '#^Access to an undefined property App\\Exports\\ExportLineItemsV1\:\:\$data\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Exports/ExportLineItemsV1.php
-
-		-
 			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
 			identifier: staticMethod.protected
 			count: 1
@@ -73,40 +67,10 @@ parameters:
 			path: app/Jobs/SyncInvoiceToExact.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Manufacturer\:\:\$city_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Manufacturer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Manufacturer\:\:\$state_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Models/Manufacturer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderQueue\:\:\$manufacturer_costs\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/OrderQueue.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderQueue\:\:\$target_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/OrderQueue.php
-
-		-
 			message: '#^Access to an undefined property \$this\(App\\Nova\\CustomerShipment\)\:\:\$tracking_number\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Nova/CustomerShipment.php
-
-		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: app/Nova/Filters/ManufacturerFilter.php
 
 		-
 			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
