@@ -16,6 +16,10 @@ parameters:
         - '#Access to an undefined property App\\Nova\\#'
         # Nova trait methods called on Nova resources
         - '#Call to an undefined method App\\Nova\\[^:]+::#'
+        # Third-party package internal error (ExchangeRates apiKey can be null from config)
+        -
+            message: '#Cannot assign null to property AshAllenDesign\\LaravelExchangeRates\\Drivers\\ExchangeRatesDataApi\\RequestBuilder::\$apiKey#'
+            path: app/Console/Commands/GetCurrencyHistoricalRates.php
 
     excludePaths:
         - app/Virtual/  # OpenAPI documentation classes
