@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Virtual\Resources;
+namespace App\OpenApi\Resources;
 
 use OpenApi\Annotations as OA;
 

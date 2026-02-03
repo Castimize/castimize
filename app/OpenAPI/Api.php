@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Virtual;
+namespace App\OpenApi;
 
 use OpenApi\Annotations as OA;
 
