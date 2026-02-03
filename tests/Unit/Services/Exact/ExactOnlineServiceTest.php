@@ -282,7 +282,7 @@ class ExactOnlineServiceTest extends TestCase
     // ========================================
 
     #[Test]
-    public function it_sets_correct_customer_data_on_account(): void
+    public function it_sets_correct_customer_data_on_new_account(): void
     {
         $account = Mockery::mock('Picqer\Financials\Exact\Account')->shouldIgnoreMissing();
 
@@ -305,7 +305,8 @@ class ExactOnlineServiceTest extends TestCase
             ],
         ];
 
-        $result = $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer]);
+        // isNewAccount = true, so Code should be set
+        $result = $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer, true]);
 
         $this->assertEquals(456, $result->Code);
         $this->assertEquals('Main Street 10', $result->AddressLine1);
@@ -317,6 +318,40 @@ class ExactOnlineServiceTest extends TestCase
         $this->assertEquals('jane@example.com', $result->Email);
         $this->assertEquals('+31612345678', $result->Phone);
         $this->assertEquals('NL123456789B01', $result->VATNumber);
+    }
+
+    #[Test]
+    public function it_does_not_set_code_when_updating_existing_account(): void
+    {
+        $account = Mockery::mock('Picqer\Financials\Exact\Account')->shouldIgnoreMissing();
+        // Set an existing Code on the account
+        $account->Code = 'EXISTING_CODE';
+
+        $customer = new Customer;
+        $customer->wpCustomer = [
+            'id' => 456,
+            'first_name' => 'Jane',
+            'last_name' => 'Smith',
+            'email' => 'jane@example.com',
+            'meta_data' => [],
+            'billing' => (object) [
+                'address_1' => 'Main Street 10',
+                'address_2' => 'Suite 5',
+                'city' => 'Rotterdam',
+                'country' => 'nl',
+                'postcode' => '5678CD',
+                'phone' => '+31612345678',
+            ],
+        ];
+
+        // isNewAccount = false (default), so Code should NOT be changed
+        $result = $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer, false]);
+
+        // Code should remain unchanged (not overwritten with wpCustomer['id'])
+        $this->assertEquals('EXISTING_CODE', $result->Code);
+        // Other fields should still be updated
+        $this->assertEquals('Main Street 10', $result->AddressLine1);
+        $this->assertEquals('Jane Smith', $result->Name);
     }
 
     #[Test]
@@ -497,6 +532,48 @@ class ExactOnlineServiceTest extends TestCase
         $this->expectExceptionMessage('Cannot sync customer to Exact: Name is empty for wp_id 555');
 
         $this->invokePrivateMethod($this->service, 'updateAccount', [$account, $customer]);
+    }
+
+    // ========================================
+    // removeAccountAttribute tests
+    // ========================================
+
+    #[Test]
+    public function it_removes_show_remark_for_sales_attribute(): void
+    {
+        // Create Account mock that extends the real class to test reflection
+        $connectionMock = Mockery::mock(\Picqer\Financials\Exact\Connection::class);
+
+        // Use reflection to create Account without calling constructor
+        $reflection = new ReflectionClass(\Picqer\Financials\Exact\Account::class);
+        $account = $reflection->newInstanceWithoutConstructor();
+
+        // Set the connection property
+        $connectionProperty = $reflection->getProperty('connection');
+        $connectionProperty->setValue($account, $connectionMock);
+
+        // Set attributes including ShowRemarkForSales
+        $attributesProperty = $reflection->getProperty('attributes');
+        $attributesProperty->setValue($account, [
+            'ID' => 'test-guid',
+            'Name' => 'Test Account',
+            'ShowRemarkForSales' => true,
+        ]);
+
+        // Verify the attribute exists before removal
+        $attributesBefore = $attributesProperty->getValue($account);
+        $this->assertArrayHasKey('ShowRemarkForSales', $attributesBefore);
+
+        // Call the private method to remove the attribute
+        $this->invokePrivateMethod($this->service, 'removeAccountAttribute', [$account, 'ShowRemarkForSales']);
+
+        // Verify the attribute was removed
+        $attributesAfter = $attributesProperty->getValue($account);
+        $this->assertArrayNotHasKey('ShowRemarkForSales', $attributesAfter);
+
+        // Verify other attributes are still present
+        $this->assertArrayHasKey('ID', $attributesAfter);
+        $this->assertArrayHasKey('Name', $attributesAfter);
     }
 
     // ========================================

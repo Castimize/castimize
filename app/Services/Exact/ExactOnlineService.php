@@ -133,9 +133,9 @@ class ExactOnlineService
             $account = $account->filter("ID eq guid'{$customer->exact_online_guid}'");
 
             if (count($account) > 0 && $account[0] instanceof Account) {
-                // now update account
+                // now update account (isNewAccount = false, don't update Code)
                 $account = $account[0];
-                $account = $this->updateAccount($account, $customer);
+                $account = $this->updateAccount($account, $customer, isNewAccount: false);
                 $account->save();
 
                 return $account;
@@ -150,7 +150,7 @@ class ExactOnlineService
         // $acc = $account->filter("ID eq guid'{$customer->exact_online_guid}'");
 
         try {
-            $account = $this->updateAccount($account, $customer);
+            $account = $this->updateAccount($account, $customer, isNewAccount: true);
             $account->save();
         } catch (Exception $exception) {
             Log::error('Customer WP id: '.$customer->wp_id.PHP_EOL.'Error: '.$exception->getMessage().PHP_EOL.print_r($account, true));
@@ -304,7 +304,7 @@ class ExactOnlineService
         $salesEntry = new SalesEntry($this->connection);
     }
 
-    private function updateAccount(Account $account, Customer $customer): Account
+    private function updateAccount(Account $account, Customer $customer, bool $isNewAccount = false): Account
     {
         $wpCustomer = $customer->wpCustomer;
         $billingVatNumber = null;
@@ -329,7 +329,10 @@ class ExactOnlineService
             throw new Exception("Cannot sync customer to Exact: Name is empty for wp_id {$wpCustomer['id']}");
         }
 
-        $account->Code = $wpCustomer['id'];
+        // Only set Code for new accounts - Code is unique in Exact and cannot be changed
+        if ($isNewAccount) {
+            $account->Code = $wpCustomer['id'];
+        }
         $account->AddressLine1 = $wpCustomer['billing']->address_1;
         $account->AddressLine2 = $wpCustomer['billing']->address_2;
         $account->ChamberOfCommerce = null;
@@ -343,8 +346,10 @@ class ExactOnlineService
         $account->Phone = $wpCustomer['billing']->phone;
         $account->SecurityLevel = 100;
         $account->VATNumber = $billingVatNumber;
-        // Unset ShowRemarkForSales to avoid "Ongeldige waarde: Opmerkingen weergeven" error
-        unset($account->ShowRemarkForSales);
+
+        // Remove ShowRemarkForSales from attributes to avoid "Ongeldige waarde: Opmerkingen weergeven" error
+        // Using reflection because the Picqer client doesn't have __unset and $attributes is protected
+        $this->removeAccountAttribute($account, 'ShowRemarkForSales');
 
         return $account;
     }
@@ -404,5 +409,18 @@ class ExactOnlineService
         throw new RuntimeException(__('VAT Code not found for :countryCode', [
             'countryCode' => $countryCode,
         ]));
+    }
+
+    /**
+     * Remove an attribute from a Picqer Exact model using reflection.
+     * The Picqer client doesn't have __unset and $attributes is protected.
+     */
+    private function removeAccountAttribute(Account $account, string $attributeName): void
+    {
+        $reflection = new \ReflectionClass($account);
+        $attributesProperty = $reflection->getProperty('attributes');
+        $attributes = $attributesProperty->getValue($account);
+        unset($attributes[$attributeName]);
+        $attributesProperty->setValue($account, $attributes);
     }
 }
