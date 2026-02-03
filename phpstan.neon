@@ -20,6 +20,7 @@ parameters:
     excludePaths:
         - app/Virtual/  # OpenAPI documentation classes
         - app/Console/Commands/Temp/  # Temporary migration scripts
+        - app/Console/Commands/GetCurrencyHistoricalRates.php  # Requires EXCHANGE_RATES_API_KEY env var
 
     # Treat phpdoc types as certain
     treatPhpDocTypesAsCertain: false
