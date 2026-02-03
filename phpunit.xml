@@ -23,6 +23,7 @@
             <directory suffix=".php">./bootstrap</directory>
             <directory suffix=".php">./builder</directory>
             <directory suffix=".php">./resources</directory>
+            <directory suffix=".php">./app/Virtual</directory>
         </exclude>
     </source>
     <php>
