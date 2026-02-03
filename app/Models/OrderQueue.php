@@ -18,6 +18,11 @@ use Illuminate\Support\Collection;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property int $id
+ * @property float|null $manufacturer_costs
+ * @property Carbon|null $target_date
+ */
 class OrderQueue extends Model
 {
     use HasFactory;

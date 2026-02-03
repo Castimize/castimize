@@ -10,6 +10,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property int $id
+ * @property string|null $address_line1
+ * @property string|null $address_line2
+ * @property string|null $postal_code
+ * @property \Illuminate\Database\Eloquent\Relations\Pivot|null $pivot
+ */
 class Address extends Model
 {
     use HasFactory;

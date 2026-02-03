@@ -12,6 +12,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property int $id
+ * @property int|null $logistics_zone_id
+ * @property int|null $currency_id
+ * @property string|null $name
+ * @property float|null $default_rate
+ * @property string|null $currency_code
+ * @property int|null $default_lead_time
+ * @property float|null $cc_threshold_1
+ * @property float|null $rate_increase_1
+ * @property float|null $cc_threshold_2
+ * @property float|null $rate_increase_2
+ * @property float|null $cc_threshold_3
+ * @property float|null $rate_increase_3
+ * @property float|null $calculated_total
+ */
 #[ObservedBy([ShippingFeeObserver::class])]
 class ShippingFee extends Model
 {

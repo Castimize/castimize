@@ -16,6 +16,12 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property int $id
+ * @property int|null $city_id
+ * @property int|null $state_id
+ * @property string|null $contact_name_1
+ */
 #[ObservedBy([ManufacturerObserver::class])]
 class Manufacturer extends Model
 {
@@ -132,7 +138,7 @@ class Manufacturer extends Model
     public function validateAddress(): void
     {
         $addressData = [
-            'name' => $this->contact_name1,
+            'name' => $this->contact_name_1,
             'company' => $this->name,
             'street1' => $this->address_line1,
             'street2' => $this->address_line2,
@@ -183,7 +189,7 @@ class Manufacturer extends Model
                     'name' => $cityName,
                 ], [
                     'name' => $cityName,
-                    'slug' => Str::slug($stateName),
+                    'slug' => Str::slug($cityName),
                     'state_id' => $this->state_id,
                     'country_id' => $this->country_id,
                 ]);

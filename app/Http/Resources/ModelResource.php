@@ -2,11 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Model;
 use App\Services\Admin\CalculatePricesService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @mixin Model
+ */
 class ModelResource extends JsonResource
 {
     public function toArray(Request $request): array

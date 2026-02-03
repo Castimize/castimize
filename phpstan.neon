@@ -1,0 +1,29 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - app/
+
+    # Level 0-9, start low and gradually increase
+    # Current: 1 (294 errors in baseline)
+    # Recommended progression: 1 -> 2 -> 3 -> 4 -> 5
+    level: 1
+
+    ignoreErrors:
+        # Nova-specific patterns that are hard to type
+        - '#Access to an undefined property App\\Nova\\#'
+        # Nova trait methods called on Nova resources
+        - '#Call to an undefined method App\\Nova\\[^:]+::#'
+
+    excludePaths:
+        - app/OpenApi/  # OpenAPI documentation classes
+        - app/Console/Commands/Temp/  # Temporary migration scripts
+        - app/Console/Commands/GetCurrencyHistoricalRates.php  # Requires EXCHANGE_RATES_API_KEY env var
+
+    # Treat phpdoc types as certain
+    treatPhpDocTypesAsCertain: false
+
+    # Report unmatched ignored errors
+    reportUnmatchedIgnoredErrors: false

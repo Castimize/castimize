@@ -18,6 +18,25 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property int $id
+ * @property float $service_fee
+ * @property float $service_fee_tax
+ * @property float $shipping_fee
+ * @property float $shipping_fee_tax
+ * @property float $discount_fee
+ * @property float $discount_fee_tax
+ * @property float $total
+ * @property float $total_tax
+ * @property float $total_refund
+ * @property float $total_refund_tax
+ * @property float $production_cost
+ * @property float $production_cost_tax
+ * @property string|null $billing_name
+ * @property string|null $billing_state
+ * @property string|null $shipping_name
+ * @property string|null $shipping_state
+ */
 #[ObservedBy([OrderObserver::class])]
 class Order extends Model
 {

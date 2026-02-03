@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Log;
 #[AllowDynamicProperties]
 class EtsyListingService
 {
+    private Etsy $etsy;
+
     public function __construct(
         protected Shop $shop,
     ) {

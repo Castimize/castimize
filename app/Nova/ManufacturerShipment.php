@@ -27,6 +27,10 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Nova;
 
+/**
+ * @property string|null $tracking_number
+ * @property string|null $tracking_url
+ */
 class ManufacturerShipment extends Resource
 {
     /**

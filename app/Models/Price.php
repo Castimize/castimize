@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property int $id
+ * @property float|null $calculated_total
+ */
 #[ObservedBy([PriceObserver::class])]
 class Price extends Model
 {

@@ -3,11 +3,15 @@
 namespace App\Http\Resources;
 
 use App\Enums\Shops\ShopOwnerShopsEnum;
+use App\Models\ShopOwner;
 use App\Services\Payment\Stripe\StripeService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin ShopOwner
+ */
 class ShopOwnerResource extends JsonResource
 {
     /**

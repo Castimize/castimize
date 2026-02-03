@@ -168,6 +168,8 @@ return [
     //    ],
 
     'redis' => [
+        'client' => env('REDIS_CLIENT', 'predis'),
+
         'cluster' => true,
 
         'options' => [

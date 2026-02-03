@@ -9,6 +9,13 @@ use Laravel\Nova\Resource as NovaResource;
 
 abstract class ManufacturerResource extends NovaResource
 {
+    /**
+     * Default ordering for index query.
+     *
+     * @var array<string, string>
+     */
+    public static $sort = [];
+
     public function __construct($resource = null)
     {
         Nova::withBreadcrumbs(false);

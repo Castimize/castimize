@@ -97,10 +97,11 @@ class AddressTransliterationService
             ? transliterator_transliterate($transliterator, $input)
             : $input;
 
-        $result = preg_replace('/[^\x20-\x7E]/', '', $result ?? $input);
-        $result = preg_replace('/\s+/', ' ', $result);
+        // preg_replace can return null on error, use input as fallback
+        $result = preg_replace('/[^\x20-\x7E]/', '', $result ?: $input) ?? $input;
+        $result = preg_replace('/\s+/', ' ', $result) ?? $result;
 
-        return trim($result ?? '');
+        return trim($result);
     }
 
     public function isAscii(string $input): bool

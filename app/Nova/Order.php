@@ -281,10 +281,11 @@ class Order extends Resource
 
     /**
      * Get the fields displayed by the resource on detail page.
-     *
-     * @return array
      */
-    public function fieldsForCreate(NovaRequest $request) {}
+    public function fieldsForCreate(NovaRequest $request): array
+    {
+        return [];
+    }
 
     /**
      * Get the fields displayed by the resource on detail page.

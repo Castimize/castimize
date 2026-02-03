@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Virtual\Models;
+namespace App\OpenApi\Models;
 
 use DateTime;
 use OpenApi\Annotations as OA;

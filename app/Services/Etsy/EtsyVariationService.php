@@ -40,7 +40,7 @@ class EtsyVariationService
 
     public function createVariationOptions(int $listingId)
     {
-        $materials = Material::all(['name'])->pluck('name')->toArray();
+        $materials = Material::pluck('name')->toArray();
 
         $payload = [
             [

@@ -6,6 +6,9 @@ use App\Models\Price;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Price
+ */
 class CalculatedPriceResource extends JsonResource
 {
     public $collects = Price::class;

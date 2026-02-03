@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Virtual\Controllers;
+namespace App\OpenApi\Controllers;
 
 use OpenApi\Annotations as OA;
 
