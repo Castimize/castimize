@@ -78,6 +78,7 @@
         "wildside/userstamps": "^2.4"
     },
     "require-dev": {
+        "cweagans/composer-patches": "^2.0",
         "fakerphp/faker": "^1.23",
         "larastan/larastan": "^3.0",
         "laravel/boost": "^1.1",
@@ -129,6 +130,11 @@
             "aliases": {
                 "ExactOnline": "App\\Services\\Exact\\LaravelExactOnlineFacade"
             }
+        },
+        "patches": {
+            "laravel/nova": {
+                "Laravel 12 FormData compatibility": "patches/nova-formdata-laravel12.patch"
+            }
         }
     },
     "config": {
@@ -137,7 +143,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "cweagans/composer-patches": true
         }
     },
     "minimum-stability": "stable",
