@@ -16,6 +16,7 @@ use App\Services\Woocommerce\WoocommerceApiService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -79,8 +80,18 @@ class GetEtsyReceipts extends Command
                                 // Check if order already exists (may have been created by WooCommerce webhook)
                                 $order = Order::where('wp_id', $orderDTO->wpId)->first();
                                 if ($order === null) {
-                                    $order = $ordersService->storeOrderFromDto($orderDTO);
-                                    $this->info('Castimize order created with id: '.$order->id);
+                                    try {
+                                        $order = $ordersService->storeOrderFromDto($orderDTO);
+                                        $this->info('Castimize order created with id: '.$order->id);
+                                    } catch (QueryException $e) {
+                                        if ($e->errorInfo[1] === 1062) {
+                                            // Created by webhook between our check and insert
+                                            $order = Order::where('wp_id', $orderDTO->wpId)->firstOrFail();
+                                            $this->info('Order already created by webhook: '.$order->id);
+                                        } else {
+                                            throw $e;
+                                        }
+                                    }
                                 } else {
                                     $this->info('Castimize order already exists with id: '.$order->id.' (created by webhook)');
                                 }
