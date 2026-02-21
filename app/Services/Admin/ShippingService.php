@@ -158,7 +158,9 @@ class ShippingService
         if (! $valid) {
             $message = __('The shipping to address is invalid with the following messages').PHP_EOL;
             foreach ($errorMessages as $errorMessage) {
-                $message .= $errorMessage['text'].PHP_EOL;
+                $source = $errorMessage['source'] ?? 'UNKNOWN';
+                $code = $errorMessage['code'] ?? 'UNKNOWN';
+                $message .= "[{$source} - {$code}] {$errorMessage['text']}".PHP_EOL;
             }
             throw new RuntimeException($message);
         }
@@ -208,8 +210,10 @@ class ShippingService
 
         if ($rate === null) {
             $errorMessages = [];
-            foreach ($shippoShipment['messages'] as $message) {
-                $errorMessages[] = $message['text'];
+            foreach ($shippoShipment['messages'] as $msg) {
+                $source = $msg['source'] ?? 'UNKNOWN';
+                $code = $msg['code'] ?? 'UNKNOWN';
+                $errorMessages[] = "[{$source} - {$code}] {$msg['text']}";
             }
             throw new Shippo_ApiError(
                 sprintf(
@@ -230,8 +234,10 @@ class ShippingService
         }
 
         $errorMessages = [];
-        foreach ($transaction['messages'] as $message) {
-            $errorMessages[] = $message['text'];
+        foreach ($transaction['messages'] as $msg) {
+            $source = $msg['source'] ?? 'UNKNOWN';
+            $code = $msg['code'] ?? 'UNKNOWN';
+            $errorMessages[] = "[{$source} - {$code}] {$msg['text']}";
         }
         if (! empty($errorMessages)) {
             throw new Shippo_ApiError(

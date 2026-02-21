@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use App\Enums\Shops\ShopOwnerShopsEnum;
+use App\Nova\Actions\ChangeOrderStatusAction;
 use App\Nova\Actions\OrderManualRefundAction;
 use App\Nova\Filters\CreatedAtDaterangepickerFilter;
 use App\Nova\Filters\StatusFilter;
@@ -362,6 +363,12 @@ class Order extends Resource
     public function actions(NovaRequest $request)
     {
         return [
+            (new ChangeOrderStatusAction)
+                ->showInline()
+                ->confirmText(__('Are you sure you want to change the status of this order?'))
+                ->confirmButtonText(__('Confirm'))
+                ->cancelButtonText(__('Cancel')),
+
             (new OrderManualRefundAction($this->model()))
                 ->showInline()
                 ->exceptOnIndex()
