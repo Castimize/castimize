@@ -6,6 +6,7 @@ use App\Models\CustomerShipment;
 use App\Models\OrderQueue;
 use App\Services\Admin\ShippingService;
 use JsonException;
+use Throwable;
 
 class CustomerShipmentObserver
 {
@@ -105,7 +106,16 @@ class CustomerShipmentObserver
             }
 
             $shippingService = app(ShippingService::class);
-            $response = $shippingService->createShippoCustomerShipment($customerShipment);
+            try {
+                $response = $shippingService->createShippoCustomerShipment($customerShipment);
+            } catch (Throwable $e) {
+                foreach ($customerShipment->selectedPOs as $selectedPO) {
+                    $selectedPO->customer_shipment_id = null;
+                    $selectedPO->save();
+                }
+                $customerShipment->deleteQuietly();
+                throw $e;
+            }
 
             if ($response['transaction'] && $response['transaction']['status'] === 'SUCCESS') {
                 $customerShipment->shippo_shipment_id = $response['shipment']['object_id'];
