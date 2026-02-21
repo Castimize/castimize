@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_shipment_id')->nullable()->index();
             $table->unsignedBigInteger('currency_id')->nullable()->index();
             $table->string('source')->default('wp');
-            $table->integer('wp_id')->nullable()->index();
+            $table->string('wp_id', 10)->nullable()->index();
             $table->string('order_number')->index();
             $table->string('order_key')->nullable();
             $table->string('status')->default('processing');
