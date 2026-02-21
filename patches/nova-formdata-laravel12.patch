@@ -1,0 +1,20 @@
+--- a/src/Fields/FormData.php
++++ b/src/Fields/FormData.php
+@@ -44,7 +44,15 @@ class FormData extends Fluent
+      * @param  array<string, mixed>  $fields
+      * @return static
+      */
+-    public static function make(NovaRequest $request, array $fields)
++    public static function make($attributes = [], $fields = null)
+     {
++        // Laravel 12 compatibility: handle both old Nova signature and new Fluent signature
++        if (!$attributes instanceof NovaRequest) {
++            return parent::make($attributes);
++        }
++
++        $request = $attributes;
++        $fields = $fields ?? [];
++
+         if (! is_null($request->resource) && ! is_null($request->resourceId)) {
+             $fields["resource:{$request->resource}"] = $request->resourceId;
+         }
