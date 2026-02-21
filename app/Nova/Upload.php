@@ -20,7 +20,8 @@ use Laravel\Nova\Panel;
 
 class Upload extends Resource
 {
-    use CommonMetaDataTrait; use OrderQueueStatusFieldTrait;
+    use CommonMetaDataTrait;
+    use OrderQueueStatusFieldTrait;
 
     /**
      * The model the resource corresponds to.
@@ -54,6 +55,14 @@ class Upload extends Resource
      */
     public static $sort = [
         'id' => 'desc',
+    ];
+
+    /**
+     * @var string[]
+     */
+    public static $with = [
+        'orderQueue.manufacturer',
+        'material',
     ];
 
     /**

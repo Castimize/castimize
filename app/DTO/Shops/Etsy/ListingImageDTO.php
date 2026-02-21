@@ -6,8 +6,9 @@ namespace App\DTO\Shops\Etsy;
 
 use App\Models\Model;
 use Illuminate\Support\Facades\Storage;
+use Spatie\LaravelData\Data;
 
-class ListingImageDTO
+class ListingImageDTO extends Data
 {
     public function __construct(
         public int $shopId,
@@ -27,8 +28,9 @@ class ListingImageDTO
         return new self(
             shopId: $shopId,
             listingId: $model->shopListingModel?->shop_listing_id,
-            image: Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? sprintf('%s/%s', env('AWS_URL'), $thumb) : '',
-            //            image: Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? Storage::disk(env('FILESYSTEM_DISK'))->get($thumb) : '',
+            image: Storage::disk(config('filesystems.default'))->exists($thumb)
+                ? sprintf('%s/%s', config('filesystems.disks.s3.url'), $thumb)
+                : '',
             listingImageId: $listingImageId,
             altText: $model->model_name ?? $model->name,
         );

@@ -72,6 +72,7 @@ class SelectManufacturerWithOverview extends Field
         if ($saveAsJson) {
             return $value;
         }
+
         return is_array($value) || is_object($value) ? (array) $value : json_decode($value);
     }
 
@@ -82,9 +83,9 @@ class SelectManufacturerWithOverview extends Field
 
         $value = is_null($value) ? ($this->nullable ? $value : $value = []) : $value;
         $value = is_array($value) ? $value : explode(',', $value);
-//        if (count($value) === 0) {
-//            throw new \Exception(__('Please select PO\'s'));
-//        }
+        //        if (count($value) === 0) {
+        //            throw new \Exception(__('Please select PO\'s'));
+        //        }
         $model->{$attribute} = ($saveAsJson || is_null($value)) ? $value : json_encode($value);
     }
 
@@ -93,8 +94,10 @@ class SelectManufacturerWithOverview extends Field
         if (! empty($model) && ! is_array($model) && method_exists($model, 'getCasts')) {
             $casts = $model->getCasts();
             $isCastedToArray = ($casts[$attribute] ?? null) === 'array';
+
             return $this->saveAsJSON || $isCastedToArray;
         }
+
         return false;
     }
 
@@ -136,6 +139,7 @@ class SelectManufacturerWithOverview extends Field
                         return false;
                     }
                 }
+
                 return true;
             });
 
@@ -157,6 +161,7 @@ class SelectManufacturerWithOverview extends Field
     public function saveAsJSON(bool $saveAsJSON = true)
     {
         $this->saveAsJSON = $saveAsJSON;
+
         return $this;
     }
 }

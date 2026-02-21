@@ -34,6 +34,7 @@ class PaymentFee extends Resource
     public function title()
     {
         $paymentMethodsOptions = PaymentMethodsEnum::options();
+
         return ! empty($this->payment_method) && array_key_exists($this->payment_method, $paymentMethodsOptions) ? $paymentMethodsOptions[$this->payment_method] : $this->id;
     }
 
@@ -133,7 +134,7 @@ class PaymentFee extends Resource
                 ->onlyOnForms(),
 
             Text::make(__('Fee'), function () {
-                return $this->fee && $this->type === PaymentFeeTypesEnum::FIXED->value ? currencyFormatter((float) $this->fee, $this->currency_code) : $this->fee . '%';
+                return $this->fee && $this->type === PaymentFeeTypesEnum::FIXED->value ? currencyFormatter((float) $this->fee, $this->currency_code) : $this->fee.'%';
             })
                 ->exceptOnForms()
                 ->sortable(),

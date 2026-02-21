@@ -3,18 +3,20 @@
 namespace App\Console\Commands;
 
 use App\DTO\Order\OrderDTO;
+use App\Enums\Admin\PaymentMethodsEnum;
 use App\Enums\Shops\ShopOwnerShopsEnum;
+use App\Models\Order;
 use App\Models\Shop;
 use App\Models\ShopOrder;
 use App\Services\Admin\OrdersService;
 use App\Services\Admin\PaymentService;
 use App\Services\Admin\ShopOrderService;
 use App\Services\Etsy\EtsyService;
-use App\Services\Payment\Stripe\StripeService;
 use App\Services\Woocommerce\WoocommerceApiService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -43,8 +45,8 @@ class GetEtsyReceipts extends Command
         WoocommerceApiService $woocommerceApiService,
         ShopOrderService $shopOrderService,
         PaymentService $paymentService,
-    ) {
-        $date = now()->subDays(14);
+    ): int {
+        $minCreatedTimestamp = now()->subDays(14)->timestamp;
         $shops = Shop::with(['shopOwner.customer'])
             ->where('active', true)
             ->where('shop', ShopOwnerShopsEnum::Etsy->value)
@@ -53,7 +55,7 @@ class GetEtsyReceipts extends Command
         foreach ($shops as $shop) {
             try {
                 $receipts = $etsyService->getShopReceipts($shop, [
-                    'min_created' => $date,
+                    'min_created' => $minCreatedTimestamp,
                 ]);
                 $this->info(sprintf('Found %s receipts for %s', $receipts->count(), $shop->id));
                 foreach ($receipts->data as $receipt) {
@@ -63,31 +65,62 @@ class GetEtsyReceipts extends Command
                     if ($shopOrder === null) {
                         $lines = $etsyService->getShopListingsFromReceipt($shop, $receipt);
                         if (count($lines) > 0) {
-                            DB::beginTransaction();
                             $wcOrder = null;
                             try {
+                                DB::beginTransaction();
                                 // Create OrderDTO from Etsy receipt
                                 $orderDTO = OrderDTO::fromEtsyReceipt($shop, $receipt, $lines);
                                 // Use mandate to pay the order
                                 $wcOrder = $woocommerceApiService->createOrder($orderDTO);
-                                $this->info('Woocommerce order created with id: ' . $wcOrder['id']);
+                                $this->info('Woocommerce order created with id: '.$wcOrder['id']);
 
                                 $orderDTO->orderNumber = (int) $wcOrder['number'];
                                 $orderDTO->wpId = (int) $wcOrder['id'];
 
-                                $order = $ordersService->storeOrderFromDto($orderDTO);
-                                $this->info('Castimize order created with id: ' . $order->id);
+                                // Check if order already exists (may have been created by WooCommerce webhook)
+                                $order = Order::where('wp_id', $orderDTO->wpId)->first();
+                                if ($order === null) {
+                                    try {
+                                        $order = $ordersService->storeOrderFromDto($orderDTO);
+                                        $this->info('Castimize order created with id: '.$order->id);
+                                    } catch (QueryException $e) {
+                                        if ($e->errorInfo[1] === 1062) {
+                                            // Created by webhook between our check and insert
+                                            $order = Order::where('wp_id', $orderDTO->wpId)->firstOrFail();
+                                            $this->info('Order already created by webhook: '.$order->id);
+                                        } else {
+                                            throw $e;
+                                        }
+                                    }
+                                } else {
+                                    $this->info('Castimize order already exists with id: '.$order->id.' (created by webhook)');
+                                }
 
                                 $newShopOrder = $shopOrderService->createShopOrder($shop, $receipt, $wcOrder);
-                                $this->info('Shop order created with id: ' . $newShopOrder->id);
+                                $this->info('Shop order created with id: '.$newShopOrder->id);
 
                                 $paymentIntent = $paymentService->createStripePaymentIntent($orderDTO, $shop->shopOwner->customer);
-                                $this->info('Payment intent: ' . print_r($paymentIntent, true));
+                                $this->info('Payment intent: '.print_r($paymentIntent, true));
+
+                                // Get the actual Stripe payment method type and map to WooCommerce payment issuer
+                                $stripePaymentMethodType = $paymentIntent->payment_method_types[0] ?? 'card';
+                                $paymentIssuer = PaymentMethodsEnum::getWoocommercePaymentMethod($stripePaymentMethodType);
+
+                                // Update local order with correct Stripe payment issuer
+                                $order->update([
+                                    'payment_method' => 'Stripe',
+                                    'payment_issuer' => $paymentIssuer,
+                                    'payment_intent_id' => $paymentIntent->id,
+                                ]);
+
                                 if ($paymentIntent->status === 'succeeded') {
                                     $orderDTO->isPaid = true;
                                     $orderDTO->paidAt = Carbon::createFromTimestamp($paymentIntent->created, 'GMT')
-                                        ?->setTimezone(env('APP_TIMEZONE'))
-                                        ->format('Y-m-d H:i:s');
+                                        ?->setTimezone(config('app.timezone'));
+                                    $order->update([
+                                        'is_paid' => true,
+                                        'paid_at' => $orderDTO->paidAt,
+                                    ]);
                                 }
                                 $orderDTO->metaData[] = [
                                     'key' => '_payment_intent_id',
@@ -108,18 +141,23 @@ class GetEtsyReceipts extends Command
                                 }
 
                                 DB::rollBack();
-                                dd($e->getMessage() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getTraceAsString());
+                                Log::channel('etsy')->error("GetEtsyReceipts: Failed to process receipt {$receipt->receipt_id}: ".$e->getMessage().PHP_EOL.$e->getTraceAsString());
+                                $this->error("Failed to process receipt {$receipt->receipt_id}: ".$e->getMessage());
                             }
+                        } else {
+                            $this->warn("Receipt {$receipt->receipt_id} has no matching listings, skipping");
                         }
                     } else {
-                        $this->info('Shop order found with id: ' . $shopOrder->id);
+                        $this->info('Shop order found with id: '.$shopOrder->id);
                     }
                 }
             } catch (Exception $e) {
-                Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL . $e->getFile() . PHP_EOL . $e->getLine());
+                $shopName = $shop->shop_oauth['shop_name'] ?? $shop->shop_oauth['shop_id'] ?? 'unknown';
+                Log::channel('etsy')->error("GetEtsyReceipts failed for shop '{$shopName}' (ID: {$shop->id}): ".$e->getMessage().PHP_EOL.$e->getTraceAsString());
+                $this->error("Failed for shop '{$shopName}' (ID: {$shop->id}): ".$e->getMessage());
             }
         }
 
-        return true;
+        return self::SUCCESS;
     }
 }

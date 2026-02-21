@@ -37,8 +37,8 @@ class InvoicesService
             $totalTax = $wpOrder['total_tax'];
         } else {
             $creditNoteDocument = WcOrderDocumentTypesEnum::CreditNote->value;
-            $invoiceNumber = $wpOrder['documents']->$creditNoteDocument->number;
-            $invoiceDate = Carbon::createFromTimestamp($wpOrder['documents']->$creditNoteDocument->date_timestamp);
+            $invoiceNumber = $wpOrder['documents']->$creditNoteDocument[0]->number;
+            $invoiceDate = Carbon::createFromTimestamp($wpOrder['documents']->$creditNoteDocument[0]->date_timestamp);
             $total = 0.00;
             foreach ($wpOrder['refunds'] as $refund) {
                 $total += abs($refund->total);
@@ -48,6 +48,16 @@ class InvoicesService
 
         $invoice = Invoice::where('invoice_number', $invoiceNumber)->first();
         if ($invoice) {
+            // If invoice exists but hasn't been synced to Exact, trigger sync
+            if ($invoice->exactSalesEntries()->count() === 0) {
+                Bus::chain([
+                    new SyncCustomerToExact($customer->wp_id),
+                    new SyncInvoiceToExact($invoice, $customer->wp_id),
+                ])
+                    ->onQueue('exact')
+                    ->dispatch();
+            }
+
             return $invoice;
         }
 
@@ -86,19 +96,35 @@ class InvoicesService
         ]);
 
         if ($debit) {
-            foreach ($order->uploads as $upload) {
+            if ($order->uploads()->count() > 0) {
+                foreach ($order->uploads as $upload) {
+                    $invoice->lines()->create([
+                        'order_id' => $order->id,
+                        'upload_id' => $upload->id,
+                        'customer_id' => $customer->id,
+                        'currency_id' => $upload->currency_id,
+                        'upload_name' => $upload->name,
+                        'material_name' => $upload->material_name,
+                        'quantity' => $upload->quantity,
+                        'total' => $upload->total,
+                        'total_tax' => $upload->total_tax,
+                        'currency_code' => $upload->currency_code,
+                        'meta_data' => $upload->meta_data,
+                    ]);
+                }
+            } else {
                 $invoice->lines()->create([
                     'order_id' => $order->id,
-                    'upload_id' => $upload->id,
+                    'upload_id' => null,
                     'customer_id' => $customer->id,
-                    'currency_id' => $upload->currency_id,
-                    'upload_name' => $upload->name,
-                    'material_name' => $upload->material_name,
-                    'quantity' => $upload->quantity,
-                    'total' => $upload->total,
-                    'total_tax' => $upload->total_tax,
-                    'currency_code' => $upload->currency_code,
-                    'meta_data' => $upload->meta_data,
+                    'currency_id' => $order->currency_id,
+                    'upload_name' => 'Fee',
+                    'material_name' => '-',
+                    'quantity' => 1,
+                    'total' => $total,
+                    'total_tax' => $totalTax,
+                    'currency_code' => $order->currency_code,
+                    'meta_data' => null,
                 ]);
             }
         } else {

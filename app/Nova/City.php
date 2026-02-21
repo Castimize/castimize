@@ -48,6 +48,14 @@ class City extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'state',
+        'country',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array

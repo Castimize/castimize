@@ -3,6 +3,7 @@
 namespace App\Traits\Nova;
 
 use App\Models\User;
+use App\Nova\User as NovaUser;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Trix;
@@ -19,7 +20,7 @@ trait CommonMetaDataTrait
         if (! $showCreatedAtOnIndex) {
             $createdAt->onlyOnDetail();
         }
-        $creator = BelongsTo::make(__('By'), 'creator', __CLASS__)
+        $creator = BelongsTo::make(__('By'), 'creator', NovaUser::class)
             ->displayUsing(fn ($user) => $user ? $user->name : '-')
             ->hideWhenCreating()
             ->hideWhenUpdating()
@@ -34,7 +35,7 @@ trait CommonMetaDataTrait
         if (! $showUpdatedAtOnIndex) {
             $updatedAt->onlyOnDetail();
         }
-        $editor = BelongsTo::make(__('By'), 'editor', __CLASS__)
+        $editor = BelongsTo::make(__('By'), 'editor', NovaUser::class)
             ->displayUsing(fn ($user) => $user ? $user->name : '-')
             ->hideWhenCreating()
             ->hideWhenUpdating()
@@ -43,6 +44,7 @@ trait CommonMetaDataTrait
         if (! $showEditorOnIndex) {
             $editor->onlyOnDetail();
         }
+
         return [
             $createdAt,
             $creator,
@@ -54,15 +56,15 @@ trait CommonMetaDataTrait
                 ->hideWhenUpdating()
                 ->onlyOnDetail(),
 
-            BelongsTo::make(__('By'), 'destroyer', __CLASS__)
+            BelongsTo::make(__('By'), 'destroyer', NovaUser::class)
                 ->displayUsing(fn ($user) => $user ? $user->name : '-')
                 ->hideWhenCreating()
                 ->hideWhenUpdating()
                 ->onlyOnDetail(),
 
-            Trix::make(__('Changes'), function() {
+            Trix::make(__('Changes'), function () {
                 $history = $this->revisionHistory()->getResults()->reverse();
-                $display = "";
+                $display = '';
                 $systemUser = User::find(1);
 
                 foreach ($history as $revision) {
@@ -70,20 +72,18 @@ trait CommonMetaDataTrait
                     if (! $user) {
                         $user = $systemUser;
                     }
-                    $name_pattern = " - <span style='color:green; font-weight:bold'>" . $user->name . "</span> - ";
-                    if($revision->key === 'created_at' && ! $revision->old_value) {
-                        $display .= $revision->created_at . $name_pattern . "<span style='color:blue'>" . __('Creation') . "</span></br>";
-                    }
-                    else if($revision->key === 'deleted_at' && ! $revision->old_value) {
-                        $display .= $revision->created_at . $name_pattern . "<span style='color:red'>" . __('Deletion') . "</span></br>";
-                    }
-                    else if($revision->key === 'deleted_at' && $revision->old_value) {
-                        $display .= $revision->created_at . $name_pattern . "<span style='color:blue'>" . __('Restoration') . "</span></br>";
-                    }
-                    else {
-                        $display .= $revision->created_at . $name_pattern . __('Field') . " <b>" . $revision->fieldName() . "</b> " . __('changed from') . " \"<span style='color:red'>" . $revision->oldValue() . "</span>\" " . __('to') . " \"<span style='color:blue'>" . $revision->newValue() . "</span>\"</br>";
+                    $name_pattern = " - <span style='color:green; font-weight:bold'>".$user->name.'</span> - ';
+                    if ($revision->key === 'created_at' && ! $revision->old_value) {
+                        $display .= $revision->created_at.$name_pattern."<span style='color:blue'>".__('Creation').'</span></br>';
+                    } elseif ($revision->key === 'deleted_at' && ! $revision->old_value) {
+                        $display .= $revision->created_at.$name_pattern."<span style='color:red'>".__('Deletion').'</span></br>';
+                    } elseif ($revision->key === 'deleted_at' && $revision->old_value) {
+                        $display .= $revision->created_at.$name_pattern."<span style='color:blue'>".__('Restoration').'</span></br>';
+                    } else {
+                        $display .= $revision->created_at.$name_pattern.__('Field').' <b>'.$revision->fieldName().'</b> '.__('changed from')." \"<span style='color:red'>".$revision->oldValue().'</span>" '.__('to')." \"<span style='color:blue'>".$revision->newValue().'</span>"</br>';
                     }
                 }
+
                 return $display;
 
             })->onlyOnDetail(),

@@ -7,7 +7,8 @@ namespace App\Services\Etsy\Resources;
 use Etsy\Collection;
 use Etsy\Resource;
 
-class ListingVariationOption extends Resource {
+class ListingVariationOption extends Resource
+{
     /**
      * @var array
      */

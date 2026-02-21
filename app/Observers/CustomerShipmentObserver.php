@@ -6,11 +6,13 @@ use App\Models\CustomerShipment;
 use App\Models\OrderQueue;
 use App\Services\Admin\ShippingService;
 use JsonException;
+use Throwable;
 
 class CustomerShipmentObserver
 {
     /**
      * Handle the CustomerShipment "creating" event.
+     *
      * @throws JsonException
      */
     public function creating(CustomerShipment $customerShipment): void
@@ -84,6 +86,9 @@ class CustomerShipmentObserver
             $totalParts = 0;
             $totalCosts = 0;
             foreach ($orderQueues as $orderQueue) {
+                if ($orderQueue->upload === null) {
+                    continue;
+                }
                 $totalParts += $orderQueue->upload->model_parts;
                 $totalCosts += $orderQueue->upload->total;
             }
@@ -101,7 +106,16 @@ class CustomerShipmentObserver
             }
 
             $shippingService = app(ShippingService::class);
-            $response = $shippingService->createShippoCustomerShipment($customerShipment);
+            try {
+                $response = $shippingService->createShippoCustomerShipment($customerShipment);
+            } catch (Throwable $e) {
+                foreach ($customerShipment->selectedPOs as $selectedPO) {
+                    $selectedPO->customer_shipment_id = null;
+                    $selectedPO->save();
+                }
+                $customerShipment->deleteQuietly();
+                throw $e;
+            }
 
             if ($response['transaction'] && $response['transaction']['status'] === 'SUCCESS') {
                 $customerShipment->shippo_shipment_id = $response['shipment']['object_id'];
@@ -122,8 +136,8 @@ class CustomerShipmentObserver
 
     public function deleted(CustomerShipment $customerShipment): void
     {
-       $customerShipment->orderQueues()->update([
-           'customer_shipment_id' => null,
-       ]);
+        $customerShipment->orderQueues()->update([
+            'customer_shipment_id' => null,
+        ]);
     }
 }

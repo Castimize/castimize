@@ -28,7 +28,7 @@ class UpdateOrderFromDTO implements ShouldQueue
         public OrderDTO $orderDto,
         public ?int $logRequestId = null,
     ) {
-        $this->ordersService = new OrdersService();
+        $this->ordersService = new OrdersService;
     }
 
     /**
@@ -45,13 +45,13 @@ class UpdateOrderFromDTO implements ShouldQueue
         try {
             $this->ordersService->updateOrderFromDto($order, $this->orderDto);
         } catch (Throwable $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::channel('orders')->error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::channel('orders')->error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

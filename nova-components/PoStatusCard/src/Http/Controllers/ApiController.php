@@ -6,6 +6,7 @@ use App\Models\OrderQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 /**
@@ -20,21 +21,29 @@ class ApiController extends Controller
      */
     public function getTotals(NovaRequest $request): JsonResponse
     {
-        $totals = [];
+        $isManufacturer = auth()->user()->hasRole('manufacturer');
+        $manufacturerId = $isManufacturer ? auth()->user()->manufacturer->id : null;
 
-        foreach ($request->statuses as $slug => $status) {
-            $query = OrderQueue::with(['order', 'orderQueueStatuses'])
-                ->whereHasLastOrderQueueStatus($slug)
-                ->whereHas('order', function (Builder $query) {
-                    $query->removeTestEmailAddresses('email')
-                        ->removeTestCustomerIds('customer_id');
-                });
+        $cacheKey = 'po_status_totals_'.($manufacturerId ?? 'admin').'_'.md5(json_encode(array_keys($request->statuses)));
 
-            if (auth()->user()->hasRole('manufacturer')) {
-                $query->where('manufacturer_id', auth()->user()->manufacturer->id);
+        $totals = Cache::remember($cacheKey, 30, function () use ($request, $isManufacturer, $manufacturerId) {
+            $totals = [];
+
+            foreach ($request->statuses as $slug => $status) {
+                $query = OrderQueue::whereHasLastOrderQueueStatus($slug)
+                    ->whereHas('order', function (Builder $query) {
+                        $query->removeTestEmailAddresses('email')
+                            ->removeTestCustomerIds('customer_id');
+                    });
+
+                if ($isManufacturer) {
+                    $query->where('manufacturer_id', $manufacturerId);
+                }
+                $totals[$slug] = $query->count();
             }
-            $totals[$slug] = $query->count();
-        }
+
+            return $totals;
+        });
 
         return response()->json([
             'totals' => $totals,

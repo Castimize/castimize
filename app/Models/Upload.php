@@ -16,6 +16,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property int $id
+ * @property float $subtotal
+ * @property float $subtotal_tax
+ * @property float $total
+ * @property float $total_tax
+ * @property float $total_refund
+ * @property float $total_refund_tax
+ * @property string|null $status_slug
+ * @property Carbon|null $status_created_at
+ */
 #[ObservedBy([UploadObserver::class])]
 class Upload extends Model
 {

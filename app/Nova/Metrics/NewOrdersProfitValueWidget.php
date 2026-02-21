@@ -28,6 +28,14 @@ class NewOrdersProfitValueWidget extends ValueWidget
                 ->removeTestEmailAddresses('email')
         )->get();
 
+        // Preload currency rates for all unique currencies
+        $currencies = $orders->flatMap(fn ($order) => $order->uploads->pluck('currency_code'))
+            ->unique()
+            ->filter()
+            ->values()
+            ->toArray();
+        $currencyService->preloadRates($currencies);
+
         $total = 0;
         foreach ($orders as $order) {
             $uploadTotal = 0;

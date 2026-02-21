@@ -55,6 +55,13 @@ class ShopOrder extends Resource
         'id' => 'desc',
     ];
 
+    /**
+     * @var string[]
+     */
+    public static $with = [
+        'order',
+    ];
+
     public static function authorizedToCreate(Request $request)
     {
         return false;

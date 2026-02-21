@@ -54,9 +54,9 @@ class EtsySyncModelsAction extends Action
      */
     public function fields(NovaRequest $request)
     {
-        $customer = Customer::find(8);
+        $customer = Customer::with('shopOwner.shops')->find(8);
         $shop = $customer->shopOwner->shops->first();
-        $taxonomyAsSelect = (new EtsyService())->getTaxonomyAsSelect($shop);
+        $taxonomyAsSelect = (new EtsyService)->getTaxonomyAsSelect($shop);
 
         $options = [];
         foreach ($taxonomyAsSelect as $id => $taxonomy) {
@@ -65,7 +65,7 @@ class EtsySyncModelsAction extends Action
             if (count($fullPath) > 0) {
                 foreach ($fullPath as $pathId) {
                     if (! empty($pathId) && $pathId != $id) {
-                        $fullPathName .= $taxonomyAsSelect[$pathId]['name'] . ' > ';
+                        $fullPathName .= $taxonomyAsSelect[$pathId]['name'].' > ';
                     }
                 }
                 $fullPathName = substr($fullPathName, 0, -3);

@@ -3,11 +3,15 @@
 namespace App\Http\Resources;
 
 use App\Enums\Shops\ShopOwnerShopsEnum;
+use App\Models\ShopOwner;
 use App\Services\Payment\Stripe\StripeService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin ShopOwner
+ */
 class ShopOwnerResource extends JsonResource
 {
     /**
@@ -25,12 +29,14 @@ class ShopOwnerResource extends JsonResource
                 'vat_number' => null,
                 'stripe_id' => null,
                 'mandate' => [],
+                'payment_method_chargable' => false,
+                'payment_method_accepted_at' => null,
                 'shops' => [],
                 'shops_list' => ShopOwnerShopsEnum::getList(),
             ];
         }
 
-        $stripeService = new StripeService();
+        $stripeService = new StripeService;
         $mandate = [];
         $paymentMethodChargable = false;
         $paymentMethod = null;

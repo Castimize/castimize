@@ -12,8 +12,8 @@ class ReprintCulprit extends Model
 {
     use HasFactory;
     use RevisionableTrait;
-    use Userstamps;
     use SoftDeletes;
+    use Userstamps;
 
     protected $revisionForceDeleteEnabled = true;
 

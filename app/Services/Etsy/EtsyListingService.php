@@ -14,10 +14,16 @@ use Illuminate\Support\Facades\Log;
 #[AllowDynamicProperties]
 class EtsyListingService
 {
+    private Etsy $etsy;
+
     public function __construct(
         protected Shop $shop,
     ) {
-        $this->etsy = new Etsy($this->shop->shop_oauth['client_id'], $this->shop->shop_oauth['access_token']);
+        $this->etsy = new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: config('services.shops.etsy.client_secret'),
+            api_key: $shop->shop_oauth['access_token'],
+        );
     }
 
     public function getListings(): Collection

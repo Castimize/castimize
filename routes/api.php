@@ -5,7 +5,7 @@ use App\Http\Middleware\RequestLogger;
 use App\Http\Middleware\ValidateWcWebhookSignature;
 use Illuminate\Support\Facades\Route;
 
-//Route::get('/user', [UsersApiController::class, 'show'])->can('viewUser')->middleware('auth:sanctum');
+// Route::get('/user', [UsersApiController::class, 'show'])->can('viewUser')->middleware('auth:sanctum');
 
 Route::group([
     'middleware' => [RequestLogger::class],
@@ -72,6 +72,7 @@ Route::group([
             Route::get('etsy/{customerId}/taxonomy', 'EtsyApiController@getTaxonomy')->name('api.etsy.get-taxonomy');
             Route::get('etsy/{customerId}/shop', 'EtsyApiController@getShop')->name('api.etsy.get-shop');
             Route::get('etsy/{customerId}/shop/authorization-url', 'EtsyApiController@getShopAuthorizationUrl')->name('api.etsy.get-shop-authorization-url');
+            Route::withoutMiddleware(['auth:sanctum', AuthGates::class])->get('etsy/{customerId}/shop/authorization-url-na', 'EtsyApiController@getShopAuthorizationUrl')->name('api.etsy.get-shop-authorization-url-no-api');
             Route::get('etsy/{customerId}/shop/return-policies', 'EtsyApiController@getShopReturnPolicies')->name('api.etsy.get-shop-return-policies');
             Route::get('etsy/{customerId}/shop/return-policies/{returnPolicyId}', 'EtsyApiController@getShopReturnPolicy')->name('api.etsy.get-shop-return-policy');
             Route::post('etsy/{customerId}/shop/return-policies', 'EtsyApiController@createShopReturnPolicy')->name('api.etsy.create-shop-return-policy');

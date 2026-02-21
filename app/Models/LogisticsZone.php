@@ -26,7 +26,7 @@ class LogisticsZone extends Model
      *
      * @var array<int, string>
      */
-    protected  $fillable = [
+    protected $fillable = [
         'name',
         'shipping_servicelevel_token',
     ];

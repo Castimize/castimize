@@ -102,7 +102,7 @@ class ShopOwnersApiController extends ApiController
 
         $shopOwner = $customer->shopOwner;
 
-        if ($request->billing_eu_vat_number && $request->billing_eu_vat_number !== $customer->vat_numnber) {
+        if ($request->billing_eu_vat_number && $request->billing_eu_vat_number !== $customer->vat_number) {
             $this->customersService->updateCustomer(
                 request: $request,
                 customer: $customer,

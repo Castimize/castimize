@@ -2,10 +2,14 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Upload;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @mixin Upload
+ */
 class UploadResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -26,8 +30,8 @@ class UploadResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'raw_file_name' => str_replace('wp-content/uploads/p3d/', '', $this->file_name),
-            'file_url' => sprintf('%s/%s', env('AWS_URL'), $this->file_name),
-            'file_thumbnail' => Storage::disk(env('FILESYSTEM_DISK'))->exists($thumb) ? sprintf('%s/%s', env('AWS_URL'), $thumb) : '',
+            'file_url' => sprintf('%s/%s', config('filesystems.disks.s3.url'), $this->file_name),
+            'file_thumbnail' => Storage::disk(config('filesystems.default'))->exists($thumb) ? sprintf('%s/%s', config('filesystems.disks.s3.url'), $thumb) : '',
             'model_volume_cc' => $this->model_volume_cc,
             'model_x_length' => $this->model_x_length,
             'model_y_length' => $this->model_y_length,

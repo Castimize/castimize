@@ -65,6 +65,10 @@ class RevenueCostsProfitLineChartWidget extends LineChartWidget
 
         $rows = $query->get();
 
+        // Preload currency rates for all unique currencies
+        $currencies = $rows->pluck('currency_code')->unique()->filter()->values()->toArray();
+        $currencyService->preloadRates($currencies);
+
         $converted = [];
         foreach ($rows as $row) {
             $rev = $currencyService->convertCurrency($row->currency_code, config('app.currency'), (float) $row->revenue);

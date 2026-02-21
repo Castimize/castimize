@@ -6,6 +6,7 @@ use App\Models\OrderQueue;
 use App\Models\RejectionReason;
 use App\Services\Admin\OrderQueuesService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
@@ -34,7 +35,10 @@ class PoRejectByManufacturerAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService();
+        // Eager load relationships to avoid N+1 queries
+        $models->load('orderQueueStatuses.orderStatus');
+
+        $orderQueuesService = new OrderQueuesService;
         foreach ($models as $model) {
             $hasEndStatus = [];
             /** @var $model OrderQueue */
@@ -56,7 +60,7 @@ class PoRejectByManufacturerAction extends Action
             time(),
             $fields->photo->extension()
         );
-        $fullFileName = 'admin/rejections/' . $fileName;
+        $fullFileName = 'admin/rejections/'.$fileName;
         Storage::disk('r2_private')->putFileAs('admin/rejections/', $fields->photo, $fileName);
 
         foreach ($models as $model) {
@@ -87,7 +91,7 @@ class PoRejectByManufacturerAction extends Action
         return [
             Select::make(__('Reason'), 'rejection_reason_id')
                 ->options(
-                    RejectionReason::all()->pluck('reason', 'id')->toArray()
+                    Cache::remember('rejection_reasons_options', 3600, fn () => RejectionReason::pluck('reason', 'id')->toArray())
                 )->displayUsingLabels(),
 
             Textarea::make(__('Extra note'), 'note_manufacturer'),

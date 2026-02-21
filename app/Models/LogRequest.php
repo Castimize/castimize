@@ -25,7 +25,7 @@ class LogRequest extends Model
      *
      * @var array<int, string>
      */
-    protected  $fillable = [
+    protected $fillable = [
         'type',
         'path_info',
         'request_uri',

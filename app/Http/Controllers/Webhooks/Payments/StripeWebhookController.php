@@ -6,6 +6,7 @@ use App\Http\Controllers\Webhooks\WebhookController;
 use App\Jobs\CreateInvoicesFromOrder;
 use App\Jobs\SetOrderCanceled;
 use App\Jobs\SetOrderPaid;
+use App\Jobs\SetPaymentIntentForEtsyOrder;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
@@ -44,12 +45,13 @@ class StripeWebhookController extends WebhookController
             $event = Event::constructFrom(
                 json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR)
             );
-        } catch(UnexpectedValueException $e) {
+        } catch (UnexpectedValueException $e) {
             LogRequestService::addResponse($request, [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ], $e->getCode());
+
             // Invalid payload
             return $this->badRequestMethod();
         }
@@ -94,14 +96,15 @@ class StripeWebhookController extends WebhookController
             case 'setup_intent.canceled':
             case 'setup_intent.requires_action':
             case 'setup_intent.setup_failed':
-                Log::info('Event: ' . $event->type . ': ' . PHP_EOL . print_r($event->data, true));
+                Log::info('Event: '.$event->type.': '.PHP_EOL.print_r($event->data, true));
+
                 return $this->successMethod();
             case 'charge.refunded':
                 $charge = $event->data->object; // contains a \Stripe\Charge
                 $this->handleChargeRefunded($charge);
                 break;
             default:
-                echo 'Received unknown event type ' . $event->type;
+                echo 'Received unknown event type '.$event->type;
         }
 
         return $this->missingMethod();
@@ -123,7 +126,7 @@ class StripeWebhookController extends WebhookController
             try {
                 LogRequestService::addResponse(request(), $customer);
             } catch (Throwable $exception) {
-                Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+                Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
             }
         }
 
@@ -139,6 +142,7 @@ class StripeWebhookController extends WebhookController
 
         Bus::chain([
             new SetOrderPaid($paymentIntent, $logRequestId),
+            new SetPaymentIntentForEtsyOrder($paymentIntent, $logRequestId),
             new CreateInvoicesFromOrder($paymentIntent->metadata->order_id),
         ])
             ->onQueue('stripe')
@@ -175,7 +179,7 @@ class StripeWebhookController extends WebhookController
 
             return $this->successMethod();
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
 
             return $this->badRequestMethod();
         }
@@ -209,7 +213,7 @@ class StripeWebhookController extends WebhookController
 
             return $this->successMethod();
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
 
             return $this->badRequestMethod();
         }
@@ -228,7 +232,7 @@ class StripeWebhookController extends WebhookController
         try {
             LogRequestService::addResponse(request(), $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
 
         return $this->successMethod();

@@ -35,7 +35,10 @@ class PoInProductionStatusAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $orderQueuesService = new OrderQueuesService();
+        // Eager load relationships to avoid N+1 queries
+        $models->load(['manufacturerCost', 'upload', 'orderQueueStatuses.orderStatus']);
+
+        $orderQueuesService = new OrderQueuesService;
         foreach ($models as $model) {
             $hasEndStatus = [];
             /** @var $model OrderQueue */
@@ -62,7 +65,7 @@ class PoInProductionStatusAction extends Action
                     ->first();
                 if ($manufacturerCost) {
                     $model->manufacturer_cost_id = $manufacturerCost->id;
-                    $model->manufacturer_costs = (new CalculatePricesService())->calculateCostsOfModel(
+                    $model->manufacturer_costs = (new CalculatePricesService)->calculateCostsOfModel(
                         $manufacturerCost,
                         $model->upload->model_volume_cc,
                         $model->upload->model_surface_area_cm2,

@@ -55,6 +55,13 @@ class Shop extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'shopOwner.customer',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array

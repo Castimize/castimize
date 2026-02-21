@@ -50,6 +50,14 @@ class ManufacturerCost extends Resource
         'id' => 'desc',
     ];
 
+    /**
+     * @var string[]
+     */
+    public static $with = [
+        'manufacturer',
+        'material',
+    ];
+
     public function authorizedToDelete(Request $request)
     {
         return false;

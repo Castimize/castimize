@@ -11,12 +11,12 @@ class LaravelExactOnlineServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application services.
      */
-    public function boot(): void {}
+    public function boot() {}
 
     /**
      * Register the application services.
      */
-    public function register(): void
+    public function register()
     {
         $this->app->alias(LaravelExactOnline::class, 'laravel-exact-online');
 

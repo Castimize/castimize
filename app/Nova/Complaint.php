@@ -51,6 +51,16 @@ class Complaint extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'customer',
+        'complaintReason',
+        'upload',
+        'order',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array

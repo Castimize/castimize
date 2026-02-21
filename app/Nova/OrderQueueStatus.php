@@ -47,6 +47,14 @@ class OrderQueueStatus extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'orderStatus',
+        'orderQueue',
+    ];
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @return array

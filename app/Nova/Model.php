@@ -17,7 +17,8 @@ use Laravel\Nova\Panel;
 
 class Model extends Resource
 {
-    use ColumnTogglerTrait; use CommonMetaDataTrait;
+    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
 
     /**
      * The model the resource corresponds to.
@@ -51,6 +52,13 @@ class Model extends Resource
      */
     public static $sort = [
         'name' => 'asc',
+    ];
+
+    /**
+     * @var string[]
+     */
+    public static $with = [
+        'customer',
     ];
 
     /**

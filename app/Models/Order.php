@@ -13,17 +13,37 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property int $id
+ * @property float $service_fee
+ * @property float $service_fee_tax
+ * @property float $shipping_fee
+ * @property float $shipping_fee_tax
+ * @property float $discount_fee
+ * @property float $discount_fee_tax
+ * @property float $total
+ * @property float $total_tax
+ * @property float $total_refund
+ * @property float $total_refund_tax
+ * @property float $production_cost
+ * @property float $production_cost_tax
+ * @property string|null $billing_name
+ * @property string|null $billing_state
+ * @property string|null $shipping_name
+ * @property string|null $shipping_state
+ */
 #[ObservedBy([OrderObserver::class])]
 class Order extends Model
 {
     use HasFactory;
     use RevisionableTrait;
-    use Userstamps;
     use SoftDeletes;
+    use Userstamps;
 
     public $wpOrder;
 
@@ -79,6 +99,8 @@ class Order extends Model
         'shipping_fee_tax',
         'discount_fee',
         'discount_fee_tax',
+        'payment_fee',
+        'payment_fee_tax',
         'total',
         'total_tax',
         'total_refund',
@@ -313,9 +335,10 @@ class Order extends Model
         $email = $this->email;
         if (! empty($this->shipping_email)) {
             $email = $this->shipping_email;
-        } else if (! empty($this->billing_email)) {
+        } elseif (! empty($this->billing_email)) {
             $email = $this->billing_email;
         }
+
         return Attribute::make(
             get: fn () => [
                 'first_name' => $this->shipping_first_name,
@@ -391,26 +414,34 @@ class Order extends Model
         return $this->hasMany(InvoiceLine::class);
     }
 
+    public function shopOrder(): HasOne
+    {
+        return $this->hasOne(ShopOrder::class, 'order_number', 'order_number');
+    }
+
     public function scopeRemoveTestEmailAddresses($query, string $column)
     {
         $removeTestEmailAddressesFilter = new RemoveTestEmailAddressesFilter($column);
+
         return $query->tap($removeTestEmailAddressesFilter);
     }
 
     public function scopeRemoveTestCustomerIds($query, string $column)
     {
         $removeTestEmailAddressesFilter = new RemoveTestCustomerIdsFilter($column);
+
         return $query->tap($removeTestEmailAddressesFilter);
     }
 
     /**
      * Get the days overdue
      */
-    public function daysOverdue(): float|null
+    public function daysOverdue(): ?float
     {
         if ($this->status === 'overdue') {
             return now()->diffInDays($this->due_date);
         }
+
         return null;
     }
 
@@ -431,6 +462,7 @@ class Order extends Model
                 $return = false;
             }
         }
+
         return $return;
     }
 }

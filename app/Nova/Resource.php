@@ -9,6 +9,13 @@ use Laravel\Nova\Resource as NovaResource;
 
 abstract class Resource extends NovaResource
 {
+    /**
+     * Default ordering for index query.
+     *
+     * @var array<string, string>
+     */
+    public static $sort = [];
+
     public function __construct($resource = null)
     {
         if (auth()->user()->isBackendUser()) {
@@ -25,6 +32,20 @@ abstract class Resource extends NovaResource
      */
     public static function indexQuery(NovaRequest $request, $query)
     {
+        // Eager load userstamp relationships to prevent N+1 queries from CommonMetaDataTrait
+        // Only if the model has these relationships (from Userstamps trait)
+        $model = $query->getModel();
+        if (method_exists($model, 'editor') || method_exists($model, 'creator')) {
+            $eagerLoad = [];
+            if (method_exists($model, 'editor')) {
+                $eagerLoad[] = 'editor';
+            }
+            if (method_exists($model, 'creator')) {
+                $eagerLoad[] = 'creator';
+            }
+            $query->with($eagerLoad);
+        }
+
         if ($request->has('orderBy') && empty($request->get('orderBy'))) {
             $query->getQuery()->orders = [];
 

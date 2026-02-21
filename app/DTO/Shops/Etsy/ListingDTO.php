@@ -12,8 +12,11 @@ use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\CurrencyService;
 use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
 
-class ListingDTO
+class ListingDTO extends Data
 {
     public function __construct(
         public int $shopId,
@@ -37,34 +40,31 @@ class ListingDTO
         public ?string $itemDimensionsUnit,
         public ?int $processingMin,
         public ?int $processingMax,
-        /**
-         * @var Collection<ListingImageDTO>
-         */
-        public ?Collection $listingImages,
-        /**
-         * @var Collection<ListingInventoryDTO>
-         */
-        public ?Collection $listingInventory,
-    ) {
-    }
+        #[DataCollectionOf(ListingImageDTO::class)]
+        public ?DataCollection $listingImages,
+        #[DataCollectionOf(ListingInventoryDTO::class)]
+        public ?DataCollection $listingInventory,
+    ) {}
 
     public static function fromModel(Shop $shop, Model $model, ?int $listingId = null, ?int $taxonomyId = null, $listing = null, $listingImages = null): self
     {
         $shopOauth = $shop->shop_oauth;
-        $customsItemSettings = new CustomsItemSettings();
-        $parcelSettings = new ParcelSettings();
+        $customsItemSettings = new CustomsItemSettings;
+        $parcelSettings = new ParcelSettings;
 
         $price = 0.00;
         $density = 0.00;
         $dcLeadTime = 0;
+
         foreach ($model->materials as $material) {
-            $priceMaterial = app()->environment() !== 'production' ?
-                0.18 :
-                (new CalculatePricesService())->calculatePriceOfModel(
+            $priceMaterial = app()->environment() !== 'production'
+                ? 0.18
+                : (new CalculatePricesService)->calculatePriceOfModel(
                     price: $material->prices->sortBy('price_volume_cc')->first(),
                     materialVolume: (float) $model->model_volume_cc,
                     surfaceArea: (float) $model->model_surface_area_cm2,
                 );
+
             if ($price === 0.00 || $priceMaterial < $price) {
                 $price = $priceMaterial;
                 $density = $material->density;
@@ -82,17 +82,24 @@ class ListingDTO
             $price = $currencyService->convertCurrency(config('app.currency'), $shopOauth['shop_currency'], $price);
         }
 
+        $listingInventoryCollection = $model->materials->map(fn ($material) => ListingInventoryDTO::fromModel(
+            shop: $shop,
+            material: $material,
+            model: $model,
+            listingId: $listing ? $listing->listing_id : ($model->shopListingModel?->shop_listing_id ?? null),
+        ));
+
         return new self(
-            shopId: $shopOauth['shop_id'],
+            shopId: (int) $shopOauth['shop_id'],
             listingId: $listing ? $listing->listing_id : ($listingId ?? $model->shopListingModel?->shop_listing_id ?? null),
             state: $listing ? $listing->state : null,
             quantity: $listing ? $listing->quantity : 1,
             title: $listing ? $listing->title : $model->model_name ?? $model->name,
-            description: $listing ? $listing->description : '3D print model: ' . ($model->model_name ?? $model->name),
+            description: $listing ? $listing->description : '3D print model: '.($model->model_name ?? $model->name),
             price: (int) ($listing ? $listing->price->amount : ($price * 100)),
             whoMade: 'i_did',
             whenMade: 'made_to_order',
-            taxonomyId: (int) ($taxonomyId ?? ($listing ? $listing->taxonomy_id : ($shopOauth['default_taxonomy_id'] ?? 12380))), // 3D Printer Files
+            taxonomyId: (int) ($taxonomyId ?? ($listing ? $listing->taxonomy_id : ($shopOauth['default_taxonomy_id'] ?? 12380))),
             shippingProfileId: $shopOauth['shop_shipping_profile_id'] ?? null,
             returnPolicyId: $shopOauth['shop_return_policy_id'] ?? null,
             materials: $model->materials,
@@ -105,14 +112,7 @@ class ListingDTO
             processingMin: $dcLeadTime + ($model->customer?->country?->logisticsZone?->shippingFee?->default_lead_time ?? 0),
             processingMax: null,
             listingImages: $listingImages,
-            listingInventory: $model->materials->map(function ($material) use ($shop, $model, $listing) {
-                return ListingInventoryDTO::fromModel(
-                    shop: $shop,
-                    material: $material,
-                    model: $model,
-                    listingId: $listing ? $listing->listing_id : ($model->shopListingModel?->shop_listing_id ?? null),
-                );
-            }),
+            listingInventory: ListingInventoryDTO::collect($listingInventoryCollection, DataCollection::class),
         );
     }
 }

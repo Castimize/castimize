@@ -45,6 +45,6 @@ class OrderQueueOrderStatusFilter extends Filter
      */
     public function options(NovaRequest $request)
     {
-        return OrderStatus::all()->pluck('slug', 'status')->toArray();
+        return OrderStatus::pluck('slug', 'status')->toArray();
     }
 }

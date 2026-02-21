@@ -67,8 +67,7 @@ class AddressSettings extends SystemSettings
             Text::make(__('State'), 'state'),
 
             Select::make(__('Country'), 'country')
-
-                ->options(Country::all()->pluck('name', 'alpha2')->toArray()),
+                ->options(Country::pluck('name', 'alpha2')->toArray()),
 
             Text::make(__('Phone'), 'phone'),
 

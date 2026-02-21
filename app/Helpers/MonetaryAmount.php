@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\Helpers;
+namespace App\Helpers;
 
 use InvalidArgumentException;
 use Stringable;

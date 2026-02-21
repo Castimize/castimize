@@ -37,8 +37,6 @@ class MaterialFilter extends Filter
      */
     public function options(NovaRequest $request)
     {
-        return Material::all()
-            ->pluck('name', 'name')
-            ->toArray();
+        return Material::pluck('name', 'name')->toArray();
     }
 }

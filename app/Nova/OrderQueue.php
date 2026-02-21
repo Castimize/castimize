@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use App\Nova\Actions\ExportLineItemsV1Action;
+use App\Nova\Actions\PoAcceptedAtDcStatusAction;
 use App\Nova\Actions\PoCanceledStatusAction;
 use App\Nova\Actions\PoChangeStatusOrderManualAction;
 use App\Nova\Actions\PoReprintByDcAction;
@@ -31,7 +32,9 @@ use Titasgailius\SearchRelations\SearchesRelations;
 
 class OrderQueue extends Resource
 {
-    use CommonMetaDataTrait; use OrderQueueStatusFieldTrait; use SearchesRelations;
+    use CommonMetaDataTrait;
+    use OrderQueueStatusFieldTrait;
+    use SearchesRelations;
 
     /**
      * The model the resource corresponds to.
@@ -83,12 +86,12 @@ class OrderQueue extends Resource
      */
     public static $with = [
         'manufacturer',
-        'upload',
-        'order',
+        'upload.material',
+        'order.country',
         'shippingFee',
         'manufacturerShipment',
         'customerShipment',
-        'orderQueueStatuses',
+        'orderQueueStatuses.orderStatus',
     ];
 
     /**
@@ -145,18 +148,18 @@ class OrderQueue extends Resource
             }),
 
             Text::make(__('Order'), function ($model) {
-                    return $model->order->order_number;
-                })
+                return $model->order->order_number;
+            })
                 ->canSee(function ($request) {
                     return $request->user()->isManufacturer();
                 })
                 ->sortable(),
 
             Text::make(__('Customer'), function ($model) {
-                    return $model->order
-                        ? '<span><a class="link-default" href="/admin/resources/customers/' . $model->order->customer_id . '">' . $model->order->billing_name . '</a></span>'
-                        : '';
-                })
+                return $model->order
+                    ? '<span><a class="link-default" href="/admin/resources/customers/'.$model->order->customer_id.'">'.$model->order->billing_name.'</a></span>'
+                    : '';
+            })
                 ->canSee(function ($request) {
                     return $request->user()->isBackendUser();
                 })
@@ -165,16 +168,16 @@ class OrderQueue extends Resource
                 ->sortable(),
 
             Text::make(__('Customer'), function ($model) {
-                    return $model->order->customer_id;
-                })
+                return $model->order->customer_id;
+            })
                 ->canSee(function ($request) {
                     return $request->user()->isManufacturer();
                 })
                 ->sortable(),
 
             Text::make(__('Country'), function ($model) {
-                    return $model->order ? strtoupper($model->order->country->alpha2) : null;
-                })
+                return $model->order ? strtoupper($model->order->country->alpha2) : null;
+            })
                 ->hideOnExport()
                 ->sortable(),
 
@@ -192,46 +195,48 @@ class OrderQueue extends Resource
             $this->getStatusCheckField(),
 
             Text::make(__('Days till TD'), function ($model) {
-                    $lastStatus = $model->getLastStatus();
-                    $dateNow = now();
-                    if ($lastStatus && ! $lastStatus?->orderStatus->end_status) {
-                        $targetDate = Carbon::parse($model->target_date);
-                        if ($dateNow->gt($targetDate)) {
-                            return '- ' . round($targetDate->diffInDays($dateNow));
-                        }
-                        return round($dateNow->diffInDays($targetDate));
+                $lastStatus = $model->getLastStatus();
+                $dateNow = now();
+                if ($lastStatus && ! $lastStatus?->orderStatus->end_status) {
+                    $targetDate = Carbon::parse($model->target_date);
+                    if ($dateNow->gt($targetDate)) {
+                        return '- '.round($targetDate->diffInDays($dateNow));
                     }
 
-                    return '-';
-                })
+                    return round($dateNow->diffInDays($targetDate));
+                }
+
+                return '-';
+            })
                 ->hideOnExport()
                 ->sortable(),
 
             Text::make(__('Days till FAD'), function ($model) {
-                    $lastStatus = $model->getLastStatus();
-                    $dateNow = now();
-                    if ($lastStatus && ! $lastStatus?->orderStatus->end_status) {
-                        $finalArrivalDate = Carbon::parse($model->final_arrival_date);
-                        if ($dateNow->gt($finalArrivalDate)) {
-                            return '- ' . round($finalArrivalDate->diffInDays($dateNow));
-                        }
-                        return round($dateNow->diffInDays($finalArrivalDate));
+                $lastStatus = $model->getLastStatus();
+                $dateNow = now();
+                if ($lastStatus && ! $lastStatus?->orderStatus->end_status) {
+                    $finalArrivalDate = Carbon::parse($model->final_arrival_date);
+                    if ($dateNow->gt($finalArrivalDate)) {
+                        return '- '.round($finalArrivalDate->diffInDays($dateNow));
                     }
 
-                    return '-';
-                })
+                    return round($dateNow->diffInDays($finalArrivalDate));
+                }
+
+                return '-';
+            })
                 ->hideOnExport()
                 ->sortable(),
 
             Text::make(__('Quantity'), function ($model) {
-                    return $model->upload->quantity;
-                })
+                return $model->upload->quantity;
+            })
                 ->hideFromIndex()
                 ->sortable(),
 
             Text::make(__('Order parts'), function ($model) {
-                    return $model->upload->model_parts;
-                })
+                return $model->upload->model_parts;
+            })
                 ->hideFromIndex()
                 ->sortable(),
 
@@ -242,8 +247,8 @@ class OrderQueue extends Resource
                 ->sortable(),
 
             Text::make(__('Total'), function ($model) {
-                    return $model->upload->total ? currencyFormatter((float) $model->upload->total, $model->upload->currency_code) : '';
-                })
+                return $model->upload->total ? currencyFormatter((float) $model->upload->total, $model->upload->currency_code) : '';
+            })
                 ->hideOnExport()
                 ->sortable(),
 
@@ -258,8 +263,8 @@ class OrderQueue extends Resource
                 ->sortable(),
 
             Text::make(__('Arrived at'), function ($model) {
-                    return $model->order->arrived_at !== null ? Carbon::parse($model->order->arrived_at)->format('d-m-Y H:i:s') : '-';
-                })
+                return $model->order->arrived_at !== null ? Carbon::parse($model->order->arrived_at)->format('d-m-Y H:i:s') : '-';
+            })
                 ->hideOnExport()
                 ->sortable(),
 
@@ -288,17 +293,18 @@ class OrderQueue extends Resource
      * Get the filters available for the resource.
      *
      * @return array
+     *
      * @throws Exception
      */
     public function filters(NovaRequest $request)
     {
         return [
-            (new OrderQueueCountryFilter()),
-            (new OrderQueueMaterialFilter()),
-            (new OrderDateDaterangepickerFilter( DateHelper::ALL))
+            (new OrderQueueCountryFilter),
+            (new OrderQueueMaterialFilter),
+            (new OrderDateDaterangepickerFilter(DateHelper::ALL))
                 ->setMaxDate(Carbon::today()),
-            (new DueDateDaterangepickerFilter( DateHelper::ALL)),
-            (new OrderQueueOrderStatusFilter()),
+            (new DueDateDaterangepickerFilter(DateHelper::ALL)),
+            (new OrderQueueOrderStatusFilter),
         ];
     }
 
@@ -320,6 +326,7 @@ class OrderQueue extends Resource
     public function actions(NovaRequest $request)
     {
         return [
+            PoAcceptedAtDcStatusAction::make()->withoutConfirmation(),
             PoReprintByDcAction::make()
                 ->confirmText(__('Are you sure you want to reprint the selected PO\'s?'))
                 ->confirmButtonText(__('Confirm'))

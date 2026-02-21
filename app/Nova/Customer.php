@@ -65,6 +65,19 @@ class Customer extends Resource
     ];
 
     /**
+     * @var string[]
+     */
+    public static $with = [
+        'user',
+        'orders',
+        'models',
+        'complaints',
+        'creator',
+        'editor',
+        'destroyer',
+    ];
+
+    /**
      * @return Builder
      */
     public static function indexQuery(NovaRequest $request, $query)
@@ -202,6 +215,7 @@ class Customer extends Resource
      * Get the filters available for the resource.
      *
      * @return array
+     *
      * @throws Exception
      */
     public function filters(NovaRequest $request)

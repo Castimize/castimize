@@ -9,6 +9,8 @@ use App\Models\Customer;
 use App\Services\Payment\Stripe\StripeService;
 use Exception;
 use RuntimeException;
+use Stripe\BalanceTransaction;
+use Stripe\Charge;
 use Stripe\Mandate;
 use Stripe\PaymentIntent;
 use Stripe\PaymentMethod;
@@ -17,12 +19,28 @@ use Stripe\SetupIntent;
 class PaymentService
 {
     public function __construct(
-        private StripeService $stripeService,
+        private readonly StripeService $stripeService,
     ) {}
 
-    public function getStripePaymentMethod(string $paymentMethodId): null|PaymentMethod
+    public function getStripeCharge(string $chargeId): Charge
     {
-        return $this->stripeService->getPaymentMethod($paymentMethodId);
+        return $this->stripeService->getCharge(
+            chargeId: $chargeId,
+        );
+    }
+
+    public function getStripeBalanceTransaction(string $balanceTransactionId): BalanceTransaction
+    {
+        return $this->stripeService->getBalanceTransaction(
+            balanceTransactionId: $balanceTransactionId,
+        );
+    }
+
+    public function getStripePaymentMethod(string $paymentMethodId): ?PaymentMethod
+    {
+        return $this->stripeService->getPaymentMethod(
+            paymentMethodId: $paymentMethodId,
+        );
     }
 
     public function getStripePaymentMethods()
@@ -30,7 +48,7 @@ class PaymentService
         return $this->stripeService->getPaymentMethods();
     }
 
-    public function attachStripePaymentMethod(Customer $customer, string $paymentMethodId)
+    public function attachStripePaymentMethod(Customer $customer, string $paymentMethodId): void
     {
         $paymentMethod = $this->getStripePaymentMethod($paymentMethodId);
         $paymentMethod?->attach([
@@ -89,6 +107,13 @@ class PaymentService
         $customer->save();
 
         return $setupIntent;
+    }
+
+    public function getStripePaymentIntent(string $paymentIntentId): PaymentIntent
+    {
+        return $this->stripeService->getPaymentIntent(
+            paymentIntentId: $paymentIntentId,
+        );
     }
 
     public function createStripePaymentIntent(OrderDTO $orderDTO, Customer $customer): PaymentIntent

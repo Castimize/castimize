@@ -25,8 +25,7 @@ class CreateRefundInvoicesFromOrder implements ShouldQueue
     public function __construct(
         public int $wpOrderId,
         public ?int $logRequestId = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -34,11 +33,17 @@ class CreateRefundInvoicesFromOrder implements ShouldQueue
     public function handle(InvoicesService $invoicesService): void
     {
         $order = Order::with('customer')->where('wp_id', $this->wpOrderId)->first();
-        $customer = $order->customer;
-
         if ($order === null) {
+            Log::channel('orders')->info("CreateRefundInvoicesFromOrder: Order not found for wp_id {$this->wpOrderId}");
+
             return;
         }
+        if (empty($order->payment_issuer)) {
+            Log::channel('orders')->info("CreateRefundInvoicesFromOrder: Order {$this->wpOrderId} has no payment_issuer, skipping");
+
+            return;
+        }
+        $customer = $order->customer;
 
         try {
             $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($this->wpOrderId);
@@ -53,13 +58,13 @@ class CreateRefundInvoicesFromOrder implements ShouldQueue
             }
 
         } catch (Throwable $e) {
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::channel('orders')->error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $order);
         } catch (Throwable $exception) {
-            Log::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
+            Log::channel('orders')->error($exception->getMessage().PHP_EOL.$exception->getTraceAsString());
         }
     }
 }

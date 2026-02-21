@@ -89,6 +89,10 @@ return [
 
     'supported_currencies' => ['EUR', 'GBP'],
 
+    'site_url' => env('APP_SITE_URL', 'https://castimize.com'),
+
+    'stl_upload_dir' => env('APP_SITE_STL_UPLOAD_DIR', 'wp-content/uploads/p3d/'),
+
     /*
     |--------------------------------------------------------------------------
     | Encryption Key

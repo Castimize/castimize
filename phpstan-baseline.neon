@@ -1,0 +1,115 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/DTO/Order/OrderDTO.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Http/Controllers/Api/V1/CustomersApiController.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Http/Controllers/Api/V1/ModelsApiController.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 4
+			path: app/Http/Controllers/Api/V1/OrdersApiController.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/CreateInvoicesFromOrder.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/CreateOrderFromWp.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/CreateRefundInvoicesFromOrder.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/SetOrderPaid.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/SetPaymentIntentForEtsyOrder.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/SyncCustomerToExact.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Jobs/SyncInvoiceToExact.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 2
+			path: app/Services/Admin/OrdersService.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 2
+			path: app/Services/Admin/OrdersService.php
+
+		-
+			message: '#^Call to protected static method refunds\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Services/Admin/UploadsService.php
+
+		-
+			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Services/Exact/ExactOnlineService.php
+
+		-
+			message: '#^Call to protected static method create\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Services/Woocommerce/WoocommerceApiService.php
+
+		-
+			message: '#^Call to protected static method delete\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Services/Woocommerce/WoocommerceApiService.php
+
+		-
+			message: '#^Call to protected static method update\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
+			identifier: staticMethod.protected
+			count: 1
+			path: app/Services/Woocommerce/WoocommerceApiService.php
+
+		-
+			message: '#^Call to protected static method update\(\) of class Codexshaper\\WooCommerce\\Models\\Order\.$#'
+			identifier: staticMethod.protected
+			count: 2
+			path: app/Services/Woocommerce/WoocommerceApiService.php

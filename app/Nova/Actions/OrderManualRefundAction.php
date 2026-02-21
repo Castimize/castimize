@@ -29,8 +29,7 @@ class OrderManualRefundAction extends Action
 
     public function __construct(
         public $model = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Perform the action on the given models.
@@ -39,7 +38,7 @@ class OrderManualRefundAction extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $ordersService = new OrdersService();
+        $ordersService = new OrdersService;
 
         foreach ($models as $model) {
             $ordersService->handleManualRefund($model, $fields->refund_amount);
@@ -56,6 +55,7 @@ class OrderManualRefundAction extends Action
     public function fields(NovaRequest $request)
     {
         $max = $this->model->total - ($this->model->total_refund ?? 0);
+
         return [
             Currency::make(__('Refund amount'), 'refund_amount')
                 ->help(__('Max refund amount is :max', [

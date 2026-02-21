@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\DTO\Shops\Etsy\ShippingProfileDestinationDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDTO;
 use App\Enums\Shops\ShopOwnerShopsEnum;
-use App\Models\Country;
 use App\Models\Customer;
 use App\Models\Model;
+use App\Models\Shop;
 use App\Services\Admin\LogRequestService;
 use App\Services\Etsy\EtsyService;
 use Illuminate\Http\JsonResponse;
@@ -24,8 +23,7 @@ class EtsyApiController extends ApiController
 
     public function getTaxonomy(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $taxonomy = $this->etsyService->getTaxonomyAsSelect($shop);
 
         return response()->json($taxonomy);
@@ -33,23 +31,26 @@ class EtsyApiController extends ApiController
 
     public function getShop(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
-        $shop = $this->etsyService->getShop($shop);
+        $shop = $this->getEtsyShopOrFail($customerId);
+        $etsyShop = $this->etsyService->getShop($shop);
 
-        return response()->json($shop->toArray());
+        return response()->json($etsyShop->toArray());
     }
 
     public function getShopAuthorizationUrl(Request $request, int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
+        $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
+        if ($customer === null) {
+            LogRequestService::addResponse($request, ['message' => 'Customer not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, 'Customer not found');
+        }
+
         $shop = $customer->shopOwner?->shops?->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
         if ($shop === null) {
-            LogRequestService::addResponse($request, [
-                'message' => '404 Not found',
-            ], 404);
-            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+            LogRequestService::addResponse($request, ['message' => 'Etsy shop not found'], 404);
+            abort(Response::HTTP_NOT_FOUND, 'Etsy shop not found');
         }
+
         $url = $this->etsyService->getAuthorizationUrl($shop);
 
         return response()->json([
@@ -59,8 +60,7 @@ class EtsyApiController extends ApiController
 
     public function getShopReturnPolicy(int $customerId, int $returnPolicyId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $shopReturnPolicy = $this->etsyService->getShopReturnPolicy($shop, $returnPolicyId);
 
         return response()->json($shopReturnPolicy->toArray());
@@ -68,8 +68,7 @@ class EtsyApiController extends ApiController
 
     public function getShopReturnPolicies(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $shopReturnPolicies = $this->etsyService->getShopReturnPolicies($shop);
 
         return response()->json($shopReturnPolicies->paginate(100));
@@ -77,8 +76,7 @@ class EtsyApiController extends ApiController
 
     public function createShopReturnPolicy(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $shopReturnPolicy = $this->etsyService->createShopReturnPolicy($shop);
 
         return response()->json($shopReturnPolicy->toArray());
@@ -86,8 +84,7 @@ class EtsyApiController extends ApiController
 
     public function getListings(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $listings = $this->etsyService->getListings($shop);
 
         return response()->json($listings->toJson());
@@ -95,8 +92,7 @@ class EtsyApiController extends ApiController
 
     public function getListingProperties(int $customerId, int $listingId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $properties = $this->etsyService->getTaxonomyProperties($shop);
 
         return response()->json($properties);
@@ -104,8 +100,7 @@ class EtsyApiController extends ApiController
 
     public function getListingInventory(int $customerId, int $listingId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $inventory = $this->etsyService->getListingInventory($shop, $listingId);
 
         return response()->json($inventory);
@@ -113,20 +108,17 @@ class EtsyApiController extends ApiController
 
     public function syncListings(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $models = Model::whereDoesntHave('shopListingModel')->where('customer_id', $customerId)->get();
-
         $listings = $this->etsyService->syncListings($shop, $models);
 
         return response()->json($listings->toArray());
     }
 
-    public function deleteListing(int $customerId, int $listingId)
+    public function deleteListing(int $customerId, int $listingId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
-        $deleted = $this->etsyService->syncListings($shop, $listingId);
+        $shop = $this->getEtsyShopOrFail($customerId);
+        $deleted = $this->etsyService->deleteListing($shop, $listingId);
 
         return response()->json([
             'deleted' => $deleted,
@@ -135,8 +127,7 @@ class EtsyApiController extends ApiController
 
     public function getShippingCarriers(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $shippingCarriers = $this->etsyService->getShippingCarriers($shop);
 
         return response()->json($shippingCarriers->toJson());
@@ -144,8 +135,7 @@ class EtsyApiController extends ApiController
 
     public function getShippingProfile(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $shippingProfiles = $this->etsyService->getShippingProfiles($shop);
 
         return response()->json($shippingProfiles->toJson());
@@ -153,9 +143,7 @@ class EtsyApiController extends ApiController
 
     public function createShippingProfile(int $customerId): JsonResponse
     {
-        $countries = Country::with(['logisticsZone.shippingFee'])->get();
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $shopId = $shop->shop_oauth['shop_id'];
 
         $shippingProfileDTO = $this->etsyService->createShippingProfile(
@@ -163,28 +151,12 @@ class EtsyApiController extends ApiController
             shippingProfileDTO: ShippingProfileDTO::fromShop($shopId),
         );
 
-        foreach ($countries as $country) {
-            if ($country->has('logisticsZone')) {
-                $shippingProfileDestinationDTO = $this->etsyService->createShippingProfileDestination(
-                    shop: $shop,
-                    shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
-                        shopId: $shopId,
-                        country: $country,
-                        shippingProfileId: $shippingProfileDTO->shippingProfileId,
-                    ),
-                );
-
-                $shippingProfileDTO->shippingProfileDestinations->push($shippingProfileDestinationDTO);
-            }
-        }
-
         return response()->json($shippingProfileDTO);
     }
 
     public function getShopPaymentLedgerEntries(int $customerId): JsonResponse
     {
-        $customer = Customer::find($customerId);
-        $shop = $customer->shopOwner->shops->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $shopPaymentLedgerEntries = $this->etsyService->getShopPaymentAccountLedgerEntries($shop);
 
         return response()->json($shopPaymentLedgerEntries->toJson());
@@ -192,14 +164,12 @@ class EtsyApiController extends ApiController
 
     public function getShopReceipts(int $customerId): JsonResponse
     {
-        $customer = Customer::with('shopOwner.shops')->find($customerId);
-        $shop = $customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $shopReceipts = $this->etsyService->getShopReceipts($shop, [
             'min_created' => now()->subDays(14)->timestamp,
         ]);
 
         $response = [];
-
         foreach ($shopReceipts->data as $shopReceipt) {
             $response[] = $shopReceipt->toArray();
         }
@@ -209,13 +179,38 @@ class EtsyApiController extends ApiController
 
     public function getShopReceipt(int $customerId, int $receiptId): JsonResponse
     {
-        $customer = Customer::with('shopOwner.shops')->find($customerId);
-        $shop = $customer->shopOwner->shops->where('shop', ShopOwnerShopsEnum::Etsy->value)->first();
+        $shop = $this->getEtsyShopOrFail($customerId);
         $shopReceipt = $this->etsyService->getShopReceipt(
             shop: $shop,
             receiptId: $receiptId,
         );
 
         return response()->json($shopReceipt->toArray());
+    }
+
+    /**
+     * Get the Etsy shop for a customer or abort with 404.
+     */
+    private function getEtsyShopOrFail(int $customerId): Shop
+    {
+        $customer = Customer::with('shopOwner.shops')->find($customerId);
+
+        if ($customer === null) {
+            abort(Response::HTTP_NOT_FOUND, "Customer {$customerId} not found");
+        }
+
+        if ($customer->shopOwner === null) {
+            abort(Response::HTTP_NOT_FOUND, "Customer {$customerId} has no shop owner");
+        }
+
+        $shop = $customer->shopOwner->shops
+            ->where('shop', ShopOwnerShopsEnum::Etsy->value)
+            ->first();
+
+        if ($shop === null) {
+            abort(Response::HTTP_NOT_FOUND, "Customer {$customerId} has no Etsy shop");
+        }
+
+        return $shop;
     }
 }

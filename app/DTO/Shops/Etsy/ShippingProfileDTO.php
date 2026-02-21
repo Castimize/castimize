@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\DTO\Shops\Etsy;
 
 use App\Nova\Settings\Shipping\DcSettings;
-use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
 
-class ShippingProfileDTO
+class ShippingProfileDTO extends Data
 {
     public function __construct(
         public int $shopId,
@@ -23,15 +25,13 @@ class ShippingProfileDTO
         public string $processingTimeUnit,
         public int $minDeliveryDays,
         public int $maxDeliveryDays,
-        /**
-         * @var Collection<ShippingProfileDestinationDTO>
-         */
-        public ?Collection $shippingProfileDestinations = null,
+        #[DataCollectionOf(ShippingProfileDestinationDTO::class)]
+        public ?DataCollection $shippingProfileDestinations = null,
     ) {}
 
     public static function fromShop(int $shopId): self
     {
-        $dcSettings = (new DcSettings);
+        $dcSettings = new DcSettings;
 
         return new self(
             shopId: $shopId,
@@ -47,7 +47,7 @@ class ShippingProfileDTO
             processingTimeUnit: 'weeks',
             minDeliveryDays: 2,
             maxDeliveryDays: 6,
-            shippingProfileDestinations: collect(),
+            shippingProfileDestinations: null,
         );
     }
 }

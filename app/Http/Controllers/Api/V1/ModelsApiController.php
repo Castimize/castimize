@@ -106,6 +106,7 @@ class ModelsApiController extends ApiController
         [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
 
         $model = $customer->models->where('name', $upload['3dp_options']['model_name_original'])
+//            ->where('file_name', 'wp-content/uploads/p3d/' . $upload['3dp_options']['model_name'])
             ->where('model_scale', $upload['3dp_options']['scale'] ?? 1)
             ->first();
 
@@ -132,11 +133,29 @@ class ModelsApiController extends ApiController
             }
         }
 
+        $uploads = json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR);
+
+        // Pre-load all materials to avoid N+1 queries
+        $materialWpIds = collect($uploads)
+            ->filter(fn ($upload) => isset($upload['3dp_options']))
+            ->map(function ($upload) {
+                [$materialId] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
+
+                return $upload['3dp_options']['material_id'] ?? $materialId;
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $materials = Material::whereIn('wp_id', $materialWpIds)->get()->keyBy('wp_id');
+
         $newUploads = [];
-        foreach (json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR) as $itemKey => $upload) {
+        foreach ($uploads as $itemKey => $upload) {
             if (isset($upload['3dp_options'])) {
                 [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
-                $material = Material::where('wp_id', ($upload['3dp_options']['material_id'] ?? $materialId))->first();
+                $materialWpId = $upload['3dp_options']['material_id'] ?? $materialId;
+                $material = $materials->get($materialWpId);
                 $model = null;
                 if ($material) {
                     $model = $customer->models()
@@ -151,7 +170,7 @@ class ModelsApiController extends ApiController
                 $newUploads[$itemKey] = $upload;
                 if ($model) {
                     if ($model->thumb_name) {
-                        $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(env('FILESYSTEM_DISK'))->exists($model->thumb_name) ? sprintf('%s/%s', env('AWS_URL'), $model->thumb_name) : '/'.$model->thumb_name;
+                        $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(config('filesystems.default'))->exists($model->thumb_name) ? sprintf('%s/%s', config('filesystems.disks.s3.url'), $model->thumb_name) : '/'.$model->thumb_name;
                     }
                     $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
                 }

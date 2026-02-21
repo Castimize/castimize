@@ -2,9 +2,13 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Customer
+ */
 class CustomerResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -28,7 +32,7 @@ class CustomerResource extends JsonResource
             'username' => $this->user?->username,
             'last_order' => $lastOrderArray,
             'order_count' => $this->orders->count(),
-            'avatar' => $this->user?->avatar ? env('AWS_URL').$this->user->avatar : null,
+            'avatar' => $this->user?->avatar ? config('filesystems.disks.s3.url').$this->user->avatar : null,
             'date_created' => $this->created_at,
             'date_modified' => $this->updated_at,
             'billing' => $billingAddress ? (new AddressResource($billingAddress))->toArray($request) : [],

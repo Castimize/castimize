@@ -20,8 +20,7 @@ class OrdersApiController extends ApiController
 {
     public function __construct(
         private OrdersService $ordersService,
-    ) {
-    }
+    ) {}
 
     public function show(int $orderNumber): OrderResource
     {
@@ -37,13 +36,14 @@ class OrdersApiController extends ApiController
 
         $response = new OrderResource($order);
         LogRequestService::addResponse(request(), $response);
+
         return $response;
     }
 
     public function showOrderWp(ShowOrderWpRequest $request)
     {
         $order = \Codexshaper\WooCommerce\Facades\Order::find($request->wp_id);
-//        $order = Order::where('wp_id', $request->wp_id)->first();
+        //        $order = Order::where('wp_id', $request->wp_id)->first();
         if ($order === null) {
             LogRequestService::addResponse($request, [
                 'message' => '404 Not found',
@@ -51,6 +51,7 @@ class OrdersApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
         LogRequestService::addResponse($request, $order);
+
         return $order;
     }
 
@@ -59,6 +60,7 @@ class OrdersApiController extends ApiController
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($orderNumber);
         $response = $wpOrder;
         LogRequestService::addResponse(request(), $response->toArray());
+
         return response()
             ->json($response)
             ->setStatusCode(Response::HTTP_OK);
@@ -79,6 +81,7 @@ class OrdersApiController extends ApiController
             'expected_delivery_date' => $expectedDeliveryDate,
         ];
         LogRequestService::addResponse($request, $response);
+
         return response()->json($response);
     }
 
@@ -94,6 +97,7 @@ class OrdersApiController extends ApiController
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
         $response = $wpOrder;
         LogRequestService::addResponse($request, $response->toArray());
+
         return response()
             ->json($response)
             ->setStatusCode(Response::HTTP_CREATED);
@@ -115,6 +119,7 @@ class OrdersApiController extends ApiController
         $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($request->id);
         $response = $wpOrder;
         LogRequestService::addResponse($request, $response->toArray());
+
         return response()
             ->json($response)
             ->setStatusCode(Response::HTTP_CREATED);

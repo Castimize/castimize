@@ -1,17 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO\Order;
 
 use App\Enums\Admin\CurrencyEnum;
-use app\Helpers\MonetaryAmount;
+use App\Helpers\MonetaryAmount;
 use App\Models\Country;
 use App\Models\Material;
 use App\Models\Shop;
 use App\Services\Admin\CalculatePricesService;
 use App\Services\Admin\CurrencyService;
 use Etsy\Resources\Receipt;
+use Spatie\LaravelData\Data;
 
-readonly class UploadDTO
+class UploadDTO extends Data
 {
     public function __construct(
         public ?string $wpId,
@@ -36,9 +39,7 @@ readonly class UploadDTO
         public int $customerLeadTime,
     ) {}
 
-    public static function fromApiRequest() {}
-
-    public static function fromWpRequest($lineItem, string $countryIso): UploadDTO
+    public static function fromWpRequest($lineItem, string $countryIso): self
     {
         $country = Country::where('alpha2', $countryIso)->first();
         $name = null;
@@ -51,6 +52,7 @@ readonly class UploadDTO
         $modelZLength = 0.01;
         $surfaceArea = null;
         $customerLeadTime = null;
+
         foreach ($lineItem->meta_data as $metaData) {
             if ($metaData->key === 'pa_p3d_filename') {
                 $name = $metaData->value;
@@ -75,30 +77,30 @@ readonly class UploadDTO
         }
 
         return new self(
-            wpId: $lineItem->id ?? null,
+            wpId: $lineItem->id ? ((string) $lineItem->id) : null,
             materialId: $material?->id,
             materialName: $material?->name,
-            name: $name,
-            fileName: $fileName,
-            modelVolumeCc: $modelVolumeCc,
-            modelXLength: $modelXLength,
-            modelYLength: $modelYLength,
-            modelZLength: $modelZLength,
-            modelBoxVolume: $modelBoxVolume,
-            surfaceArea: $surfaceArea,
+            name: $name ?? '',
+            fileName: $fileName ?? '',
+            modelVolumeCc: (float) ($modelVolumeCc ?? 0),
+            modelXLength: (float) $modelXLength,
+            modelYLength: (float) $modelYLength,
+            modelZLength: (float) $modelZLength,
+            modelBoxVolume: (float) ($modelBoxVolume ?? 0),
+            surfaceArea: (float) ($surfaceArea ?? 0),
             modelParts: 1,
             quantity: $lineItem->quantity ?? 1,
             inCents: false,
-            subtotal: MonetaryAmount::fromString($lineItem->subtotal),
-            subtotalTax: MonetaryAmount::fromString($lineItem->subtotal_tax),
-            total: MonetaryAmount::fromString($lineItem->total),
-            totalTax: MonetaryAmount::fromString($lineItem->total_tax),
-            metaData: $lineItem->meta_data,
-            customerLeadTime: $customerLeadTime,
+            subtotal: MonetaryAmount::fromString($lineItem->subtotal ?? '0'),
+            subtotalTax: MonetaryAmount::fromString($lineItem->subtotal_tax ?? '0'),
+            total: MonetaryAmount::fromString($lineItem->total ?? '0'),
+            totalTax: MonetaryAmount::fromString($lineItem->total_tax ?? '0'),
+            metaData: $lineItem->meta_data ?? [],
+            customerLeadTime: $customerLeadTime ?? 0,
         );
     }
 
-    public static function fromEtsyReceipt(Shop $shop, Receipt $receipt, $line, ?int $taxPercentage = null): UploadDTO
+    public static function fromEtsyReceipt(Shop $shop, Receipt $receipt, $line, ?int $taxPercentage = null): self
     {
         $country = Country::where('alpha2', $receipt->country_iso)->first();
         $model = $line['shop_listing_model']->model;
@@ -113,7 +115,6 @@ readonly class UploadDTO
         );
 
         if (
-            // app()->environment() === 'production' &&
             array_key_exists('shop_currency', $shop->shop_oauth) &&
             $shop->shop_oauth['shop_currency'] !== config('app.currency') &&
             in_array(CurrencyEnum::from($shop->shop_oauth['shop_currency']), CurrencyEnum::cases(), true)
@@ -129,58 +130,26 @@ readonly class UploadDTO
         if ($taxPercentage) {
             $totalTax = MonetaryAmount::fromFloat(($taxPercentage / 100) * $total->toFloat());
         }
+
         $metaDataWeight = $model->model_volume_cc * $material->density;
         $metaDataScale = sprintf('&times;%s (%s &times; %s &times; %s cm)', $model->model_scale, round($model->model_x_length, 2), round($model->model_y_length, 2), round($model->model_x_length, 2));
 
         $metaData = [
-            [
-                'key' => 'pa_p3d_printer',
-                'value' => '3. Default',
-            ],
-            [
-                'key' => 'pa_p3d_filename',
-                'value' => $model->name,
-            ],
-            [
-                'key' => 'pa_p3d_material',
-                'value' => sprintf('%s. %s', $material->wp_id, $material->name),
-            ],
-            [
-                'key' => 'pa_p3d_model',
-                'value' => str_replace('wp-content/uploads/p3d/', '', $model->file_name),
-            ],
-            [
-                'key' => 'pa_p3d_unit',
-                'value' => 'mm',
-            ],
-            [
-                'key' => 'pa_p3d_scale',
-                'value' => $metaDataScale,
-            ],
-            [
-                'key' => '_p3d_stats_material_volume',
-                'value' => round($model->model_volume_cc, 2),
-            ],
-            [
-                'key' => '_p3d_stats_print_time',
-                'value' => '0',
-            ],
-            [
-                'key' => '_p3d_stats_surface_area',
-                'value' => round($model->model_surface_area_cm2, 2),
-            ],
-            [
-                'key' => '_p3d_stats_weight',
-                'value' => round($metaDataWeight, 2),
-            ],
-            [
-                'key' => '_p3d_stats_box_volume',
-                'value' => round($model->model_box_volume, 2),
-            ],
+            ['key' => 'pa_p3d_printer', 'value' => '3. Default'],
+            ['key' => 'pa_p3d_filename', 'value' => $model->name],
+            ['key' => 'pa_p3d_material', 'value' => sprintf('%s. %s', $material->wp_id, $material->name)],
+            ['key' => 'pa_p3d_model', 'value' => str_replace('wp-content/uploads/p3d/', '', $model->file_name)],
+            ['key' => 'pa_p3d_unit', 'value' => 'mm'],
+            ['key' => 'pa_p3d_scale', 'value' => $metaDataScale],
+            ['key' => '_p3d_stats_material_volume', 'value' => round($model->model_volume_cc, 2)],
+            ['key' => '_p3d_stats_print_time', 'value' => '0'],
+            ['key' => '_p3d_stats_surface_area', 'value' => round($model->model_surface_area_cm2, 2)],
+            ['key' => '_p3d_stats_weight', 'value' => round($metaDataWeight, 2)],
+            ['key' => '_p3d_stats_box_volume', 'value' => round($model->model_box_volume, 2)],
         ];
 
         return new self(
-            wpId: $model->wp_id ?? null,
+            wpId: $model->wp_id ? ((string) $model->wp_id) : null,
             materialId: $material->id,
             materialName: $material->name,
             name: $model->name,

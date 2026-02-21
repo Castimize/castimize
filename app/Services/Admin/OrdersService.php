@@ -33,10 +33,10 @@ class OrdersService
 
     public function __construct()
     {
-        $this->customersService = new CustomersService();
+        $this->customersService = new CustomersService;
         $this->uploadsService = app(UploadsService::class);
-        $this->orderQueuesService = new OrderQueuesService();
-        $this->woocommerceApiService = new WoocommerceApiService();
+        $this->orderQueuesService = new OrderQueuesService;
+        $this->woocommerceApiService = new WoocommerceApiService;
     }
 
     public function storeOrderFromWpOrder($wpOrder)
@@ -73,7 +73,7 @@ class OrdersService
         }
 
         $isPaid = $wpOrder['date_paid'] !== null;
-        $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $wpOrder['date_created_gmt']), 'GMT')?->setTimezone(env('APP_TIMEZONE'));
+        $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $wpOrder['date_created_gmt']), 'GMT')?->setTimezone(config('app.timezone'));
 
         $taxPercentage = null;
         if (count($wpOrder['tax_lines']) > 0) {
@@ -142,7 +142,7 @@ class OrdersService
             'created_by' => $systemUser->id,
             'created_at' => $createdAt,
             'updated_by' => $systemUser->id,
-            'updated_at' => Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $wpOrder['date_modified_gmt']), 'GMT')?->setTimezone(env('APP_TIMEZONE')),
+            'updated_at' => Carbon::createFromFormat('Y-m-d H:i:s', str_replace('T', '', $wpOrder['date_modified_gmt']), 'GMT')?->setTimezone(config('app.timezone')),
         ]);
 
         $biggestCustomerLeadTime = $this->storeOrderLineItems(
@@ -188,6 +188,23 @@ class OrdersService
             $currency = Currency::where('code', 'USD')->first();
         }
 
+        $paymentFee = null;
+        $paymentFeeTax = null;
+        if (is_array($orderDto->paymentFees)) {
+            foreach ($orderDto->paymentFees as $orderPaymentFee) {
+                if ($paymentFee === null) {
+                    $paymentFee = $orderPaymentFee->total;
+                } else {
+                    $paymentFee = $paymentFee->add($orderPaymentFee->total);
+                }
+                if ($paymentFeeTax === null) {
+                    $paymentFeeTax = $orderPaymentFee->totalTax;
+                } else {
+                    $paymentFeeTax = $paymentFeeTax->add($orderPaymentFee->totalTax);
+                }
+            }
+        }
+
         $order = Order::create([
             'wp_id' => $orderDto->wpId,
             'customer_id' => $customer?->id,
@@ -228,6 +245,8 @@ class OrdersService
             'shipping_fee_tax' => $orderDto->shippingFeeTax?->toFloat(),
             'discount_fee' => $orderDto->discountFee?->toFloat(),
             'discount_fee_tax' => $orderDto->discountFeeTax?->toFloat(),
+            'payment_fee' => $paymentFee?->toFloat(),
+            'payment_fee_tax' => $paymentFee?->toFloat(),
             'total' => $orderDto->total->toFloat(),
             'total_tax' => $orderDto->totalTax?->toFloat(),
             'production_cost' => null,
@@ -320,7 +339,7 @@ class OrdersService
             } else {
                 $refundAmount += $orderQueue->upload->total;
                 $refundTaxAmount += $orderQueue->upload->total_tax;
-//                $lineItems[] = $this->orderQueuesService->getRefundLineItem($orderQueue, $orderQueue->upload->total, $wpOrder['line_items']);
+                //                $lineItems[] = $this->orderQueuesService->getRefundLineItem($orderQueue, $orderQueue->upload->total, $wpOrder['line_items']);
                 $orderQueue->upload->total_refund = $refundAmount;
                 $orderQueue->upload->total_refund_tax = $orderQueue->upload->total_tax;
                 $orderQueue->upload->save();
@@ -343,18 +362,18 @@ class OrdersService
             $order->save();
         }
 
-//        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string) $refundAmount, $lineItems);
+        //        $refundOrder = $this->woocommerceApiService->refundOrder($order->wp_id, (string) $refundAmount, $lineItems);
 
         if ($cancelOrder) {
             $this->woocommerceApiService->updateOrderStatus($order->wp_id, WcOrderStatesEnum::Cancelled->value);
         }
 
-//        return $refundOrder;
+        //        return $refundOrder;
     }
 
     public function handleStripeRefund(Order $order, Charge $charge): void
     {
-        if ($order !== null && $charge->status === 'succeeded' && $charge->refunded) {
+        if ($order !== null && $charge->status === 'succeeded') {
             $order->total_refund = ($charge->amount_refunded / 100);
             if ($order->total === $order->total_refund) {
                 $order->total_refund_tax = $order->total_tax;
@@ -439,12 +458,13 @@ class OrdersService
                 ->first();
 
             if ($model === null) {
+                $fileNameThumb = sprintf('%s%s.thumb.png', config('app.stl_upload_dir'), str_replace('_resized', '', $uploadDto->fileName));
+                $fileName = sprintf('%s%s', config('app.stl_upload_dir'), $uploadDto->fileName);
+                $fileUrl = sprintf('%s/%s', config('app.site_url'), $fileName);
+                $fileThumb = sprintf('%s/%s', config('app.site_url'), $fileNameThumb);
+                $withoutResizedFileName = str_replace('_resized', '', $fileName);
+
                 try {
-                    $fileNameThumb = sprintf('%s%s.thumb.png', env('APP_SITE_STL_UPLOAD_DIR'), str_replace('_resized', '', $uploadDto->fileName));
-                    $fileName = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $uploadDto->fileName);
-                    $fileUrl = sprintf('%s/%s', env('APP_SITE_URL'), $fileName);
-                    $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
-                    $withoutResizedFileName = str_replace('_resized', '', $fileName);
                     $fileHeaders = get_headers($fileUrl);
                     // Check files exists on local storage of site and not on R2
                     if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileName)) {
@@ -459,7 +479,7 @@ class OrdersService
                         Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
                     }
                 } catch (Exception $e) {
-                    Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                    Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
                 }
 
                 $model = Model::where('file_name', $withoutResizedFileName)->first();
@@ -482,7 +502,7 @@ class OrdersService
                 'customer_id' => $customer->id,
                 'currency_id' => $currency->id,
                 'name' => $name,
-                'file_name' => sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $uploadDto->fileName),
+                'file_name' => sprintf('%s%s', config('app.stl_upload_dir'), $uploadDto->fileName),
                 'material_name' => $uploadDto->materialName,
                 'model_volume_cc' => $uploadDto->modelVolumeCc,
                 'model_x_length' => $modelXLength,
@@ -509,9 +529,19 @@ class OrdersService
 
     private function updateUploads($uploads): void
     {
+        // Get all wp_ids from the upload DTOs
+        $wpIds = collect($uploads)->pluck('wpId')->filter()->values()->toArray();
+
+        if (empty($wpIds)) {
+            return;
+        }
+
+        // Load all uploads in one query and index by wp_id
+        $existingUploads = Upload::whereIn('wp_id', $wpIds)->get()->keyBy('wp_id');
+
         /** @var UploadDTO $uploadDto */
         foreach ($uploads as $uploadDto) {
-            $upload = Upload::where('wp_id', $uploadDto->wpId)->first();
+            $upload = $existingUploads->get($uploadDto->wpId);
             if ($upload) {
                 $upload->update([
                     'quantity' => $uploadDto->quantity,
@@ -574,10 +604,10 @@ class OrdersService
                 ->first();
 
             if ($model === null) {
-                $fileNameThumb = sprintf('%s%s.thumb.png', env('APP_SITE_STL_UPLOAD_DIR'), str_replace('_resized', '', $fileName));
-                $fileName = sprintf('%s%s', env('APP_SITE_STL_UPLOAD_DIR'), $fileName);
-                $fileUrl = sprintf('%s/%s', env('APP_SITE_URL'), $fileName);
-                $fileThumb = sprintf('%s/%s', env('APP_SITE_URL'), $fileNameThumb);
+                $fileNameThumb = sprintf('%s%s.thumb.png', config('app.stl_upload_dir'), str_replace('_resized', '', $fileName));
+                $fileName = sprintf('%s%s', config('app.stl_upload_dir'), $fileName);
+                $fileUrl = sprintf('%s/%s', config('app.site_url'), $fileName);
+                $fileThumb = sprintf('%s/%s', config('app.site_url'), $fileNameThumb);
                 $fileHeaders = get_headers($fileUrl);
                 $withoutResizedFileName = str_replace('_resized', '', $fileName);
 
@@ -595,7 +625,7 @@ class OrdersService
                         Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
                     }
                 } catch (Exception $e) {
-                    Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                    Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
                 }
 
                 $model = Model::where('file_name', $withoutResizedFileName)->first();
@@ -653,6 +683,7 @@ class OrdersService
                 $biggestCustomerLeadTime = $customerLeadTime;
             }
         }
+
         return now()->addBusinessDays($biggestCustomerLeadTime)->toFormattedDateString();
     }
 }

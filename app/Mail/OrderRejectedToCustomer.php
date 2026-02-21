@@ -12,7 +12,8 @@ use Illuminate\Queue\SerializesModels;
 
 class OrderRejectedToCustomer extends Mailable
 {
-    use Queueable; use SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new message instance.

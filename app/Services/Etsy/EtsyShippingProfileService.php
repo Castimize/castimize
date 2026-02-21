@@ -5,25 +5,33 @@ namespace App\Services\Etsy;
 use AllowDynamicProperties;
 use App\DTO\Shops\Etsy\ShippingProfileDestinationDTO;
 use App\DTO\Shops\Etsy\ShippingProfileDTO;
+use App\Models\Country;
 use App\Models\Shop;
 use Etsy\Etsy;
 use Etsy\Resources\ShippingDestination;
 use Etsy\Resources\ShippingProfile;
+use Exception;
 
 #[AllowDynamicProperties]
 class EtsyShippingProfileService
 {
+    private Etsy $etsy;
+
     public function __construct(
         protected Shop $shop,
     ) {
-        $this->etsy = new Etsy($this->shop->shop_oauth['client_id'], $this->shop->shop_oauth['access_token']);
+        $this->etsy = new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: config('services.shops.etsy.client_secret'),
+            api_key: $shop->shop_oauth['access_token'],
+        );
     }
 
     public function getShippingProfile()
     {
         return ShippingProfile::get(
             shop_id: $this->shop->shop_oauth['shop_id'],
-            profile_id: $this->shop->shop_oauth['shipping_profile_id'],
+            profile_id: $this->shop->shop_oauth['shop_shipping_profile_id'],
         );
     }
 
@@ -36,6 +44,8 @@ class EtsyShippingProfileService
 
     public function createShippingProfile(ShippingProfileDTO $shippingProfileDTO): ShippingProfileDTO
     {
+        $countries = Country::with(['logisticsZone.shippingFee'])->get();
+
         $shippingProfile = ShippingProfile::create(
             shop_id: $this->shop->shop_oauth['shop_id'],
             data: [
@@ -55,6 +65,24 @@ class EtsyShippingProfileService
 
         $shippingProfileDTO->shippingProfileId = $shippingProfile?->shipping_profile_id;
 
+        foreach ($countries as $country) {
+            if ($country->has('logisticsZone')) {
+                try {
+                    $shippingProfileDestinationDTO = $this->createShippingProfileDestination(
+                        shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
+                            shop: $this->shop,
+                            country: $country,
+                            shippingProfileId: $shippingProfileDTO->shippingProfileId,
+                        ),
+                    );
+
+                    $shippingProfileDTO->shippingProfileDestinations->push($shippingProfileDestinationDTO);
+                } catch (Exception $exception) {
+                    // just continue with other countries
+                }
+            }
+        }
+
         $this->addShippingProfileToShopOwnerShop($shippingProfile);
 
         return $shippingProfileDTO;
@@ -65,6 +93,26 @@ class EtsyShippingProfileService
         $shippingDestination = ShippingDestination::create(
             shop_id: $this->shop->shop_oauth['shop_id'],
             profile_id: $shippingProfileDestinationDTO->shippingProfileId,
+            data: [
+                'primary_cost' => $shippingProfileDestinationDTO->primaryCost,
+                'secondary_cost' => $shippingProfileDestinationDTO->secondaryCost,
+                'destination_country_iso' => $shippingProfileDestinationDTO->destinationCountryIso,
+                'min_delivery_days' => $shippingProfileDestinationDTO->minDeliveryDays,
+                'max_delivery_days' => $shippingProfileDestinationDTO->maxDeliveryDays,
+            ],
+        );
+
+        $shippingProfileDestinationDTO->shippingProfileDestinationId = $shippingDestination->shipping_profile_destination_id;
+
+        return $shippingProfileDestinationDTO;
+    }
+
+    public function updateShippingProfileDestination(ShippingProfileDestinationDTO $shippingProfileDestinationDTO): ShippingProfileDestinationDTO
+    {
+        $shippingDestination = ShippingDestination::update(
+            shop_id: $this->shop->shop_oauth['shop_id'],
+            profile_id: $shippingProfileDestinationDTO->shippingProfileId,
+            destination_id: $shippingProfileDestinationDTO->shippingProfileDestinationId,
             data: [
                 'primary_cost' => $shippingProfileDestinationDTO->primaryCost,
                 'secondary_cost' => $shippingProfileDestinationDTO->secondaryCost,

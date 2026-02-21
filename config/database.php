@@ -168,11 +168,13 @@ return [
     //    ],
 
     'redis' => [
+        'client' => env('REDIS_CLIENT', 'predis'),
+
         'cluster' => true,
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX') . '_' . Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_',
+            'prefix' => env('REDIS_PREFIX').'_'.Str::slug(env('APP_NAME', 'laravel'), '_').'_database_',
             'parameters' => [
                 'password' => env('REDIS_PASSWORD', null),
             ],

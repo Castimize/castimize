@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO\Customer;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Spatie\LaravelData\Data;
 
-readonly class CustomerDTO
+class CustomerDTO extends Data
 {
     public function __construct(
         public ?int $id,
@@ -44,9 +47,9 @@ readonly class CustomerDTO
     {
         return new self(
             id: $customer->id,
-            wpId: $request->wp_id ?? $customer->wp_id ?? null,
-            countryId: $request->country ?? null,
-            currencyId: $request->currency ?? null,
+            wpId: isset($request->wp_id) ? (int) $request->wp_id : ($customer->wp_id ?? null),
+            countryId: isset($request->country) ? (int) $request->country : null,
+            currencyId: isset($request->currency) ? (int) $request->currency : null,
             firstName: $request->firstName ?? null,
             lastName: $request->lastName ?? null,
             company: $request->company ?? null,
@@ -74,10 +77,5 @@ readonly class CustomerDTO
             shippingState: $request->shippingState ?? null,
             shippingCountry: $request->shippingCountry ?? null,
         );
-    }
-
-    public static function fromWpCustomer(int $wpId): CustomerDTO
-    {
-        $wpCustomer = \Codexshaper\WooCommerce\Facades\Customer::find($wpId);
     }
 }

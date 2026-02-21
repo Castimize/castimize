@@ -22,16 +22,18 @@ class ValidateWcWebhookSignature
             LogRequestService::addResponse($request, [
                 'message' => 'Invalid key',
             ], 401);
+
             return response(['Invalid key'], 401);
         }
 
         $payload = $request->getContent();
-        $calculated_hmac = base64_encode(hash_hmac('sha256', $payload, env('WOOCOMMERCE_KEY'), true));
+        $calculated_hmac = base64_encode(hash_hmac('sha256', $payload, config('services.woocommerce.key'), true));
 
         if ($signature != $calculated_hmac) {
             LogRequestService::addResponse($request, [
                 'message' => 'Invalid payload',
             ], 401);
+
             return response(['Invalid payload'], 401);
         }
 

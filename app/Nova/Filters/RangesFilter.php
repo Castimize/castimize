@@ -23,10 +23,7 @@ class RangesFilter extends Filter
      */
     public function __construct(
         protected string $column
-    )
-    {
-
-    }
+    ) {}
 
     /**
      * Apply the filter to the given query.

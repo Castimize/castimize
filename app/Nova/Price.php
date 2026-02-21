@@ -17,7 +17,9 @@ use Titasgailius\SearchRelations\SearchesRelations;
 
 class Price extends Resource
 {
-    use ColumnTogglerTrait; use CommonMetaDataTrait; use SearchesRelations;
+    use ColumnTogglerTrait;
+    use CommonMetaDataTrait;
+    use SearchesRelations;
 
     /**
      * The model the resource corresponds to.
@@ -64,6 +66,14 @@ class Price extends Resource
             'name',
             'alpha2',
         ],
+    ];
+
+    /**
+     * @var string[]
+     */
+    public static $with = [
+        'material',
+        'country',
     ];
 
     /**

@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO\Order;
 
 use App\Enums\Admin\PaymentFeeTypesEnum;
 use App\Enums\Admin\PaymentMethodsEnum;
 use App\Enums\Woocommerce\WcOrderFeeTaxStatesEnum;
-use app\Helpers\MonetaryAmount;
+use App\Helpers\MonetaryAmount;
 use App\Models\Customer;
 use App\Models\PaymentFee;
 use App\Services\Payment\Stripe\StripeService;
+use Spatie\LaravelData\Data;
 
-class PaymentFeeDTO
+class PaymentFeeDTO extends Data
 {
     public function __construct(
         public string $paymentMethod,
@@ -37,7 +40,7 @@ class PaymentFeeDTO
         );
     }
 
-    public static function fromEtsyReceipt(Customer $customer, float $totalReceipt, ?int $taxPercentage = null): PaymentFeeDTO
+    public static function fromEtsyReceipt(Customer $customer, float $totalReceipt, ?int $taxPercentage = null): self
     {
         $total = 0.00;
         $totalTax = 0.00;
@@ -48,6 +51,7 @@ class PaymentFeeDTO
 
         $paymentFee = PaymentFee::where('payment_method', $paymentMethodEnum->value)->first();
         $taxes = [];
+
         if ($paymentFee) {
             if (PaymentFeeTypesEnum::from($paymentFee->type) === PaymentFeeTypesEnum::FIXED) {
                 $total = $paymentFee->fee;

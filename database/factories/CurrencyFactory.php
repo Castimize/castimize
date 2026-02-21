@@ -17,9 +17,14 @@ class CurrencyFactory extends Factory
      */
     public function definition(): array
     {
+        // Generate a unique code that doesn't exist in the database
+        do {
+            $code = fake()->currencyCode();
+        } while (Currency::where('code', $code)->exists());
+
         return [
-            'name' => fake()->randomElement(['Dollar', 'Euro', 'Pound']),
-            'code' => fake()->randomElement(['USD', 'EUR', 'GBP']),
+            'name' => $code,
+            'code' => $code,
         ];
     }
 }

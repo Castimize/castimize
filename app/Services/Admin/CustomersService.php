@@ -10,7 +10,9 @@ use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\State;
 use App\Services\Woocommerce\WoocommerceApiService;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class CustomersService
@@ -26,6 +28,7 @@ class CustomersService
         if ($customer === null) {
             return $this->createCustomerFromWpCustomer($wpCustomer);
         }
+
         return $this->updateCustomerFromWpCustomer($customer, $wpCustomer);
     }
 
@@ -42,6 +45,7 @@ class CustomersService
         if ($customer === null) {
             return $this->createCustomerFromWp($request);
         }
+
         return $this->updateCustomerFromWp($customer, $request);
     }
 
@@ -98,7 +102,7 @@ class CustomersService
                 ];
                 $customer->addresses()->attach($shippingAddress, $pivotData);
             }
-        } else if ($billingAddress !== null) {
+        } elseif ($billingAddress !== null) {
             $pivotData = [
                 'default_billing' => 1,
                 'default_shipping' => 1,
@@ -135,7 +139,11 @@ class CustomersService
             'updated_by' => 1,
         ]);
 
-        $this->attachAddressesFromWpCustomer($wpCustomer, $customer);
+        try {
+            $this->attachAddressesFromWpCustomer($wpCustomer, $customer);
+        } catch (Exception $e) {
+            Log::error($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getLine().PHP_EOL.$e->getTraceAsString());
+        }
 
         return $customer;
     }
@@ -169,7 +177,11 @@ class CustomersService
         $customer->phone = $wpCustomer['billing']->phone ?? null;
         $customer->save();
 
-        $this->attachAddressesFromWpCustomer($wpCustomer, $customer);
+        try {
+            $this->attachAddressesFromWpCustomer($wpCustomer, $customer);
+        } catch (Exception $e) {
+            Log::error($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getLine().PHP_EOL.$e->getTraceAsString());
+        }
 
         return $customer;
     }
@@ -226,7 +238,7 @@ class CustomersService
             } else {
                 $customer->addresses()->syncWithPivotValues($shippingAddress, $pivotData);
             }
-        } else if ($shippingAddress !== $billingAddress) {
+        } elseif ($shippingAddress !== $billingAddress) {
             $pivotData = [
                 'contact_name' => sprintf('%s %s', $request->shipping['first_name'], $request->shipping['last_name']),
                 'phone' => $request->shipping['phone'] ?? null,
@@ -330,6 +342,7 @@ class CustomersService
 
             return $address;
         }
+
         return null;
     }
 
@@ -346,7 +359,7 @@ class CustomersService
             if ($stateName) {
                 $state = State::firstOrCreate(
                     [
-                        'name' => $stateName,
+                        'slug' => Str::slug($stateName),
                     ],
                     [
                         'name' => $stateName,
@@ -360,7 +373,7 @@ class CustomersService
             if ($cityName) {
                 $city = City::firstOrCreate(
                     [
-                        'name' => $cityName,
+                        'slug' => Str::slug($cityName),
                     ],
                     [
                         'name' => $cityName,
@@ -387,6 +400,7 @@ class CustomersService
 
             return $address;
         }
+
         return null;
     }
 }
