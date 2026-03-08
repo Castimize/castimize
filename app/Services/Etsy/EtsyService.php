@@ -756,6 +756,13 @@ class EtsyService
 
     public function updateShopReceipt(Shop $shop, int $receiptId, array $data): ?Receipt
     {
+        $this->refreshAccessToken($shop);
+        new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: config('services.shops.etsy.client_secret'),
+            api_key: $shop->shop_oauth['access_token'],
+        );
+
         return Receipt::update(
             shop_id: $shop->shop_oauth['shop_id'],
             receipt_id: $receiptId,
