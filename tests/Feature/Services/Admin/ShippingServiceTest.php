@@ -263,4 +263,212 @@ class ShippingServiceTest extends TestCase
 
         return $orderQueue;
     }
+
+    #[Test]
+    public function it_maps_null_postal_code_to_empty_string(): void
+    {
+        $capturedToAddress = null;
+
+        $mockShippoAddress = $this->createMockShippoAddress();
+
+        $this->shippoServiceMock->shouldReceive('setFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('setToAddress')
+            ->withArgs(function (array $address) use (&$capturedToAddress): bool {
+                $capturedToAddress = $address;
+
+                return true;
+            })
+            ->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createToAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getShipmentFromAddress')->andReturn($mockShippoAddress);
+        $this->shippoServiceMock->shouldReceive('getShipmentToAddress')->andReturn($mockShippoAddress);
+        $this->shippoServiceMock->shouldReceive('setShipmentFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('setShipmentToAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createParcel')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getCacheKey')->andReturn('test-cache-key');
+
+        $customerShipment = $this->createCustomerShipmentWithAddresses();
+        $customerShipment->toAddress['postal_code'] = null;
+
+        $customerShipment->selectedPOs = collect([
+            $this->createMockOrderQueueWithNullUpload(),
+        ]);
+
+        $this->shippoServiceMock->shouldReceive('createCustomsItem')->zeroOrMoreTimes()->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createCustomsDeclaration')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createShipment')->andReturnSelf();
+
+        $mockShipment = Mockery::mock(Shippo_Object::class);
+        $mockShipment->shouldReceive('offsetGet')->with('rates')->andReturn([]);
+        $mockShipment->shouldReceive('offsetGet')->with('messages')->andReturn([]);
+        $mockShipment->shouldReceive('offsetExists')->andReturn(true);
+
+        $this->shippoServiceMock->shouldReceive('getShipment')->andReturn($mockShipment);
+
+        try {
+            $this->shippingService->createShippoCustomerShipment($customerShipment);
+        } catch (\Throwable) {
+            // We only care that setToAddress was called with zip = ''
+        }
+
+        $this->assertNotNull($capturedToAddress, 'setToAddress was not called');
+        $this->assertSame('', $capturedToAddress['zip']);
+    }
+
+    #[Test]
+    public function it_maps_null_phone_to_empty_string(): void
+    {
+        $capturedToAddress = null;
+
+        $mockShippoAddress = $this->createMockShippoAddress();
+
+        $this->shippoServiceMock->shouldReceive('setFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('setToAddress')
+            ->withArgs(function (array $address) use (&$capturedToAddress): bool {
+                $capturedToAddress = $address;
+
+                return true;
+            })
+            ->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createToAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getShipmentFromAddress')->andReturn($mockShippoAddress);
+        $this->shippoServiceMock->shouldReceive('getShipmentToAddress')->andReturn($mockShippoAddress);
+        $this->shippoServiceMock->shouldReceive('setShipmentFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('setShipmentToAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createParcel')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getCacheKey')->andReturn('test-cache-key');
+
+        $customerShipment = $this->createCustomerShipmentWithAddresses();
+        $customerShipment->toAddress['phone'] = null;
+
+        $customerShipment->selectedPOs = collect([
+            $this->createMockOrderQueueWithNullUpload(),
+        ]);
+
+        $this->shippoServiceMock->shouldReceive('createCustomsItem')->zeroOrMoreTimes()->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createCustomsDeclaration')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createShipment')->andReturnSelf();
+
+        $mockShipment = Mockery::mock(Shippo_Object::class);
+        $mockShipment->shouldReceive('offsetGet')->with('rates')->andReturn([]);
+        $mockShipment->shouldReceive('offsetGet')->with('messages')->andReturn([]);
+        $mockShipment->shouldReceive('offsetExists')->andReturn(true);
+
+        $this->shippoServiceMock->shouldReceive('getShipment')->andReturn($mockShipment);
+
+        try {
+            $this->shippingService->createShippoCustomerShipment($customerShipment);
+        } catch (\Throwable) {
+            // We only care that setToAddress was called with phone = ''
+        }
+
+        $this->assertNotNull($capturedToAddress, 'setToAddress was not called');
+        $this->assertSame('', $capturedToAddress['phone']);
+    }
+
+    #[Test]
+    public function it_maps_empty_company_to_null(): void
+    {
+        $capturedToAddress = null;
+
+        $mockShippoAddress = $this->createMockShippoAddress();
+
+        $this->shippoServiceMock->shouldReceive('setFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('setToAddress')
+            ->withArgs(function (array $address) use (&$capturedToAddress): bool {
+                $capturedToAddress = $address;
+
+                return true;
+            })
+            ->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createToAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getShipmentFromAddress')->andReturn($mockShippoAddress);
+        $this->shippoServiceMock->shouldReceive('getShipmentToAddress')->andReturn($mockShippoAddress);
+        $this->shippoServiceMock->shouldReceive('setShipmentFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('setShipmentToAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createParcel')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getCacheKey')->andReturn('test-cache-key');
+
+        $customerShipment = $this->createCustomerShipmentWithAddresses();
+        $customerShipment->toAddress['company'] = '';
+
+        $customerShipment->selectedPOs = collect([
+            $this->createMockOrderQueueWithNullUpload(),
+        ]);
+
+        $this->shippoServiceMock->shouldReceive('createCustomsItem')->zeroOrMoreTimes()->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createCustomsDeclaration')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createShipment')->andReturnSelf();
+
+        $mockShipment = Mockery::mock(Shippo_Object::class);
+        $mockShipment->shouldReceive('offsetGet')->with('rates')->andReturn([]);
+        $mockShipment->shouldReceive('offsetGet')->with('messages')->andReturn([]);
+        $mockShipment->shouldReceive('offsetExists')->andReturn(true);
+
+        $this->shippoServiceMock->shouldReceive('getShipment')->andReturn($mockShipment);
+
+        try {
+            $this->shippingService->createShippoCustomerShipment($customerShipment);
+        } catch (\Throwable) {
+            // We only care that setToAddress was called with company = null
+        }
+
+        $this->assertNotNull($capturedToAddress, 'setToAddress was not called');
+        $this->assertNull($capturedToAddress['company']);
+    }
+
+    #[Test]
+    public function it_maps_null_company_to_null(): void
+    {
+        $capturedToAddress = null;
+
+        $mockShippoAddress = $this->createMockShippoAddress();
+
+        $this->shippoServiceMock->shouldReceive('setFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('setToAddress')
+            ->withArgs(function (array $address) use (&$capturedToAddress): bool {
+                $capturedToAddress = $address;
+
+                return true;
+            })
+            ->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createToAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getShipmentFromAddress')->andReturn($mockShippoAddress);
+        $this->shippoServiceMock->shouldReceive('getShipmentToAddress')->andReturn($mockShippoAddress);
+        $this->shippoServiceMock->shouldReceive('setShipmentFromAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('setShipmentToAddress')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createParcel')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getCacheKey')->andReturn('test-cache-key');
+
+        $customerShipment = $this->createCustomerShipmentWithAddresses();
+        $customerShipment->toAddress['company'] = null;
+
+        $customerShipment->selectedPOs = collect([
+            $this->createMockOrderQueueWithNullUpload(),
+        ]);
+
+        $this->shippoServiceMock->shouldReceive('createCustomsItem')->zeroOrMoreTimes()->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createCustomsDeclaration')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createShipment')->andReturnSelf();
+
+        $mockShipment = Mockery::mock(Shippo_Object::class);
+        $mockShipment->shouldReceive('offsetGet')->with('rates')->andReturn([]);
+        $mockShipment->shouldReceive('offsetGet')->with('messages')->andReturn([]);
+        $mockShipment->shouldReceive('offsetExists')->andReturn(true);
+
+        $this->shippoServiceMock->shouldReceive('getShipment')->andReturn($mockShipment);
+
+        try {
+            $this->shippingService->createShippoCustomerShipment($customerShipment);
+        } catch (\Throwable) {
+            // We only care that setToAddress was called with company = null
+        }
+
+        $this->assertNotNull($capturedToAddress, 'setToAddress was not called');
+        $this->assertNull($capturedToAddress['company']);
+    }
 }

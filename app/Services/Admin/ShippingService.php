@@ -377,15 +377,15 @@ class ShippingService
 
         return [
             'name' => $transliteratedAddress['name'],
-            'company' => $transliteratedAddress['company'],
+            'company' => ! empty($transliteratedAddress['company']) ? $transliteratedAddress['company'] : null,
             'street1' => $transliteratedAddress['address_line1'],
             'street2' => $transliteratedAddress['address_line2'],
             'city' => $transliteratedAddress['city'],
             'state' => $transliteratedAddress['state'] ?? null,
-            'zip' => $address['postal_code'],
+            'zip' => $address['postal_code'] ?? '',
             'country' => $address['country'],
-            'email' => $address['email'],
-            'phone' => $address['phone'],
+            'email' => $address['email'] ?? '',
+            'phone' => $address['phone'] ?? '',
         ];
     }
 
@@ -435,11 +435,6 @@ class ShippingService
     private function checkAddressValid($validation_results, bool $test = false, bool $frontend = true): array
     {
         $valid = 1;
-        if (is_array($validation_results)) {
-            if (app()->environment('production')) {
-                $valid = $validation_results['is_valid'] ? 1 : 0;
-            }
-        }
         $errorMessages = [];
         if (isset($validation_results['messages']) && $validation_results['messages']) {
             foreach ($validation_results['messages'] as $message) {

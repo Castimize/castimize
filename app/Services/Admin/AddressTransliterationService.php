@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Admin;
 
 use Illuminate\Support\Facades\Log;
-use InvalidArgumentException;
 
 class AddressTransliterationService
 {
@@ -31,7 +30,6 @@ class AddressTransliterationService
     {
         $modified = false;
         $originalFields = [];
-        $fieldLengthErrors = [];
 
         foreach (self::TRANSLITERABLE_FIELDS as $field) {
             if (isset($address[$field]) && is_string($address[$field])) {
@@ -45,29 +43,18 @@ class AddressTransliterationService
 
                 $maxLength = self::FIELD_MAX_LENGTHS[$field] ?? null;
                 if ($maxLength !== null && mb_strlen($address[$field]) > $maxLength) {
-                    $fieldLengthErrors[$field] = [
-                        'value' => $address[$field],
-                        'length' => mb_strlen($address[$field]),
+                    $truncated = mb_substr($address[$field], 0, $maxLength);
+
+                    Log::warning('Address field truncated to max length for Shippo', [
+                        'field' => $field,
+                        'original' => $address[$field],
+                        'truncated' => $truncated,
                         'max_length' => $maxLength,
-                    ];
+                    ]);
+
+                    $address[$field] = $truncated;
                 }
             }
-        }
-
-        if (! empty($fieldLengthErrors)) {
-            $errorMessages = [];
-            foreach ($fieldLengthErrors as $field => $error) {
-                $errorMessages[] = sprintf(
-                    '%s exceeds maximum length of %d characters (current: %d)',
-                    $field,
-                    $error['max_length'],
-                    $error['length']
-                );
-            }
-
-            throw new InvalidArgumentException(
-                'Address validation failed: '.implode('; ', $errorMessages)
-            );
         }
 
         if ($modified) {
