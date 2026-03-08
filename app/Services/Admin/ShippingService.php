@@ -377,15 +377,15 @@ class ShippingService
 
         return [
             'name' => $transliteratedAddress['name'],
-            'company' => $transliteratedAddress['company'],
+            'company' => ! empty($transliteratedAddress['company']) ? $transliteratedAddress['company'] : null,
             'street1' => $transliteratedAddress['address_line1'],
             'street2' => $transliteratedAddress['address_line2'],
             'city' => $transliteratedAddress['city'],
             'state' => $transliteratedAddress['state'] ?? null,
-            'zip' => $address['postal_code'],
+            'zip' => $address['postal_code'] ?? '',
             'country' => $address['country'],
-            'email' => $address['email'],
-            'phone' => $address['phone'],
+            'email' => $address['email'] ?? '',
+            'phone' => $address['phone'] ?? '',
         ];
     }
 
