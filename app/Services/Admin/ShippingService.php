@@ -435,11 +435,6 @@ class ShippingService
     private function checkAddressValid($validation_results, bool $test = false, bool $frontend = true): array
     {
         $valid = 1;
-        if (is_array($validation_results)) {
-            if (app()->environment('production')) {
-                $valid = $validation_results['is_valid'] ? 1 : 0;
-            }
-        }
         $errorMessages = [];
         if (isset($validation_results['messages']) && $validation_results['messages']) {
             foreach ($validation_results['messages'] as $message) {
