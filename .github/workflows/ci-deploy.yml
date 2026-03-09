@@ -200,6 +200,8 @@ jobs:
           DB_DATABASE: testing
           DB_USERNAME: root
           DB_PASSWORD: password
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
 
       - name: Run tests
         run: vendor/bin/phpunit
