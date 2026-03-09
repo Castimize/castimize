@@ -389,7 +389,7 @@ class ExactOnlineService
             return '4  ';
         }
 
-        $vatCodes = (new VatCode($this->connection))->get();
+        $vatCodes = (new VatCode($this->connection))->filter('', '', 'Code,OssCountry,Description');
         /** @var VatCode $vatCode */
         foreach ($vatCodes as $vatCode) {
             $ossCountry = trim((string) $vatCode->OssCountry);
@@ -404,7 +404,7 @@ class ExactOnlineService
         // Log available VAT codes for debugging
         $availableCodes = [];
         foreach ($vatCodes as $vatCode) {
-            $availableCodes[] = "Code: {$vatCode->Code}, OssCountry: ".($vatCode->OssCountry ?? 'null');
+            $availableCodes[] = "Code: {$vatCode->Code}, OssCountry: ".($vatCode->OssCountry ?? 'null').', Description: '.($vatCode->Description ?? 'null');
         }
         Log::channel('exact')->warning("VAT Code not found for {$countryCode}. Available codes: ".implode('; ', $availableCodes));
 
