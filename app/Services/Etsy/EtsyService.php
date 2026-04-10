@@ -619,10 +619,6 @@ class EtsyService
 
         Log::info('Update listing: '.$listingDTO->listingId);
 
-        // Update inventory with variations, first get existing inventory so we can keep the existing intact
-        $inventory = $this->getListingInventory($shop, $listingDTO->listingId);
-        $this->updateListingInventory($shop, $listingDTO, $inventory);
-
         $materials = [];
         if ($listingDTO->materials) {
             foreach ($listingDTO->materials as $material) {
@@ -630,7 +626,7 @@ class EtsyService
             }
         }
 
-        // Also set state to active again
+        // Update listing metadata first (including readiness_state_id) before inventory update
         $data = [
             'taxonomy_id' => $listingDTO->taxonomyId,
             'return_policy_id' => $listingDTO->returnPolicyId,
@@ -649,6 +645,10 @@ class EtsyService
             listingId: $listing->listing_id,
             data: $data,
         );
+
+        // Update inventory after listing has readiness_state_id set
+        $inventory = $this->getListingInventory($shop, $listingDTO->listingId);
+        $this->updateListingInventory($shop, $listingDTO, $inventory);
 
         (new ShopListingModelService)->updateShopListingModel($model->shopListingModel, $listingDTO);
 
@@ -707,16 +707,11 @@ class EtsyService
         }
 
         try {
-            $readinessStateDefinitionId = isset($shop->shop_oauth['readiness_state_definition_id'])
-                ? (int) $shop->shop_oauth['readiness_state_definition_id']
-                : null;
-
             $inventoryResponse = (new EtsyInventoryService(
                 shop: $shop,
             ))->updateInventory(
                 listingId: $listingId,
                 products: $variations,
-                readinessStateDefinitionId: $readinessStateDefinitionId,
             );
             Log::info('Listing inventory created: '.print_r($inventoryResponse, true));
         } catch (Exception $e) {
