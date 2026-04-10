@@ -39,21 +39,11 @@ class EtsyInventoryService
         }
     }
 
-    public function updateInventory(int $listingId, array $products, ?int $readinessStateDefinitionId = null)
+    public function updateInventory(int $listingId, array $products)
     {
         $inventoryProducts = [];
 
         foreach ($products as $product) {
-            $offering = [
-                'price' => (float) $product['price'],
-                'quantity' => $product['quantity'],
-                'is_enabled' => $product['is_enabled'],
-            ];
-
-            if ($readinessStateDefinitionId !== null) {
-                $offering['readiness_state_definition_id'] = $readinessStateDefinitionId;
-            }
-
             $inventoryProducts[] = [
                 'sku' => $product['sku'],
                 'property_values' => [
@@ -63,7 +53,13 @@ class EtsyInventoryService
                         'values' => [$product['material']],
                     ],
                 ],
-                'offerings' => [$offering],
+                'offerings' => [
+                    [
+                        'price' => (float) $product['price'],
+                        'quantity' => $product['quantity'],
+                        'is_enabled' => $product['is_enabled'],
+                    ],
+                ],
             ];
         }
 
