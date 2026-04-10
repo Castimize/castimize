@@ -72,10 +72,11 @@ class EtsyInventoryService
             'price_on_property' => [514],
             'quantity_on_property' => [514],
             'sku_on_property' => [514],
+            'readiness_state_on_property' => [],
         ];
 
-        //            dd($payload);
         return $this->client->put("listings/{$listingId}/inventory", [
+            'query' => ['legacy' => 'false'],
             'json' => $payload,
         ]);
     }
