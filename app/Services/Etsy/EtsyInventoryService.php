@@ -55,7 +55,11 @@ class EtsyInventoryService
                 ],
                 'offerings' => [
                     [
-                        'price' => $product['price'],
+                        'price' => [
+                            'amount' => (int) round($product['price'] * 100),
+                            'divisor' => 100,
+                            'currency_code' => $product['currency_code'],
+                        ],
                         'quantity' => $product['quantity'],
                         'is_enabled' => $product['is_enabled'],
                     ],
