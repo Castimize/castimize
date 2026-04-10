@@ -275,6 +275,24 @@ class EtsyService
         return SellerTaxonomy::all();
     }
 
+    public function checkExistingReadinessStateDefinition(Shop $shop): void
+    {
+        if (isset($shop->shop_oauth['readiness_state_definition_id'])) {
+            return;
+        }
+
+        $this->refreshAccessToken($shop);
+
+        $definitionId = (new EtsyReadinessStateService(shop: $shop))->createReadinessStateDefinition();
+
+        if ($definitionId) {
+            $shopOauth = $shop->shop_oauth;
+            $shopOauth['readiness_state_definition_id'] = $definitionId;
+            $shop->shop_oauth = $shopOauth;
+            $shop->save();
+        }
+    }
+
     public function checkExistingShippingProfile(int $shopId, Shop $shop): void
     {
         $shippingProfileDTO = ShippingProfileDTO::fromShop($shopId);
@@ -522,6 +540,7 @@ class EtsyService
             shopId: $shop->shop_oauth['shop_id'],
             shop: $shop,
         );
+        $this->checkExistingReadinessStateDefinition($shop);
         $shop->refresh();
 
         $etsyListingService = new EtsyListingService(
@@ -581,6 +600,9 @@ class EtsyService
 
     private function updateListing(Shop $shop, Model $model): ListingDTO
     {
+        $this->checkExistingReadinessStateDefinition($shop);
+        $shop->refresh();
+
         $etsyListingService = new EtsyListingService(
             shop: $shop,
         );
@@ -615,6 +637,10 @@ class EtsyService
             'item_width' => $listingDTO->itemWidth,
             'item_height' => $listingDTO->itemHeight,
         ];
+
+        if (isset($shop->shop_oauth['readiness_state_definition_id'])) {
+            $data['readiness_state_id'] = $shop->shop_oauth['readiness_state_definition_id'];
+        }
 
         $etsyListingService->updateListing(
             listingId: $listing->listing_id,

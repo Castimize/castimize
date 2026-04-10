@@ -43,25 +43,31 @@ class EtsyListingService
     public function createDraftListing(ListingDTO $listingDTO)
     {
         try {
+            $data = [
+                'title' => $listingDTO->title,
+                'description' => $listingDTO->description,
+                'quantity' => 999,
+                'price' => $listingDTO->price,
+                'who_made' => $listingDTO->whoMade,
+                'when_made' => $listingDTO->whenMade,
+                'taxonomy_id' => $listingDTO->taxonomyId,
+                'shipping_profile_id' => $listingDTO->shippingProfileId,
+                'return_policy_id' => $listingDTO->returnPolicyId,
+                'materials' => $listingDTO->materials,
+                'item_weight' => $listingDTO->itemWeight,
+                'item_length' => $listingDTO->itemLength,
+                'item_width' => $listingDTO->itemWidth,
+                'item_height' => $listingDTO->itemHeight,
+                'type' => 'physical',
+            ];
+
+            if (isset($this->shop->shop_oauth['readiness_state_definition_id'])) {
+                $data['readiness_state_id'] = $this->shop->shop_oauth['readiness_state_definition_id'];
+            }
+
             return Listing::create(
                 shop_id: $this->shop->shop_oauth['shop_id'],
-                data: [
-                    'title' => $listingDTO->title,
-                    'description' => $listingDTO->description,
-                    'quantity' => 999,
-                    'price' => $listingDTO->price,
-                    'who_made' => $listingDTO->whoMade,
-                    'when_made' => $listingDTO->whenMade,
-                    'taxonomy_id' => $listingDTO->taxonomyId,
-                    'shipping_profile_id' => $listingDTO->shippingProfileId,
-                    'return_policy_id' => $listingDTO->returnPolicyId,
-                    'materials' => $listingDTO->materials,
-                    'item_weight' => $listingDTO->itemWeight,
-                    'item_length' => $listingDTO->itemLength,
-                    'item_width' => $listingDTO->itemWidth,
-                    'item_height' => $listingDTO->itemHeight,
-                    'type' => 'physical',
-                ],
+                data: $data,
             );
         } catch (Exception $e) {
             Log::error($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getTraceAsString());
