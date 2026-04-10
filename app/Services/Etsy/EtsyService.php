@@ -707,11 +707,16 @@ class EtsyService
         }
 
         try {
+            $readinessStateId = isset($shop->shop_oauth['readiness_state_definition_id'])
+                ? (int) $shop->shop_oauth['readiness_state_definition_id']
+                : null;
+
             $inventoryResponse = (new EtsyInventoryService(
                 shop: $shop,
             ))->updateInventory(
                 listingId: $listingId,
                 products: $variations,
+                readinessStateId: $readinessStateId,
             );
             Log::info('Listing inventory created: '.print_r($inventoryResponse, true));
         } catch (Exception $e) {

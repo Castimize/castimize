@@ -39,11 +39,21 @@ class EtsyInventoryService
         }
     }
 
-    public function updateInventory(int $listingId, array $products)
+    public function updateInventory(int $listingId, array $products, ?int $readinessStateId = null)
     {
         $inventoryProducts = [];
 
         foreach ($products as $product) {
+            $offering = [
+                'price' => (float) $product['price'],
+                'quantity' => $product['quantity'],
+                'is_enabled' => $product['is_enabled'],
+            ];
+
+            if ($readinessStateId !== null) {
+                $offering['readiness_state_id'] = $readinessStateId;
+            }
+
             $inventoryProducts[] = [
                 'sku' => $product['sku'],
                 'property_values' => [
@@ -53,13 +63,7 @@ class EtsyInventoryService
                         'values' => [$product['material']],
                     ],
                 ],
-                'offerings' => [
-                    [
-                        'price' => (float) $product['price'],
-                        'quantity' => $product['quantity'],
-                        'is_enabled' => $product['is_enabled'],
-                    ],
-                ],
+                'offerings' => [$offering],
             ];
         }
 
@@ -68,10 +72,11 @@ class EtsyInventoryService
             'price_on_property' => [514],
             'quantity_on_property' => [514],
             'sku_on_property' => [514],
+            'readiness_state_on_property' => [],
         ];
 
-        //            dd($payload);
         return $this->client->put("listings/{$listingId}/inventory", [
+            'query' => ['legacy' => 'false'],
             'json' => $payload,
         ]);
     }
