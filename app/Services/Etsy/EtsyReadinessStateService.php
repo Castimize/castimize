@@ -76,15 +76,16 @@ class EtsyReadinessStateService
 
     private function getReadinessStateDefinitionIdFromLocation(string $location): ?int
     {
-        try {
-            $response = $this->client->get($location);
-            $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        // Extract ID directly from the URL path (last segment)
+        $id = (int) basename(parse_url($location, PHP_URL_PATH));
+        if ($id > 0) {
+            Log::info('Etsy readiness state definition ID extracted from location: '.$id);
 
-            return $data['readiness_state_definition_id'] ?? $data['id'] ?? null;
-        } catch (Exception $e) {
-            Log::error($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getTraceAsString());
-
-            return null;
+            return $id;
         }
+
+        Log::error('Could not extract readiness state definition ID from location: '.$location);
+
+        return null;
     }
 }
