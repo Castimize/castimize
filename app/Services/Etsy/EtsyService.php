@@ -633,18 +633,13 @@ class EtsyService
 
         $variations = [];
         foreach ($listingDTO->listingInventory as $listingInventory) {
-            $sku = $listingInventory->sku;
-            $price = $listingInventory->price;
-            $currency = $listingInventory->currency;
-            $quantity = $listingInventory->quantity;
-            $isEnabled = $listingInventory->isEnabled;
             $variations[] = [
-                'sku' => $sku,
+                'sku' => $listingInventory->sku,
                 'material' => str_replace('(1µm)', '(1 micron)', $listingInventory->name),
-                'price' => $price,
-                'quantity' => $quantity,
-                'currency_code' => $currency->value,
-                'is_enabled' => $isEnabled,
+                'price' => $listingInventory->price,
+                'quantity' => $listingInventory->quantity,
+                'currency_code' => $listingInventory->currency->value,
+                'is_enabled' => $listingInventory->isEnabled,
             ];
         }
         try {
