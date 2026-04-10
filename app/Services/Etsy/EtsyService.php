@@ -659,7 +659,7 @@ class EtsyService
                                     $index = $i;
                                 }
                             }
-                            if ($index) {
+                            if ($index !== null) {
                                 $variations[$index]['sku'] = $product['sku'];
                                 $variations[$index]['price'] = $offering['price']['amount'] / $offering['price']['divisor'];
                                 $variations[$index]['quantity'] = $offering['quantity'];
