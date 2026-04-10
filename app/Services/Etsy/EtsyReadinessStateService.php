@@ -50,17 +50,20 @@ class EtsyReadinessStateService
             ]);
 
             $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+            Log::info('Etsy readiness state definition created: '.json_encode($data));
 
             return $data['readiness_state_definition_id'] ?? $data['id'] ?? null;
         } catch (ClientException $e) {
             if ($e->getResponse()->getStatusCode() === 409) {
                 // Definition already exists — retrieve ID from Content-Location header
                 $location = $e->getResponse()->getHeaderLine('Content-Location');
+                Log::info('Etsy readiness state definition conflict, location: '.$location);
                 if ($location) {
                     return $this->getReadinessStateDefinitionIdFromLocation($location);
                 }
             }
 
+            Log::error('Etsy readiness state definition error ('.$e->getResponse()->getStatusCode().'): '.$e->getResponse()->getBody()->getContents());
             Log::error($e->getMessage().PHP_EOL.$e->getFile().PHP_EOL.$e->getTraceAsString());
 
             return null;

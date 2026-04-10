@@ -285,11 +285,14 @@ class EtsyService
 
         $definitionId = (new EtsyReadinessStateService(shop: $shop))->createReadinessStateDefinition();
 
+        Log::info('Etsy readiness state definition ID: '.($definitionId ?? 'null'));
+
         if ($definitionId) {
             $shopOauth = $shop->shop_oauth;
             $shopOauth['readiness_state_definition_id'] = $definitionId;
             $shop->shop_oauth = $shopOauth;
             $shop->save();
+            Log::info('Etsy readiness state definition saved to shop_oauth');
         }
     }
 
