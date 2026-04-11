@@ -17,6 +17,12 @@ class AddressTransliterationService
         'state',
     ];
 
+    /**
+     * Countries where local script (CJK etc.) is accepted natively by Shippo/UPS.
+     * Transliteration of these scripts produces incorrect romanization and breaks address validation.
+     */
+    private const SKIP_TRANSLITERATION_COUNTRIES = ['JP', 'CN', 'TW', 'HK', 'KR'];
+
     private const FIELD_MAX_LENGTHS = [
         'name' => 35,
         'company' => 35,
@@ -28,6 +34,11 @@ class AddressTransliterationService
 
     public function transliterateAddress(array $address): array
     {
+        $country = strtoupper($address['country'] ?? '');
+        if (in_array($country, self::SKIP_TRANSLITERATION_COUNTRIES, true)) {
+            return $address;
+        }
+
         $modified = false;
         $originalFields = [];
 
