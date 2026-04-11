@@ -608,20 +608,22 @@ class OrdersService
                 $fileName = sprintf('%s%s', config('app.stl_upload_dir'), $fileName);
                 $fileUrl = sprintf('%s/%s', config('app.site_url'), $fileName);
                 $fileThumb = sprintf('%s/%s', config('app.site_url'), $fileNameThumb);
-                $fileHeaders = get_headers($fileUrl);
                 $withoutResizedFileName = str_replace('_resized', '', $fileName);
 
                 try {
+                    $fileHeaders = get_headers($fileUrl);
+                    $fileAvailable = $fileHeaders !== false && ! str_contains($fileHeaders[0], '404');
+
                     // Check files exists on local storage of site and not on R2
-                    if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileName)) {
+                    if ($fileAvailable && ! Storage::disk('s3')->exists($fileName)) {
                         Storage::disk('s3')->put($fileName, file_get_contents($fileUrl));
                     }
-                    // Check files exists on local storage of site and not on R2 (without resized
-                    if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($withoutResizedFileName)) {
+                    // Check files exists on local storage of site and not on R2 (without resized)
+                    if ($fileAvailable && ! Storage::disk('s3')->exists($withoutResizedFileName)) {
                         Storage::disk('s3')->put($withoutResizedFileName, file_get_contents($fileUrl));
                     }
                     // Check file thumb exists on local storage of site and not on R2
-                    if (! str_contains($fileHeaders[0], '404') && ! Storage::disk('s3')->exists($fileNameThumb)) {
+                    if ($fileAvailable && ! Storage::disk('s3')->exists($fileNameThumb)) {
                         Storage::disk('s3')->put($fileNameThumb, file_get_contents($fileThumb));
                     }
                 } catch (Exception $e) {
