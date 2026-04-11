@@ -275,6 +275,27 @@ class EtsyService
         return SellerTaxonomy::all();
     }
 
+    public function checkExistingReadinessStateDefinition(Shop $shop): void
+    {
+        if (isset($shop->shop_oauth['readiness_state_definition_id'])) {
+            return;
+        }
+
+        $this->refreshAccessToken($shop);
+
+        $definitionId = (new EtsyReadinessStateService(shop: $shop))->createReadinessStateDefinition();
+
+        Log::info('Etsy readiness state definition ID: '.($definitionId ?? 'null'));
+
+        if ($definitionId) {
+            $shopOauth = $shop->shop_oauth;
+            $shopOauth['readiness_state_definition_id'] = $definitionId;
+            $shop->shop_oauth = $shopOauth;
+            $shop->save();
+            Log::info('Etsy readiness state definition saved to shop_oauth');
+        }
+    }
+
     public function checkExistingShippingProfile(int $shopId, Shop $shop): void
     {
         $shippingProfileDTO = ShippingProfileDTO::fromShop($shopId);
@@ -522,6 +543,7 @@ class EtsyService
             shopId: $shop->shop_oauth['shop_id'],
             shop: $shop,
         );
+        $this->checkExistingReadinessStateDefinition($shop);
         $shop->refresh();
 
         $etsyListingService = new EtsyListingService(
@@ -581,6 +603,9 @@ class EtsyService
 
     private function updateListing(Shop $shop, Model $model): ListingDTO
     {
+        $this->checkExistingReadinessStateDefinition($shop);
+        $shop->refresh();
+
         $etsyListingService = new EtsyListingService(
             shop: $shop,
         );
@@ -594,10 +619,6 @@ class EtsyService
 
         Log::info('Update listing: '.$listingDTO->listingId);
 
-        // Update inventory with variations, first get existing inventory so we can keep the existing intact
-        $inventory = $this->getListingInventory($shop, $listingDTO->listingId);
-        $this->updateListingInventory($shop, $listingDTO, $inventory);
-
         $materials = [];
         if ($listingDTO->materials) {
             foreach ($listingDTO->materials as $material) {
@@ -605,7 +626,7 @@ class EtsyService
             }
         }
 
-        // Also set state to active again
+        // Update listing metadata first (including readiness_state_id) before inventory update
         $data = [
             'taxonomy_id' => $listingDTO->taxonomyId,
             'return_policy_id' => $listingDTO->returnPolicyId,
@@ -616,10 +637,18 @@ class EtsyService
             'item_height' => $listingDTO->itemHeight,
         ];
 
+        if (isset($shop->shop_oauth['readiness_state_definition_id'])) {
+            $data['readiness_state_id'] = $shop->shop_oauth['readiness_state_definition_id'];
+        }
+
         $etsyListingService->updateListing(
             listingId: $listing->listing_id,
             data: $data,
         );
+
+        // Update inventory after listing has readiness_state_id set
+        $inventory = $this->getListingInventory($shop, $listingDTO->listingId);
+        $this->updateListingInventory($shop, $listingDTO, $inventory);
 
         (new ShopListingModelService)->updateShopListingModel($model->shopListingModel, $listingDTO);
 
@@ -633,18 +662,13 @@ class EtsyService
 
         $variations = [];
         foreach ($listingDTO->listingInventory as $listingInventory) {
-            $sku = $listingInventory->sku;
-            $price = $listingInventory->price;
-            $currency = $listingInventory->currency;
-            $quantity = $listingInventory->quantity;
-            $isEnabled = $listingInventory->isEnabled;
             $variations[] = [
-                'sku' => $sku,
+                'sku' => $listingInventory->sku,
                 'material' => str_replace('(1µm)', '(1 micron)', $listingInventory->name),
-                'price' => $price,
-                'quantity' => $quantity,
-                'currency_code' => $currency->value,
-                'is_enabled' => $isEnabled,
+                'price' => $listingInventory->price,
+                'quantity' => $listingInventory->quantity,
+                'currency_code' => $listingInventory->currency->value,
+                'is_enabled' => $listingInventory->isEnabled,
             ];
         }
         try {
@@ -659,7 +683,7 @@ class EtsyService
                                     $index = $i;
                                 }
                             }
-                            if ($index) {
+                            if ($index !== null) {
                                 $variations[$index]['sku'] = $product['sku'];
                                 $variations[$index]['price'] = $offering['price']['amount'] / $offering['price']['divisor'];
                                 $variations[$index]['quantity'] = $offering['quantity'];
@@ -683,11 +707,16 @@ class EtsyService
         }
 
         try {
+            $readinessStateId = isset($shop->shop_oauth['readiness_state_definition_id'])
+                ? (int) $shop->shop_oauth['readiness_state_definition_id']
+                : null;
+
             $inventoryResponse = (new EtsyInventoryService(
                 shop: $shop,
             ))->updateInventory(
                 listingId: $listingId,
                 products: $variations,
+                readinessStateId: $readinessStateId,
             );
             Log::info('Listing inventory created: '.print_r($inventoryResponse, true));
         } catch (Exception $e) {
@@ -756,6 +785,13 @@ class EtsyService
 
     public function updateShopReceipt(Shop $shop, int $receiptId, array $data): ?Receipt
     {
+        $this->refreshAccessToken($shop);
+        new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: config('services.shops.etsy.client_secret'),
+            api_key: $shop->shop_oauth['access_token'],
+        );
+
         return Receipt::update(
             shop_id: $shop->shop_oauth['shop_id'],
             receipt_id: $receiptId,

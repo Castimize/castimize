@@ -389,22 +389,36 @@ class ExactOnlineService
             return '4  ';
         }
 
-        $vatCodes = (new VatCode($this->connection))->get();
+        $vatCodes = (new VatCode($this->connection))->filter('', '', 'Code,OssCountry,Description');
+        $codeMatch = null;
         /** @var VatCode $vatCode */
         foreach ($vatCodes as $vatCode) {
             $ossCountry = trim((string) $vatCode->OssCountry);
-            // Match on OssCountry (case-insensitive)
-            if (strcasecmp($ossCountry, $countryCode) === 0) {
+            $code = trim((string) $vatCode->Code);
+
+            // Prefer OssCountry match
+            if ($ossCountry !== '' && strcasecmp($ossCountry, $countryCode) === 0) {
                 Log::channel('exact')->info("Found VAT code for {$countryCode}: {$vatCode->Code} (OssCountry: {$ossCountry})");
 
                 return $vatCode->Code;
             }
+
+            // Fall back to Code match when OssCountry is not set
+            if ($codeMatch === null && $ossCountry === '' && strcasecmp($code, $countryCode) === 0) {
+                $codeMatch = $vatCode->Code;
+            }
+        }
+
+        if ($codeMatch !== null) {
+            Log::channel('exact')->info("Found VAT code for {$countryCode}: {$codeMatch} (matched on Code, OssCountry was null)");
+
+            return $codeMatch;
         }
 
         // Log available VAT codes for debugging
         $availableCodes = [];
         foreach ($vatCodes as $vatCode) {
-            $availableCodes[] = "Code: {$vatCode->Code}, OssCountry: ".($vatCode->OssCountry ?? 'null');
+            $availableCodes[] = 'Code: '.$vatCode->Code.', OssCountry: '.($vatCode->OssCountry ?? 'null').', Description: '.($vatCode->Description ?? 'null');
         }
         Log::channel('exact')->warning("VAT Code not found for {$countryCode}. Available codes: ".implode('; ', $availableCodes));
 

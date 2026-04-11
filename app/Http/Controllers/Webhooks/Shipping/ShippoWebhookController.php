@@ -95,7 +95,7 @@ class ShippoWebhookController extends WebhookController
             }
         }
 
-        if ($data['tracking_status']['status'] === 'TRANSIT') {
+        if ($shipment && $data['tracking_status']['status'] === 'TRANSIT') {
             $shipment->expected_delivery_date = $data['eta'];
             $shipment->save();
 
@@ -113,20 +113,21 @@ class ShippoWebhookController extends WebhookController
                 }
 
                 try {
-                    $orders = Order::has('shopOrder')->whereIn('id', $orderIds)->get();
+                    $orders = Order::has('shopOrder')->with('shopOrder.shopWithTrashed')->whereIn('id', $orderIds)->get();
                     foreach ($orders as $order) {
-                        if ($order->shopOrder) {
+                        $shop = $order->shopOrder?->shopWithTrashed;
+                        if ($order->shopOrder && $shop && $shipment->tracking_number) {
                             $etsyService = new EtsyService;
                             $etsyService->updateShopReceiptTracking(
-                                shop: $order->shopOrder->shop,
+                                shop: $shop,
                                 receiptId: $order->shopOrder->shop_receipt_id,
-                                receiptTrackingDTO: ReceiptTrackingDTO::from(
+                                receiptTrackingDTO: new ReceiptTrackingDTO(
                                     trackingCode: $shipment->tracking_number,
-                                    noteToBuyer: $shipment->tracking_url,
+                                    noteToBuyer: $shipment->tracking_url ?? '',
                                 )
                             );
                             $etsyService->updateShopReceipt(
-                                shop: $order->shopOrder->shop,
+                                shop: $shop,
                                 receiptId: $order->shopOrder->shop_receipt_id,
                                 data: [
                                     'was_shipped' => true,
