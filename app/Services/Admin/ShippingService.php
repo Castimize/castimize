@@ -18,6 +18,7 @@ use JsonException;
 use RuntimeException;
 use Shippo_ApiError;
 use Shippo_Object;
+use Throwable;
 
 class ShippingService
 {
@@ -67,7 +68,7 @@ class ShippingService
         $this->_transliterationService = app(AddressTransliterationService::class);
     }
 
-    public function createShippoAddress(string $type = 'From'): Shippo_Object
+    public function createShippoAddress(string $type = 'From', bool $validate = true): Shippo_Object
     {
         $getAddressMethod = 'get'.$type.'Address';
         $getShipmentAddressMethod = 'getShipment'.$type.'Address';
@@ -77,7 +78,7 @@ class ShippingService
 
         // return Cache::remember($cacheKey . '_v3', 31556926, function() use ($getAddressMethod, $setAddressMethod, $createAddressMethod, $getShipmentAddressMethod) {
         return $this->_shippoService->$setAddressMethod($this->$getAddressMethod())
-            ->$createAddressMethod(true)
+            ->$createAddressMethod($validate)
             ->$getShipmentAddressMethod();
         // });
     }
@@ -154,15 +155,41 @@ class ShippingService
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
-        [$valid, $errorMessages] = $this->checkAddressValid($shippoToAddress['validation_results'], $shippoToAddress['test'], false);
+        [$valid, $errorMessages, $hasUpsAddressError] = $this->checkAddressValid($shippoToAddress['validation_results'], $shippoToAddress['test'], false);
         if (! $valid) {
-            $message = __('The shipping to address is invalid with the following messages').PHP_EOL;
-            foreach ($errorMessages as $errorMessage) {
-                $source = $errorMessage['source'] ?? 'UNKNOWN';
-                $code = $errorMessage['code'] ?? 'UNKNOWN';
-                $message .= "[{$source} - {$code}] {$errorMessage['text']}".PHP_EOL;
+            if ($hasUpsAddressError) {
+                Log::warning('UPS address_error on to-address, retrying with corrected address', [
+                    'original_address' => $toAddress,
+                    'corrected_street1' => $shippoToAddress['street1'],
+                    'corrected_city' => $shippoToAddress['city'],
+                    'corrected_zip' => $shippoToAddress['zip'],
+                    'messages' => $errorMessages,
+                ]);
+                try {
+                    $shippoToAddress = $this->retryWithCorrectedAddress('To', $shippoToAddress, $toAddress);
+                    Log::info('UPS to-address retry succeeded with corrected address', ['corrected_address' => $this->getToAddress()]);
+                } catch (Throwable $retryException) {
+                    Log::error('UPS to-address retry also failed', [
+                        'retry_error' => $retryException->getMessage(),
+                        'original_messages' => $errorMessages,
+                    ]);
+                    $message = __('The shipping to address is invalid with the following messages').PHP_EOL;
+                    foreach ($errorMessages as $errorMessage) {
+                        $source = $errorMessage['source'] ?? 'UNKNOWN';
+                        $code = $errorMessage['code'] ?? 'UNKNOWN';
+                        $message .= "[{$source} - {$code}] {$errorMessage['text']}".PHP_EOL;
+                    }
+                    throw new RuntimeException($message);
+                }
+            } else {
+                $message = __('The shipping to address is invalid with the following messages').PHP_EOL;
+                foreach ($errorMessages as $errorMessage) {
+                    $source = $errorMessage['source'] ?? 'UNKNOWN';
+                    $code = $errorMessage['code'] ?? 'UNKNOWN';
+                    $message .= "[{$source} - {$code}] {$errorMessage['text']}".PHP_EOL;
+                }
+                throw new RuntimeException($message);
             }
-            throw new RuntimeException($message);
         }
 
         $this->_shippoService
@@ -263,13 +290,37 @@ class ShippingService
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
         $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
-        [$valid, $errorMessages] = $this->checkAddressValid($shippoFromAddress['validation_results'], $shippoFromAddress['test'], false);
+        [$valid, $errorMessages, $hasUpsAddressError] = $this->checkAddressValid($shippoFromAddress['validation_results'], $shippoFromAddress['test'], false);
         if (! $valid) {
-            $message = __('The shipping from address is invalid with the following messages').PHP_EOL;
-            foreach ($errorMessages as $errorMessage) {
-                $message .= $errorMessage['text'].PHP_EOL;
+            if ($hasUpsAddressError) {
+                Log::warning('UPS address_error on from-address, retrying with corrected address', [
+                    'original_address' => $fromAddress,
+                    'corrected_street1' => $shippoFromAddress['street1'],
+                    'corrected_city' => $shippoFromAddress['city'],
+                    'corrected_zip' => $shippoFromAddress['zip'],
+                    'messages' => $errorMessages,
+                ]);
+                try {
+                    $shippoFromAddress = $this->retryWithCorrectedAddress('From', $shippoFromAddress, $fromAddress);
+                    Log::info('UPS from-address retry succeeded with corrected address', ['corrected_address' => $this->getFromAddress()]);
+                } catch (Throwable $retryException) {
+                    Log::error('UPS from-address retry also failed', [
+                        'retry_error' => $retryException->getMessage(),
+                        'original_messages' => $errorMessages,
+                    ]);
+                    $message = __('The shipping from address is invalid with the following messages').PHP_EOL;
+                    foreach ($errorMessages as $errorMessage) {
+                        $message .= $errorMessage['text'].PHP_EOL;
+                    }
+                    throw new RuntimeException($message);
+                }
+            } else {
+                $message = __('The shipping from address is invalid with the following messages').PHP_EOL;
+                foreach ($errorMessages as $errorMessage) {
+                    $message .= $errorMessage['text'].PHP_EOL;
+                }
+                throw new RuntimeException($message);
             }
-            throw new RuntimeException($message);
         }
 
         $this->_shippoService
@@ -377,15 +428,15 @@ class ShippingService
 
         return [
             'name' => $transliteratedAddress['name'],
-            'company' => $transliteratedAddress['company'],
+            'company' => ! empty($transliteratedAddress['company']) ? $transliteratedAddress['company'] : null,
             'street1' => $transliteratedAddress['address_line1'],
             'street2' => $transliteratedAddress['address_line2'],
             'city' => $transliteratedAddress['city'],
             'state' => $transliteratedAddress['state'] ?? null,
-            'zip' => $address['postal_code'],
+            'zip' => $address['postal_code'] ?? '',
             'country' => $address['country'],
-            'email' => $address['email'],
-            'phone' => $address['phone'],
+            'email' => $address['email'] ?? '',
+            'phone' => $address['phone'] ?? '',
         ];
     }
 
@@ -435,16 +486,15 @@ class ShippingService
     private function checkAddressValid($validation_results, bool $test = false, bool $frontend = true): array
     {
         $valid = 1;
-        if (is_array($validation_results)) {
-            if (app()->environment('production')) {
-                $valid = $validation_results['is_valid'] ? 1 : 0;
-            }
-        }
         $errorMessages = [];
+        $hasUpsAddressError = false;
         if (isset($validation_results['messages']) && $validation_results['messages']) {
             foreach ($validation_results['messages'] as $message) {
                 if ($message['type'] === 'address_error') {
                     $valid = 0;
+                    if (($message['source'] ?? '') === 'UPS') {
+                        $hasUpsAddressError = true;
+                    }
                 }
                 $errorMessages[] = [
                     'source' => $message['source'],
@@ -455,6 +505,30 @@ class ShippingService
             }
         }
 
-        return [$valid, $errorMessages];
+        return [$valid, $errorMessages, $hasUpsAddressError];
+    }
+
+    private function extractCorrectedAddressFromShippoResponse(Shippo_Object $shippoAddress, array $originalMappedAddress): array
+    {
+        return [
+            'name' => $originalMappedAddress['name'],
+            'company' => $originalMappedAddress['company'],
+            'street1' => $shippoAddress['street1'].(! empty($shippoAddress['street_no']) ? ' '.$shippoAddress['street_no'] : ''),
+            'street2' => $originalMappedAddress['street2'],
+            'city' => $shippoAddress['city'],
+            'state' => $shippoAddress['state'],
+            'zip' => $shippoAddress['zip'],
+            'country' => $shippoAddress['country'],
+            'email' => $originalMappedAddress['email'],
+            'phone' => $originalMappedAddress['phone'],
+        ];
+    }
+
+    private function retryWithCorrectedAddress(string $type, Shippo_Object $originalShippoAddress, array $originalMappedAddress): Shippo_Object
+    {
+        $correctedAddress = $this->extractCorrectedAddressFromShippoResponse($originalShippoAddress, $originalMappedAddress);
+        $setMethod = 'set'.$type.'Address';
+
+        return $this->$setMethod($correctedAddress)->createShippoAddress($type, false);
     }
 }
