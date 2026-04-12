@@ -302,7 +302,8 @@ class ShippingServiceTest extends TestCase
         $this->shippoServiceMock->shouldReceive('createToAddress')
             ->once()->with(false)->andReturnSelf();
         $this->shippoServiceMock->shouldReceive('getShipmentToAddress')
-            ->once()->andReturn($mockInvalidShippoAddress)
+            ->once()->andReturn($mockInvalidShippoAddress);
+        $this->shippoServiceMock->shouldReceive('getShipmentToAddress')
             ->once()->andReturn($mockCorrectedShippoAddress);
         $this->shippoServiceMock->shouldReceive('setShipmentFromAddress')->andReturnSelf();
         $this->shippoServiceMock->shouldReceive('setShipmentToAddress')->andReturnSelf();

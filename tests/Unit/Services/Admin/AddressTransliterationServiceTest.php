@@ -87,7 +87,7 @@ class AddressTransliterationServiceTest extends TestCase
     }
 
     #[Test]
-    public function it_transliterates_full_japanese_address(): void
+    public function it_skips_transliteration_for_japanese_address(): void
     {
         $address = [
             'name' => '田中太郎',
@@ -104,16 +104,8 @@ class AddressTransliterationServiceTest extends TestCase
 
         $result = $this->service->transliterateAddress($address);
 
-        $this->assertTrue($this->service->isAscii($result['name']));
-        $this->assertTrue($this->service->isAscii($result['company']));
-        $this->assertTrue($this->service->isAscii($result['address_line1']));
-        $this->assertTrue($this->service->isAscii($result['city']));
-        $this->assertTrue($this->service->isAscii($result['state']));
-
-        $this->assertEquals('150-0001', $result['postal_code']);
-        $this->assertEquals('JP', $result['country']);
-        $this->assertEquals('tanaka@example.com', $result['email']);
-        $this->assertEquals('+81-90-1234-5678', $result['phone']);
+        // JP addresses are passed through unchanged — Shippo accepts native Japanese script
+        $this->assertEquals($address, $result);
     }
 
     #[Test]
@@ -141,11 +133,11 @@ class AddressTransliterationServiceTest extends TestCase
     public function it_handles_address_with_missing_optional_fields(): void
     {
         $address = [
-            'name' => '田中太郎',
-            'address_line1' => '東京都渋谷区',
-            'city' => '渋谷',
-            'postal_code' => '150-0001',
-            'country' => 'JP',
+            'name' => 'John Doe',
+            'address_line1' => '123 Main Street',
+            'city' => 'New York',
+            'postal_code' => '10001',
+            'country' => 'US',
         ];
 
         $result = $this->service->transliterateAddress($address);
