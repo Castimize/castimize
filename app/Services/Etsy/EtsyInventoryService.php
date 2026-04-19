@@ -14,7 +14,7 @@ class EtsyInventoryService
     public function __construct(
         protected Shop $shop,
     ) {
-        /** @var array<string, string> $shopOauth */
+        /** @var array{access_token: string, client_id: string} $shopOauth */
         $shopOauth = (array) $this->shop->shop_oauth;
 
         $this->client = new Client([
