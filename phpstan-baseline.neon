@@ -114,12 +114,3 @@ parameters:
 			count: 2
 			path: app/Services/Woocommerce/WoocommerceApiService.php
 
-		-
-			message: '#Undefined array key "access_token"#'
-			count: 1
-			path: app/Services/Etsy/EtsyInventoryService.php
-
-		-
-			message: '#Undefined array key "client_id"#'
-			count: 1
-			path: app/Services/Etsy/EtsyInventoryService.php
