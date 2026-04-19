@@ -113,21 +113,3 @@ parameters:
 			identifier: staticMethod.protected
 			count: 2
 			path: app/Services/Woocommerce/WoocommerceApiService.php
-
-		-
-			message: '#^Offset ''access_token'' does not exist on array\<array\-key, mixed\>\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: app/Services/Etsy/EtsyInventoryService.php
-
-		-
-			message: '#^Offset ''client_id'' does not exist on array\<array\-key, mixed\>\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: app/Services/Etsy/EtsyInventoryService.php
-
-		-
-			message: '#^Trying to access array offset on null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: app/Services/Etsy/EtsyInventoryService.php

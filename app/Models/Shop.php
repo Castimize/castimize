@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
+/**
+ * @property array<string, mixed> $shop_oauth
+ */
 #[ObservedBy(ShopOwnerAuthObserver::class)]
 class Shop extends Model
 {
