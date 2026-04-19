@@ -113,3 +113,15 @@ parameters:
 			identifier: staticMethod.protected
 			count: 2
 			path: app/Services/Woocommerce/WoocommerceApiService.php
+
+		-
+			message: '#^Warning: Undefined array key "access_token"\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: app/Services/Etsy/EtsyInventoryService.php
+
+		-
+			message: '#^Warning: Undefined array key "client_id"\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: app/Services/Etsy/EtsyInventoryService.php
