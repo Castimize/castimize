@@ -14,7 +14,7 @@ class EtsyInventoryService
     public function __construct(
         protected Shop $shop,
     ) {
-        $oauth = (array) $this->shop->getAttribute('shop_oauth');
+        $oauth = $this->shop->shopOauthArray();
         $this->client = new Client([
             'base_uri' => 'https://openapi.etsy.com/v3/application/',
             'headers' => [

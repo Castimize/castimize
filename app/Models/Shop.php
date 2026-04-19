@@ -56,6 +56,11 @@ class Shop extends Model
         ];
     }
 
+    public function shopOauthArray(): array
+    {
+        return (array) $this->shop_oauth;
+    }
+
     public function shopOwner(): BelongsTo
     {
         return $this->belongsTo(ShopOwner::class);
