@@ -671,31 +671,43 @@ class EtsyService
                 'is_enabled' => $listingInventory->isEnabled,
             ];
         }
+
+        // Build a set of active material names for quick lookup
+        $activeMaterialNames = array_column($variations, 'material');
+
         try {
             if (array_key_exists('products', $existingInventory)) {
                 foreach ($existingInventory['products'] as $product) {
                     foreach ($product['property_values'] as $propertyValue) {
                         if ($propertyValue['property_name'] === 'Material') {
                             $offering = $product['offerings'][0];
+                            $existingMaterialName = $propertyValue['values'][0];
                             $index = null;
                             for ($i = 0, $iMax = count($variations); $i < $iMax; $i++) {
-                                if ($propertyValue['values'][0] === $variations[$i]['material']) {
+                                if ($existingMaterialName === $variations[$i]['material']) {
                                     $index = $i;
                                 }
                             }
                             if ($index !== null) {
+                                // Active material: preserve SKU, price and quantity from Etsy
                                 $variations[$index]['sku'] = $product['sku'];
                                 $variations[$index]['price'] = $offering['price']['amount'] / $offering['price']['divisor'];
                                 $variations[$index]['quantity'] = $offering['quantity'];
                                 $variations[$index]['is_enabled'] = $offering['is_enabled'];
-                            } else {
+                            } elseif (! in_array($existingMaterialName, $activeMaterialNames, true)) {
+                                // Material exists in Etsy but is no longer linked to this model —
+                                // disable it instead of re-adding it as active.
+                                Log::info('Disabling removed material variation in Etsy listing', [
+                                    'listing_id' => $listingId,
+                                    'material' => $existingMaterialName,
+                                ]);
                                 $variations[] = [
                                     'sku' => $product['sku'],
-                                    'material' => $propertyValue['values'][0],
+                                    'material' => $existingMaterialName,
                                     'price' => $offering['price']['amount'] / $offering['price']['divisor'],
                                     'quantity' => $offering['quantity'],
                                     'currency_code' => $offering['price']['currency_code'],
-                                    'is_enabled' => $offering['is_enabled'],
+                                    'is_enabled' => false,
                                 ];
                             }
                         }
@@ -711,9 +723,7 @@ class EtsyService
                 ? (int) $shop->shop_oauth['readiness_state_definition_id']
                 : null;
 
-            $inventoryResponse = (new EtsyInventoryService(
-                shop: $shop,
-            ))->updateInventory(
+            $inventoryResponse = app(EtsyInventoryService::class, ['shop' => $shop])->updateInventory(
                 listingId: $listingId,
                 products: $variations,
                 readinessStateId: $readinessStateId,
