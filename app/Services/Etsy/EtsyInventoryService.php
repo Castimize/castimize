@@ -14,12 +14,14 @@ class EtsyInventoryService
     public function __construct(
         protected Shop $shop,
     ) {
+        /** @var array<string, string> $shopOauth */
+        $shopOauth = $this->shop->shop_oauth;
+
         $this->client = new Client([
             'base_uri' => 'https://openapi.etsy.com/v3/application/',
             'headers' => [
-                'Authorization' => 'Bearer '.$this->shop->shop_oauth['access_token'],
-                //                'x-api-key' => $this->shop->shop_oauth['client_id'],
-                'x-api-key' => $this->shop->shop_oauth['client_id'].':'.config('services.shops.etsy.client_secret'),
+                'Authorization' => 'Bearer '.$shopOauth['access_token'],
+                'x-api-key' => $shopOauth['client_id'].':'.config('services.shops.etsy.client_secret'),
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
             ],
