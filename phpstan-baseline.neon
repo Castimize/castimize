@@ -115,11 +115,11 @@ parameters:
 			path: app/Services/Woocommerce/WoocommerceApiService.php
 
 		-
-			message: '#^Warning: Undefined array key "access_token"\.$#'
+			message: '#Undefined array key "access_token"#'
 			count: 1
 			path: app/Services/Etsy/EtsyInventoryService.php
 
 		-
-			message: '#^Warning: Undefined array key "client_id"\.$#'
+			message: '#Undefined array key "client_id"#'
 			count: 1
 			path: app/Services/Etsy/EtsyInventoryService.php
