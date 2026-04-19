@@ -125,3 +125,9 @@ parameters:
 			identifier: offsetAccess.notFound
 			count: 1
 			path: app/Services/Etsy/EtsyInventoryService.php
+
+		-
+			message: '#^Trying to access array offset on null\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: app/Services/Etsy/EtsyInventoryService.php
