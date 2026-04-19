@@ -22,6 +22,7 @@ parameters:
         - app/Console/Commands/Temp/  # Temporary migration scripts
         - app/Console/Commands/GetCurrencyHistoricalRates.php  # Requires EXCHANGE_RATES_API_KEY env var
         - app/Services/Etsy/EtsyInventoryService.php  # shop_oauth array key inference differs between PHP versions
+        - app/Observers/MaterialModelObserver.php  # Larastan internal error during analysis
 
     # Treat phpdoc types as certain
     treatPhpDocTypesAsCertain: false
