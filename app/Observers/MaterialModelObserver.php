@@ -31,6 +31,6 @@ class MaterialModelObserver
             'material_id' => $materialModel->material_id,
         ]);
 
-        (new ModelsService)->syncModelToShop($model);
+        app(ModelsService::class)->syncModelToShop($model);
     }
 }
