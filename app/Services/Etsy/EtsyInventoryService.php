@@ -15,7 +15,7 @@ class EtsyInventoryService
         protected Shop $shop,
     ) {
         /** @var array<string, string> $shopOauth */
-        $shopOauth = $this->shop->shop_oauth;
+        $shopOauth = (array) $this->shop->shop_oauth;
 
         $this->client = new Client([
             'base_uri' => 'https://openapi.etsy.com/v3/application/',
