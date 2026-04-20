@@ -309,12 +309,23 @@ class EtsyService
 
                 $this->addShippingProfileToShopOwnerShop($shop, $shippingProfile);
                 $shop->refresh();
+
+                $this->syncShippingProfileDestinations($shop, $shippingProfile->shipping_profile_id);
             }
         }
 
         if ($createShippingProfile) {
             $this->createShippingProfile($shop, $shippingProfileDTO);
         }
+    }
+
+    public function syncShippingProfileDestinations(Shop $shop, int $shippingProfileId): void
+    {
+        $this->refreshAccessToken($shop);
+
+        (new EtsyShippingProfileService(
+            shop: $shop,
+        ))->syncShippingProfileDestinations($shippingProfileId);
     }
 
     public function getShippingProfile(Shop $shop)
