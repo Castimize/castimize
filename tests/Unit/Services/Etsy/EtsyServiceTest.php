@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Services\Etsy;
 
 use App\DTO\Shops\Etsy\ReceiptTrackingDTO;
+use App\DTO\Shops\Etsy\ShippingProfileDTO;
 use App\Models\Shop;
 use App\Services\Etsy\EtsyService;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -24,6 +26,17 @@ class EtsyServiceTest extends TestCase
         // EtsyService uses config('services.shops.etsy.client_secret') in refreshAccessToken.
         // Set a dummy value so the Etsy\OAuth\Client constructor doesn't receive null.
         config(['services.shops.etsy.client_secret' => 'test-client-secret']);
+
+        // ShippingProfileDTO::fromShop reads DcSettings which loads from the settings table.
+        // Insert a minimal record so postalCode is not null (the DTO requires string).
+        DB::table('settings')->insertOrIgnore([
+            'group' => 'shipping',
+            'name' => 'dc_settings',
+            'payload' => json_encode(['postalCode' => '1234AB']),
+            'locked' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     protected function tearDown(): void
@@ -186,5 +199,55 @@ class EtsyServiceTest extends TestCase
 
         $shop->refresh();
         $this->assertFalse((bool) $shop->active);
+    }
+
+    #[Test]
+    public function it_syncs_shipping_profile_destinations_when_profile_already_exists(): void
+    {
+        $shop = Shop::factory()->create([
+            'shop_oauth' => [
+                'shop_id' => 12345678,
+                'client_id' => 'test-client-id',
+                'access_token' => 'test-access-token',
+                'refresh_token' => 'test-refresh-token',
+            ],
+        ]);
+
+        $existingProfile = (object) [
+            'title' => 'Castimize shipping profile',
+            'shipping_profile_id' => 99999,
+        ];
+        $fakeProfiles = (object) ['data' => [$existingProfile]];
+
+        $service = Mockery::mock(EtsyService::class)->makePartial();
+        $service->shouldReceive('getShippingProfiles')->once()->andReturn($fakeProfiles);
+        $service->shouldReceive('syncShippingProfileDestinations')->once()->with($shop, 99999);
+        $service->shouldNotReceive('createShippingProfile');
+
+        $service->checkExistingShippingProfile(12345678, $shop);
+    }
+
+    #[Test]
+    public function it_creates_shipping_profile_when_no_matching_profile_exists(): void
+    {
+        $shop = Shop::factory()->create([
+            'shop_oauth' => [
+                'shop_id' => 12345678,
+                'client_id' => 'test-client-id',
+                'access_token' => 'test-access-token',
+                'refresh_token' => 'test-refresh-token',
+            ],
+        ]);
+
+        $fakeProfiles = (object) ['data' => []];
+
+        $service = Mockery::mock(EtsyService::class)->makePartial();
+        $service->shouldReceive('getShippingProfiles')->once()->andReturn($fakeProfiles);
+        $service->shouldReceive('createShippingProfile')->once()->withArgs(
+            fn (Shop $s, ShippingProfileDTO $dto) => $s->id === $shop->id
+        );
+        $service->shouldNotReceive('syncShippingProfileDestinations');
+
+        $service->checkExistingShippingProfile(12345678, $shop);
     }
 }

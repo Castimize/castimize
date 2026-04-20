@@ -49,33 +49,32 @@ class FixShippingProfileWithDestinations extends Command
                     }
 
                     $countries = Country::with(['logisticsZone.shippingFee'])
+                        ->whereHas('logisticsZone', fn ($q) => $q->whereHas('shippingFee'))
                         ->get();
 
                     foreach ($countries as $country) {
-                        if ($country->has('logisticsZone')) {
-                            try {
-                                $shippingProfileDestinationService = new EtsyShippingProfileService(shop: $shop);
-                                if (! array_key_exists($country->alpha2, $existingShippingProfileDestinations)) {
-                                    $shippingProfileDestinationService->createShippingProfileDestination(
-                                        shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
-                                            shop: $shop,
-                                            country: $country,
-                                            shippingProfileId: $shop->shop_oauth['shop_shipping_profile_id'],
-                                        ),
-                                    );
-                                } else {
-                                    $shippingProfileDestinationService->updateShippingProfileDestination(
-                                        shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
-                                            shop: $shop,
-                                            country: $country,
-                                            shippingProfileId: $shop->shop_oauth['shop_shipping_profile_id'],
-                                            shippingProfileDestinationId: $existingShippingProfileDestinations[$country->alpha2],
-                                        ),
-                                    );
-                                }
-                            } catch (Exception $e) {
-                                // just continue
+                        try {
+                            $shippingProfileDestinationService = new EtsyShippingProfileService(shop: $shop);
+                            if (! array_key_exists($country->alpha2, $existingShippingProfileDestinations)) {
+                                $shippingProfileDestinationService->createShippingProfileDestination(
+                                    shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
+                                        shop: $shop,
+                                        country: $country,
+                                        shippingProfileId: $shop->shop_oauth['shop_shipping_profile_id'],
+                                    ),
+                                );
+                            } else {
+                                $shippingProfileDestinationService->updateShippingProfileDestination(
+                                    shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
+                                        shop: $shop,
+                                        country: $country,
+                                        shippingProfileId: $shop->shop_oauth['shop_shipping_profile_id'],
+                                        shippingProfileDestinationId: $existingShippingProfileDestinations[$country->alpha2],
+                                    ),
+                                );
                             }
+                        } catch (Exception $e) {
+                            // just continue
                         }
                     }
                 }
