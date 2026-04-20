@@ -77,7 +77,7 @@ class Model extends EloquentModel
 
     public function materials(): BelongsToMany
     {
-        return $this->belongsToMany(Material::class);
+        return $this->belongsToMany(Material::class)->using(MaterialModel::class);
     }
 
     public function shopListingModel(): HasOne
