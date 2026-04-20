@@ -202,10 +202,10 @@ class EtsyServiceTest extends TestCase
             ],
         ]);
 
-        $existingProfile = (object) [
+        $existingProfile = new \Etsy\Resources\ShippingProfile([
             'title' => 'Castimize shipping profile',
             'shipping_profile_id' => 99999,
-        ];
+        ]);
         $fakeProfiles = (object) ['data' => [$existingProfile]];
 
         $service = Mockery::mock(EtsyService::class)->makePartial();
@@ -214,6 +214,8 @@ class EtsyServiceTest extends TestCase
         $service->shouldNotReceive('createShippingProfile');
 
         $service->checkExistingShippingProfile(12345678, $shop);
+
+        $this->addToAssertionCount(Mockery::getContainer()->mockery_getExpectationCount());
     }
 
     #[Test]
@@ -236,6 +238,8 @@ class EtsyServiceTest extends TestCase
             fn (Shop $s, ShippingProfileDTO $dto) => $s->id === $shop->id
         );
         $service->shouldNotReceive('syncShippingProfileDestinations');
+
+        $this->addToAssertionCount(Mockery::getContainer()->mockery_getExpectationCount());
 
         $service->checkExistingShippingProfile(12345678, $shop);
     }
