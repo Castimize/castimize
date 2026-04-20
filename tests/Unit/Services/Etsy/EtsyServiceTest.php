@@ -10,7 +10,6 @@ use App\Models\Shop;
 use App\Services\Etsy\EtsyService;
 use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\DB;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -27,16 +26,6 @@ class EtsyServiceTest extends TestCase
         // Set a dummy value so the Etsy\OAuth\Client constructor doesn't receive null.
         config(['services.shops.etsy.client_secret' => 'test-client-secret']);
 
-        // ShippingProfileDTO::fromShop reads DcSettings which loads from the settings table.
-        // Insert a minimal record so postalCode is not null (the DTO requires string).
-        DB::table('settings')->insertOrIgnore([
-            'group' => 'shipping',
-            'name' => 'dc_settings',
-            'payload' => json_encode(['postalCode' => '1234AB']),
-            'locked' => false,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
     }
 
     protected function tearDown(): void
