@@ -5,17 +5,17 @@ namespace App\Models;
 use App\Observers\MaterialModelObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 #[ObservedBy(MaterialModelObserver::class)]
-class MaterialModel extends Model
+class MaterialModel extends Pivot
 {
     use HasFactory;
 
     protected $table = 'material_model';
 
-    protected $primaryKey = ['model_id', 'material_id'];
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
