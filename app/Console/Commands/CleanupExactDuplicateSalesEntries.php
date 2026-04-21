@@ -11,7 +11,7 @@ use Throwable;
 class CleanupExactDuplicateSalesEntries extends Command
 {
     protected $signature = 'castimize:cleanup-exact-duplicate-sales-entries
-                            {invoice_ids* : One or more invoice IDs (optional — omit to process all synced invoices)}';
+                            {invoice_ids?* : One or more invoice IDs (optional — omit to process all synced invoices)}';
 
     protected $description = 'Remove sales entries from Exact Online that are no longer present in the local invoice_exact_sales_entries table';
 
