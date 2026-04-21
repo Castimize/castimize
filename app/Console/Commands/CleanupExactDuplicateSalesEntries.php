@@ -11,7 +11,7 @@ use Throwable;
 class CleanupExactDuplicateSalesEntries extends Command
 {
     protected $signature = 'castimize:cleanup-exact-duplicate-sales-entries
-                            {invoice_ids* : One or more invoice IDs to process}';
+                            {invoice_ids* : One or more invoice IDs (optional — omit to process all synced invoices)}';
 
     protected $description = 'Remove sales entries from Exact Online that are no longer present in the local invoice_exact_sales_entries table';
 
@@ -19,21 +19,27 @@ class CleanupExactDuplicateSalesEntries extends Command
     {
         $invoiceIds = $this->argument('invoice_ids');
 
-        $invoices = Invoice::with('exactSalesEntries')
-            ->whereIn('id', $invoiceIds)
-            ->get();
+        $query = Invoice::with('exactSalesEntries')->has('exactSalesEntries');
 
-        $notFound = array_diff($invoiceIds, $invoices->pluck('id')->map(fn ($id) => (string) $id)->toArray());
-        foreach ($notFound as $missingId) {
-            $this->error("Invoice ID {$missingId} not found in database — skipping.");
-            Log::channel('exact')->warning('CleanupExactDuplicateSalesEntries: invoice not found', ['invoice_id' => $missingId]);
+        if (! empty($invoiceIds)) {
+            $query->whereIn('id', $invoiceIds);
+
+            $notFound = array_diff($invoiceIds, $query->pluck('id')->map(fn ($id) => (string) $id)->toArray());
+            foreach ($notFound as $missingId) {
+                $this->error("Invoice ID {$missingId} not found in database — skipping.");
+                Log::channel('exact')->warning('CleanupExactDuplicateSalesEntries: invoice not found', ['invoice_id' => $missingId]);
+            }
         }
+
+        $invoices = $query->get();
 
         if ($invoices->isEmpty()) {
             $this->warn('No invoices found to process.');
 
             return self::FAILURE;
         }
+
+        $this->info("Processing {$invoices->count()} invoice(s)...");
 
         $connection = app()->make('Exact\Connection');
         $totalDeleted = 0;
