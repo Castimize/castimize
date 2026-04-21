@@ -240,6 +240,12 @@ class ExactOnlineService
 
     private function createSalesEntryFromInvoice(Invoice $invoice, array $salesEntryLines, int $diary, int $type, string $entryDate): void
     {
+        if ($invoice->exactSalesEntries()->where('diary', $diary)->exists()) {
+            Log::channel('exact')->info("createSalesEntryFromInvoice: skipping — entry already exists for invoice {$invoice->invoice_number} diary {$diary}");
+
+            return;
+        }
+
         if ($invoice->customer === null) {
             throw new RuntimeException(sprintf(
                 'Invoice #%s has no customer attached',
@@ -274,7 +280,7 @@ class ExactOnlineService
         $salesEntry->Currency = CurrencyEnum::EUR->value;
         $salesEntry->Journal = $diary;
         $salesEntry->YourRef = $invoice->invoice_number;
-        $salesEntry->OrderNumber = $invoice->invoice_nuber;
+        $salesEntry->OrderNumber = $invoice->invoice_number;
         $salesEntry->Description = $invoice->description;
         $salesEntry->EntryDate = $entryDate;
         $salesEntry->PaymentCondition = '00';
