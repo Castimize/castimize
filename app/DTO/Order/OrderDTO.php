@@ -198,7 +198,7 @@ class OrderDTO extends Data
 
         $taxPercentage = null;
         $vatExempt = 'yes';
-        if ($billingVatNumber !== null && $billingAddress->country_id === 1) {
+        if ($billingVatNumber !== null && $billingAddress?->country_id === 1) {
             $taxPercentage = 21;
             $vatExempt = 'no';
         }
@@ -254,7 +254,7 @@ class OrderDTO extends Data
                     'vat_number' => ['data' => $billingVatNumber ? substr($billingVatNumber, 0, 2) : null, 'label' => 'VAT Number'],
                     'country_code' => ['data' => $billingVatNumber ? substr($billingVatNumber, 2) : null, 'label' => 'Country Code'],
                     'business_name' => ['data' => $customer->company, 'label' => 'Business Name'],
-                    'business_address' => ['data' => $billingAddress->full_address_with_new_lines, 'label' => 'Business Address'],
+                    'business_address' => ['data' => $billingAddress?->full_address_with_new_lines, 'label' => 'Business Address'],
                 ],
             ];
         }
@@ -280,12 +280,12 @@ class OrderDTO extends Data
             billingCompany: $customer->company,
             billingPhoneNumber: $customer->phone ?? '',
             billingEmail: $customer->email ?? '',
-            billingAddressLine1: $billingAddress->address_line1 ?? '',
-            billingAddressLine2: $billingAddress->address_line2,
-            billingPostalCode: $billingAddress->postal_code ?? '',
-            billingCity: $billingAddress->city?->name ?? '',
-            billingState: $billingAddress->state?->name,
-            billingCountry: $billingAddress->country?->alpha2 ?? '',
+            billingAddressLine1: $billingAddress?->address_line1 ?? '',
+            billingAddressLine2: $billingAddress?->address_line2,
+            billingPostalCode: $billingAddress?->postal_code ?? '',
+            billingCity: $billingAddress?->city?->name ?? '',
+            billingState: $billingAddress?->state?->name,
+            billingCountry: $billingAddress?->country?->alpha2 ?? '',
             billingVatNumber: $billingVatNumber,
             shippingFirstName: $name->getFirstname() ?? '',
             shippingLastName: $name->getMiddlename() !== '' ? $name->getMiddlename().' '.$name->getLastName() : ($name->getLastName() ?? ''),
