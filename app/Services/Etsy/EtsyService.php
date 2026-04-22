@@ -850,17 +850,58 @@ class EtsyService
                 ->where('shop_listing_id', $transaction->listing_id)
                 ->where('created_at', '<=', Carbon::createFromTimestamp($receipt->created_timestamp))
                 ->first();
-            if ($shopListingModel) {
-                foreach ($transaction->variations as $variation) {
-                    $material = $shopListingModel->model->materials->where('name', $variation->formatted_value)->first();
-                    if ($variation->formatted_name === 'Material' && $material) {
-                        $lines[] = [
-                            'transaction' => $transaction,
-                            'shop_listing_model' => $shopListingModel,
-                            'material' => $material,
-                        ];
-                    }
+
+            if (! $shopListingModel) {
+                Log::channel('etsy')->warning('getShopListingsFromReceipt: no ShopListingModel found for transaction', [
+                    'shop_id' => $shop->id,
+                    'receipt_id' => $receipt->receipt_id,
+                    'listing_id' => $transaction->listing_id,
+                    'transaction_id' => $transaction->transaction_id,
+                    'receipt_created_timestamp' => $receipt->created_timestamp,
+                ]);
+
+                continue;
+            }
+
+            $matchedLine = false;
+            foreach ($transaction->variations as $variation) {
+                if ($variation->formatted_name !== 'Material') {
+                    continue;
                 }
+
+                $material = $shopListingModel->model->materials->where('name', $variation->formatted_value)->first();
+                if (! $material) {
+                    Log::channel('etsy')->warning('getShopListingsFromReceipt: material not found for variation', [
+                        'shop_id' => $shop->id,
+                        'receipt_id' => $receipt->receipt_id,
+                        'listing_id' => $transaction->listing_id,
+                        'transaction_id' => $transaction->transaction_id,
+                        'variation_value' => $variation->formatted_value,
+                        'available_materials' => $shopListingModel->model->materials->pluck('name'),
+                    ]);
+
+                    continue;
+                }
+
+                $lines[] = [
+                    'transaction' => $transaction,
+                    'shop_listing_model' => $shopListingModel,
+                    'material' => $material,
+                ];
+                $matchedLine = true;
+            }
+
+            if (! $matchedLine) {
+                Log::channel('etsy')->warning('getShopListingsFromReceipt: no matching Material variation found for transaction', [
+                    'shop_id' => $shop->id,
+                    'receipt_id' => $receipt->receipt_id,
+                    'listing_id' => $transaction->listing_id,
+                    'transaction_id' => $transaction->transaction_id,
+                    'variations' => collect($transaction->variations)->map(fn ($v) => [
+                        'name' => $v->formatted_name,
+                        'value' => $v->formatted_value,
+                    ])->all(),
+                ]);
             }
         }
 
