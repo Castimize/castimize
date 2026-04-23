@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class DeleteInvoiceFromExact extends Command
 {
     protected $signature = 'castimize:delete-invoice-from-exact
-                            {invoice_ids* : One or more local invoice IDs to look up YourRef via exact_data}
+                            {invoice_ids?* : One or more local invoice IDs to look up YourRef via exact_data}
                             {--ref=* : One or more Exact YourRef values to dispatch a delete job for directly}';
 
     protected $description = 'Delete invoice sales entries from Exact Online by invoice ID (via exact_data) or directly by YourRef';
