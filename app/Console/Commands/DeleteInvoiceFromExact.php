@@ -10,16 +10,31 @@ use Illuminate\Support\Facades\Log;
 class DeleteInvoiceFromExact extends Command
 {
     protected $signature = 'castimize:delete-invoice-from-exact
-                            {invoice_ids* : One or more local invoice IDs to delete from Exact Online}';
+                            {invoice_ids* : One or more local invoice IDs to look up YourRef via exact_data}
+                            {--ref=* : One or more Exact YourRef values to dispatch a delete job for directly}';
 
-    protected $description = 'Delete invoice sales entries from Exact Online using the YourRef stored in local exact_data';
+    protected $description = 'Delete invoice sales entries from Exact Online by invoice ID (via exact_data) or directly by YourRef';
 
     public function handle(): int
     {
+        $directRefs = $this->option('ref');
+
+        if (! empty($directRefs)) {
+            foreach ($directRefs as $yourRef) {
+                DeleteInvoiceFromExactJob::dispatch($yourRef);
+                $this->info("Dispatched delete job for YourRef '{$yourRef}'.");
+                Log::channel('exact')->info('DeleteInvoiceFromExact: dispatched job via --ref', ['your_ref' => $yourRef]);
+            }
+
+            $this->info('Done.');
+
+            return self::SUCCESS;
+        }
+
         $invoiceIds = $this->argument('invoice_ids');
 
         if (empty($invoiceIds)) {
-            $this->error('Provide at least one invoice ID.');
+            $this->error('Provide at least one invoice ID or use --ref to delete by YourRef directly.');
 
             return self::FAILURE;
         }
@@ -61,7 +76,7 @@ class DeleteInvoiceFromExact extends Command
             foreach ($yourRefs as $yourRef) {
                 DeleteInvoiceFromExactJob::dispatch($yourRef);
                 $this->info("Invoice #{$invoice->invoice_number} (ID: {$invoice->id}): dispatched delete job for YourRef '{$yourRef}'.");
-                Log::channel('exact')->info('DeleteInvoiceFromExact: dispatched job', [
+                Log::channel('exact')->info('DeleteInvoiceFromExact: dispatched job via invoice ID', [
                     'invoice_id' => $invoice->id,
                     'invoice_number' => $invoice->invoice_number,
                     'your_ref' => $yourRef,
