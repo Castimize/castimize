@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Services\Admin;
 
 use App\Services\Admin\AddressTransliterationService;
-use InvalidArgumentException;
+use Illuminate\Support\Facades\Log;
+use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -84,7 +87,7 @@ class AddressTransliterationServiceTest extends TestCase
     }
 
     #[Test]
-    public function it_transliterates_full_japanese_address(): void
+    public function it_skips_transliteration_for_japanese_address(): void
     {
         $address = [
             'name' => '田中太郎',
@@ -101,16 +104,8 @@ class AddressTransliterationServiceTest extends TestCase
 
         $result = $this->service->transliterateAddress($address);
 
-        $this->assertTrue($this->service->isAscii($result['name']));
-        $this->assertTrue($this->service->isAscii($result['company']));
-        $this->assertTrue($this->service->isAscii($result['address_line1']));
-        $this->assertTrue($this->service->isAscii($result['city']));
-        $this->assertTrue($this->service->isAscii($result['state']));
-
-        $this->assertEquals('150-0001', $result['postal_code']);
-        $this->assertEquals('JP', $result['country']);
-        $this->assertEquals('tanaka@example.com', $result['email']);
-        $this->assertEquals('+81-90-1234-5678', $result['phone']);
+        // JP addresses are passed through unchanged — Shippo accepts native Japanese script
+        $this->assertEquals($address, $result);
     }
 
     #[Test]
@@ -138,11 +133,11 @@ class AddressTransliterationServiceTest extends TestCase
     public function it_handles_address_with_missing_optional_fields(): void
     {
         $address = [
-            'name' => '田中太郎',
-            'address_line1' => '東京都渋谷区',
-            'city' => '渋谷',
-            'postal_code' => '150-0001',
-            'country' => 'JP',
+            'name' => 'John Doe',
+            'address_line1' => '123 Main Street',
+            'city' => 'New York',
+            'postal_code' => '10001',
+            'country' => 'US',
         ];
 
         $result = $this->service->transliterateAddress($address);
@@ -157,56 +152,100 @@ class AddressTransliterationServiceTest extends TestCase
     #[Test]
     public function it_throws_exception_when_address_line_exceeds_35_characters(): void
     {
+        $longAddressLine2 = 'This is a very long address line 2 that exceeds the UPS maximum of 35 characters';
         $address = [
             'name' => 'John Doe',
-            'address_line2' => 'This is a very long address line 2 that exceeds the UPS maximum of 35 characters',
+            'address_line2' => $longAddressLine2,
             'city' => 'New York',
             'postal_code' => '10001',
             'country' => 'US',
         ];
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('address_line2 exceeds maximum length of 35 characters');
+        $result = $this->service->transliterateAddress($address);
 
-        $this->service->transliterateAddress($address);
+        $this->assertEquals(35, mb_strlen($result['address_line2']));
+        $this->assertEquals(mb_substr($longAddressLine2, 0, 35), $result['address_line2']);
     }
 
     #[Test]
     public function it_throws_exception_when_city_exceeds_30_characters(): void
     {
+        $longCity = 'This Is An Extremely Long City Name That Exceeds Limit';
         $address = [
             'name' => 'John Doe',
-            'city' => 'This Is An Extremely Long City Name That Exceeds Limit',
+            'city' => $longCity,
             'postal_code' => '10001',
             'country' => 'US',
         ];
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('city exceeds maximum length of 30 characters');
+        $result = $this->service->transliterateAddress($address);
 
-        $this->service->transliterateAddress($address);
+        $this->assertEquals(30, mb_strlen($result['city']));
+        $this->assertEquals(mb_substr($longCity, 0, 30), $result['city']);
     }
 
     #[Test]
     public function it_includes_all_field_errors_in_exception_message(): void
     {
+        $longName = 'This is a very long name that exceeds the maximum';
+        $longAddressLine1 = 'This is a very long address that exceeds maximum';
         $address = [
-            'name' => 'This is a very long name that exceeds the maximum',
-            'address_line1' => 'This is a very long address that exceeds maximum',
+            'name' => $longName,
+            'address_line1' => $longAddressLine1,
             'city' => 'New York',
             'postal_code' => '10001',
             'country' => 'US',
         ];
 
-        $this->expectException(InvalidArgumentException::class);
+        $result = $this->service->transliterateAddress($address);
 
-        try {
-            $this->service->transliterateAddress($address);
-        } catch (InvalidArgumentException $e) {
-            $this->assertStringContainsString('name exceeds maximum length of 35', $e->getMessage());
-            $this->assertStringContainsString('address_line1 exceeds maximum length of 35', $e->getMessage());
-            throw $e;
-        }
+        $this->assertEquals(35, mb_strlen($result['name']));
+        $this->assertEquals(mb_substr($longName, 0, 35), $result['name']);
+        $this->assertEquals(35, mb_strlen($result['address_line1']));
+        $this->assertEquals(mb_substr($longAddressLine1, 0, 35), $result['address_line1']);
+    }
+
+    #[Test]
+    public function it_truncates_name_exceeding_35_characters(): void
+    {
+        $longName = 'This Is A Very Long Name That Clearly Exceeds The Limit';
+        $address = [
+            'name' => $longName,
+            'address_line1' => '123 Main Street',
+            'city' => 'New York',
+            'postal_code' => '10001',
+            'country' => 'US',
+        ];
+
+        $result = $this->service->transliterateAddress($address);
+
+        $this->assertEquals(35, mb_strlen($result['name']));
+        $this->assertEquals(mb_substr($longName, 0, 35), $result['name']);
+    }
+
+    #[Test]
+    public function it_logs_warning_when_truncating(): void
+    {
+        Log::shouldReceive('warning')
+            ->once()
+            ->with('Address field truncated to max length for Shippo', Mockery::on(function (array $context): bool {
+                return $context['field'] === 'name'
+                    && $context['max_length'] === 35
+                    && mb_strlen($context['truncated']) === 35;
+            }));
+
+        Log::shouldReceive('info')->zeroOrMoreTimes();
+
+        $longName = 'This Is A Very Long Name That Clearly Exceeds The Limit';
+        $address = [
+            'name' => $longName,
+            'address_line1' => '123 Main Street',
+            'city' => 'New York',
+            'postal_code' => '10001',
+            'country' => 'US',
+        ];
+
+        $this->service->transliterateAddress($address);
     }
 
     #[Test]
