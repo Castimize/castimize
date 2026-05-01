@@ -685,6 +685,18 @@ class EtsyService
         try {
             if (array_key_exists('products', $existingInventory)) {
                 foreach ($existingInventory['products'] as $product) {
+                    if (count($product['property_values']) > 1) {
+                        Log::channel('etsy')->warning('updateListingInventory: listing has more than one variation property — skipping update to prevent data loss', [
+                            'listing_id' => $listingId,
+                            'property_count' => count($product['property_values']),
+                            'properties' => array_column($product['property_values'], 'property_name'),
+                        ]);
+
+                        return;
+                    }
+                }
+
+                foreach ($existingInventory['products'] as $product) {
                     foreach ($product['property_values'] as $propertyValue) {
                         if ($propertyValue['property_name'] === 'Material') {
                             $offering = $product['offerings'][0];

@@ -73,6 +73,7 @@ class EtsyInventoryService
             'quantity_on_property' => [514],
             'sku_on_property' => [514],
             'readiness_state_on_property' => [],
+            'max_variations_supported' => 2,
         ];
 
         return $this->client->put("listings/{$listingId}/inventory", [
