@@ -734,9 +734,7 @@ class EtsyService
                 ? (int) $shop->shop_oauth['readiness_state_definition_id']
                 : null;
 
-            $inventoryResponse = (new EtsyInventoryService(
-                shop: $shop,
-            ))->updateInventory(
+            $inventoryResponse = $this->makeInventoryService($shop)->updateInventory(
                 listingId: $listingId,
                 products: $variations,
                 readinessStateId: $readinessStateId,
@@ -957,6 +955,11 @@ class EtsyService
         $shop->save();
 
         return $shop;
+    }
+
+    protected function makeInventoryService(Shop $shop): EtsyInventoryService
+    {
+        return new EtsyInventoryService(shop: $shop);
     }
 
     private function storeClientSecret(Shop $shop): Shop
