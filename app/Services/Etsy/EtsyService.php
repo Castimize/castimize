@@ -685,6 +685,18 @@ class EtsyService
         try {
             if (array_key_exists('products', $existingInventory)) {
                 foreach ($existingInventory['products'] as $product) {
+                    if (count($product['property_values']) > 1) {
+                        Log::channel('etsy')->warning('updateListingInventory: listing has more than one variation property — skipping update to prevent data loss', [
+                            'listing_id' => $listingId,
+                            'property_count' => count($product['property_values']),
+                            'properties' => array_column($product['property_values'], 'property_name'),
+                        ]);
+
+                        return;
+                    }
+                }
+
+                foreach ($existingInventory['products'] as $product) {
                     foreach ($product['property_values'] as $propertyValue) {
                         if ($propertyValue['property_name'] === 'Material') {
                             $offering = $product['offerings'][0];
@@ -722,9 +734,7 @@ class EtsyService
                 ? (int) $shop->shop_oauth['readiness_state_definition_id']
                 : null;
 
-            $inventoryResponse = (new EtsyInventoryService(
-                shop: $shop,
-            ))->updateInventory(
+            $inventoryResponse = $this->makeInventoryService($shop)->updateInventory(
                 listingId: $listingId,
                 products: $variations,
                 readinessStateId: $readinessStateId,
@@ -945,6 +955,11 @@ class EtsyService
         $shop->save();
 
         return $shop;
+    }
+
+    protected function makeInventoryService(Shop $shop): EtsyInventoryService
+    {
+        return new EtsyInventoryService(shop: $shop);
     }
 
     private function storeClientSecret(Shop $shop): Shop
