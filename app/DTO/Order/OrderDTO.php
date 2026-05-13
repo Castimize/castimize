@@ -203,8 +203,16 @@ class OrderDTO extends Data
             $vatExempt = 'no';
         }
 
+        $countryIso = $receipt->country_iso ?? $billingAddress?->country?->alpha2;
+
+        if (empty($countryIso)) {
+            throw new \RuntimeException(
+                "Cannot calculate shipping fee for receipt {$receipt->receipt_id}: country_iso is empty and no billing address country available."
+            );
+        }
+
         $shippingFee = (new CalculatePricesService)->calculateShippingFeeNew(
-            countryIso: $receipt->country_iso,
+            countryIso: $countryIso,
             uploads: collect($lines)->map(fn ($line) => CalculateShippingFeeUploadDTO::fromEtsyLine($line)),
         )->calculated_total;
 
@@ -234,7 +242,7 @@ class OrderDTO extends Data
             $totalItemsTax = ($taxPercentage / 100) * $totalItems;
         }
 
-        $country = Country::where('alpha2', $receipt->country_iso)->first();
+        $country = Country::where('alpha2', $countryIso)->first();
         $expectedDeliveryDate = (new OrdersService)->calculateExpectedDeliveryDate($uploads, $country);
 
         $metaData = [
