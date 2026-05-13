@@ -858,7 +858,7 @@ class EtsyService
             $shopListingModel = ShopListingModel::with('model.materials')
                 ->where('shop_id', $shop->id)
                 ->where('shop_listing_id', $transaction->listing_id)
-                ->where('created_at', '<=', Carbon::createFromTimestamp($receipt->created_timestamp))
+                ->where('created_at', '<=', Carbon::createFromTimestamp($receipt->created_timestamp)->addDay())
                 ->first();
 
             if (! $shopListingModel) {
