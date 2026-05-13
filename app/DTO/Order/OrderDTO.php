@@ -203,6 +203,12 @@ class OrderDTO extends Data
             $vatExempt = 'no';
         }
 
+        if (empty($receipt->country_iso)) {
+            throw new \RuntimeException(
+                "Cannot calculate shipping fee for receipt {$receipt->receipt_id}: country_iso is empty."
+            );
+        }
+
         $shippingFee = (new CalculatePricesService)->calculateShippingFeeNew(
             countryIso: $receipt->country_iso,
             uploads: collect($lines)->map(fn ($line) => CalculateShippingFeeUploadDTO::fromEtsyLine($line)),
