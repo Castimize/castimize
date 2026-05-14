@@ -35,21 +35,28 @@ class CleanupOrphanedWpOrders extends Command
         $totalFailed = 0;
 
         foreach ($orders as $order) {
+            $notFoundInWp = false;
+
             try {
                 /** @phpstan-ignore staticMethod.protected */
                 $wpOrder = \Codexshaper\WooCommerce\Facades\Order::find($order->wp_id);
+                $notFoundInWp = empty($wpOrder);
             } catch (Throwable $e) {
-                $this->warn("  Order #{$order->order_number} (ID: {$order->id}, wp_id: {$order->wp_id}): WP lookup failed — {$e->getMessage()}");
-                Log::warning('CleanupOrphanedWpOrders: WP lookup failed', [
-                    'order_id' => $order->id,
-                    'wp_id' => $order->wp_id,
-                    'error' => $e->getMessage(),
-                ]);
+                if (str_contains($e->getMessage(), 'woocommerce_rest_shop_order_invalid_id') || str_contains($e->getMessage(), 'Invalid ID')) {
+                    $notFoundInWp = true;
+                } else {
+                    $this->warn("  Order #{$order->order_number} (ID: {$order->id}, wp_id: {$order->wp_id}): WP lookup failed — {$e->getMessage()}");
+                    Log::warning('CleanupOrphanedWpOrders: WP lookup failed', [
+                        'order_id' => $order->id,
+                        'wp_id' => $order->wp_id,
+                        'error' => $e->getMessage(),
+                    ]);
 
-                continue;
+                    continue;
+                }
             }
 
-            if (! empty($wpOrder)) {
+            if (! $notFoundInWp) {
                 continue;
             }
 
