@@ -13,8 +13,9 @@ class EtsyInventoryService
 
     public function __construct(
         protected Shop $shop,
+        ?Client $client = null,
     ) {
-        $this->client = new Client([
+        $this->client = $client ?? new Client([
             'base_uri' => 'https://openapi.etsy.com/v3/application/',
             'headers' => [
                 'Authorization' => 'Bearer '.$this->shop->shop_oauth['access_token'],
@@ -73,6 +74,7 @@ class EtsyInventoryService
             'quantity_on_property' => [514],
             'sku_on_property' => [514],
             'readiness_state_on_property' => [],
+            'max_variations_supported' => 2,
         ];
 
         return $this->client->put("listings/{$listingId}/inventory", [
