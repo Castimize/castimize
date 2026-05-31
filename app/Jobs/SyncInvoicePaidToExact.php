@@ -41,15 +41,11 @@ class SyncInvoicePaidToExact implements ShouldQueue
             return;
         }
 
-        try {
-            if ($customer->exact_online_guid === null) {
-                throw new Exception('Customer exact_online_guid is null');
-            }
-
-            $exactOnlineService->syncInvoicePaid($this->invoice);
-        } catch (Throwable $e) {
-            Log::channel('exact')->error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+        if ($customer->exact_online_guid === null) {
+            throw new Exception('Customer exact_online_guid is null');
         }
+
+        $exactOnlineService->syncInvoicePaid($this->invoice);
 
         try {
             LogRequestService::addResponseById($this->logRequestId, $this->invoice);
