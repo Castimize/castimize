@@ -46,6 +46,8 @@ class SyncMissingDiary90ToExact extends Command
             SyncInvoicePaidToExact::dispatch($invoice, $invoice->customer->wp_id)
                 ->onQueue('exact');
 
+            sleep(8);
+
             $progressBar->advance();
         }
 

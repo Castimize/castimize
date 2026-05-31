@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Queue;
 use PHPUnit\Framework\Attributes\Test;
+use Picqer\Financials\Exact\ApiException;
 use Tests\TestCase;
 
 class SyncInvoicePaidToExactTest extends TestCase
@@ -97,18 +98,34 @@ class SyncInvoicePaidToExactTest extends TestCase
     }
 
     #[Test]
-    public function it_propagates_exceptions_from_sync_so_job_can_retry(): void
+    public function it_propagates_non_rate_limit_exceptions_from_sync_so_job_can_retry(): void
     {
         $exactOnlineService = $this->mock(ExactOnlineService::class);
         $exactOnlineService->shouldReceive('syncInvoicePaid')
             ->once()
-            ->andThrow(new Exception('Exact Online API error'));
+            ->andThrow(new ApiException('Error 500: Internal Server Error'));
 
         $job = new SyncInvoicePaidToExact($this->invoice, 55555);
 
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Exact Online API error');
+        $this->expectException(ApiException::class);
+        $this->expectExceptionMessage('Error 500');
 
         $job->handle($exactOnlineService);
+    }
+
+    #[Test]
+    public function it_does_not_throw_when_exact_returns_rate_limit_error(): void
+    {
+        $exactOnlineService = $this->mock(ExactOnlineService::class);
+        $exactOnlineService->shouldReceive('syncInvoicePaid')
+            ->once()
+            ->andThrow(new ApiException('Error 429: Too Many Requests'));
+
+        $job = new SyncInvoicePaidToExact($this->invoice, 55555);
+
+        // Should not throw — job catches 429 and releases back to queue
+        $job->handle($exactOnlineService);
+
+        $this->assertTrue(true);
     }
 }
