@@ -3,6 +3,7 @@
 namespace App\Services\Shippo;
 
 use App\Enums\Admin\CurrencyEnum;
+use App\Enums\Shippo\ShippoCarriersEnum;
 use App\Enums\Shippo\ShippoCustomsDeclarationContentTypesEnum;
 use App\Enums\Shippo\ShippoCustomsDeclarationIncoTermsEnum;
 use App\Enums\Shippo\ShippoCustomsDeclarationNonDeliveryOptionsEnum;
@@ -328,7 +329,17 @@ class ShippoService
         return $this;
     }
 
-    public function createShipment(?array $extras = null): static
+    public function getCarrierAccount(?string $carrier = null): string
+    {
+        $carrier ??= $this->generalSettings->defaultCarrier ?? ShippoCarriersEnum::default()->value;
+
+        return match ($carrier) {
+            ShippoCarriersEnum::FedEx->value => $this->generalSettings->fedexCarrierAccount,
+            default => $this->generalSettings->upsCarrierAccount,
+        };
+    }
+
+    public function createShipment(?string $carrier = null, ?array $extras = null): static
     {
         $data = [
             'object_purpose' => 'PURCHASE',
@@ -337,7 +348,7 @@ class ShippoService
             'parcels' => $this->_parcel,
             'customs_declaration' => $this->_customsDeclaration,
             'carrier_accounts' => [
-                $this->generalSettings->upsCarrierAccount,
+                $this->getCarrierAccount($carrier),
             ],
             'async' => false,
         ];
@@ -397,10 +408,10 @@ class ShippoService
     //        ]);
     //    }
 
-    public function createPickup(array $params): Shippo_Object
+    public function createPickup(array $params, ?string $carrier = null): Shippo_Object
     {
         return Shippo_Pickup::create([
-            'carrier_account' => $this->generalSettings->upsCarrierAccount,
+            'carrier_account' => $this->getCarrierAccount($carrier),
             'location' => [
                 'building_type' => $params['building_type'] ?? $this->pickupSettings->buildingType,
                 'building_location_type' => $params['building_location_type'] ?? $this->pickupSettings->buildingLocationType,
@@ -468,6 +479,17 @@ class ShippoService
             'UPS_MI_Parcel_Post' => 'UPS Parcel Post (Mail Innovations - Domestic only)',
             'UPS_MI_Priority' => 'UPS Priority (Mail Innovations - Domestic only)',
             'UPS_MI_Standard_Flat' => 'UPS Standard Flat (Mail Innovations - Domestic only)',
+            'FedEx_Envelope' => 'FedEx Envelope',
+            'FedEx_Pak' => 'FedEx Pak',
+            'FedEx_Box' => 'FedEx Box',
+            'FedEx_Box_Small' => 'FedEx Small Box',
+            'FedEx_Box_Medium' => 'FedEx Medium Box',
+            'FedEx_Box_Large' => 'FedEx Large Box',
+            'FedEx_Box_Extra_Large' => 'FedEx Extra Large Box',
+            'FedEx_Tube' => 'FedEx Tube',
+            'FedEx_10kg_Box' => 'FedEx 10kg Box',
+            'FedEx_25kg_Box' => 'FedEx 25kg Box',
+            'FedEx_Padded_Pak' => 'FedEx Padded Pak',
         ];
     }
 
@@ -475,6 +497,7 @@ class ShippoService
     {
         $this->_carriers = [
             'ups' => 'UPS',
+            'fedex' => 'FedEx',
         ];
     }
 
@@ -499,6 +522,22 @@ class ShippoService
             'ups_express_1200' => 'UPS Express 12:00',
             'ups_express_plus' => 'UPS Express Plus®',
             'ups_expedited' => 'UPS Expedited®',
+            'fedex_ground' => 'FedEx Ground®',
+            'fedex_home_delivery' => 'FedEx Home Delivery®',
+            'fedex_smart_post' => 'FedEx SmartPost®',
+            'fedex_express_saver' => 'FedEx Express Saver®',
+            'fedex_2_day' => 'FedEx 2Day®',
+            'fedex_2_day_am' => 'FedEx 2Day® A.M.',
+            'fedex_standard_overnight' => 'FedEx Standard Overnight®',
+            'fedex_priority_overnight' => 'FedEx Priority Overnight®',
+            'fedex_first_overnight' => 'FedEx First Overnight®',
+            'fedex_regional_economy' => 'FedEx Regional Economy®',
+            'fedex_international_economy' => 'FedEx International Economy®',
+            'fedex_international_economy_freight' => 'FedEx International Economy® Freight',
+            'fedex_international_priority' => 'FedEx International Priority®',
+            'fedex_international_priority_freight' => 'FedEx International Priority® Freight',
+            'fedex_international_first' => 'FedEx International First®',
+            'fedex_europe_first_international_priority' => 'FedEx Europe First® International Priority',
             'UPS_Box_10kg' => 'Box 10kg',
             'UPS_Box_25kg' => 'Box 25kg',
             'UPS_Express_Box' => 'UPS Express Box',

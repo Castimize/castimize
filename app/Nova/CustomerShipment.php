@@ -2,11 +2,13 @@
 
 namespace App\Nova;
 
+use App\Enums\Shippo\ShippoCarriersEnum;
 use App\Enums\Shippo\ShippoDistanceUnitsEnum;
 use App\Enums\Shippo\ShippoMassUnitsEnum;
 use App\Nova\Actions\ShipmentInTransitToCustomerStatusAction;
 use App\Nova\Filters\CreatedAtDaterangepickerFilter;
 use App\Nova\Settings\Shipping\DcSettings;
+use App\Nova\Settings\Shipping\GeneralSettings;
 use App\Nova\Settings\Shipping\ParcelSettings;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Carbon\Carbon;
@@ -267,6 +269,7 @@ class CustomerShipment extends Resource
     {
         $dcSettings = (new DcSettings);
         $parcelSettings = (new ParcelSettings);
+        $generalSettings = (new GeneralSettings);
 
         return [
             SelectWithOverview::make('PO\'s', 'selectedPOs')
@@ -497,6 +500,14 @@ class CustomerShipment extends Resource
                         }
                     }
                 ),
+
+            Heading::make('<h3 class="font-normal text-xl">'.__('Carrier').'</h3>')->asHtml(),
+
+            Select::make(__('Carrier'), 'carrier')
+                ->default($generalSettings->defaultCarrier ?? ShippoCarriersEnum::default()->value)
+                ->options(ShippoCarriersEnum::values())
+                ->displayUsingLabels()
+                ->rules('required'),
 
             Heading::make('<h3 class="font-normal text-xl">'.__('Parcel settings').'</h3>')->asHtml(),
 

@@ -2,6 +2,7 @@
 
 namespace App\Nova\Settings\Shipping;
 
+use App\Enums\Shippo\ShippoCarriersEnum;
 use App\Enums\Shippo\ShippoVatTypesEnum;
 use Devloops\NovaSystemSettings\Contracts\SystemSettings;
 use Laravel\Nova\Fields\Select;
@@ -10,6 +11,10 @@ use Laravel\Nova\Fields\Text;
 class GeneralSettings extends SystemSettings
 {
     public ?string $upsCarrierAccount;
+
+    public ?string $fedexCarrierAccount;
+
+    public ?string $defaultCarrier;
 
     public ?string $eoriNumber;
 
@@ -47,6 +52,12 @@ class GeneralSettings extends SystemSettings
     {
         return [
             Text::make(__('UPS carrier account ID'), 'upsCarrierAccount'),
+
+            Text::make(__('FedEx carrier account ID'), 'fedexCarrierAccount'),
+
+            Select::make(__('Default carrier'), 'defaultCarrier')
+                ->default(ShippoCarriersEnum::UPS->value)
+                ->options(ShippoCarriersEnum::values()),
 
             Text::make(__('EORI number'), 'eoriNumber'),
 

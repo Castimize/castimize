@@ -35,6 +35,7 @@ return [
     ],
     'shippo' => [
         'key' => env('SHIPPO_API_KEY'),
+        'default_carrier' => env('SHIPPO_DEFAULT_CARRIER', 'ups'),
     ],
     'stripe' => [
         'model' => App\Models\User::class,

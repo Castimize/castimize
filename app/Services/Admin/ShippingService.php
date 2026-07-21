@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Enums\Shippo\ShippoCarriersEnum;
 use App\Enums\Shippo\ShippoCustomsDeclarationContentTypesEnum;
 use App\Models\Country;
 use App\Models\CustomerShipment;
@@ -148,8 +149,9 @@ class ShippingService
     /**
      * @throws Shippo_ApiError
      */
-    public function createShippoCustomerShipment(CustomerShipment $customerShipment): array
+    public function createShippoCustomerShipment(CustomerShipment $customerShipment, ?string $carrier = null): array
     {
+        $carrier ??= $customerShipment->carrier ?? $this->generalSettings->defaultCarrier ?? ShippoCarriersEnum::default()->value;
         $fromAddress = $this->mapToShippoAddress($customerShipment->fromAddress);
         $toAddress = $this->mapToShippoAddress($customerShipment->toAddress);
 
@@ -230,7 +232,9 @@ class ShippingService
                 'contents_type' => $contentsType,
                 // 'eori_number' => strtoupper($customerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
             ])
-            ->createShipment();
+            ->createShipment($carrier, [
+                'reference_1' => $orderNumber,
+            ]);
         $shippoShipment = $this->_shippoService->getShipment();
         //        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
@@ -357,7 +361,7 @@ class ShippingService
                 'currency' => $currency,
                 // 'eori_number' => $this->generalSettings->eoriNumber,
             ])
-            ->createShipment($extra);
+            ->createShipment(null, $extra);
         $shippoShipment = $this->_shippoService->getShipment();
         //        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
@@ -419,7 +423,6 @@ class ShippingService
             ->setFromAddress($this->getFromAddress())
             ->createFromAddress()
             ->createPickup($params);
-        dd($shippoPickup);
     }
 
     private function mapToShippoAddress(array $address): array

@@ -680,4 +680,187 @@ class ShippingServiceTest extends TestCase
         $this->assertNotNull($capturedToAddress, 'setToAddress was not called');
         $this->assertNull($capturedToAddress['company']);
     }
+
+    #[Test]
+    public function it_creates_shipment_with_fedex_carrier_when_specified_explicitly(): void
+    {
+        // Arrange
+        $this->setupShippoMocksForAddressCreation();
+
+        $capturedCarrier = null;
+
+        $mockShipment = Mockery::mock(Shippo_Object::class);
+        $mockShipment->shouldReceive('offsetGet')->with('rates')->andReturn([
+            ['object_id' => 'rate-fedex-1', 'servicelevel' => ['token' => 'fedex_international_economy']],
+        ]);
+        $mockShipment->shouldReceive('offsetGet')->with('messages')->andReturn([]);
+        $mockShipment->shouldReceive('offsetExists')->andReturn(true);
+
+        $mockTransaction = $this->createMockSuccessTransaction();
+
+        $this->shippoServiceMock->shouldReceive('createCustomsItem')->once()->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createCustomsDeclaration')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createShipment')
+            ->withArgs(function ($carrier) use (&$capturedCarrier): bool {
+                $capturedCarrier = $carrier;
+
+                return true;
+            })
+            ->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getShipment')->andReturn($mockShipment);
+        $this->shippoServiceMock->shouldReceive('createLabel')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getTransaction')->andReturn($mockTransaction);
+        $this->shippoServiceMock->shouldReceive('toArray')->andReturn($this->makeSuccessTransactionArray());
+
+        $customerShipment = $this->createCustomerShipmentWithAddresses();
+        $customerShipment->selectedPOs = collect([$this->createMockOrderQueueWithUpload()]);
+
+        // Act
+        $result = $this->shippingService->createShippoCustomerShipment($customerShipment, 'fedex');
+
+        // Assert
+        $this->assertEquals('fedex', $capturedCarrier);
+        $this->assertIsArray($result);
+        $this->assertEquals('SUCCESS', $result['transaction']['status']);
+    }
+
+    #[Test]
+    public function it_creates_shipment_with_fedex_carrier_from_customer_shipment_model(): void
+    {
+        // Arrange
+        $this->setupShippoMocksForAddressCreation();
+
+        $capturedCarrier = null;
+
+        $mockShipment = Mockery::mock(Shippo_Object::class);
+        $mockShipment->shouldReceive('offsetGet')->with('rates')->andReturn([
+            ['object_id' => 'rate-fedex-1', 'servicelevel' => ['token' => 'fedex_international_economy']],
+        ]);
+        $mockShipment->shouldReceive('offsetGet')->with('messages')->andReturn([]);
+        $mockShipment->shouldReceive('offsetExists')->andReturn(true);
+
+        $mockTransaction = $this->createMockSuccessTransaction();
+
+        $this->shippoServiceMock->shouldReceive('createCustomsItem')->once()->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createCustomsDeclaration')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createShipment')
+            ->withArgs(function ($carrier) use (&$capturedCarrier): bool {
+                $capturedCarrier = $carrier;
+
+                return true;
+            })
+            ->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getShipment')->andReturn($mockShipment);
+        $this->shippoServiceMock->shouldReceive('createLabel')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getTransaction')->andReturn($mockTransaction);
+        $this->shippoServiceMock->shouldReceive('toArray')->andReturn($this->makeSuccessTransactionArray());
+
+        $customerShipment = $this->createCustomerShipmentWithAddresses();
+        $customerShipment->carrier = 'fedex';
+        $customerShipment->selectedPOs = collect([$this->createMockOrderQueueWithUpload()]);
+
+        // Act
+        $result = $this->shippingService->createShippoCustomerShipment($customerShipment);
+
+        // Assert
+        $this->assertEquals('fedex', $capturedCarrier);
+        $this->assertEquals('SUCCESS', $result['transaction']['status']);
+    }
+
+    #[Test]
+    public function it_selects_fedex_rate_matching_logistics_zone_token(): void
+    {
+        // Arrange
+        $logisticsZone = LogisticsZone::firstOrCreate(
+            ['name' => 'International'],
+            ['shipping_servicelevel_token' => 'fedex_international_economy']
+        );
+        Country::firstOrCreate(
+            ['alpha2' => 'US'],
+            ['name' => 'United States', 'alpha3' => 'USA', 'logistics_zone_id' => $logisticsZone->id]
+        );
+
+        $this->setupShippoMocksForAddressCreation();
+
+        $capturedRateId = null;
+
+        $mockShipment = Mockery::mock(Shippo_Object::class);
+        $mockShipment->shouldReceive('offsetGet')->with('rates')->andReturn([
+            ['object_id' => 'rate-fedex-priority', 'servicelevel' => ['token' => 'fedex_international_priority']],
+            ['object_id' => 'rate-fedex-economy', 'servicelevel' => ['token' => 'fedex_international_economy']],
+        ]);
+        $mockShipment->shouldReceive('offsetGet')->with('messages')->andReturn([]);
+        $mockShipment->shouldReceive('offsetExists')->andReturn(true);
+
+        $mockTransaction = $this->createMockSuccessTransaction();
+
+        $this->shippoServiceMock->shouldReceive('createCustomsItem')->once()->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createCustomsDeclaration')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createShipment')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getShipment')->andReturn($mockShipment);
+        $this->shippoServiceMock->shouldReceive('createLabel')
+            ->withArgs(function (int $shipmentId, string $rateId) use (&$capturedRateId): bool {
+                $capturedRateId = $rateId;
+
+                return true;
+            })
+            ->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getTransaction')->andReturn($mockTransaction);
+        $this->shippoServiceMock->shouldReceive('toArray')->andReturn($this->makeSuccessTransactionArray());
+
+        $order = Mockery::mock(Order::class);
+        $order->shouldReceive('getAttribute')->with('order_number')->andReturn(99999);
+        $order->shouldReceive('getAttribute')->with('currency_code')->andReturn('USD');
+        $order->shouldReceive('getAttribute')->with('shipping_country')->andReturn('US');
+
+        $upload = Mockery::mock(Upload::class);
+        $upload->shouldReceive('getAttribute')->with('order')->andReturn($order);
+        $upload->shouldReceive('getAttribute')->with('total')->andReturn(10.00);
+
+        $orderQueue = new OrderQueue;
+        $orderQueue->id = fake()->randomNumber(5);
+        $orderQueue->setRelation('upload', $upload);
+
+        $customerShipment = $this->createCustomerShipmentWithAddresses();
+        $customerShipment->selectedPOs = collect([$orderQueue]);
+
+        // Act
+        $this->shippingService->createShippoCustomerShipment($customerShipment, 'fedex');
+
+        // Assert: economy rate selected over priority because logistics zone is configured for economy
+        $this->assertEquals('rate-fedex-economy', $capturedRateId);
+    }
+
+    private function createMockSuccessTransaction(): MockInterface
+    {
+        $mockTransaction = Mockery::mock(Shippo_Object::class);
+        $mockTransaction->shouldReceive('offsetGet')->with('status')->andReturn('SUCCESS');
+        $mockTransaction->shouldReceive('offsetGet')->with('eta')->andReturn(null);
+        $mockTransaction->shouldReceive('offsetGet')->with('tracking_number')->andReturn('449044304137821');
+        $mockTransaction->shouldReceive('offsetGet')->with('tracking_url_provider')->andReturn('https://www.fedex.com/apps/fedextrack/?tracknumbers=449044304137821');
+        $mockTransaction->shouldReceive('offsetGet')->with('object_id')->andReturn('transaction-fedex-123');
+        $mockTransaction->shouldReceive('offsetGet')->with('label_url')->andReturn('https://label.url/fedex-label.zpl');
+        $mockTransaction->shouldReceive('offsetGet')->with('commercial_invoice_url')->andReturn(null);
+        $mockTransaction->shouldReceive('offsetGet')->with('qr_code_url')->andReturn(null);
+        $mockTransaction->shouldReceive('offsetExists')->andReturn(true);
+
+        return $mockTransaction;
+    }
+
+    private function makeSuccessTransactionArray(): array
+    {
+        return [
+            'shipment' => ['object_id' => 'shipment-fedex-123'],
+            'transaction' => [
+                'status' => 'SUCCESS',
+                'eta' => null,
+                'tracking_number' => '449044304137821',
+                'tracking_url_provider' => 'https://www.fedex.com/apps/fedextrack/?tracknumbers=449044304137821',
+                'object_id' => 'transaction-fedex-123',
+                'label_url' => 'https://label.url/fedex-label.zpl',
+                'commercial_invoice_url' => null,
+                'qr_code_url' => null,
+            ],
+        ];
+    }
 }
