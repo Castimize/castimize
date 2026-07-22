@@ -199,7 +199,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                         }),
                     MenuItem::resource(Permission::class)
                         ->canSee(function (NovaRequest $request) {
-                            return $request->user()->isSuperAdmin();
+                            return $request->user()->isSuperAdmin() || $request->user()->can('assign-roles');
                         }),
                 ])->icon('shield-check')
 //                    ->collapsable()

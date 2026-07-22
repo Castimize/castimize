@@ -17,16 +17,22 @@ class OscarAssignRolesPermissionSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $permission = Permission::firstOrCreate(
+        $assignRoles = Permission::firstOrCreate(
             ['name' => 'assign-roles'],
             ['group' => 'Role']
         );
 
         // Super-admin should always have all permissions
-        Role::findByName('super-admin')->givePermissionTo($permission);
+        Role::findByName('super-admin')->givePermissionTo($assignRoles);
+
+        $permissions = collect(['assign-roles', 'viewAnyRole', 'viewRole', 'viewAnyPermission', 'viewPermission'])
+            ->map(fn (string $name) => Permission::firstOrCreate(
+                ['name' => $name],
+                ['group' => str_contains($name, 'Permission') ? 'Permission' : 'Role']
+            ));
 
         User::where('email', 'oscar@castimize.com')
             ->firstOrFail()
-            ->givePermissionTo($permission);
+            ->givePermissionTo($permissions);
     }
 }
