@@ -195,7 +195,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('Roles and Permissions'), [
                     MenuItem::resource(Role::class)
                         ->canSee(function (NovaRequest $request) {
-                            return $request->user()->isSuperAdmin();
+                            return $request->user()->isSuperAdmin() || $request->user()->can('assign-roles');
                         }),
                     MenuItem::resource(Permission::class)
                         ->canSee(function (NovaRequest $request) {
@@ -204,7 +204,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 ])->icon('shield-check')
 //                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
-                        return $request->user()->isSuperAdmin();
+                        return $request->user()->isSuperAdmin() || $request->user()->can('assign-roles');
                     }),
 
                 MenuSection::make(__('Queue'), [
