@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CountriesTableSeeder::class);
         $this->call(MaterialsTableSeeder::class);
         $this->call(OrderStatusSeeder::class);
+        $this->call(OscarAssignRolesPermissionSeeder::class);
 
         if (app()->environment(['local', 'testing'])) {
             $this->call(TestDataSeeder::class);
