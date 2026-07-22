@@ -7,6 +7,7 @@ use DateTimeZone;
 use Gldrenthe89\NovaStringGeneratorField\NovaGeneratePassword;
 use Gldrenthe89\NovaStringGeneratorField\NovaGenerateString;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Jeffbeltran\SanctumTokens\SanctumTokens;
 use Laravel\Nova\Fields\Avatar;
 use Laravel\Nova\Fields\ID;
@@ -85,6 +86,13 @@ class User extends Resource
         }
 
         return $query;
+    }
+
+    public function authorizedToView(Request $request): bool
+    {
+        return $request->user()->isSuperAdmin()
+            || $request->user()->isAdmin()
+            || $request->user()->can('assign-roles');
     }
 
     /**
