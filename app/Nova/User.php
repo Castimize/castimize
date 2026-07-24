@@ -153,11 +153,11 @@ class User extends Resource
 
             MorphToMany::make(__('Roles'), 'roles', Role::class)
                 ->canSee(function ($request) {
-                    return $request->user()->isSuperAdmin() || $request->user()->can('assign-roles');
+                    return $request->user()->can('assign-roles');
                 }),
             MorphToMany::make(__('Permissions'), 'permissions', Permission::class)
                 ->canSee(function ($request) {
-                    return $request->user()->isSuperAdmin() || $request->user()->can('assign-roles');
+                    return $request->user()->can('assign-roles');
                 }),
 
             new Panel(__('History'), $this->commonMetaData()),

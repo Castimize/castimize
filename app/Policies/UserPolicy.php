@@ -11,11 +11,11 @@ class UserPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->isSuperAdmin() || $user->isAdmin() || $user->can('assign-roles');
+        return $user->isSuperAdmin() || $user->isAdmin();
     }
 
     public function view(User $user, User $model): bool
     {
-        return $user->isSuperAdmin() || $user->isAdmin() || $user->can('assign-roles');
+        return $user->isSuperAdmin() || $user->isAdmin();
     }
 }
