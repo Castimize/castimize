@@ -88,13 +88,6 @@ class User extends Resource
         return $query;
     }
 
-    public function authorizedToView(Request $request): bool
-    {
-        return $request->user()->isSuperAdmin()
-            || $request->user()->isAdmin()
-            || $request->user()->can('assign-roles');
-    }
-
     /**
      * Get the fields displayed by the resource.
      *
