@@ -52,8 +52,6 @@ use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
-use Sereny\NovaPermissions\Nova\Permission;
-use Sereny\NovaPermissions\Nova\Role;
 use Sereny\NovaPermissions\NovaPermissions;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
@@ -193,8 +191,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     }),
 
                 MenuSection::make(__('Roles and Permissions'), [
-                    MenuItem::resource(Role::class),
-                    MenuItem::resource(Permission::class),
+                    MenuItem::make(__('Roles'), '/resources/roles'),
+                    MenuItem::make(__('Permissions'), '/resources/permissions'),
                 ])->icon('shield-check')
 //                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {
