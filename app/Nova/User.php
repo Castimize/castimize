@@ -88,6 +88,13 @@ class User extends Resource
         return $query;
     }
 
+    public static function afterCreate(NovaRequest $request, $model): void
+    {
+        if ($model->roles()->count() === 0) {
+            $model->assignRole('customer-support');
+        }
+    }
+
     /**
      * Get the fields displayed by the resource.
      *
