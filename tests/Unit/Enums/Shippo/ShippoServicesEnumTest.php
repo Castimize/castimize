@@ -30,11 +30,23 @@ class ShippoServicesEnumTest extends TestCase
     }
 
     #[Test]
+    public function it_has_fedex_ground_case(): void
+    {
+        $this->assertEquals('fedex_ground', ShippoServicesEnum::FEDEX_GROUND->value);
+    }
+
+    #[Test]
+    public function it_has_fedex_international_economy_case(): void
+    {
+        $this->assertEquals('fedex_international_economy', ShippoServicesEnum::FEDEX_INTERNATIONAL_ECONOMY->value);
+    }
+
+    #[Test]
     public function it_has_all_expected_cases(): void
     {
         $cases = ShippoServicesEnum::cases();
 
-        $this->assertCount(3, $cases);
+        $this->assertCount(13, $cases);
     }
 
     #[Test]
@@ -43,11 +55,14 @@ class ShippoServicesEnumTest extends TestCase
         $values = ShippoServicesEnum::values();
 
         $this->assertIsArray($values);
-        $this->assertCount(3, $values);
+        $this->assertCount(13, $values);
         $this->assertArrayHasKey('ups_standard', $values);
         $this->assertArrayHasKey('ups_saver', $values);
         $this->assertArrayHasKey('ups_express_saver_worldwide_ca', $values);
+        $this->assertArrayHasKey('fedex_ground', $values);
+        $this->assertArrayHasKey('fedex_international_economy', $values);
+        $this->assertArrayHasKey('fedex_international_priority', $values);
         $this->assertEquals('UPS Standard℠', $values['ups_standard']);
-        $this->assertEquals('UPS Express Saver', $values['ups_saver']);
+        $this->assertEquals('FedEx Ground®', $values['fedex_ground']);
     }
 }

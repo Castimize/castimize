@@ -771,11 +771,11 @@ class ShippingServiceTest extends TestCase
     public function it_selects_fedex_rate_matching_logistics_zone_token(): void
     {
         // Arrange
-        $logisticsZone = LogisticsZone::firstOrCreate(
+        $logisticsZone = LogisticsZone::updateOrCreate(
             ['name' => 'International'],
             ['shipping_servicelevel_token' => 'fedex_international_economy']
         );
-        Country::firstOrCreate(
+        Country::updateOrCreate(
             ['alpha2' => 'US'],
             ['name' => 'United States', 'alpha3' => 'USA', 'logistics_zone_id' => $logisticsZone->id]
         );

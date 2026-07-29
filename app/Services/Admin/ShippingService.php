@@ -461,12 +461,13 @@ class ShippingService
     private function getCustomerShipmentRate($shippoShipment, string $shippingCountry): mixed
     {
         $country = Country::with('logisticsZone')->where('alpha2', $shippingCountry)->first();
+        $serviceLevelToken = $country?->logisticsZone?->shipping_servicelevel_token;
         $firstCarrierAccountRate = null;
         foreach ($shippoShipment['rates'] as $rate) {
             if ($firstCarrierAccountRate === null) {
                 $firstCarrierAccountRate = $rate;
             }
-            if ($rate['servicelevel']['token'] === $country->logisticsZone->shipping_servicelevel_token) {
+            if ($serviceLevelToken && $rate['servicelevel']['token'] === $serviceLevelToken) {
                 return $rate;
             }
         }
