@@ -36,3 +36,6 @@ stubs/
 
 # Generated API docs
 storage/api-docs/
+.worktrees/
+
+.worktrees/

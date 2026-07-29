@@ -52,6 +52,7 @@ class CustomerShipment extends Model
         'service_lead_time',
         'service_costs',
         'currency_code',
+        'carrier',
         'tracking_number',
         'tracking_url',
         'tracking_manual',

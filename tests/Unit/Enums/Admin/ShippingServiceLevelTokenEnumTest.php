@@ -25,12 +25,20 @@ class ShippingServiceLevelTokenEnumTest extends TestCase
     }
 
     #[Test]
+    public function it_has_fedex_international_economy_case(): void
+    {
+        $this->assertEquals('fedex_international_economy', ShippingServiceLevelTokenEnum::FedexInternationalEconomy->value);
+    }
+
+    #[Test]
     public function it_has_all_expected_cases(): void
     {
         $cases = ShippingServiceLevelTokenEnum::cases();
 
-        $this->assertCount(2, $cases);
+        $this->assertCount(12, $cases);
         $this->assertContains(ShippingServiceLevelTokenEnum::UpsStandard, $cases);
         $this->assertContains(ShippingServiceLevelTokenEnum::UpsSaver, $cases);
+        $this->assertContains(ShippingServiceLevelTokenEnum::FedexGround, $cases);
+        $this->assertContains(ShippingServiceLevelTokenEnum::FedexInternationalEconomy, $cases);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Enums\Shippo\ShippoCarriersEnum;
 use App\Enums\Shippo\ShippoCustomsDeclarationContentTypesEnum;
 use App\Models\Country;
 use App\Models\CustomerShipment;
@@ -148,8 +149,9 @@ class ShippingService
     /**
      * @throws Shippo_ApiError
      */
-    public function createShippoCustomerShipment(CustomerShipment $customerShipment): array
+    public function createShippoCustomerShipment(CustomerShipment $customerShipment, ?string $carrier = null): array
     {
+        $carrier ??= $customerShipment->carrier ?? $this->generalSettings->defaultCarrier ?? ShippoCarriersEnum::default()->value;
         $fromAddress = $this->mapToShippoAddress($customerShipment->fromAddress);
         $toAddress = $this->mapToShippoAddress($customerShipment->toAddress);
 
@@ -230,7 +232,9 @@ class ShippingService
                 'contents_type' => $contentsType,
                 // 'eori_number' => strtoupper($customerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
             ])
-            ->createShipment();
+            ->createShipment($carrier, [
+                'reference_1' => $orderNumber,
+            ]);
         $shippoShipment = $this->_shippoService->getShipment();
         //        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
@@ -255,7 +259,6 @@ class ShippingService
         $this->_shippoService = $this->_shippoService
             ->createLabel($customerShipment->id, $rate['object_id']);
         $transaction = $this->_shippoService->getTransaction();
-        Log::info(print_r($transaction, true));
         if ($transaction && $transaction['status'] === 'SUCCESS') {
             return $this->_shippoService->toArray();
         }
@@ -357,7 +360,7 @@ class ShippingService
                 'currency' => $currency,
                 // 'eori_number' => $this->generalSettings->eoriNumber,
             ])
-            ->createShipment($extra);
+            ->createShipment(null, $extra);
         $shippoShipment = $this->_shippoService->getShipment();
         //        dd($shippoShipment);
         $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
@@ -419,7 +422,6 @@ class ShippingService
             ->setFromAddress($this->getFromAddress())
             ->createFromAddress()
             ->createPickup($params);
-        dd($shippoPickup);
     }
 
     private function mapToShippoAddress(array $address): array
@@ -459,12 +461,13 @@ class ShippingService
     private function getCustomerShipmentRate($shippoShipment, string $shippingCountry): mixed
     {
         $country = Country::with('logisticsZone')->where('alpha2', $shippingCountry)->first();
+        $serviceLevelToken = $country?->logisticsZone?->shipping_servicelevel_token;
         $firstCarrierAccountRate = null;
         foreach ($shippoShipment['rates'] as $rate) {
             if ($firstCarrierAccountRate === null) {
                 $firstCarrierAccountRate = $rate;
             }
-            if ($rate['servicelevel']['token'] === $country->logisticsZone->shipping_servicelevel_token) {
+            if ($serviceLevelToken && $rate['servicelevel']['token'] === $serviceLevelToken) {
                 return $rate;
             }
         }
