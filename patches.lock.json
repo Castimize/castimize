@@ -1,0 +1,17 @@
+{
+    "_hash": "efa487ec104c2739d3bd18d4b2be0f43ec7480a3803a2dc6501db255bf519b67",
+    "patches": {
+        "laravel/nova": [
+            {
+                "package": "laravel/nova",
+                "description": "Laravel 12 FormData compatibility",
+                "url": "patches/nova-formdata-laravel12.patch",
+                "sha256": "29108ac1611fe2cca1fd1cfb67a9b1a9455342d3ad649b3860598b7100e8e8ce",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            }
+        ]
+    }
+}
