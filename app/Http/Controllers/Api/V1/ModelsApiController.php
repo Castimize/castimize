@@ -133,11 +133,19 @@ class ModelsApiController extends ApiController
             }
         }
 
-        $uploads = json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR);
+        $uploads = collect(json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR))
+            ->map(function ($upload) {
+                if (isset($upload['3dp_options']) && is_string($upload['3dp_options'])) {
+                    $upload['3dp_options'] = json_decode($upload['3dp_options'], true) ?? $upload['3dp_options'];
+                }
+
+                return $upload;
+            })
+            ->all();
 
         // Pre-load all materials to avoid N+1 queries
         $materialWpIds = collect($uploads)
-            ->filter(fn ($upload) => isset($upload['3dp_options']))
+            ->filter(fn ($upload) => isset($upload['3dp_options']) && is_array($upload['3dp_options']))
             ->map(function ($upload) {
                 [$materialId] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
 
@@ -152,7 +160,7 @@ class ModelsApiController extends ApiController
 
         $newUploads = [];
         foreach ($uploads as $itemKey => $upload) {
-            if (isset($upload['3dp_options'])) {
+            if (isset($upload['3dp_options']) && is_array($upload['3dp_options'])) {
                 [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
                 $materialWpId = $upload['3dp_options']['material_id'] ?? $materialId;
                 $material = $materials->get($materialWpId);
