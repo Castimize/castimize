@@ -164,13 +164,14 @@ class ModelsApiController extends ApiController
                 [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
                 $materialWpId = $upload['3dp_options']['material_id'] ?? $materialId;
                 $material = $materials->get($materialWpId);
+                $modelNameOriginal = $upload['3dp_options']['model_name_original'] ?? null;
                 $model = null;
-                if ($material) {
+                if ($material && $modelNameOriginal) {
                     $model = $customer->models()
                         ->whereHas('materials', function ($query) use ($upload, $materialId) {
                             $query->where('id', ($upload['3dp_options']['material_id'] ?? $materialId));
                         })
-                        ->where('name', $upload['3dp_options']['model_name_original'])
+                        ->where('name', $modelNameOriginal)
                         ->where('model_scale', $upload['3dp_options']['scale'] ?? 1)
                         ->first();
                 }
@@ -180,7 +181,7 @@ class ModelsApiController extends ApiController
                     if ($model->thumb_name) {
                         $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(config('filesystems.default'))->exists($model->thumb_name) ? sprintf('%s/%s', config('filesystems.disks.s3.url'), $model->thumb_name) : '/'.$model->thumb_name;
                     }
-                    $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
+                    $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $modelNameOriginal;
                 }
             }
         }
