@@ -17,7 +17,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: mbstring
           coverage: none
 
@@ -38,6 +38,9 @@ jobs:
           NOVA_LICENSE_KEY: ${{ secrets.NOVA_LICENSE_KEY }}
         run: |
           composer config http-basic.nova.laravel.com "${NOVA_USERNAME}" "${NOVA_LICENSE_KEY}"
+
+      - name: Copy environment file
+        run: cp .env.testing .env
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
@@ -54,7 +57,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: mbstring
           coverage: none
 
@@ -75,6 +78,9 @@ jobs:
           NOVA_LICENSE_KEY: ${{ secrets.NOVA_LICENSE_KEY }}
         run: |
           composer config http-basic.nova.laravel.com "${NOVA_USERNAME}" "${NOVA_LICENSE_KEY}"
+
+      - name: Copy environment file
+        run: cp .env.testing .env
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
@@ -142,7 +148,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: mbstring, dom, fileinfo, mysql, redis
           coverage: none
 
