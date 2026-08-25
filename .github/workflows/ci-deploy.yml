@@ -39,6 +39,9 @@ jobs:
         run: |
           composer config http-basic.nova.laravel.com "${NOVA_USERNAME}" "${NOVA_LICENSE_KEY}"
 
+      - name: Copy environment file
+        run: cp .env.testing .env
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
@@ -75,6 +78,9 @@ jobs:
           NOVA_LICENSE_KEY: ${{ secrets.NOVA_LICENSE_KEY }}
         run: |
           composer config http-basic.nova.laravel.com "${NOVA_USERNAME}" "${NOVA_LICENSE_KEY}"
+
+      - name: Copy environment file
+        run: cp .env.testing .env
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
