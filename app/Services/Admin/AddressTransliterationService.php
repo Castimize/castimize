@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Admin;
 
 use Illuminate\Support\Facades\Log;
+use Normalizer;
 
 class AddressTransliterationService
 {
@@ -77,26 +78,58 @@ class AddressTransliterationService
         return $address;
     }
 
+    // Characters that do not decompose via Unicode NFD normalization.
+    private const SPECIAL_CHAR_MAP = [
+        'ß' => 'ss', 'ẞ' => 'SS',
+        'ø' => 'o', 'Ø' => 'O',
+        'ł' => 'l', 'Ł' => 'L',
+        'đ' => 'd', 'Đ' => 'D',
+        'æ' => 'ae', 'Æ' => 'AE',
+        'œ' => 'oe', 'Œ' => 'OE',
+        'ŀ' => 'l', 'Ŀ' => 'L',
+        'ŧ' => 't', 'Ŧ' => 'T',
+        'ħ' => 'h', 'Ħ' => 'H',
+        'ı' => 'i',
+    ];
+
     public function transliterateString(string $input): string
     {
         if ($input === '' || $this->isAscii($input)) {
             return $input;
         }
 
-        $transliterator = transliterator_create(
-            'Katakana-Latin; Hiragana-Latin; Han-Latin; Any-Latin; Latin-ASCII; [:Nonspacing Mark:] Remove'
+        // Step 1: replace characters that NFD normalization cannot decompose
+        $result = str_replace(
+            array_keys(self::SPECIAL_CHAR_MAP),
+            array_values(self::SPECIAL_CHAR_MAP),
+            $input
         );
 
-        if ($transliterator === null) {
-            $transliterator = transliterator_create('Any-Latin; Latin-ASCII');
+        // Step 2: NFD decomposition + strip combining diacritical marks (ö→o, é→e, etc.)
+        if (class_exists('Normalizer')) {
+            $normalized = Normalizer::normalize($result, Normalizer::FORM_KD);
+            if ($normalized !== false) {
+                $result = (string) preg_replace('/\p{Mn}/u', '', $normalized);
+            }
         }
 
-        $result = $transliterator !== null
-            ? transliterator_transliterate($transliterator, $input)
-            : $input;
+        // Step 3: ICU transliterator for remaining non-Latin scripts (CJK, Cyrillic, etc.)
+        if (! $this->isAscii($result)) {
+            $transliterator = transliterator_create(
+                'Katakana-Latin; Hiragana-Latin; Han-Latin; Any-Latin; Latin-ASCII; [:Nonspacing Mark:] Remove'
+            );
 
-        // preg_replace can return null on error, use input as fallback
-        $result = preg_replace('/[^\x20-\x7E]/', '', $result ?: $input) ?? $input;
+            if ($transliterator === null) {
+                $transliterator = transliterator_create('Any-Latin; Latin-ASCII');
+            }
+
+            if ($transliterator !== null) {
+                $result = transliterator_transliterate($transliterator, $result) ?: $result;
+            }
+        }
+
+        // Step 4: strip any remaining non-printable-ASCII bytes as absolute safety net
+        $result = preg_replace('/[^\x20-\x7E]/', '', $result) ?? '';
         $result = preg_replace('/\s+/', ' ', $result) ?? $result;
 
         return trim($result);
