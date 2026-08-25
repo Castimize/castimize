@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60681740f1451592303c19fe9f45f142",
+    "content-hash": "8ab85aa945b35549e589a11193da9a75",
     "packages": [
         {
             "name": "abordage/nova-html-card",
@@ -14469,37 +14469,6 @@
                 "source": "https://github.com/phar-io/version/tree/3.2.1"
             },
             "time": "2022-02-21T01:04:05+00:00"
-        },
-        {
-            "name": "phpecs/phpecs",
-            "version": "2.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/TomasVotruba/ecs.git",
-                "reference": "ec24cef77f4006a55f095b3b26bc68616fd6183e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/TomasVotruba/ecs/zipball/ec24cef77f4006a55f095b3b26bc68616fd6183e",
-                "reference": "ec24cef77f4006a55f095b3b26bc68616fd6183e",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.2|^8.0",
-                "symplify/easy-coding-standard": "^13.0.1"
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "The easiest way to use Coding Standard",
-            "support": {
-                "issues": "https://github.com/TomasVotruba/ecs/issues",
-                "source": "https://github.com/TomasVotruba/ecs/tree/2.3.0"
-            },
-            "abandoned": "symplify/easy-coding-standard",
-            "time": "2026-01-05T08:44:06+00:00"
         },
         {
             "name": "phpmyadmin/sql-parser",
