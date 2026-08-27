@@ -156,8 +156,12 @@ class ShippingService
         $toAddress = $this->mapToShippoAddress($customerShipment->toAddress);
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
-        $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
-        [$valid, $errorMessages, $hasUpsAddressError] = $this->checkAddressValid($shippoToAddress['validation_results'], $shippoToAddress['test'], false);
+        // For FedEx, skip Shippo address validation to prevent Shippo from normalising
+        // non-ASCII characters back into the address (e.g. Schlossberg → Schloßberg).
+        // Our transliteration already guarantees ASCII output.
+        $validateToAddress = $carrier !== ShippoCarriersEnum::FedEx->value;
+        $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To', $validateToAddress);
+        [$valid, $errorMessages, $hasUpsAddressError] = $this->checkAddressValid($shippoToAddress['validation_results'] ?? [], $shippoToAddress['test'] ?? false, false);
         if (! $valid) {
             if ($hasUpsAddressError) {
                 Log::warning('UPS address_error on to-address, retrying with corrected address', [
