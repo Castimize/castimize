@@ -46,8 +46,21 @@ class ExactOnlineController extends Controller
      */
     public function appCallback(Request $request)
     {
+        // Exact returns an error parameter when authorisation fails (e.g. user denied,
+        // session expired, or a state mismatch). Abort early so we do not store null
+        // as the auth code and do not trigger another redirect loop.
+        if ($request->has('error')) {
+            abort(400, 'Exact Online authorisation failed: '.$request->get('error').' – '.$request->get('error_description', ''));
+        }
+
+        $code = $request->get('code');
+
+        if (empty($code)) {
+            abort(400, 'Exact Online callback received without an authorisation code.');
+        }
+
         $config = LaravelExactOnline::loadConfig();
-        $config->exact_authorisationCode = request()->get('code');
+        $config->exact_authorisationCode = $code;
 
         // Store first to avoid another redirect to exact online
         LaravelExactOnline::storeConfig($config);
