@@ -52,6 +52,11 @@ class ExactOnlineController extends Controller
         // Store first to avoid another redirect to exact online
         LaravelExactOnline::storeConfig($config);
 
+        // Forget the existing singleton: it was initialised before the auth code
+        // was available and has no knowledge of the new code. A fresh instance
+        // will read credentials.json with the code and exchange it for tokens.
+        app()->forgetInstance('Exact\Connection');
+
         $connection = app()->make('Exact\Connection');
 
         $config->exact_accessToken = serialize($connection->getAccessToken());
