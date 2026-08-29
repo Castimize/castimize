@@ -156,12 +156,8 @@ class ShippingService
         $toAddress = $this->mapToShippoAddress($customerShipment->toAddress);
 
         $shippoFromAddress = $this->setFromAddress($fromAddress)->createShippoAddress('From');
-        // For FedEx, skip Shippo address validation to prevent Shippo from normalising
-        // non-ASCII characters back into the address (e.g. Schlossberg → Schloßberg).
-        // Our transliteration already guarantees ASCII output.
-        $validateToAddress = $carrier !== ShippoCarriersEnum::FedEx->value;
-        $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To', $validateToAddress);
-        [$valid, $errorMessages, $hasUpsAddressError] = $this->checkAddressValid($shippoToAddress['validation_results'] ?? [], $shippoToAddress['test'] ?? false, false);
+        $shippoToAddress = $this->setToAddress($toAddress)->createShippoAddress('To');
+        [$valid, $errorMessages, $hasUpsAddressError] = $this->checkAddressValid($shippoToAddress['validation_results'], $shippoToAddress['test'], false);
         if (! $valid) {
             if ($hasUpsAddressError) {
                 Log::warning('UPS address_error on to-address, retrying with corrected address', [
@@ -196,6 +192,28 @@ class ShippingService
                 }
                 throw new RuntimeException($message);
             }
+        }
+
+        // For FedEx, Shippo address validation may normalise ASCII transliterations
+        // back to native characters (e.g. Schlossberg → Schloßberg). Re-transliterate
+        // the validated Shippo address and re-create it without validation so the
+        // ASCII version is stored in Shippo and forwarded to FedEx unchanged.
+        if ($carrier === ShippoCarriersEnum::FedEx->value) {
+            $shippoStreet = ($shippoToAddress['street1'] ?? '')
+                .(! empty($shippoToAddress['street_no']) ? ' '.$shippoToAddress['street_no'] : '');
+            $fedexToAddress = $this->mapToShippoAddress([
+                'name' => $shippoToAddress['name'] ?? $toAddress['name'],
+                'company' => $shippoToAddress['company'] ?? $toAddress['company'],
+                'address_line1' => $shippoStreet ?: $toAddress['address_line1'],
+                'address_line2' => $shippoToAddress['street2'] ?? $toAddress['address_line2'],
+                'city' => $shippoToAddress['city'] ?? $toAddress['city'],
+                'state' => $shippoToAddress['state'] ?? $toAddress['state'],
+                'postal_code' => $shippoToAddress['zip'] ?? $toAddress['postal_code'],
+                'country' => $shippoToAddress['country'] ?? $toAddress['country'],
+                'phone' => $toAddress['phone'],
+                'email' => $toAddress['email'],
+            ]);
+            $shippoToAddress = $this->setToAddress($fedexToAddress)->createShippoAddress('To', false);
         }
 
         $this->_shippoService
