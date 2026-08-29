@@ -176,6 +176,7 @@ class ShippingServiceTest extends TestCase
             'messages' => [],
         ]);
         $mockShippoAddress->shouldReceive('offsetGet')->with('test')->andReturn(false);
+        $mockShippoAddress->shouldReceive('offsetGet')->andReturn(null);
         $mockShippoAddress->shouldReceive('offsetExists')->andReturn(true);
 
         return $mockShippoAddress;
