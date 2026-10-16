@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use App\Enums\Shippo\ShippoCarriersEnum;
+use App\Enums\Shippo\ShippoCustomsDeclarationIncoTermsEnum;
 use App\Enums\Shippo\ShippoDistanceUnitsEnum;
 use App\Enums\Shippo\ShippoMassUnitsEnum;
 use App\Nova\Actions\ShipmentInTransitToCustomerStatusAction;
@@ -508,6 +509,13 @@ class CustomerShipment extends Resource
                 ->options(ShippoCarriersEnum::values())
                 ->displayUsingLabels()
                 ->rules('required'),
+
+            Select::make(__('Inco term'), 'inco_term')
+                ->default(ShippoCustomsDeclarationIncoTermsEnum::DDU->value)
+                ->options(ShippoCustomsDeclarationIncoTermsEnum::values())
+                ->displayUsingLabels()
+                ->help(__('Who pays import duties. Defaults to DDU (end customer pays) when left empty.'))
+                ->nullable(),
 
             Heading::make('<h3 class="font-normal text-xl">'.__('Parcel settings').'</h3>')->asHtml(),
 

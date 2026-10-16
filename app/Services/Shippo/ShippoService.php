@@ -313,7 +313,7 @@ class ShippoService
             'non_delivery_option' => ShippoCustomsDeclarationNonDeliveryOptionsEnum::RETURN->value,
             'exporter_reference' => $params['exporter_reference'],
             'importer_reference' => $params['importer_reference'],
-            'inco_term' => ShippoCustomsDeclarationIncoTermsEnum::DDU->value,
+            'inco_term' => $params['inco_term'] ?? ShippoCustomsDeclarationIncoTermsEnum::DDU->value,
             //            'b13a_filing_option' => 'NOT_REQUIRED',
             'currency' => $params['currency'],
             'exporter_identification' => [
