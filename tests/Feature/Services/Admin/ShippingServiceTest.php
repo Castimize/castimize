@@ -167,6 +167,92 @@ class ShippingServiceTest extends TestCase
         $this->assertEquals('SUCCESS', $result['transaction']['status']);
     }
 
+    #[Test]
+    public function it_passes_customer_shipment_inco_term_to_customs_declaration(): void
+    {
+        // Arrange
+        $this->setupShippoMocksForAddressCreation();
+        $this->mockSuccessfulShippoShipmentCreation();
+
+        $customerShipment = $this->createCustomerShipmentWithAddresses();
+        $customerShipment->inco_term = 'DDP';
+        $customerShipment->selectedPOs = collect([
+            $this->createMockOrderQueueWithUpload(),
+        ]);
+
+        $this->shippoServiceMock->shouldReceive('createCustomsDeclaration')
+            ->once()
+            ->with(Mockery::on(fn ($params) => $params['inco_term'] === 'DDP'))
+            ->andReturnSelf();
+
+        // Act
+        $this->shippingService->createShippoCustomerShipment($customerShipment);
+    }
+
+    #[Test]
+    public function it_defaults_inco_term_to_ddu_when_customer_shipment_has_none(): void
+    {
+        // Arrange
+        $this->setupShippoMocksForAddressCreation();
+        $this->mockSuccessfulShippoShipmentCreation();
+
+        $customerShipment = $this->createCustomerShipmentWithAddresses();
+        $customerShipment->selectedPOs = collect([
+            $this->createMockOrderQueueWithUpload(),
+        ]);
+
+        $this->shippoServiceMock->shouldReceive('createCustomsDeclaration')
+            ->once()
+            ->with(Mockery::on(fn ($params) => $params['inco_term'] === 'DDU'))
+            ->andReturnSelf();
+
+        // Act
+        $this->shippingService->createShippoCustomerShipment($customerShipment);
+    }
+
+    private function mockSuccessfulShippoShipmentCreation(): void
+    {
+        $mockShipment = Mockery::mock(Shippo_Object::class);
+        $mockShipment->shouldReceive('offsetGet')->with('rates')->andReturn([
+            [
+                'object_id' => 'rate-123',
+                'servicelevel' => ['token' => 'ups_standard'],
+            ],
+        ]);
+        $mockShipment->shouldReceive('offsetGet')->with('messages')->andReturn([]);
+        $mockShipment->shouldReceive('offsetExists')->andReturn(true);
+
+        $mockTransaction = Mockery::mock(Shippo_Object::class);
+        $mockTransaction->shouldReceive('offsetGet')->with('status')->andReturn('SUCCESS');
+        $mockTransaction->shouldReceive('offsetGet')->with('eta')->andReturn(null);
+        $mockTransaction->shouldReceive('offsetGet')->with('tracking_number')->andReturn('1Z999AA10123456784');
+        $mockTransaction->shouldReceive('offsetGet')->with('tracking_url_provider')->andReturn('https://tracking.ups.com/...');
+        $mockTransaction->shouldReceive('offsetGet')->with('object_id')->andReturn('transaction-123');
+        $mockTransaction->shouldReceive('offsetGet')->with('label_url')->andReturn('https://label.url/...');
+        $mockTransaction->shouldReceive('offsetGet')->with('commercial_invoice_url')->andReturn(null);
+        $mockTransaction->shouldReceive('offsetGet')->with('qr_code_url')->andReturn(null);
+        $mockTransaction->shouldReceive('offsetExists')->andReturn(true);
+
+        $this->shippoServiceMock->shouldReceive('createCustomsItem')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('createShipment')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getShipment')->andReturn($mockShipment);
+        $this->shippoServiceMock->shouldReceive('createLabel')->andReturnSelf();
+        $this->shippoServiceMock->shouldReceive('getTransaction')->andReturn($mockTransaction);
+        $this->shippoServiceMock->shouldReceive('toArray')->andReturn([
+            'shipment' => ['object_id' => 'shipment-123'],
+            'transaction' => [
+                'status' => 'SUCCESS',
+                'eta' => null,
+                'tracking_number' => '1Z999AA10123456784',
+                'tracking_url_provider' => 'https://tracking.ups.com/...',
+                'object_id' => 'transaction-123',
+                'label_url' => 'https://label.url/...',
+                'commercial_invoice_url' => null,
+                'qr_code_url' => null,
+            ],
+        ]);
+    }
+
     private function createMockShippoAddress(): MockInterface
     {
         $mockShippoAddress = Mockery::mock(Shippo_Object::class);

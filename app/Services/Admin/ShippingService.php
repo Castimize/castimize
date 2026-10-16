@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Enums\Shippo\ShippoCarriersEnum;
 use App\Enums\Shippo\ShippoCustomsDeclarationContentTypesEnum;
+use App\Enums\Shippo\ShippoCustomsDeclarationIncoTermsEnum;
 use App\Models\Country;
 use App\Models\CustomerShipment;
 use App\Models\ManufacturerShipment;
@@ -252,6 +253,7 @@ class ShippingService
                 'importer_reference' => $orderNumber,
                 'currency' => $currency,
                 'contents_type' => $contentsType,
+                'inco_term' => $customerShipment->inco_term ?? ShippoCustomsDeclarationIncoTermsEnum::DDU->value,
                 // 'eori_number' => strtoupper($customerShipment->toAddress['country']) === 'GB' ? $this->generalSettings->eoriNumberGb : $this->generalSettings->eoriNumber,
             ])
             ->createShipment($carrier, [
