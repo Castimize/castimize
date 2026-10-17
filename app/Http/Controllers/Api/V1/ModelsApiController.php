@@ -10,22 +10,24 @@ use App\Models\Model;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ModelsService;
+use App\Traits\Api\AuthorizesCustomerAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class ModelsApiController extends ApiController
 {
+    use AuthorizesCustomerAccess;
+
     public function __construct(
         private ModelsService $modelsService,
     ) {}
 
     public function show(int $customerId, Model $model): ModelResource
     {
-        abort_if(Gate::denies('viewModel'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $this->authorizeCustomerAccess($customerId, 'viewModel');
         if (! $model || (int) $model->customer?->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
@@ -38,6 +40,7 @@ class ModelsApiController extends ApiController
 
     public function showModelsWpCustomer(int $customerId): AnonymousResourceCollection
     {
+        $this->authorizeCustomerAccess($customerId, null);
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), [
@@ -73,6 +76,7 @@ class ModelsApiController extends ApiController
 
     public function showModelsWpCustomerPaginated(Request $request, int $customerId): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, null);
         $customer = Customer::where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), [
@@ -94,6 +98,7 @@ class ModelsApiController extends ApiController
 
     public function getCustomModelName(int $customerId, Request $request): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, null);
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), [
@@ -119,6 +124,7 @@ class ModelsApiController extends ApiController
 
     public function getCustomModelAttributes(int $customerId, Request $request): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, null);
         ini_set('precision', 53);
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
@@ -193,6 +199,7 @@ class ModelsApiController extends ApiController
 
     public function store(int $customerId, Request $request): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, null);
         ini_set('precision', 17);
         $customer = Customer::where('wp_id', $customerId)->first();
         if ($customer === null) {
@@ -213,6 +220,7 @@ class ModelsApiController extends ApiController
 
     public function update(Request $request, int $customerId, Model $model): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, null);
         ini_set('precision', 53);
         if (! $model || (int) $model->customer?->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
@@ -228,6 +236,7 @@ class ModelsApiController extends ApiController
 
     public function destroy(int $customerId, Model $model): Response
     {
+        $this->authorizeCustomerAccess($customerId, null);
         if (! $model || (int) $model->customer?->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }

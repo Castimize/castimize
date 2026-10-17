@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use Tests\Traits\NeedsApiUser;
 
@@ -31,6 +32,19 @@ class ModelsApiControllerTest extends TestCase
 
         $this->setUpApiUserWithPermissions(['viewModel']);
         $this->setUpSharedDependencies();
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
+    }
+
+    /**
+     * Create the customer-role User account a customer-scoped token belongs
+     * to, and return a plain-text token for it.
+     */
+    private function createCustomerApiToken(Customer $customer): string
+    {
+        $user = User::factory()->create(['wp_id' => $customer->wp_id]);
+        $user->assignRole('customer');
+
+        return $user->createToken('test-token')->plainTextToken;
     }
 
     private function setUpSharedDependencies(): void
@@ -447,5 +461,61 @@ class ModelsApiControllerTest extends TestCase
         ]));
 
         $response->assertUnauthorized();
+    }
+
+    // ========================================
+    // Customer-scoped token tests
+    // ========================================
+
+    #[Test]
+    public function it_allows_customer_scoped_token_to_list_own_models(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $this->createModel(['customer_id' => $customer->id]);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.models.show-customer-wp-models', [
+                'customerId' => $customer->wp_id,
+            ]));
+
+        $response->assertOk();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_listing_other_customers_models(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
+        $this->createModel(['customer_id' => $otherCustomer->id]);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.models.show-customer-wp-models', [
+                'customerId' => $otherCustomer->wp_id,
+            ]));
+
+        $response->assertForbidden();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_deleting_other_customers_model(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
+        $model = $this->createModel(['customer_id' => $otherCustomer->id]);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson(route('api.api.models.delete', [
+                'customerId' => $otherCustomer->wp_id,
+                'model' => $model->id,
+            ]));
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('models', ['id' => $model->id, 'deleted_at' => null]);
     }
 }

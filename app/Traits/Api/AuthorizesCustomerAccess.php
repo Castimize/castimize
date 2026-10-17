@@ -18,9 +18,13 @@ trait AuthorizesCustomerAccess
      * 'customer' role alone does not scope access to only that user's own
      * data, so every customer-facing endpoint still needs this ownership
      * check. Any other authenticated principal (e.g. the WordPress backend's
-     * staff-level token) falls back to the existing permission gate, unchanged.
+     * staff-level token) falls back to the existing permission gate,
+     * unchanged. Pass $staffGate as null for endpoints that never had a
+     * permission gate to begin with — that preserves today's behavior for
+     * the staff/master token exactly (no new requirement introduced) while
+     * still adding the ownership check for customer-role tokens.
      */
-    protected function authorizeCustomerAccess(int $customerId, string $staffGate): void
+    protected function authorizeCustomerAccess(int $customerId, ?string $staffGate): void
     {
         $user = auth()->user();
 
@@ -30,6 +34,8 @@ trait AuthorizesCustomerAccess
             return;
         }
 
-        abort_if(Gate::denies($staffGate), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if ($staffGate !== null) {
+            abort_if(Gate::denies($staffGate), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        }
     }
 }

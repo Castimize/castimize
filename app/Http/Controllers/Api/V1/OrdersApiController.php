@@ -11,28 +11,30 @@ use App\Models\Country;
 use App\Models\Order;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\OrdersService;
+use App\Traits\Api\AuthorizesCustomerAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
 class OrdersApiController extends ApiController
 {
+    use AuthorizesCustomerAccess;
+
     public function __construct(
         private OrdersService $ordersService,
     ) {}
 
     public function show(int $orderNumber): OrderResource
     {
-        abort_if(Gate::denies('viewOrder'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
-        $order = Order::where('order_number', $orderNumber)->first();
+        $order = Order::with('customer')->where('order_number', $orderNumber)->first();
         if ($order === null) {
             LogRequestService::addResponse(request(), [
                 'message' => '404 Not found',
             ], 404);
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
+
+        $this->authorizeCustomerAccess($order->customer?->wp_id ?? -1, 'viewOrder');
 
         $response = new OrderResource($order);
         LogRequestService::addResponse(request(), $response);
