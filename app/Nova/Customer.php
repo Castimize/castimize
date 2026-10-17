@@ -2,11 +2,11 @@
 
 namespace App\Nova;
 
-use App\Nova\Actions\GenerateCustomerApiTokenAction;
 use App\Nova\Filters\CustomerHasOrdersFilter;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Jeffbeltran\SanctumTokens\SanctumTokens;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\DateTime;
@@ -196,6 +196,9 @@ class Customer extends Resource
             HasMany::make(__('Complaints'), 'complaints')
                 ->hideFromIndex(),
 
+            SanctumTokens::make()
+                ->defaultAbilities([\App\Models\Customer::API_TOKEN_ABILITY_SELF_SERVICE]),
+
             new Panel(__('History'), $this->commonMetaData(true, false, false, false)),
         ];
     }
@@ -241,8 +244,6 @@ class Customer extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [
-            new GenerateCustomerApiTokenAction,
-        ];
+        return [];
     }
 }
