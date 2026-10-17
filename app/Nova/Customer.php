@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\GenerateCustomerApiTokenAction;
 use App\Nova\Filters\CustomerHasOrdersFilter;
 use App\Traits\Nova\CommonMetaDataTrait;
 use Exception;
@@ -240,6 +241,8 @@ class Customer extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            new GenerateCustomerApiTokenAction,
+        ];
     }
 }
