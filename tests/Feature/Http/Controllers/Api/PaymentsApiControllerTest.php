@@ -7,12 +7,14 @@ namespace Tests\Feature\Http\Controllers\Api;
 use App\Models\Customer;
 use App\Models\Shop;
 use App\Models\ShopOwner;
+use App\Models\User;
 use App\Services\Admin\PaymentService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use Tests\Traits\NeedsApiUser;
 
@@ -26,6 +28,19 @@ class PaymentsApiControllerTest extends TestCase
         parent::setUp();
 
         $this->setUpApiUserWithPermissions(['viewCustomer']);
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
+    }
+
+    /**
+     * Create the customer-role User account a customer-scoped token belongs
+     * to, and return a plain-text token for it.
+     */
+    private function createCustomerApiToken(Customer $customer): string
+    {
+        $user = User::factory()->create(['wp_id' => $customer->wp_id]);
+        $user->assignRole('customer');
+
+        return $user->createToken('test-token')->plainTextToken;
     }
 
     protected function tearDown(): void
@@ -153,9 +168,9 @@ class PaymentsApiControllerTest extends TestCase
         $customer = Customer::factory()->create(['wp_id' => 111111]);
         $otherCustomer = $this->createCustomerWithShopOwnerAndMandate(222222);
 
-        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+        $token = $this->createCustomerApiToken($customer);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson(route('api.api.customers.payments.create-setup-intent', [
                 'customerId' => $otherCustomer->wp_id,
             ]));
@@ -172,9 +187,9 @@ class PaymentsApiControllerTest extends TestCase
             $mock->shouldReceive('attachStripePaymentMethod')->once();
         });
 
-        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+        $token = $this->createCustomerApiToken($customer);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson(route('api.api.customers.payments.attach-payment-method', [
                 'customerId' => $customer->wp_id,
             ]), [
@@ -190,9 +205,9 @@ class PaymentsApiControllerTest extends TestCase
         $customer = Customer::factory()->create(['wp_id' => 111111]);
         $otherCustomer = $this->createCustomerWithShopOwnerAndMandate(222222);
 
-        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+        $token = $this->createCustomerApiToken($customer);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson(route('api.api.customers.payments.attach-payment-method', [
                 'customerId' => $otherCustomer->wp_id,
             ]), [
@@ -208,9 +223,9 @@ class PaymentsApiControllerTest extends TestCase
         $customer = Customer::factory()->create(['wp_id' => 111111]);
         $otherCustomer = $this->createCustomerWithShopOwnerAndMandate(222222);
 
-        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+        $token = $this->createCustomerApiToken($customer);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson(route('api.api.customers.payments.cancel-mandate', [
                 'customerId' => $otherCustomer->wp_id,
             ]));

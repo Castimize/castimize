@@ -12,26 +12,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
 use Venturecraft\Revisionable\RevisionableTrait;
 use Wildside\Userstamps\Userstamps;
 
 #[ObservedBy([CustomerObserver::class])]
 class Customer extends Model
 {
-    use HasApiTokens;
     use HasFactory;
     use ModelHasAddresses;
     use RevisionableTrait;
     use SoftDeletes;
     use Userstamps;
-
-    /**
-     * Sanctum token ability granted to tokens issued for a customer's own
-     * self-service use (e.g. embedded in the WordPress "My account" pages).
-     * Scoped to exactly one customer — never grants cross-customer access.
-     */
-    public const API_TOKEN_ABILITY_SELF_SERVICE = 'customer-self-service';
 
     public $wpCustomer = null;
 

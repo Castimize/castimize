@@ -7,6 +7,7 @@ use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
+use App\Services\Admin\UsersService;
 use App\Traits\Api\AuthorizesCustomerAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ class CustomersApiController extends ApiController
 
     public function __construct(
         private CustomersService $customersService,
+        private UsersService $usersService,
     ) {}
 
     public function show(Customer $customer): CustomerResource
@@ -32,9 +34,11 @@ class CustomersApiController extends ApiController
     }
 
     /**
-     * Issue a short-lived, customer-scoped API token for use in WordPress'
-     * "My account" pages, so the browser never sees the shared backend
-     * token. The token can only act on behalf of this one customer.
+     * Issue a short-lived API token for use in WordPress' "My account" pages,
+     * so the browser never sees the shared backend token. The token belongs
+     * to this customer's own User account (role: customer), so it only works
+     * for this one customer's data once past the ownership checks on each
+     * customer-facing endpoint.
      */
     public function issueApiToken(int $customerId): JsonResponse
     {
@@ -45,13 +49,11 @@ class CustomersApiController extends ApiController
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
 
-        $customer->tokens()->where('name', 'wordpress-self-service')->delete();
+        $user = $this->usersService->findOrCreateApiUser($customer);
 
-        $token = $customer->createToken(
-            'wordpress-self-service',
-            [Customer::API_TOKEN_ABILITY_SELF_SERVICE],
-            now()->addDay(),
-        );
+        $user->tokens()->where('name', 'wordpress-self-service')->delete();
+
+        $token = $user->createToken('wordpress-self-service', ['*'], now()->addDay());
 
         return response()->json([
             'token' => $token->plainTextToken,

@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use Tests\Traits\NeedsApiUser;
 
@@ -24,6 +25,19 @@ class ShopOwnersApiControllerTest extends TestCase
         parent::setUp();
 
         $this->setUpApiUserWithPermissions(['viewCustomer']);
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
+    }
+
+    /**
+     * Create the customer-role User account a customer-scoped token belongs
+     * to, and return a plain-text token for it.
+     */
+    private function createCustomerApiToken(Customer $customer): string
+    {
+        $user = User::factory()->create(['wp_id' => $customer->wp_id]);
+        $user->assignRole('customer');
+
+        return $user->createToken('test-token')->plainTextToken;
     }
 
     // ========================================
@@ -244,9 +258,9 @@ class ShopOwnersApiControllerTest extends TestCase
         $customer = Customer::factory()->create();
         ShopOwner::factory()->create(['customer_id' => $customer->id]);
 
-        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+        $token = $this->createCustomerApiToken($customer);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson(route('api.api.customers.shop-owners.show', [
                 'customerId' => $customer->wp_id,
             ]));
@@ -261,9 +275,9 @@ class ShopOwnersApiControllerTest extends TestCase
         $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
         ShopOwner::factory()->create(['customer_id' => $otherCustomer->id]);
 
-        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+        $token = $this->createCustomerApiToken($customer);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson(route('api.api.customers.shop-owners.show', [
                 'customerId' => $otherCustomer->wp_id,
             ]));
@@ -278,9 +292,9 @@ class ShopOwnersApiControllerTest extends TestCase
         $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
         ShopOwner::factory()->create(['customer_id' => $otherCustomer->id, 'active' => true]);
 
-        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+        $token = $this->createCustomerApiToken($customer);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->putJson(route('api.api.customers.shop-owners.update-active', [
                 'customerId' => $otherCustomer->wp_id,
             ]), [

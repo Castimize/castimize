@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use Tests\Traits\NeedsApiUser;
 
@@ -23,6 +24,22 @@ class CustomersApiControllerTest extends TestCase
         parent::setUp();
 
         $this->setUpApiUserWithPermissions(['viewCustomer']);
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
+    }
+
+    /**
+     * Create the customer-role User account a customer-scoped token belongs
+     * to, matching how CustomersApiController::issueApiToken() and
+     * UsersService::findOrCreateApiUser() link them, and return a plain-text
+     * token for it.
+     */
+    private function createCustomerApiToken(Customer $customer): string
+    {
+        $user = User::factory()->create(['wp_id' => $customer->wp_id]);
+        $user->assignRole('customer');
+        $customer->update(['user_id' => $user->id]);
+
+        return $user->createToken('test-token')->plainTextToken;
     }
 
     #[Test]
@@ -54,9 +71,9 @@ class CustomersApiControllerTest extends TestCase
     {
         $customer = Customer::factory()->create(['wp_id' => 111111]);
 
-        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+        $token = $this->createCustomerApiToken($customer);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson(route('api.api.customers.show', ['customer' => $customer->id]));
 
         $response->assertOk();
@@ -68,9 +85,9 @@ class CustomersApiControllerTest extends TestCase
         $customer = Customer::factory()->create(['wp_id' => 111111]);
         $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
 
-        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+        $token = $this->createCustomerApiToken($customer);
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson(route('api.api.customers.show', ['customer' => $otherCustomer->id]));
 
         $response->assertForbidden();
