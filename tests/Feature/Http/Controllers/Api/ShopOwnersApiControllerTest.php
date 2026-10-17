@@ -233,4 +233,64 @@ class ShopOwnersApiControllerTest extends TestCase
 
         $response->assertUnauthorized();
     }
+
+    // ========================================
+    // Customer-scoped token tests
+    // ========================================
+
+    #[Test]
+    public function it_allows_customer_scoped_token_to_view_own_shop_owner(): void
+    {
+        $customer = Customer::factory()->create();
+        ShopOwner::factory()->create(['customer_id' => $customer->id]);
+
+        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+            ->getJson(route('api.api.customers.shop-owners.show', [
+                'customerId' => $customer->wp_id,
+            ]));
+
+        $response->assertOk();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_viewing_other_customers_shop_owner(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
+        ShopOwner::factory()->create(['customer_id' => $otherCustomer->id]);
+
+        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+            ->getJson(route('api.api.customers.shop-owners.show', [
+                'customerId' => $otherCustomer->wp_id,
+            ]));
+
+        $response->assertForbidden();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_updating_other_customers_shop_owner_active_state(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
+        ShopOwner::factory()->create(['customer_id' => $otherCustomer->id, 'active' => true]);
+
+        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+            ->putJson(route('api.api.customers.shop-owners.update-active', [
+                'customerId' => $otherCustomer->wp_id,
+            ]), [
+                'active' => '0',
+            ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('shop_owners', [
+            'customer_id' => $otherCustomer->id,
+            'active' => true,
+        ]);
+    }
 }

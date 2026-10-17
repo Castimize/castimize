@@ -26,6 +26,7 @@ Route::group([
             // Customers
             Route::get('customers/wp', 'CustomersApiController@showCustomerWp')->name('api.customers.show-customer-wp');
             Route::get('customers/{customer}', 'CustomersApiController@show')->name('api.customers.show');
+            Route::post('customers/{customerId}/token', 'CustomersApiController@issueApiToken')->name('api.customers.issue-token');
 
             // Shop owners
             Route::get('customers/{customerId}/shop-owner', 'ShopOwnersApiController@show')->name('api.customers.shop-owners.show');

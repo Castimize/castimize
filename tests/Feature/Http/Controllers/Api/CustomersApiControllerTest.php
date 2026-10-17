@@ -7,6 +7,7 @@ namespace Tests\Feature\Http\Controllers\Api;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -157,5 +158,88 @@ class CustomersApiControllerTest extends TestCase
         );
 
         $response->assertNotFound();
+    }
+
+    // ========================================
+    // issueApiToken() tests
+    // ========================================
+
+    #[Test]
+    public function it_issues_a_customer_scoped_api_token(): void
+    {
+        $customer = Customer::factory()->create();
+
+        Sanctum::actingAs($this->apiUser);
+
+        $response = $this->postJson(route('api.api.customers.issue-token', [
+            'customerId' => $customer->wp_id,
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonStructure(['token']);
+    }
+
+    #[Test]
+    public function issued_token_can_only_access_its_own_customer_shop_owner_data(): void
+    {
+        $ownCustomer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
+
+        // Use a real bearer token for the staff call (rather than Sanctum::actingAs,
+        // which would keep overriding auth for the later requests below, regardless
+        // of the Authorization header we send).
+        $staffToken = $this->apiUser->createToken('staff')->plainTextToken;
+
+        $issueResponse = $this->withHeader('Authorization', 'Bearer '.$staffToken)
+            ->postJson(route('api.api.customers.issue-token', [
+                'customerId' => $ownCustomer->wp_id,
+            ]));
+        $token = $issueResponse->json('token');
+
+        // Laravel's test client resolves and caches the authenticated user on
+        // the guard instance for the lifetime of the test; without forgetting
+        // it here, the requests below would keep authenticating as the staff
+        // user from the call above regardless of the Authorization header.
+        Auth::forgetGuards();
+
+        $ownResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.customers.shop-owners.show', [
+                'customerId' => $ownCustomer->wp_id,
+            ]));
+        $ownResponse->assertOk();
+
+        Auth::forgetGuards();
+
+        $otherResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.customers.shop-owners.show', [
+                'customerId' => $otherCustomer->wp_id,
+            ]));
+        $otherResponse->assertForbidden();
+    }
+
+    #[Test]
+    public function it_returns_404_when_issuing_token_for_nonexistent_customer(): void
+    {
+        Sanctum::actingAs($this->apiUser);
+
+        $response = $this->postJson(route('api.api.customers.issue-token', [
+            'customerId' => 99999,
+        ]));
+
+        $response->assertNotFound();
+    }
+
+    #[Test]
+    public function it_returns_403_when_issuing_token_without_permission(): void
+    {
+        $customer = Customer::factory()->create();
+        $userWithoutPermission = User::factory()->create();
+        Sanctum::actingAs($userWithoutPermission);
+
+        $response = $this->postJson(route('api.api.customers.issue-token', [
+            'customerId' => $customer->wp_id,
+        ]));
+
+        $response->assertForbidden();
     }
 }

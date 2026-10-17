@@ -28,6 +28,34 @@ class CustomersApiController extends ApiController
         return $response;
     }
 
+    /**
+     * Issue a short-lived, customer-scoped API token for use in WordPress'
+     * "My account" pages, so the browser never sees the shared backend
+     * token. The token can only act on behalf of this one customer.
+     */
+    public function issueApiToken(int $customerId): JsonResponse
+    {
+        abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $customer = Customer::where('wp_id', $customerId)->first();
+        if (! $customer) {
+            abort(Response::HTTP_NOT_FOUND, '404 Not found');
+        }
+
+        $customer->tokens()->where('name', 'wordpress-self-service')->delete();
+
+        $token = $customer->createToken(
+            'wordpress-self-service',
+            [Customer::API_TOKEN_ABILITY_SELF_SERVICE],
+            now()->addDay(),
+        );
+
+        return response()->json([
+            'token' => $token->plainTextToken,
+            'expires_at' => $token->accessToken->expires_at,
+        ]);
+    }
+
     public function showCustomerWp(ShowCustomerWpRequest $request): CustomerResource
     {
         $customer = Customer::with(['orders'])
