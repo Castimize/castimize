@@ -7,6 +7,7 @@ use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
+use App\Traits\Api\AuthorizesCustomerAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -14,13 +15,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CustomersApiController extends ApiController
 {
+    use AuthorizesCustomerAccess;
+
     public function __construct(
         private CustomersService $customersService,
     ) {}
 
     public function show(Customer $customer): CustomerResource
     {
-        abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $this->authorizeCustomerAccess($customer->wp_id, 'viewCustomer');
 
         $response = new CustomerResource($customer);
         LogRequestService::addResponse(request(), $response);

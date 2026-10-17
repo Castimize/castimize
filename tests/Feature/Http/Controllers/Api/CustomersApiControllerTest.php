@@ -50,6 +50,33 @@ class CustomersApiControllerTest extends TestCase
     }
 
     #[Test]
+    public function it_allows_customer_scoped_token_to_view_own_record(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+
+        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+            ->getJson(route('api.api.customers.show', ['customer' => $customer->id]));
+
+        $response->assertOk();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_viewing_other_customers_record(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
+
+        $token = $customer->createToken('wordpress-self-service', [Customer::API_TOKEN_ABILITY_SELF_SERVICE]);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+            ->getJson(route('api.api.customers.show', ['customer' => $otherCustomer->id]));
+
+        $response->assertForbidden();
+    }
+
+    #[Test]
     public function it_returns_403_when_user_lacks_permission(): void
     {
         $customer = Customer::factory()->create();
