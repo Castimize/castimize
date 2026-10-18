@@ -67,6 +67,18 @@ parameters:
 			path: app/Jobs/SyncInvoiceToExact.php
 
 		-
+			message: '#^Static method App\\Nova\\Fields\\FormData\<TKey of \(int\|string\),TValue\>\:\:make\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Nova/Fields/FormData.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: app/Nova/Fields/FormData.php
+
+		-
 			message: '#^Call to protected static method find\(\) of class Codexshaper\\WooCommerce\\Models\\Customer\.$#'
 			identifier: staticMethod.protected
 			count: 2

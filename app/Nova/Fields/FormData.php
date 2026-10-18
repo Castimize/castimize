@@ -30,6 +30,7 @@ class FormData extends FluentDecorator
 
     /**
      * Make fluent payload from request.
+     *
      * @return static
      */
     public static function make($attributes = [])

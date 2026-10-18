@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Castimize\ColumnToggler;
 
@@ -37,7 +37,7 @@ trait ColumnTogglerTrait
     private function filterFields(NovaRequest $request, FieldCollection $fields): FieldCollection
     {
         return $fields->when(
-            value: $request->has('columnToggler') && !$request->routeIs('nova.column-toggler.fields'),
+            value: $request->has('columnToggler') && ! $request->routeIs('nova.column-toggler.fields'),
             callback: function (FieldCollection $fields) use ($request) {
 
                 $value = $request->input('columnToggler');
@@ -55,7 +55,7 @@ trait ColumnTogglerTrait
                 }
 
                 if ($value === 'false') {
-                    return new FieldCollection();
+                    return new FieldCollection;
                 }
 
                 $columns = collect(json_decode(base64_decode($value)));

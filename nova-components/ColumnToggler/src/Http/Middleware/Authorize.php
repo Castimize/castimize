@@ -28,6 +28,6 @@ class Authorize
      */
     public function matchesTool($tool)
     {
-//        return $tool instanceof ColumnToggler;
+        //        return $tool instanceof ColumnToggler;
     }
 }
