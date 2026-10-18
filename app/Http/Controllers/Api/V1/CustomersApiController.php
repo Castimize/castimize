@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Requests\ShowCustomerWpRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
+use App\Models\User;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\UsersService;
@@ -42,6 +43,13 @@ class CustomersApiController extends ApiController
      */
     public function issueApiToken(int $customerId): JsonResponse
     {
+        // This mints a fresh token for the given customer, so it must stay
+        // staff-only: a customer-scoped token must never be able to use it
+        // to impersonate another customer, even though the 'customer' role
+        // is itself granted 'viewCustomer' (so customers can view their own
+        // record elsewhere).
+        $caller = auth()->user();
+        abort_if($caller instanceof User && $caller->hasRole('customer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $customer = Customer::where('wp_id', $customerId)->first();

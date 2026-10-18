@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use Tests\Traits\NeedsApiUser;
@@ -283,6 +284,30 @@ class CustomersApiControllerTest extends TestCase
         $response = $this->postJson(route('api.api.customers.issue-token', [
             'customerId' => $customer->wp_id,
         ]));
+
+        $response->assertForbidden();
+    }
+
+    #[Test]
+    public function it_forbids_a_customer_scoped_token_from_issuing_a_token_for_another_customer(): void
+    {
+        // In production, the 'customer' role is granted the 'viewCustomer'
+        // permission (so customers can view their own record via Nova/API),
+        // which would otherwise let a customer-scoped token pass the
+        // Gate::denies('viewCustomer') check here and mint a fresh token
+        // impersonating any other customer. Replicate that grant explicitly,
+        // since this test's role isn't seeded with it by default.
+        Permission::firstOrCreate(['name' => 'viewCustomer', 'guard_name' => 'web']);
+        Role::findByName('customer')->givePermissionTo('viewCustomer');
+
+        $ownCustomer = Customer::factory()->create(['wp_id' => 333333]);
+        $otherCustomer = Customer::factory()->create(['wp_id' => 444444]);
+        $token = $this->createCustomerApiToken($ownCustomer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson(route('api.api.customers.issue-token', [
+                'customerId' => $otherCustomer->wp_id,
+            ]));
 
         $response->assertForbidden();
     }
