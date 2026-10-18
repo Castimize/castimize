@@ -23,7 +23,7 @@ class ToolServiceProvider extends ServiceProvider
 
         Field::macro('hideByDefault', function ($hiddenByDefault = true) {
             return $this->withMeta([
-                'columnToggleVisible' => !$hiddenByDefault,
+                'columnToggleVisible' => ! $hiddenByDefault,
             ]);
         });
 
@@ -32,8 +32,8 @@ class ToolServiceProvider extends ServiceProvider
                 'column_toggler' => config('nova.vendors.column_toggler'),
             ]);
 
-            Nova::script('column-toggler', __DIR__ . '/../dist/js/tool.js');
-            Nova::style('column-toggler', __DIR__ . '/../dist/css/tool.css');
+            Nova::script('column-toggler', __DIR__.'/../dist/js/tool.js');
+            Nova::style('column-toggler', __DIR__.'/../dist/css/tool.css');
         });
     }
 
@@ -60,7 +60,7 @@ class ToolServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/nova.php', 'nova.vendors.column_toggler',
+            __DIR__.'/../config/nova.php', 'nova.vendors.column_toggler',
         );
     }
 }

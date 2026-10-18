@@ -275,6 +275,27 @@ class EtsyService
         return SellerTaxonomy::all();
     }
 
+    public function checkExistingReadinessStateDefinition(Shop $shop): void
+    {
+        if (isset($shop->shop_oauth['readiness_state_definition_id'])) {
+            return;
+        }
+
+        $this->refreshAccessToken($shop);
+
+        $definitionId = (new EtsyReadinessStateService(shop: $shop))->createReadinessStateDefinition();
+
+        Log::info('Etsy readiness state definition ID: '.($definitionId ?? 'null'));
+
+        if ($definitionId) {
+            $shopOauth = $shop->shop_oauth;
+            $shopOauth['readiness_state_definition_id'] = $definitionId;
+            $shop->shop_oauth = $shopOauth;
+            $shop->save();
+            Log::info('Etsy readiness state definition saved to shop_oauth');
+        }
+    }
+
     public function checkExistingShippingProfile(int $shopId, Shop $shop): void
     {
         $shippingProfileDTO = ShippingProfileDTO::fromShop($shopId);
@@ -288,12 +309,23 @@ class EtsyService
 
                 $this->addShippingProfileToShopOwnerShop($shop, $shippingProfile);
                 $shop->refresh();
+
+                $this->syncShippingProfileDestinations($shop, $shippingProfile->shipping_profile_id);
             }
         }
 
         if ($createShippingProfile) {
             $this->createShippingProfile($shop, $shippingProfileDTO);
         }
+    }
+
+    public function syncShippingProfileDestinations(Shop $shop, int $shippingProfileId): void
+    {
+        $this->refreshAccessToken($shop);
+
+        (new EtsyShippingProfileService(
+            shop: $shop,
+        ))->syncShippingProfileDestinations($shippingProfileId);
     }
 
     public function getShippingProfile(Shop $shop)
@@ -522,6 +554,7 @@ class EtsyService
             shopId: $shop->shop_oauth['shop_id'],
             shop: $shop,
         );
+        $this->checkExistingReadinessStateDefinition($shop);
         $shop->refresh();
 
         $etsyListingService = new EtsyListingService(
@@ -581,6 +614,9 @@ class EtsyService
 
     private function updateListing(Shop $shop, Model $model): ListingDTO
     {
+        $this->checkExistingReadinessStateDefinition($shop);
+        $shop->refresh();
+
         $etsyListingService = new EtsyListingService(
             shop: $shop,
         );
@@ -594,10 +630,6 @@ class EtsyService
 
         Log::info('Update listing: '.$listingDTO->listingId);
 
-        // Update inventory with variations, first get existing inventory so we can keep the existing intact
-        $inventory = $this->getListingInventory($shop, $listingDTO->listingId);
-        $this->updateListingInventory($shop, $listingDTO, $inventory);
-
         $materials = [];
         if ($listingDTO->materials) {
             foreach ($listingDTO->materials as $material) {
@@ -605,7 +637,7 @@ class EtsyService
             }
         }
 
-        // Also set state to active again
+        // Update listing metadata first (including readiness_state_id) before inventory update
         $data = [
             'taxonomy_id' => $listingDTO->taxonomyId,
             'return_policy_id' => $listingDTO->returnPolicyId,
@@ -616,10 +648,18 @@ class EtsyService
             'item_height' => $listingDTO->itemHeight,
         ];
 
+        if (isset($shop->shop_oauth['readiness_state_definition_id'])) {
+            $data['readiness_state_id'] = $shop->shop_oauth['readiness_state_definition_id'];
+        }
+
         $etsyListingService->updateListing(
             listingId: $listing->listing_id,
             data: $data,
         );
+
+        // Update inventory after listing has readiness_state_id set
+        $inventory = $this->getListingInventory($shop, $listingDTO->listingId);
+        $this->updateListingInventory($shop, $listingDTO, $inventory);
 
         (new ShopListingModelService)->updateShopListingModel($model->shopListingModel, $listingDTO);
 
@@ -633,22 +673,29 @@ class EtsyService
 
         $variations = [];
         foreach ($listingDTO->listingInventory as $listingInventory) {
-            $sku = $listingInventory->sku;
-            $price = $listingInventory->price;
-            $currency = $listingInventory->currency;
-            $quantity = $listingInventory->quantity;
-            $isEnabled = $listingInventory->isEnabled;
             $variations[] = [
-                'sku' => $sku,
+                'sku' => $listingInventory->sku,
                 'material' => str_replace('(1µm)', '(1 micron)', $listingInventory->name),
-                'price' => $price,
-                'quantity' => $quantity,
-                'currency_code' => $currency->value,
-                'is_enabled' => $isEnabled,
+                'price' => $listingInventory->price,
+                'quantity' => $listingInventory->quantity,
+                'currency_code' => $listingInventory->currency->value,
+                'is_enabled' => $listingInventory->isEnabled,
             ];
         }
         try {
             if (array_key_exists('products', $existingInventory)) {
+                foreach ($existingInventory['products'] as $product) {
+                    if (count($product['property_values']) > 1) {
+                        Log::channel('etsy')->warning('updateListingInventory: listing has more than one variation property — skipping update to prevent data loss', [
+                            'listing_id' => $listingId,
+                            'property_count' => count($product['property_values']),
+                            'properties' => array_column($product['property_values'], 'property_name'),
+                        ]);
+
+                        return;
+                    }
+                }
+
                 foreach ($existingInventory['products'] as $product) {
                     foreach ($product['property_values'] as $propertyValue) {
                         if ($propertyValue['property_name'] === 'Material') {
@@ -659,7 +706,7 @@ class EtsyService
                                     $index = $i;
                                 }
                             }
-                            if ($index) {
+                            if ($index !== null) {
                                 $variations[$index]['sku'] = $product['sku'];
                                 $variations[$index]['price'] = $offering['price']['amount'] / $offering['price']['divisor'];
                                 $variations[$index]['quantity'] = $offering['quantity'];
@@ -683,11 +730,14 @@ class EtsyService
         }
 
         try {
-            $inventoryResponse = (new EtsyInventoryService(
-                shop: $shop,
-            ))->updateInventory(
+            $readinessStateId = isset($shop->shop_oauth['readiness_state_definition_id'])
+                ? (int) $shop->shop_oauth['readiness_state_definition_id']
+                : null;
+
+            $inventoryResponse = $this->makeInventoryService($shop)->updateInventory(
                 listingId: $listingId,
                 products: $variations,
+                readinessStateId: $readinessStateId,
             );
             Log::info('Listing inventory created: '.print_r($inventoryResponse, true));
         } catch (Exception $e) {
@@ -756,6 +806,13 @@ class EtsyService
 
     public function updateShopReceipt(Shop $shop, int $receiptId, array $data): ?Receipt
     {
+        $this->refreshAccessToken($shop);
+        new Etsy(
+            client_id: $shop->shop_oauth['client_id'],
+            shared_secret: config('services.shops.etsy.client_secret'),
+            api_key: $shop->shop_oauth['access_token'],
+        );
+
         return Receipt::update(
             shop_id: $shop->shop_oauth['shop_id'],
             receipt_id: $receiptId,
@@ -801,19 +858,60 @@ class EtsyService
             $shopListingModel = ShopListingModel::with('model.materials')
                 ->where('shop_id', $shop->id)
                 ->where('shop_listing_id', $transaction->listing_id)
-                ->where('created_at', '<=', Carbon::createFromTimestamp($receipt->created_timestamp))
+                ->where('created_at', '<=', Carbon::createFromTimestamp($receipt->created_timestamp)->addDay())
                 ->first();
-            if ($shopListingModel) {
-                foreach ($transaction->variations as $variation) {
-                    $material = $shopListingModel->model->materials->where('name', $variation->formatted_value)->first();
-                    if ($variation->formatted_name === 'Material' && $material) {
-                        $lines[] = [
-                            'transaction' => $transaction,
-                            'shop_listing_model' => $shopListingModel,
-                            'material' => $material,
-                        ];
-                    }
+
+            if (! $shopListingModel) {
+                Log::channel('etsy')->warning('getShopListingsFromReceipt: no ShopListingModel found for transaction', [
+                    'shop_id' => $shop->id,
+                    'receipt_id' => $receipt->receipt_id,
+                    'listing_id' => $transaction->listing_id,
+                    'transaction_id' => $transaction->transaction_id,
+                    'receipt_created_timestamp' => $receipt->created_timestamp,
+                ]);
+
+                continue;
+            }
+
+            $matchedLine = false;
+            foreach ($transaction->variations as $variation) {
+                if ($variation->formatted_name !== 'Material') {
+                    continue;
                 }
+
+                $material = $shopListingModel->model->materials->where('name', $variation->formatted_value)->first();
+                if (! $material) {
+                    Log::channel('etsy')->warning('getShopListingsFromReceipt: material not found for variation', [
+                        'shop_id' => $shop->id,
+                        'receipt_id' => $receipt->receipt_id,
+                        'listing_id' => $transaction->listing_id,
+                        'transaction_id' => $transaction->transaction_id,
+                        'variation_value' => $variation->formatted_value,
+                        'available_materials' => $shopListingModel->model->materials->pluck('name'),
+                    ]);
+
+                    continue;
+                }
+
+                $lines[] = [
+                    'transaction' => $transaction,
+                    'shop_listing_model' => $shopListingModel,
+                    'material' => $material,
+                ];
+                $matchedLine = true;
+            }
+
+            if (! $matchedLine) {
+                Log::channel('etsy')->warning('getShopListingsFromReceipt: no matching Material variation found for transaction', [
+                    'shop_id' => $shop->id,
+                    'receipt_id' => $receipt->receipt_id,
+                    'listing_id' => $transaction->listing_id,
+                    'transaction_id' => $transaction->transaction_id,
+                    'variations' => collect($transaction->variations)->map(fn ($v) => [
+                        'name' => $v->formatted_name,
+                        'value' => $v->formatted_value,
+                    ])->all(),
+                ]);
             }
         }
 
@@ -857,6 +955,11 @@ class EtsyService
         $shop->save();
 
         return $shop;
+    }
+
+    protected function makeInventoryService(Shop $shop): EtsyInventoryService
+    {
+        return new EtsyInventoryService(shop: $shop);
     }
 
     private function storeClientSecret(Shop $shop): Shop

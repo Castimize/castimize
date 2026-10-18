@@ -11,6 +11,7 @@ use Etsy\Etsy;
 use Etsy\Resources\ShippingDestination;
 use Etsy\Resources\ShippingProfile;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 #[AllowDynamicProperties]
 class EtsyShippingProfileService
@@ -44,7 +45,9 @@ class EtsyShippingProfileService
 
     public function createShippingProfile(ShippingProfileDTO $shippingProfileDTO): ShippingProfileDTO
     {
-        $countries = Country::with(['logisticsZone.shippingFee'])->get();
+        $countries = Country::with(['logisticsZone.shippingFee'])
+            ->whereHas('logisticsZone', fn ($q) => $q->whereHas('shippingFee'))
+            ->get();
 
         $shippingProfile = ShippingProfile::create(
             shop_id: $this->shop->shop_oauth['shop_id'],
@@ -66,20 +69,18 @@ class EtsyShippingProfileService
         $shippingProfileDTO->shippingProfileId = $shippingProfile?->shipping_profile_id;
 
         foreach ($countries as $country) {
-            if ($country->has('logisticsZone')) {
-                try {
-                    $shippingProfileDestinationDTO = $this->createShippingProfileDestination(
-                        shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
-                            shop: $this->shop,
-                            country: $country,
-                            shippingProfileId: $shippingProfileDTO->shippingProfileId,
-                        ),
-                    );
+            try {
+                $shippingProfileDestinationDTO = $this->createShippingProfileDestination(
+                    shippingProfileDestinationDTO: ShippingProfileDestinationDTO::fromCountry(
+                        shop: $this->shop,
+                        country: $country,
+                        shippingProfileId: $shippingProfileDTO->shippingProfileId,
+                    ),
+                );
 
-                    $shippingProfileDTO->shippingProfileDestinations->push($shippingProfileDestinationDTO);
-                } catch (Exception $exception) {
-                    // just continue with other countries
-                }
+                $shippingProfileDTO->shippingProfileDestinations->push($shippingProfileDestinationDTO);
+            } catch (Exception $exception) {
+                // just continue with other countries
             }
         }
 
@@ -125,6 +126,46 @@ class EtsyShippingProfileService
         $shippingProfileDestinationDTO->shippingProfileDestinationId = $shippingDestination->shipping_profile_destination_id;
 
         return $shippingProfileDestinationDTO;
+    }
+
+    public function syncShippingProfileDestinations(int $shippingProfileId): void
+    {
+        $shippingProfile = ShippingProfile::get(
+            shop_id: $this->shop->shop_oauth['shop_id'],
+            profile_id: $shippingProfileId,
+        );
+
+        $existingDestinations = [];
+        foreach ($shippingProfile->shipping_profile_destinations as $destination) {
+            $existingDestinations[$destination->destination_country_iso] = $destination->shipping_profile_destination_id;
+        }
+
+        $countries = Country::with(['logisticsZone.shippingFee'])
+            ->whereHas('logisticsZone', fn ($q) => $q->whereHas('shippingFee'))
+            ->get();
+
+        foreach ($countries as $country) {
+            try {
+                $dto = ShippingProfileDestinationDTO::fromCountry(
+                    shop: $this->shop,
+                    country: $country,
+                    shippingProfileId: $shippingProfileId,
+                    shippingProfileDestinationId: $existingDestinations[$country->alpha2] ?? null,
+                );
+
+                if (isset($existingDestinations[$country->alpha2])) {
+                    $this->updateShippingProfileDestination($dto);
+                } else {
+                    $this->createShippingProfileDestination($dto);
+                }
+            } catch (Exception $exception) {
+                Log::warning('Failed to sync shipping profile destination', [
+                    'shop_id' => $this->shop->id,
+                    'country' => $country->alpha2,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
     }
 
     public function addShippingProfileToShopOwnerShop(?ShippingProfile $shippingProfile): void

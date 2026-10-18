@@ -48,4 +48,9 @@ class CustomersApiController
      * )
      */
     public function show() {}
+
+    // issueApiToken() is intentionally undocumented here: it's an internal
+    // endpoint only ever called by the WordPress backend itself (using the
+    // staff/master token), not something external API consumers should
+    // discover or call directly.
 }

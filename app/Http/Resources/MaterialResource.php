@@ -17,7 +17,7 @@ class MaterialResource extends JsonResource
             'id' => $this->id,
             'wp_id' => $this->wp_id,
             'name' => $this->name,
-            'link' => '&attribute_pa_p3d_material=' . $this->wp_id,
+            'link' => '&attribute_pa_p3d_material='.$this->wp_id,
         ];
     }
 }

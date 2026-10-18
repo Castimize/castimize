@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
+use Picqer\Financials\Exact\ApiException;
 use Throwable;
 
 class SyncInvoicePaidToExact implements ShouldQueue
@@ -41,14 +42,22 @@ class SyncInvoicePaidToExact implements ShouldQueue
             return;
         }
 
-        try {
-            if ($customer->exact_online_guid === null) {
-                throw new Exception('Customer exact_online_guid is null');
-            }
+        if ($customer->exact_online_guid === null) {
+            throw new Exception('Customer exact_online_guid is null');
+        }
 
+        try {
             $exactOnlineService->syncInvoicePaid($this->invoice);
-        } catch (Throwable $e) {
-            Log::channel('exact')->error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+        } catch (ApiException $e) {
+            if (str_contains($e->getMessage(), 'Error 429')) {
+                Log::channel('exact')->warning("SyncInvoicePaidToExact: rate limited by Exact Online for invoice {$this->invoice->invoice_number}, releasing for 60s");
+                if ($this->job !== null) {
+                    $this->release(60);
+                }
+
+                return;
+            }
+            throw $e;
         }
 
         try {

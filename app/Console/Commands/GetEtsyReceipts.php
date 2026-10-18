@@ -145,6 +145,10 @@ class GetEtsyReceipts extends Command
                                 $this->error("Failed to process receipt {$receipt->receipt_id}: ".$e->getMessage());
                             }
                         } else {
+                            Log::channel('etsy')->warning('GetEtsyReceipts: receipt has no matching listings, skipping', [
+                                'shop_id' => $shop->id,
+                                'receipt_id' => $receipt->receipt_id,
+                            ]);
                             $this->warn("Receipt {$receipt->receipt_id} has no matching listings, skipping");
                         }
                     } else {

@@ -26,6 +26,7 @@ Route::group([
             // Customers
             Route::get('customers/wp', 'CustomersApiController@showCustomerWp')->name('api.customers.show-customer-wp');
             Route::get('customers/{customer}', 'CustomersApiController@show')->name('api.customers.show');
+            Route::post('customers/{customerId}/token', 'CustomersApiController@issueApiToken')->name('api.customers.issue-token');
 
             // Shop owners
             Route::get('customers/{customerId}/shop-owner', 'ShopOwnersApiController@show')->name('api.customers.shop-owners.show');
@@ -41,14 +42,9 @@ Route::group([
             Route::post('customers/{customerId}/payments/cancel-mandate', 'PaymentsApiController@cancelMandate')->name('api.customers.payments.cancel-mandate');
 
             // Orders
-            Route::post('orders/calculate-expected-delivery-date', 'OrdersApiController@calculateExpectedDeliveryDate')->name('api.orders.calculate-expected-delivery-date');
             Route::get('orders/wp', 'OrdersApiController@showOrderWp')->name('api.orders.show-order-wp');
             Route::get('orders/{order_number}', 'OrdersApiController@show')->name('api.orders.show');
             Route::get('orders/wp/{order_number}', 'OrdersApiController@showWpOrder')->name('api.orders.show-wp-order');
-
-            // Prices
-            Route::post('prices/calculate', 'PricesApiController@calculatePrice')->name('api.prices.calculate');
-            Route::post('prices/calculate/shipping', 'PricesApiController@calculateShipping')->name('api.prices.calculate.shipping');
 
             // Materials
             Route::get('materials', 'MaterialsApiController@index')->name('api.materials.index');
@@ -64,9 +60,6 @@ Route::group([
             Route::post('models/wp/{customerId}/get-custom-model-attributes', 'ModelsApiController@getCustomModelAttributes')->name('api.models.get-custom-model-attributes');
             Route::post('models/wp/{customerId}/{model}', 'ModelsApiController@update')->name('api.models.update');
             Route::post('models/wp/{customerId}/{model}/delete', 'ModelsApiController@destroy')->name('api.models.delete');
-
-            // Shippo
-            Route::post('address/validate', 'AddressApiController@validate')->name('api.address.validate');
 
             // Etsy
             Route::get('etsy/{customerId}/taxonomy', 'EtsyApiController@getTaxonomy')->name('api.etsy.get-taxonomy');
@@ -89,6 +82,14 @@ Route::group([
             Route::get('etsy/{customerId}/shipping-profile', 'EtsyApiController@getShippingProfile')->name('api.etsy.get-shipping-profile');
             Route::post('etsy/{customerId}/shipping-profile', 'EtsyApiController@createShippingProfile')->name('api.etsy.create-shipping-profile');
         });
+
+        // Public calculation utilities: no customer-private data, and needed
+        // during checkout/configuration before a customer necessarily has
+        // any API token (e.g. guest checkout, anonymous configurator use).
+        Route::post('prices/calculate', 'PricesApiController@calculatePrice')->name('api.prices.calculate');
+        Route::post('prices/calculate/shipping', 'PricesApiController@calculateShipping')->name('api.prices.calculate.shipping');
+        Route::post('orders/calculate-expected-delivery-date', 'OrdersApiController@calculateExpectedDeliveryDate')->name('api.orders.calculate-expected-delivery-date');
+        Route::post('address/validate', 'AddressApiController@validate')->name('api.address.validate');
 
         // Woocommerce endpoints
         Route::middleware(ValidateWcWebhookSignature::class)

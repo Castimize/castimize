@@ -13,8 +13,9 @@ class EtsyInventoryService
 
     public function __construct(
         protected Shop $shop,
+        ?Client $client = null,
     ) {
-        $this->client = new Client([
+        $this->client = $client ?? new Client([
             'base_uri' => 'https://openapi.etsy.com/v3/application/',
             'headers' => [
                 'Authorization' => 'Bearer '.$this->shop->shop_oauth['access_token'],
@@ -39,11 +40,21 @@ class EtsyInventoryService
         }
     }
 
-    public function updateInventory(int $listingId, array $products)
+    public function updateInventory(int $listingId, array $products, ?int $readinessStateId = null)
     {
         $inventoryProducts = [];
 
         foreach ($products as $product) {
+            $offering = [
+                'price' => (float) $product['price'],
+                'quantity' => $product['quantity'],
+                'is_enabled' => $product['is_enabled'],
+            ];
+
+            if ($readinessStateId !== null) {
+                $offering['readiness_state_id'] = $readinessStateId;
+            }
+
             $inventoryProducts[] = [
                 'sku' => $product['sku'],
                 'property_values' => [
@@ -53,13 +64,7 @@ class EtsyInventoryService
                         'values' => [$product['material']],
                     ],
                 ],
-                'offerings' => [
-                    [
-                        'price' => $product['price'],
-                        'quantity' => $product['quantity'],
-                        'is_enabled' => $product['is_enabled'],
-                    ],
-                ],
+                'offerings' => [$offering],
             ];
         }
 
@@ -68,10 +73,12 @@ class EtsyInventoryService
             'price_on_property' => [514],
             'quantity_on_property' => [514],
             'sku_on_property' => [514],
+            'readiness_state_on_property' => [],
+            'max_variations_supported' => 2,
         ];
 
-        //            dd($payload);
         return $this->client->put("listings/{$listingId}/inventory", [
+            'query' => ['legacy' => 'false'],
             'json' => $payload,
         ]);
     }

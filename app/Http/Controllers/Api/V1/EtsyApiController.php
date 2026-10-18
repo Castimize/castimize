@@ -11,12 +11,15 @@ use App\Models\Model;
 use App\Models\Shop;
 use App\Services\Admin\LogRequestService;
 use App\Services\Etsy\EtsyService;
+use App\Traits\Api\AuthorizesCustomerAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class EtsyApiController extends ApiController
 {
+    use AuthorizesCustomerAccess;
+
     public function __construct(
         private EtsyService $etsyService,
     ) {}
@@ -198,6 +201,11 @@ class EtsyApiController extends ApiController
         if ($customer === null) {
             abort(Response::HTTP_NOT_FOUND, "Customer {$customerId} not found");
         }
+
+        // $customerId here is the Customer's primary key, not wp_id (unlike
+        // the rest of the API) - authorizeCustomerAccess always compares
+        // against wp_id, so resolve it via the customer we just found.
+        $this->authorizeCustomerAccess($customer->wp_id ?? -1, null);
 
         if ($customer->shopOwner === null) {
             abort(Response::HTTP_NOT_FOUND, "Customer {$customerId} has no shop owner");

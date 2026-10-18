@@ -7,12 +7,14 @@ namespace Tests\Feature\Http\Controllers\Api;
 use App\Models\Customer;
 use App\Models\Shop;
 use App\Models\ShopOwner;
+use App\Models\User;
 use App\Services\Admin\PaymentService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use Tests\Traits\NeedsApiUser;
 
@@ -25,7 +27,20 @@ class PaymentsApiControllerTest extends TestCase
     {
         parent::setUp();
 
-        $this->setUpApiUserWithPermissions([]);
+        $this->setUpApiUserWithPermissions(['viewCustomer']);
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
+    }
+
+    /**
+     * Create the customer-role User account a customer-scoped token belongs
+     * to, and return a plain-text token for it.
+     */
+    private function createCustomerApiToken(Customer $customer): string
+    {
+        $user = User::factory()->create(['wp_id' => $customer->wp_id]);
+        $user->assignRole('customer');
+
+        return $user->createToken('test-token')->plainTextToken;
     }
 
     protected function tearDown(): void
@@ -34,9 +49,10 @@ class PaymentsApiControllerTest extends TestCase
         parent::tearDown();
     }
 
-    private function createCustomerWithShopOwnerAndMandate(): Customer
+    private function createCustomerWithShopOwnerAndMandate(?int $wpId = null): Customer
     {
         $customer = Customer::factory()->create([
+            'wp_id' => $wpId ?? fake()->numberBetween(1, 10000),
             'stripe_data' => [
                 'customer_id' => 'cus_test123',
                 'mandate_id' => 'mandate_test123',
@@ -140,5 +156,80 @@ class PaymentsApiControllerTest extends TestCase
         ]));
 
         $response->assertUnauthorized();
+    }
+
+    // ========================================
+    // Customer-scoped token tests
+    // ========================================
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_creating_setup_intent_for_other_customer(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = $this->createCustomerWithShopOwnerAndMandate(222222);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.customers.payments.create-setup-intent', [
+                'customerId' => $otherCustomer->wp_id,
+            ]));
+
+        $response->assertForbidden();
+    }
+
+    #[Test]
+    public function it_allows_customer_scoped_token_to_attach_payment_method_for_own_customer(): void
+    {
+        $customer = $this->createCustomerWithShopOwnerAndMandate();
+
+        $this->mock(PaymentService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('attachStripePaymentMethod')->once();
+        });
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson(route('api.api.customers.payments.attach-payment-method', [
+                'customerId' => $customer->wp_id,
+            ]), [
+                'payment_method' => 'pm_test123',
+            ]);
+
+        $response->assertNoContent();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_attaching_payment_method_for_other_customer(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = $this->createCustomerWithShopOwnerAndMandate(222222);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson(route('api.api.customers.payments.attach-payment-method', [
+                'customerId' => $otherCustomer->wp_id,
+            ]), [
+                'payment_method' => 'pm_test123',
+            ]);
+
+        $response->assertForbidden();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_cancelling_other_customers_mandate(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = $this->createCustomerWithShopOwnerAndMandate(222222);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson(route('api.api.customers.payments.cancel-mandate', [
+                'customerId' => $otherCustomer->wp_id,
+            ]));
+
+        $response->assertForbidden();
     }
 }

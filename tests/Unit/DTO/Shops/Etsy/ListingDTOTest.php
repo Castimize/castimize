@@ -184,10 +184,10 @@ class ListingDTOTest extends TestCase
     #[Test]
     public function it_can_have_listing_images(): void
     {
-        $images = ListingImageDTO::collect([
+        $images = collect([
             new ListingImageDTO(shopId: 12345, listingId: 100, image: 'img1.jpg', listingImageId: 1, altText: 'Image 1', rank: 1),
             new ListingImageDTO(shopId: 12345, listingId: 100, image: 'img2.jpg', listingImageId: 2, altText: 'Image 2', rank: 2),
-        ], DataCollection::class);
+        ]);
 
         $dto = new ListingDTO(
             shopId: 222,
@@ -216,7 +216,7 @@ class ListingDTOTest extends TestCase
         );
 
         $this->assertCount(2, $dto->listingImages);
-        $this->assertInstanceOf(DataCollection::class, $dto->listingImages);
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $dto->listingImages);
     }
 
     #[Test]

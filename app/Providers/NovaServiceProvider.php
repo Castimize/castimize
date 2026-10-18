@@ -52,8 +52,8 @@ use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
-use Sereny\NovaPermissions\Nova\Permission;
-use Sereny\NovaPermissions\Nova\Role;
+use Sereny\NovaPermissions\Nova\Permission as NovaPermission;
+use Sereny\NovaPermissions\Nova\Role as NovaRole;
 use Sereny\NovaPermissions\NovaPermissions;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
@@ -64,6 +64,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function boot()
     {
         parent::boot();
+
+        // Always register Role and Permission resources so MorphToMany fields
+        // work for users with assign-roles permission, regardless of tool canSee.
+        Nova::resources([NovaRole::class, NovaPermission::class]);
 
         //        Nova::withBreadcrumbs();
 
@@ -193,14 +197,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     }),
 
                 MenuSection::make(__('Roles and Permissions'), [
-                    MenuItem::resource(Role::class)
-                        ->canSee(function (NovaRequest $request) {
-                            return $request->user()->isSuperAdmin();
-                        }),
-                    MenuItem::resource(Permission::class)
-                        ->canSee(function (NovaRequest $request) {
-                            return $request->user()->isSuperAdmin();
-                        }),
+                    MenuItem::make(__('Roles'), '/resources/roles'),
+                    MenuItem::make(__('Permissions'), '/resources/permissions'),
                 ])->icon('shield-check')
 //                    ->collapsable()
                     ->canSee(function (NovaRequest $request) {

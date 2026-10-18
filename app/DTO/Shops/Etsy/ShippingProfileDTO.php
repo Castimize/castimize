@@ -19,7 +19,7 @@ class ShippingProfileDTO extends Data
         public float $primaryCost,
         public float $secondaryCost,
         public string $destinationCountryIso,
-        public string $originPostalCode,
+        public ?string $originPostalCode,
         public int $minProcessingTime,
         public int $maxProcessingTime,
         public string $processingTimeUnit,

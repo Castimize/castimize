@@ -238,8 +238,52 @@ class ExactOnlineService
         }
     }
 
+    public function deleteByYourRef(string $invoiceNumber): void
+    {
+        Log::channel('exact')->info('deleteByYourRef: fetching entries from Exact Online', [
+            'invoice_number' => $invoiceNumber,
+        ]);
+
+        $exactEntries = (new SalesEntry($this->connection))->filter("YourRef eq '{$invoiceNumber}'");
+
+        if (empty($exactEntries)) {
+            Log::channel('exact')->info('deleteByYourRef: no entries found in Exact Online', [
+                'invoice_number' => $invoiceNumber,
+            ]);
+        }
+
+        foreach ($exactEntries as $exactEntry) {
+            $guid = $exactEntry->EntryID;
+            $journal = $exactEntry->Journal ?? '?';
+
+            $exactEntry->delete();
+
+            Log::channel('exact')->info('deleteByYourRef: deleted entry from Exact Online', [
+                'invoice_number' => $invoiceNumber,
+                'exact_online_guid' => $guid,
+                'journal' => $journal,
+            ]);
+        }
+
+        $invoice = Invoice::where('invoice_number', $invoiceNumber)->first();
+        if ($invoice !== null) {
+            $deleted = $invoice->exactSalesEntries()->forceDelete();
+            Log::channel('exact')->info('deleteByYourRef: removed local sales entry records', [
+                'invoice_number' => $invoiceNumber,
+                'invoice_id' => $invoice->id,
+                'deleted_count' => $deleted,
+            ]);
+        }
+    }
+
     private function createSalesEntryFromInvoice(Invoice $invoice, array $salesEntryLines, int $diary, int $type, string $entryDate): void
     {
+        if ($invoice->exactSalesEntries()->where('diary', $diary)->exists()) {
+            Log::channel('exact')->info("createSalesEntryFromInvoice: skipping — entry already exists for invoice {$invoice->invoice_number} diary {$diary}");
+
+            return;
+        }
+
         if ($invoice->customer === null) {
             throw new RuntimeException(sprintf(
                 'Invoice #%s has no customer attached',
@@ -274,7 +318,7 @@ class ExactOnlineService
         $salesEntry->Currency = CurrencyEnum::EUR->value;
         $salesEntry->Journal = $diary;
         $salesEntry->YourRef = $invoice->invoice_number;
-        $salesEntry->OrderNumber = $invoice->invoice_nuber;
+        $salesEntry->OrderNumber = $invoice->invoice_number;
         $salesEntry->Description = $invoice->description;
         $salesEntry->EntryDate = $entryDate;
         $salesEntry->PaymentCondition = '00';
@@ -389,22 +433,36 @@ class ExactOnlineService
             return '4  ';
         }
 
-        $vatCodes = (new VatCode($this->connection))->get();
+        $vatCodes = (new VatCode($this->connection))->filter('', '', 'Code,OssCountry,Description');
+        $codeMatch = null;
         /** @var VatCode $vatCode */
         foreach ($vatCodes as $vatCode) {
             $ossCountry = trim((string) $vatCode->OssCountry);
-            // Match on OssCountry (case-insensitive)
-            if (strcasecmp($ossCountry, $countryCode) === 0) {
+            $code = trim((string) $vatCode->Code);
+
+            // Prefer OssCountry match
+            if ($ossCountry !== '' && strcasecmp($ossCountry, $countryCode) === 0) {
                 Log::channel('exact')->info("Found VAT code for {$countryCode}: {$vatCode->Code} (OssCountry: {$ossCountry})");
 
                 return $vatCode->Code;
             }
+
+            // Fall back to Code match when OssCountry is not set
+            if ($codeMatch === null && $ossCountry === '' && strcasecmp($code, $countryCode) === 0) {
+                $codeMatch = $vatCode->Code;
+            }
+        }
+
+        if ($codeMatch !== null) {
+            Log::channel('exact')->info("Found VAT code for {$countryCode}: {$codeMatch} (matched on Code, OssCountry was null)");
+
+            return $codeMatch;
         }
 
         // Log available VAT codes for debugging
         $availableCodes = [];
         foreach ($vatCodes as $vatCode) {
-            $availableCodes[] = "Code: {$vatCode->Code}, OssCountry: ".($vatCode->OssCountry ?? 'null');
+            $availableCodes[] = 'Code: '.$vatCode->Code.', OssCountry: '.($vatCode->OssCountry ?? 'null').', Description: '.($vatCode->Description ?? 'null');
         }
         Log::channel('exact')->warning("VAT Code not found for {$countryCode}. Available codes: ".implode('; ', $availableCodes));
 

@@ -11,6 +11,8 @@ use App\Services\Admin\ShippingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
+use Shippo_InvalidRequestError;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -18,7 +20,7 @@ class AddressApiController extends ApiController
 {
     public function validate(Request $request): JsonResponse
     {
-        if ($request->customer_id && !empty($request->customer_id)) {
+        if ($request->customer_id && ! empty($request->customer_id)) {
             $customer = Customer::where('wp_id', $request->customer_id)->first();
             if ($customer && ! $customer->use_address_validation) {
                 $response = [
@@ -31,13 +33,15 @@ class AddressApiController extends ApiController
             }
         }
 
+        $nullIfNullString = static fn (mixed $value): mixed => ($value === 'null' || $value === '') ? null : $value;
+
         $addressData = [
             'name' => $request->name,
-            'company' => $request->company ?? null,
+            'company' => $nullIfNullString($request->company),
             'street1' => $request->address_1,
-            'street2' => $request->address_2 ?? null,
+            'street2' => $nullIfNullString($request->address_2),
             'city' => $request->city,
-            'state' => $request->state ?? null,
+            'state' => $nullIfNullString($request->state),
             'zip' => $request->postal_code,
             'country' => $request->country,
             'email' => $request->email,
@@ -56,8 +60,22 @@ class AddressApiController extends ApiController
             return response()->json($response);
         }
 
-        $shippingService = app(ShippingService::class);
-        $response = $shippingService->setFromAddress($addressData)->validateAddress('From');
+        try {
+            $shippingService = app(ShippingService::class);
+            $response = $shippingService->setFromAddress($addressData)->validateAddress('From');
+        } catch (Shippo_InvalidRequestError $e) {
+            Log::warning('Shippo_InvalidRequestError during address validation', [
+                'address' => $addressData,
+                'error' => $e->getMessage(),
+            ]);
+            $response = [
+                'valid' => false,
+                'address' => $addressData,
+                'address_changed' => false,
+                'messages' => [['source' => 'SHIPPO', 'code' => 'invalid_request', 'type' => 'address_error', 'text' => $e->getMessage()]],
+            ];
+        }
+
         LogRequestService::addResponse($request, $response);
 
         return response()->json($response);
