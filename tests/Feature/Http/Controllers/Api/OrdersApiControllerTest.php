@@ -189,6 +189,18 @@ class OrdersApiControllerTest extends TestCase
         $response->assertJsonPath('success', true);
     }
 
+    /**
+     * The expected date includes the country's shipping zone lead time, which
+     * differs per environment depending on seeded logistics data.
+     */
+    private function expectedDeliveryDate(Material $material, string $alpha2): string
+    {
+        $country = Country::with('logisticsZone.shippingFee')->where('alpha2', $alpha2)->firstOrFail();
+        $leadTime = $material->dc_lead_time + ($country->logisticsZone?->shippingFee?->default_lead_time ?? 0);
+
+        return now()->addBusinessDays($leadTime)->toFormattedDateString();
+    }
+
     #[Test]
     public function it_handles_uploads_where_each_upload_is_a_json_string(): void
     {
@@ -207,7 +219,7 @@ class OrdersApiControllerTest extends TestCase
         $response->assertJsonPath('success', true);
         $response->assertJsonPath(
             'expected_delivery_date',
-            now()->addBusinessDays($material->dc_lead_time)->toFormattedDateString()
+            $this->expectedDeliveryDate($material, 'NL')
         );
     }
 
@@ -234,7 +246,7 @@ class OrdersApiControllerTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath(
             'expected_delivery_date',
-            now()->addBusinessDays($material->dc_lead_time)->toFormattedDateString()
+            $this->expectedDeliveryDate($material, 'NL')
         );
     }
 
