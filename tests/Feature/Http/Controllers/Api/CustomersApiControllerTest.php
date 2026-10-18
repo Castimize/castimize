@@ -225,6 +225,27 @@ class CustomersApiControllerTest extends TestCase
     }
 
     #[Test]
+    public function it_issues_tokens_for_multiple_customers_with_unique_usernames(): void
+    {
+        $customerA = Customer::factory()->create(['wp_id' => 910001, 'first_name' => 'Jane', 'last_name' => 'Doe']);
+        $customerB = Customer::factory()->create(['wp_id' => 910002, 'first_name' => 'John', 'last_name' => 'Roe']);
+
+        Sanctum::actingAs($this->apiUser);
+
+        foreach ([$customerA, $customerB] as $customer) {
+            $this->postJson(route('api.api.customers.issue-token', [
+                'customerId' => $customer->wp_id,
+            ]))->assertOk();
+        }
+
+        $usernames = User::whereIn('wp_id', [910001, 910002])->pluck('username')->all();
+
+        $this->assertCount(2, $usernames);
+        $this->assertNotContains('', $usernames);
+        $this->assertSame('jane-doe-910001', User::where('wp_id', 910001)->value('username'));
+    }
+
+    #[Test]
     public function issued_token_can_only_access_its_own_customer_shop_owner_data(): void
     {
         $ownCustomer = Customer::factory()->create(['wp_id' => 111111]);

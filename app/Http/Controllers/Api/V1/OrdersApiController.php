@@ -71,10 +71,7 @@ class OrdersApiController extends ApiController
     public function calculateExpectedDeliveryDate(Request $request): JsonResponse
     {
         $country = Country::with('logisticsZone.shippingFee')->where('alpha2', $request->country)->first();
-        $uploads = $request->uploads;
-        if (is_string($uploads)) {
-            $uploads = json_decode($uploads, true, 512, JSON_THROW_ON_ERROR);
-        }
+        $uploads = $this->normalizeUploads($request->uploads);
 
         $expectedDeliveryDate = $this->ordersService->calculateExpectedDeliveryDate($uploads, $country);
 
@@ -125,5 +122,31 @@ class OrdersApiController extends ApiController
         return response()
             ->json($response)
             ->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    /**
+     * Accepts uploads as an array or JSON string, where each upload may itself be
+     * an array or a JSON string. Entries without a material_id are dropped.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function normalizeUploads(mixed $uploads): array
+    {
+        if (is_string($uploads)) {
+            $uploads = json_decode($uploads, true, 512, JSON_THROW_ON_ERROR);
+        }
+
+        $normalized = [];
+        foreach ((array) $uploads as $upload) {
+            if (is_string($upload)) {
+                $upload = json_decode($upload, true);
+            }
+
+            if (is_array($upload) && isset($upload['material_id'])) {
+                $normalized[] = $upload;
+            }
+        }
+
+        return $normalized;
     }
 }
