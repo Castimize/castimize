@@ -40,8 +40,7 @@ class ListingDTO extends Data
         public ?string $itemDimensionsUnit,
         public ?int $processingMin,
         public ?int $processingMax,
-        #[DataCollectionOf(ListingImageDTO::class)]
-        public ?DataCollection $listingImages,
+        public ?Collection $listingImages,
         #[DataCollectionOf(ListingInventoryDTO::class)]
         public ?DataCollection $listingInventory,
     ) {}

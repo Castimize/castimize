@@ -7,6 +7,7 @@ use DateTimeZone;
 use Gldrenthe89\NovaStringGeneratorField\NovaGeneratePassword;
 use Gldrenthe89\NovaStringGeneratorField\NovaGenerateString;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Jeffbeltran\SanctumTokens\SanctumTokens;
 use Laravel\Nova\Fields\Avatar;
 use Laravel\Nova\Fields\ID;
@@ -87,6 +88,13 @@ class User extends Resource
         return $query;
     }
 
+    public static function afterCreate(NovaRequest $request, $model): void
+    {
+        if ($model->roles()->count() === 0) {
+            $model->assignRole('customer-support');
+        }
+    }
+
     /**
      * Get the fields displayed by the resource.
      *
@@ -152,11 +160,11 @@ class User extends Resource
 
             MorphToMany::make(__('Roles'), 'roles', Role::class)
                 ->canSee(function ($request) {
-                    return $request->user()->isSuperAdmin();
+                    return $request->user()->can('assign-roles');
                 }),
             MorphToMany::make(__('Permissions'), 'permissions', Permission::class)
                 ->canSee(function ($request) {
-                    return $request->user()->isSuperAdmin();
+                    return $request->user()->can('assign-roles');
                 }),
 
             new Panel(__('History'), $this->commonMetaData()),

@@ -12,7 +12,6 @@ use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ModelsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -23,10 +22,12 @@ class PricesApiController extends ApiController
         private CalculatePricesService $calculatePricesService,
     ) {}
 
+    /**
+     * Public: no customer-private data, and needed for anonymous visitors
+     * configuring a model before they have any account/token.
+     */
     public function calculatePrice(Request $request): JsonResponse|CalculatedPriceResource
     {
-        abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
         try {
             $price = $this->calculatePricesService->calculatePrice($request);
         } catch (UnprocessableEntityHttpException $e) {
@@ -60,10 +61,12 @@ class PricesApiController extends ApiController
         return $response;
     }
 
+    /**
+     * Public: same as calculatePrice() above - no customer-private data, and
+     * needed before/without a checkout account.
+     */
     public function calculateShipping(Request $request): JsonResponse|CalculatedShippingFeeResource
     {
-        abort_if(Gate::denies('viewPricing'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
         try {
             $shippingFee = $this->calculatePricesService->calculateShippingFeeNew(
                 countryIso: $request->country,

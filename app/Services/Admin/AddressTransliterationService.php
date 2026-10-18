@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Admin;
 
 use Illuminate\Support\Facades\Log;
-use InvalidArgumentException;
+use Normalizer;
 
 class AddressTransliterationService
 {
@@ -18,6 +18,12 @@ class AddressTransliterationService
         'state',
     ];
 
+    /**
+     * Countries where local script (CJK etc.) is accepted natively by Shippo/UPS.
+     * Transliteration of these scripts produces incorrect romanization and breaks address validation.
+     */
+    private const SKIP_TRANSLITERATION_COUNTRIES = ['JP', 'CN', 'TW', 'HK', 'KR'];
+
     private const FIELD_MAX_LENGTHS = [
         'name' => 35,
         'company' => 35,
@@ -29,9 +35,13 @@ class AddressTransliterationService
 
     public function transliterateAddress(array $address): array
     {
+        $country = strtoupper($address['country'] ?? '');
+        if (in_array($country, self::SKIP_TRANSLITERATION_COUNTRIES, true)) {
+            return $address;
+        }
+
         $modified = false;
         $originalFields = [];
-        $fieldLengthErrors = [];
 
         foreach (self::TRANSLITERABLE_FIELDS as $field) {
             if (isset($address[$field]) && is_string($address[$field])) {
@@ -45,29 +55,18 @@ class AddressTransliterationService
 
                 $maxLength = self::FIELD_MAX_LENGTHS[$field] ?? null;
                 if ($maxLength !== null && mb_strlen($address[$field]) > $maxLength) {
-                    $fieldLengthErrors[$field] = [
-                        'value' => $address[$field],
-                        'length' => mb_strlen($address[$field]),
+                    $truncated = mb_substr($address[$field], 0, $maxLength);
+
+                    Log::warning('Address field truncated to max length for Shippo', [
+                        'field' => $field,
+                        'original' => $address[$field],
+                        'truncated' => $truncated,
                         'max_length' => $maxLength,
-                    ];
+                    ]);
+
+                    $address[$field] = $truncated;
                 }
             }
-        }
-
-        if (! empty($fieldLengthErrors)) {
-            $errorMessages = [];
-            foreach ($fieldLengthErrors as $field => $error) {
-                $errorMessages[] = sprintf(
-                    '%s exceeds maximum length of %d characters (current: %d)',
-                    $field,
-                    $error['max_length'],
-                    $error['length']
-                );
-            }
-
-            throw new InvalidArgumentException(
-                'Address validation failed: '.implode('; ', $errorMessages)
-            );
         }
 
         if ($modified) {
@@ -79,26 +78,58 @@ class AddressTransliterationService
         return $address;
     }
 
+    // Characters that do not decompose via Unicode NFD normalization.
+    private const SPECIAL_CHAR_MAP = [
+        'ß' => 'ss', 'ẞ' => 'SS',
+        'ø' => 'o', 'Ø' => 'O',
+        'ł' => 'l', 'Ł' => 'L',
+        'đ' => 'd', 'Đ' => 'D',
+        'æ' => 'ae', 'Æ' => 'AE',
+        'œ' => 'oe', 'Œ' => 'OE',
+        'ŀ' => 'l', 'Ŀ' => 'L',
+        'ŧ' => 't', 'Ŧ' => 'T',
+        'ħ' => 'h', 'Ħ' => 'H',
+        'ı' => 'i',
+    ];
+
     public function transliterateString(string $input): string
     {
         if ($input === '' || $this->isAscii($input)) {
             return $input;
         }
 
-        $transliterator = transliterator_create(
-            'Katakana-Latin; Hiragana-Latin; Han-Latin; Any-Latin; Latin-ASCII; [:Nonspacing Mark:] Remove'
+        // Step 1: replace characters that NFD normalization cannot decompose
+        $result = str_replace(
+            array_keys(self::SPECIAL_CHAR_MAP),
+            array_values(self::SPECIAL_CHAR_MAP),
+            $input
         );
 
-        if ($transliterator === null) {
-            $transliterator = transliterator_create('Any-Latin; Latin-ASCII');
+        // Step 2: NFD decomposition + strip combining diacritical marks (ö→o, é→e, etc.)
+        if (class_exists('Normalizer')) {
+            $normalized = Normalizer::normalize($result, Normalizer::FORM_KD);
+            if ($normalized !== false) {
+                $result = (string) preg_replace('/\p{Mn}/u', '', $normalized);
+            }
         }
 
-        $result = $transliterator !== null
-            ? transliterator_transliterate($transliterator, $input)
-            : $input;
+        // Step 3: ICU transliterator for remaining non-Latin scripts (CJK, Cyrillic, etc.)
+        if (! $this->isAscii($result)) {
+            $transliterator = transliterator_create(
+                'Katakana-Latin; Hiragana-Latin; Han-Latin; Any-Latin; Latin-ASCII; [:Nonspacing Mark:] Remove'
+            );
 
-        // preg_replace can return null on error, use input as fallback
-        $result = preg_replace('/[^\x20-\x7E]/', '', $result ?: $input) ?? $input;
+            if ($transliterator === null) {
+                $transliterator = transliterator_create('Any-Latin; Latin-ASCII');
+            }
+
+            if ($transliterator !== null) {
+                $result = transliterator_transliterate($transliterator, $result) ?: $result;
+            }
+        }
+
+        // Step 4: strip any remaining non-printable-ASCII bytes as absolute safety net
+        $result = preg_replace('/[^\x20-\x7E]/', '', $result) ?? '';
         $result = preg_replace('/\s+/', ' ', $result) ?? $result;
 
         return trim($result);

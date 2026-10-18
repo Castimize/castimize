@@ -6,11 +6,13 @@ namespace Tests\Feature\Http\Controllers\Api;
 
 use App\Models\Country;
 use App\Models\Currency;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use Tests\Traits\NeedsApiUser;
 
@@ -24,6 +26,19 @@ class OrdersApiControllerTest extends TestCase
         parent::setUp();
 
         $this->setUpApiUserWithPermissions(['viewOrder']);
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
+    }
+
+    /**
+     * Create the customer-role User account a customer-scoped token belongs
+     * to, and return a plain-text token for it.
+     */
+    private function createCustomerApiToken(Customer $customer): string
+    {
+        $user = User::factory()->create(['wp_id' => $customer->wp_id]);
+        $user->assignRole('customer');
+
+        return $user->createToken('test-token')->plainTextToken;
     }
 
     // ========================================
@@ -96,7 +111,31 @@ class OrdersApiControllerTest extends TestCase
 
     // ========================================
     // calculateExpectedDeliveryDate() tests
+    //
+    // Public endpoint: no customer-private data, and needed during checkout
+    // before a customer necessarily has any account/token.
     // ========================================
+
+    #[Test]
+    public function it_calculates_expected_delivery_date_without_authentication(): void
+    {
+        Country::firstOrCreate(
+            ['alpha2' => 'NL'],
+            [
+                'name' => 'Netherlands',
+                'alpha3' => 'NLD',
+                'numeric' => 528,
+            ]
+        );
+
+        $response = $this->postJson(route('api.api.orders.calculate-expected-delivery-date'), [
+            'country' => 'NL',
+            'uploads' => [],
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('success', true);
+    }
 
     #[Test]
     public function it_calculates_expected_delivery_date(): void
@@ -147,5 +186,48 @@ class OrdersApiControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonPath('success', true);
+    }
+
+    // ========================================
+    // Customer-scoped token tests
+    // ========================================
+
+    #[Test]
+    public function it_allows_customer_scoped_token_to_view_own_order(): void
+    {
+        $currency = Currency::firstOrCreate(['code' => 'EUR'], ['name' => 'Euro']);
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        Order::factory()->create([
+            'order_number' => 22222,
+            'currency_id' => $currency->id,
+            'customer_id' => $customer->id,
+        ]);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.orders.show', ['order_number' => 22222]));
+
+        $response->assertOk();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_viewing_other_customers_order(): void
+    {
+        $currency = Currency::firstOrCreate(['code' => 'EUR'], ['name' => 'Euro']);
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
+        Order::factory()->create([
+            'order_number' => 33333,
+            'currency_id' => $currency->id,
+            'customer_id' => $otherCustomer->id,
+        ]);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.orders.show', ['order_number' => 33333]));
+
+        $response->assertForbidden();
     }
 }

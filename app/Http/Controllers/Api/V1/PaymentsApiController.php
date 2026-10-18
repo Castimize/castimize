@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\PaymentService;
 use App\Services\Admin\ShopOwnersService;
+use App\Traits\Api\AuthorizesCustomerAccess;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PaymentsApiController extends ApiController
 {
+    use AuthorizesCustomerAccess;
+
     public function __construct(
         private PaymentService $paymentService,
         private ShopOwnersService $shopOwnersService,
@@ -20,6 +23,7 @@ class PaymentsApiController extends ApiController
 
     public function createSetupIntent(int $customerId): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, 'viewCustomer');
         //        dd($this->paymentService->getStripePaymentMethods());
         //        dd($this->paymentService->getStripeBalanceTransaction('txn_3SBI4p0004dOynzN13DH3Rus'));
         //        dd($this->paymentService->getStripeCharge('py_3SBI4p0004dOynzN1mLpwQFP'));
@@ -42,6 +46,7 @@ class PaymentsApiController extends ApiController
 
     public function attachPaymentMethod(int $customerId, Request $request)
     {
+        $this->authorizeCustomerAccess($customerId, 'viewCustomer');
         $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if (! $customer) {
             LogRequestService::addResponse(request(), [
@@ -67,6 +72,7 @@ class PaymentsApiController extends ApiController
 
     public function cancelMandate(int $customerId)
     {
+        $this->authorizeCustomerAccess($customerId, 'viewCustomer');
         $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if (! $customer) {
             LogRequestService::addResponse(request(), [

@@ -7,12 +7,14 @@ namespace Tests\Feature\Http\Controllers\Api;
 use App\Models\Customer;
 use App\Models\Shop;
 use App\Models\ShopOwner;
+use App\Models\User;
 use App\Services\Etsy\EtsyService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use Tests\Traits\NeedsApiUser;
 
@@ -26,6 +28,19 @@ class EtsyApiControllerTest extends TestCase
         parent::setUp();
 
         $this->setUpApiUserWithPermissions([]);
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
+    }
+
+    /**
+     * Create the customer-role User account a customer-scoped token belongs
+     * to, and return a plain-text token for it.
+     */
+    private function createCustomerApiToken(Customer $customer): string
+    {
+        $user = User::factory()->create(['wp_id' => $customer->wp_id]);
+        $user->assignRole('customer');
+
+        return $user->createToken('test-token')->plainTextToken;
     }
 
     protected function tearDown(): void
@@ -210,5 +225,55 @@ class EtsyApiControllerTest extends TestCase
         ]));
 
         $response->assertUnauthorized();
+    }
+
+    // ========================================
+    // Customer-scoped token tests
+    //
+    // Note: getEtsyShopOrFail() resolves {customerId} via Customer::find(),
+    // i.e. the primary key - not wp_id like the rest of the API - so these
+    // tests use $customer->id to match the real routing, same as the
+    // existing it_returns_404_when_customer_has_no_shop_owner test above.
+    // ========================================
+
+    #[Test]
+    public function it_allows_customer_scoped_token_to_view_own_etsy_listings(): void
+    {
+        $customer = $this->createCustomerWithEtsyShop();
+
+        $this->mock(EtsyService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('getListings')->once()->andReturn(new \Etsy\Collection('Listing'));
+        });
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.etsy.get-listings', [
+                'customerId' => $customer->id,
+            ]));
+
+        $response->assertOk();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_viewing_other_customers_etsy_listings(): void
+    {
+        $customer = Customer::factory()->create();
+        $otherCustomer = $this->createCustomerWithEtsyShop();
+
+        // Authorization should abort before EtsyService is ever used, but
+        // the controller's constructor injection resolves it regardless of
+        // whether the method body reaches it - mock it so that resolution
+        // doesn't try to build a real Etsy client without credentials.
+        $this->mock(EtsyService::class);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.etsy.get-listings', [
+                'customerId' => $otherCustomer->id,
+            ]));
+
+        $response->assertForbidden();
     }
 }

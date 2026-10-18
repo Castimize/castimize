@@ -10,22 +10,24 @@ use App\Models\Model;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ModelsService;
+use App\Traits\Api\AuthorizesCustomerAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class ModelsApiController extends ApiController
 {
+    use AuthorizesCustomerAccess;
+
     public function __construct(
         private ModelsService $modelsService,
     ) {}
 
     public function show(int $customerId, Model $model): ModelResource
     {
-        abort_if(Gate::denies('viewModel'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $this->authorizeCustomerAccess($customerId, 'viewModel');
         if (! $model || (int) $model->customer?->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }
@@ -38,6 +40,7 @@ class ModelsApiController extends ApiController
 
     public function showModelsWpCustomer(int $customerId): AnonymousResourceCollection
     {
+        $this->authorizeCustomerAccess($customerId, null);
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), [
@@ -73,6 +76,7 @@ class ModelsApiController extends ApiController
 
     public function showModelsWpCustomerPaginated(Request $request, int $customerId): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, null);
         $customer = Customer::where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), [
@@ -94,6 +98,7 @@ class ModelsApiController extends ApiController
 
     public function getCustomModelName(int $customerId, Request $request): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, null);
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
             LogRequestService::addResponse(request(), [
@@ -119,6 +124,7 @@ class ModelsApiController extends ApiController
 
     public function getCustomModelAttributes(int $customerId, Request $request): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, null);
         ini_set('precision', 53);
         $customer = Customer::with('models.materials')->where('wp_id', $customerId)->first();
         if ($customer === null) {
@@ -133,11 +139,19 @@ class ModelsApiController extends ApiController
             }
         }
 
-        $uploads = json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR);
+        $uploads = collect(json_decode($request->uploads, true, 512, JSON_THROW_ON_ERROR))
+            ->map(function ($upload) {
+                if (isset($upload['3dp_options']) && is_string($upload['3dp_options'])) {
+                    $upload['3dp_options'] = json_decode($upload['3dp_options'], true) ?? $upload['3dp_options'];
+                }
+
+                return $upload;
+            })
+            ->all();
 
         // Pre-load all materials to avoid N+1 queries
         $materialWpIds = collect($uploads)
-            ->filter(fn ($upload) => isset($upload['3dp_options']))
+            ->filter(fn ($upload) => isset($upload['3dp_options']) && is_array($upload['3dp_options']))
             ->map(function ($upload) {
                 [$materialId] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
 
@@ -152,17 +166,18 @@ class ModelsApiController extends ApiController
 
         $newUploads = [];
         foreach ($uploads as $itemKey => $upload) {
-            if (isset($upload['3dp_options'])) {
+            if (isset($upload['3dp_options']) && is_array($upload['3dp_options'])) {
                 [$materialId, $materialName] = array_pad(explode('. ', $upload['3dp_options']['material_name']), 2, null);
                 $materialWpId = $upload['3dp_options']['material_id'] ?? $materialId;
                 $material = $materials->get($materialWpId);
+                $modelNameOriginal = $upload['3dp_options']['model_name_original'] ?? null;
                 $model = null;
-                if ($material) {
+                if ($material && $modelNameOriginal) {
                     $model = $customer->models()
                         ->whereHas('materials', function ($query) use ($upload, $materialId) {
                             $query->where('id', ($upload['3dp_options']['material_id'] ?? $materialId));
                         })
-                        ->where('name', $upload['3dp_options']['model_name_original'])
+                        ->where('name', $modelNameOriginal)
                         ->where('model_scale', $upload['3dp_options']['scale'] ?? 1)
                         ->first();
                 }
@@ -172,7 +187,7 @@ class ModelsApiController extends ApiController
                     if ($model->thumb_name) {
                         $newUploads[$itemKey]['3dp_options']['thumbnail'] = Storage::disk(config('filesystems.default'))->exists($model->thumb_name) ? sprintf('%s/%s', config('filesystems.disks.s3.url'), $model->thumb_name) : '/'.$model->thumb_name;
                     }
-                    $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $upload['3dp_options']['model_name_original'];
+                    $newUploads[$itemKey]['3dp_options']['model_name_original'] = $model->model_name ?: $modelNameOriginal;
                 }
             }
         }
@@ -184,6 +199,7 @@ class ModelsApiController extends ApiController
 
     public function store(int $customerId, Request $request): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, null);
         ini_set('precision', 17);
         $customer = Customer::where('wp_id', $customerId)->first();
         if ($customer === null) {
@@ -204,6 +220,7 @@ class ModelsApiController extends ApiController
 
     public function update(Request $request, int $customerId, Model $model): JsonResponse
     {
+        $this->authorizeCustomerAccess($customerId, null);
         ini_set('precision', 53);
         if (! $model || (int) $model->customer?->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
@@ -219,6 +236,7 @@ class ModelsApiController extends ApiController
 
     public function destroy(int $customerId, Model $model): Response
     {
+        $this->authorizeCustomerAccess($customerId, null);
         if (! $model || (int) $model->customer?->wp_id !== $customerId) {
             abort(Response::HTTP_NOT_FOUND, '404 Not found');
         }

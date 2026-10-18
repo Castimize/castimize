@@ -212,7 +212,7 @@ class ExactOnlineServiceTest extends TestCase
     {
         // Mock the VatCode API to return empty results
         $vatCodeMock = Mockery::mock('overload:Picqer\Financials\Exact\VatCode');
-        $vatCodeMock->shouldReceive('get')->andReturn([]);
+        $vatCodeMock->shouldReceive('filter')->andReturn([]);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('VAT Code not found for US');

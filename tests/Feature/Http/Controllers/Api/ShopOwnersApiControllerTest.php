@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use Tests\Traits\NeedsApiUser;
 
@@ -24,6 +25,19 @@ class ShopOwnersApiControllerTest extends TestCase
         parent::setUp();
 
         $this->setUpApiUserWithPermissions(['viewCustomer']);
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
+    }
+
+    /**
+     * Create the customer-role User account a customer-scoped token belongs
+     * to, and return a plain-text token for it.
+     */
+    private function createCustomerApiToken(Customer $customer): string
+    {
+        $user = User::factory()->create(['wp_id' => $customer->wp_id]);
+        $user->assignRole('customer');
+
+        return $user->createToken('test-token')->plainTextToken;
     }
 
     // ========================================
@@ -232,5 +246,65 @@ class ShopOwnersApiControllerTest extends TestCase
         ]));
 
         $response->assertUnauthorized();
+    }
+
+    // ========================================
+    // Customer-scoped token tests
+    // ========================================
+
+    #[Test]
+    public function it_allows_customer_scoped_token_to_view_own_shop_owner(): void
+    {
+        $customer = Customer::factory()->create();
+        ShopOwner::factory()->create(['customer_id' => $customer->id]);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.customers.shop-owners.show', [
+                'customerId' => $customer->wp_id,
+            ]));
+
+        $response->assertOk();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_viewing_other_customers_shop_owner(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
+        ShopOwner::factory()->create(['customer_id' => $otherCustomer->id]);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson(route('api.api.customers.shop-owners.show', [
+                'customerId' => $otherCustomer->wp_id,
+            ]));
+
+        $response->assertForbidden();
+    }
+
+    #[Test]
+    public function it_forbids_customer_scoped_token_from_updating_other_customers_shop_owner_active_state(): void
+    {
+        $customer = Customer::factory()->create(['wp_id' => 111111]);
+        $otherCustomer = Customer::factory()->create(['wp_id' => 222222]);
+        ShopOwner::factory()->create(['customer_id' => $otherCustomer->id, 'active' => true]);
+
+        $token = $this->createCustomerApiToken($customer);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->putJson(route('api.api.customers.shop-owners.update-active', [
+                'customerId' => $otherCustomer->wp_id,
+            ]), [
+                'active' => '0',
+            ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('shop_owners', [
+            'customer_id' => $otherCustomer->id,
+            'active' => true,
+        ]);
     }
 }

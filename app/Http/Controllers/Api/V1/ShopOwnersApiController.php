@@ -8,12 +8,14 @@ use App\Models\Customer;
 use App\Services\Admin\CustomersService;
 use App\Services\Admin\LogRequestService;
 use App\Services\Admin\ShopOwnersService;
+use App\Traits\Api\AuthorizesCustomerAccess;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
 class ShopOwnersApiController extends ApiController
 {
+    use AuthorizesCustomerAccess;
+
     public function __construct(
         private ShopOwnersService $shopOwnersService,
         private CustomersService $customersService,
@@ -21,7 +23,7 @@ class ShopOwnersApiController extends ApiController
 
     public function show(int $customerId): ShopOwnerResource
     {
-        abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $this->authorizeCustomerAccess($customerId, 'viewCustomer');
         $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
         if (! $customer) {
             LogRequestService::addResponse(request(), [
@@ -38,7 +40,7 @@ class ShopOwnersApiController extends ApiController
 
     public function showShop(int $customerId, string $shop): ShopResource
     {
-        abort_if(Gate::denies('viewCustomer'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $this->authorizeCustomerAccess($customerId, 'viewCustomer');
         $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if (! $customer || ! $customer->shopOwner) {
             LogRequestService::addResponse(request(), [
@@ -64,6 +66,7 @@ class ShopOwnersApiController extends ApiController
 
     public function store(Request $request, int $customerId): ShopOwnerResource
     {
+        $this->authorizeCustomerAccess($customerId, 'viewCustomer');
         $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
         if ($customer && $customer->shopOwner) {
             LogRequestService::addResponse(request(), [
@@ -92,6 +95,7 @@ class ShopOwnersApiController extends ApiController
 
     public function update(Request $request, int $customerId): ShopOwnerResource
     {
+        $this->authorizeCustomerAccess($customerId, 'viewCustomer');
         $customer = Customer::with('shopOwner')->where('wp_id', $customerId)->first();
         if ($customer && ! $customer->shopOwner) {
             LogRequestService::addResponse(request(), [
@@ -128,6 +132,7 @@ class ShopOwnersApiController extends ApiController
 
     public function updateActive(Request $request, int $customerId): ShopOwnerResource
     {
+        $this->authorizeCustomerAccess($customerId, 'viewCustomer');
         $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if ($customer && ! $customer->shopOwner) {
             LogRequestService::addResponse(request(), [
@@ -157,6 +162,7 @@ class ShopOwnersApiController extends ApiController
 
     public function updateActiveShop(Request $request, int $customerId, string $shop): ShopResource
     {
+        $this->authorizeCustomerAccess($customerId, 'viewCustomer');
         $customer = Customer::with('shopOwner.shops')->where('wp_id', $customerId)->first();
         if ($customer && ! $customer->shopOwner) {
             LogRequestService::addResponse(request(), [
