@@ -25,7 +25,7 @@ class ModelsService
         $pageLength = (int) $request->length;
         $skip = (int) (($pageNumber - 1) * $pageLength);
         $orderColumn = $request->order_column;
-        $orderDir = $request->order_dir;
+        $orderDir = strtolower((string) $request->order_dir) === 'desc' ? 'DESC' : 'ASC';
         $searchValue = $request->search_value;
         $key = sprintf(
             'models-paginated:%s:%s-%s-%s-%s-%s',
@@ -38,16 +38,16 @@ class ModelsService
         );
 
         return Cache::remember($key, 60, function () use ($customer, $pageLength, $skip, $orderColumn, $orderDir, $searchValue) {
-            $query = "SELECT models.id, IFNULL(model_name, models.name) as order_model_name
+            $query = 'SELECT models.id, IFNULL(model_name, models.name) as order_model_name
                       FROM models
                       LEFT JOIN material_model ON models.id = material_model.model_id
                       LEFT JOIN materials ON material_model.material_id = materials.id
-                      WHERE customer_id = {$customer->id}
+                      WHERE customer_id = ?
                       and models.deleted_at IS NULL
                       {{{search}}}
                       GROUP BY models.name, model_name, model_scale
                       {{{order}}}
-                      {{{limit}}}";
+                      {{{limit}}}';
 
             if ($orderColumn) {
                 $mapper = [
@@ -72,32 +72,37 @@ class ModelsService
                 }
             }
 
+            $bindings = [$customer->id];
+
             $countTotalQuery = str_replace(['{{{search}}}', '{{{limit}}}'], ['', ''], $query);
-            $recordsTotal = count(DB::select($countTotalQuery));
+            $recordsTotal = count(DB::select($countTotalQuery, $bindings));
             $recordsFiltered = $recordsTotal;
 
             if (! empty($searchValue)) {
-                $searchQuery = " AND (
-                    models.name LIKE '%{$searchValue}%'
-                    OR model_name LIKE '%{$searchValue}%'
-                    OR model_volume_cc LIKE '%{$searchValue}%'
-                    OR model_x_length LIKE '%{$searchValue}%'
-                    OR model_y_length LIKE '%{$searchValue}%'
-                    OR model_z_length LIKE '%{$searchValue}%'
-                    OR model_surface_area_cm2 LIKE '%{$searchValue}%'
-                    OR categories LIKE '%{$searchValue}%'
-                    OR materials.name LIKE '%{$searchValue}%'
-                ) ";
+                $searchQuery = ' AND (
+                    models.name LIKE ?
+                    OR model_name LIKE ?
+                    OR model_volume_cc LIKE ?
+                    OR model_x_length LIKE ?
+                    OR model_y_length LIKE ?
+                    OR model_z_length LIKE ?
+                    OR model_surface_area_cm2 LIKE ?
+                    OR categories LIKE ?
+                    OR materials.name LIKE ?
+                ) ';
+
+                $like = '%'.addcslashes((string) $searchValue, '\\%_').'%';
+                $bindings = array_merge($bindings, array_fill(0, 9, $like));
 
                 $query = str_replace(['{{{search}}}'], [$searchQuery], $query);
                 $countFilteredQuery = str_replace(['{{{limit}}}'], [''], $query);
-                $recordsFiltered = count(DB::select($countFilteredQuery));
+                $recordsFiltered = count(DB::select($countFilteredQuery, $bindings));
             } else {
                 $query = str_replace(['{{{search}}}'], [''], $query);
             }
 
             $query = str_replace(['{{{limit}}}'], [" LIMIT {$pageLength} OFFSET {$skip}"], $query);
-            $modelsToShow = array_column(DB::select($query), 'id');
+            $modelsToShow = array_column(DB::select($query, $bindings), 'id');
             $modelsToShowAsString = implode(',', $modelsToShow);
 
             $modelsQuery = Model::with(['materials.prices', 'customer.shopOwner', 'shopListingModel'])
