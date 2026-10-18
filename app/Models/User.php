@@ -50,6 +50,7 @@ class User extends Authenticatable
     protected $fillable = [
         'wp_id',
         'name',
+        'username',
         'first_name',
         'last_name',
         'email',

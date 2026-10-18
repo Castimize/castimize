@@ -7,6 +7,7 @@ namespace Tests\Feature\Http\Controllers\Api;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Customer;
+use App\Models\Material;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -186,6 +187,55 @@ class OrdersApiControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonPath('success', true);
+    }
+
+    #[Test]
+    public function it_handles_uploads_where_each_upload_is_a_json_string(): void
+    {
+        Country::firstOrCreate(
+            ['alpha2' => 'NL'],
+            ['name' => 'Netherlands', 'alpha3' => 'NLD', 'numeric' => 528]
+        );
+        $material = Material::factory()->create(['wp_id' => 987001]);
+
+        $response = $this->postJson(route('api.api.orders.calculate-expected-delivery-date'), [
+            'country' => 'NL',
+            'uploads' => [json_encode(['material_id' => $material->wp_id])],
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('success', true);
+        $response->assertJsonPath(
+            'expected_delivery_date',
+            now()->addBusinessDays($material->dc_lead_time)->toFormattedDateString()
+        );
+    }
+
+    #[Test]
+    public function it_ignores_invalid_uploads_when_calculating_expected_delivery_date(): void
+    {
+        Country::firstOrCreate(
+            ['alpha2' => 'NL'],
+            ['name' => 'Netherlands', 'alpha3' => 'NLD', 'numeric' => 528]
+        );
+        $material = Material::factory()->create(['wp_id' => 987002]);
+
+        $response = $this->postJson(route('api.api.orders.calculate-expected-delivery-date'), [
+            'country' => 'NL',
+            'uploads' => [
+                null,
+                'not-json',
+                ['no_material' => true],
+                ['material_id' => 999999999],
+                ['material_id' => $material->wp_id],
+            ],
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath(
+            'expected_delivery_date',
+            now()->addBusinessDays($material->dc_lead_time)->toFormattedDateString()
+        );
     }
 
     // ========================================

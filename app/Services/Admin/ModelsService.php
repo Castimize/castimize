@@ -27,7 +27,15 @@ class ModelsService
         $orderColumn = $request->order_column;
         $orderDir = $request->order_dir;
         $searchValue = $request->search_value;
-        $key = sprintf('%s-%s-%s-%s-%s-%s', $pageNumber, $pageLength, $skip, $orderColumn, $orderDir, $searchValue);
+        $key = sprintf(
+            'models-paginated:%s:%s-%s-%s-%s-%s',
+            $customer->id,
+            $pageLength,
+            $skip,
+            $orderColumn,
+            $orderDir,
+            md5((string) $searchValue)
+        );
 
         return Cache::remember($key, 60, function () use ($customer, $pageLength, $skip, $orderColumn, $orderDir, $searchValue) {
             $query = "SELECT models.id, IFNULL(model_name, models.name) as order_model_name
