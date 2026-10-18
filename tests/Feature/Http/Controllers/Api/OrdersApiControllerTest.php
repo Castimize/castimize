@@ -111,7 +111,31 @@ class OrdersApiControllerTest extends TestCase
 
     // ========================================
     // calculateExpectedDeliveryDate() tests
+    //
+    // Public endpoint: no customer-private data, and needed during checkout
+    // before a customer necessarily has any account/token.
     // ========================================
+
+    #[Test]
+    public function it_calculates_expected_delivery_date_without_authentication(): void
+    {
+        Country::firstOrCreate(
+            ['alpha2' => 'NL'],
+            [
+                'name' => 'Netherlands',
+                'alpha3' => 'NLD',
+                'numeric' => 528,
+            ]
+        );
+
+        $response = $this->postJson(route('api.api.orders.calculate-expected-delivery-date'), [
+            'country' => 'NL',
+            'uploads' => [],
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('success', true);
+    }
 
     #[Test]
     public function it_calculates_expected_delivery_date(): void

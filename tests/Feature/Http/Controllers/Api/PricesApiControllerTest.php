@@ -4,82 +4,95 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Controllers\Api;
 
-use App\Models\User;
+use App\Enums\Admin\CurrencyEnum;
+use App\Models\Country;
+use App\Models\LogisticsZone;
+use App\Models\Material;
+use App\Models\Price;
+use App\Models\ShippingFee;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
-use Tests\Traits\NeedsApiUser;
 
 class PricesApiControllerTest extends TestCase
 {
     use DatabaseTransactions;
-    use NeedsApiUser;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->setUpApiUserWithPermissions(['viewPricing']);
-    }
 
     // ========================================
     // calculatePrice() tests
+    //
+    // Public endpoint: no customer-private data, and needed for anonymous
+    // visitors configuring a model before they have any account/token.
     // ========================================
 
     #[Test]
-    public function it_returns_403_when_user_lacks_permission_for_calculate_price(): void
+    public function it_calculates_price_without_authentication(): void
     {
-        $userWithoutPermission = User::factory()->create();
-        Sanctum::actingAs($userWithoutPermission);
+        $material = Material::factory()->create(['wp_id' => 123]);
+        Price::factory()->create(['material_id' => $material->id]);
 
         $response = $this->postJson(route('api.api.prices.calculate'), [
-            'material_id' => 1,
-            'model_volume_cc' => 10.5,
-            'model_surface_area_cm2' => 20.5,
+            'wp_id' => 123,
+            'x_dim' => 1,
+            'y_dim' => 1,
+            'z_dim' => 1,
+            'material_volume' => 1,
+            'box_volume' => 1,
+            'model_parts' => 1,
+            'surface_area' => 1,
         ]);
 
-        $response->assertForbidden();
+        $response->assertOk();
+        $response->assertJsonStructure(['data' => ['total']]);
     }
 
     #[Test]
-    public function it_returns_401_when_not_authenticated_for_calculate_price(): void
+    public function it_returns_404_when_material_not_found_for_calculate_price(): void
     {
         $response = $this->postJson(route('api.api.prices.calculate'), [
-            'material_id' => 1,
-            'model_volume_cc' => 10.5,
-            'model_surface_area_cm2' => 20.5,
+            'wp_id' => 99999,
+            'x_dim' => 1,
+            'y_dim' => 1,
+            'z_dim' => 1,
+            'material_volume' => 1,
+            'box_volume' => 1,
+            'model_parts' => 1,
+            'surface_area' => 1,
         ]);
 
-        $response->assertUnauthorized();
+        $response->assertNotFound();
     }
 
     // ========================================
     // calculateShipping() tests
+    //
+    // Public endpoint, same reasoning as calculatePrice() above.
     // ========================================
 
     #[Test]
-    public function it_returns_403_when_user_lacks_permission_for_calculate_shipping(): void
+    public function it_calculates_shipping_without_authentication(): void
     {
-        $userWithoutPermission = User::factory()->create();
-        Sanctum::actingAs($userWithoutPermission);
+        $logisticsZone = LogisticsZone::factory()->create();
+        ShippingFee::factory()->create(['logistics_zone_id' => $logisticsZone->id]);
+        Country::factory()->create(['alpha2' => 'NL', 'logistics_zone_id' => $logisticsZone->id]);
 
         $response = $this->postJson(route('api.api.prices.calculate.shipping'), [
             'country' => 'NL',
+            'currency' => CurrencyEnum::USD->value,
             'uploads' => [],
         ]);
 
-        $response->assertForbidden();
+        $response->assertOk();
     }
 
     #[Test]
-    public function it_returns_401_when_not_authenticated_for_calculate_shipping(): void
+    public function it_returns_404_when_country_not_found_for_calculate_shipping(): void
     {
         $response = $this->postJson(route('api.api.prices.calculate.shipping'), [
-            'country' => 'NL',
+            'country' => 'XX',
             'uploads' => [],
         ]);
 
-        $response->assertUnauthorized();
+        $response->assertNotFound();
     }
 }
