@@ -60,6 +60,13 @@ class ShippoService
 
     private $_transaction;
 
+    /**
+     * Payloads sent to Shippo for the current shipment, keyed by call.
+     *
+     * @var array<string, mixed>
+     */
+    private array $_requestData = [];
+
     public function __construct(
         public GeneralSettings $generalSettings,
         public CustomsItemSettings $customsItemSettings,
@@ -260,14 +267,16 @@ class ShippoService
 
     public function createParcel(array $params): static
     {
-        $this->_parcel = Shippo_Parcel::create([
+        $data = [
             'distance_unit' => $params['distance_unit'],
             'length' => $params['length'],
             'width' => $params['width'],
             'height' => $params['height'],
             'mass_unit' => $params['mass_unit'],
             'weight' => $params['weight'],
-        ]);
+        ];
+        $this->_parcel = Shippo_Parcel::create($data);
+        $this->_requestData['parcel'] = $data;
 
         return $this;
     }
@@ -283,7 +292,7 @@ class ShippoService
             $tariffNUmber = $material->hs_code;
         }
         $netWeight = ($upload->model_volume_cc * $material->density + $this->customsItemSettings->bag) * $upload->quantity;
-        $customsItem = Shippo_CustomsItem::create([
+        $customsItemData = [
             'description' => $description,
             'quantity' => $upload->quantity,
             'net_weight' => round($netWeight, 2), // (in gram) = volume (cm3) * density + bag
@@ -295,16 +304,18 @@ class ShippoService
             'metadata' => __('Order ID #:order_number', [
                 'order_number' => $upload->order->order_number,
             ]),
-        ]);
+        ];
+        $customsItem = Shippo_CustomsItem::create($customsItemData);
 
         $this->_customsItems[] = $customsItem;
+        $this->_requestData['customs_items'][] = $customsItemData;
 
         return $this;
     }
 
     public function createCustomsDeclaration(array $params): static
     {
-        $this->_customsDeclaration = Shippo_CustomsDeclaration::create([
+        $customsDeclarationData = [
             'certify' => true,
             'certify_signer' => $this->generalSettings->certifySigner,
             'commercial_invoice' => true,
@@ -324,6 +335,10 @@ class ShippoService
                 ],
             ],
             'items' => $this->_customsItems,
+        ];
+        $this->_customsDeclaration = Shippo_CustomsDeclaration::create($customsDeclarationData);
+        $this->_requestData['customs_declaration'] = array_merge($customsDeclarationData, [
+            'items' => $this->objectIds($this->_customsItems ?? []),
         ]);
 
         return $this;
@@ -358,6 +373,15 @@ class ShippoService
         }
 
         $this->_shipment = Shippo_Shipment::create($data);
+        $this->_requestData['shipment'] = [
+            'object_purpose' => $data['object_purpose'],
+            'address_from' => $this->toPlainArray($this->_shipmentFromAddress),
+            'address_to' => $this->toPlainArray($this->_shipmentToAddress),
+            'parcels' => $this->toPlainArray($this->_parcel),
+            'customs_declaration' => $this->objectIds([$this->_customsDeclaration])[0] ?? null,
+            'carrier_accounts' => $data['carrier_accounts'],
+            'extra' => $data['extra'] ?? null,
+        ];
         $this->logShippoCall(
             pathInfo: 'shipments',
             requestUri: 'shipments',
@@ -379,6 +403,7 @@ class ShippoService
             'async' => false,
         ];
         $this->_transaction = Shippo_Transaction::create($data);
+        $this->_requestData['transaction'] = $data;
         $this->logShippoCall(
             pathInfo: 'transactions',
             requestUri: 'transactions',
@@ -435,7 +460,32 @@ class ShippoService
             'customs_declaration' => $this->_customsDeclaration,
             'shipment' => $this->_shipment,
             'transaction' => $this->_transaction,
+            'request' => $this->_requestData,
         ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function toPlainArray(mixed $shippoObject): ?array
+    {
+        if ($shippoObject === null) {
+            return null;
+        }
+
+        return json_decode((string) $shippoObject, true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * @param  array<int, mixed>  $shippoObjects
+     * @return array<int, string|null>
+     */
+    private function objectIds(array $shippoObjects): array
+    {
+        return array_map(
+            fn ($shippoObject) => $shippoObject !== null ? ($shippoObject['object_id'] ?? null) : null,
+            $shippoObjects
+        );
     }
 
     private function logShippoCall(string $pathInfo, string $requestUri, string $method, $request, $response): void
