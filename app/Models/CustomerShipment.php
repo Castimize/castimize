@@ -59,6 +59,7 @@ class CustomerShipment extends Model
         'tracking_manual',
         'shippo_shipment_id',
         'shippo_shipment_meta_data',
+        'shippo_request_data',
         'shippo_transaction_id',
         'shippo_transaction_meta_data',
         'label_url',
@@ -83,6 +84,7 @@ class CustomerShipment extends Model
             'expected_delivery_date' => 'datetime',
             'service_lead_time' => 'datetime',
             'shippo_shipment_meta_data' => 'json',
+            'shippo_request_data' => 'json',
             'shippo_transaction_meta_data' => 'json',
             'selected_pos' => AsArrayObject::class,
         ];
