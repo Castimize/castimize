@@ -860,7 +860,10 @@ class ShippingServiceTest extends TestCase
         // Arrange
         $logisticsZone = LogisticsZone::updateOrCreate(
             ['name' => 'International'],
-            ['shipping_servicelevel_token' => 'fedex_international_economy']
+            [
+                'shipping_servicelevel_token' => 'ups_saver',
+                'fedex_shipping_servicelevel_token' => 'fedex_international_economy',
+            ]
         );
         Country::updateOrCreate(
             ['alpha2' => 'US'],
