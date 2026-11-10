@@ -46,7 +46,7 @@ class ShippoServicesEnumTest extends TestCase
     {
         $cases = ShippoServicesEnum::cases();
 
-        $this->assertCount(13, $cases);
+        $this->assertCount(17, $cases);
     }
 
     #[Test]
@@ -55,7 +55,7 @@ class ShippoServicesEnumTest extends TestCase
         $values = ShippoServicesEnum::values();
 
         $this->assertIsArray($values);
-        $this->assertCount(13, $values);
+        $this->assertCount(17, $values);
         $this->assertArrayHasKey('ups_standard', $values);
         $this->assertArrayHasKey('ups_saver', $values);
         $this->assertArrayHasKey('ups_express_saver_worldwide_ca', $values);
@@ -64,5 +64,24 @@ class ShippoServicesEnumTest extends TestCase
         $this->assertArrayHasKey('fedex_international_priority', $values);
         $this->assertEquals('UPS Standard℠', $values['ups_standard']);
         $this->assertEquals('FedEx Ground®', $values['fedex_ground']);
+    }
+
+    #[Test]
+    public function it_returns_only_ups_values_for_the_ups_service_level(): void
+    {
+        $values = ShippoServicesEnum::upsValues();
+
+        $this->assertSame(['ups_standard', 'ups_saver', 'ups_express_saver_worldwide_ca'], array_keys($values));
+    }
+
+    #[Test]
+    public function it_returns_only_fedex_values_for_the_fedex_service_level(): void
+    {
+        $values = ShippoServicesEnum::fedexValues();
+
+        $this->assertCount(14, $values);
+        $this->assertArrayHasKey('fedex_international_connect_plus', $values);
+        $this->assertArrayHasKey('fedex_international_priority_express', $values);
+        $this->assertArrayNotHasKey('ups_saver', $values);
     }
 }

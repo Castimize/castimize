@@ -261,7 +261,7 @@ class ShippingService
             ]);
         $shippoShipment = $this->_shippoService->getShipment();
         //        dd($shippoShipment);
-        $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry);
+        $rate = $this->getCustomerShipmentRate($shippoShipment, $shippingCountry, $carrier);
 
         if ($rate === null) {
             $errorMessages = [];
@@ -482,25 +482,35 @@ class ShippingService
         ];
     }
 
-    private function getCustomerShipmentRate($shippoShipment, string $shippingCountry): mixed
+    /**
+     * Pick the rate for a shipment: the service level configured on the logistics zone for the
+     * carrier, otherwise the cheapest available rate.
+     *
+     * @param  mixed  $shippoShipment
+     */
+    private function getCustomerShipmentRate($shippoShipment, string $shippingCountry, ?string $carrier = null): mixed
     {
         $country = Country::with('logisticsZone')->where('alpha2', $shippingCountry)->first();
-        $serviceLevelToken = $country?->logisticsZone?->shipping_servicelevel_token;
-        $firstCarrierAccountRate = null;
-        foreach ($shippoShipment['rates'] as $rate) {
-            if ($firstCarrierAccountRate === null) {
-                $firstCarrierAccountRate = $rate;
-            }
+        $zone = $country?->logisticsZone;
+        $serviceLevelToken = $carrier === ShippoCarriersEnum::FedEx->value
+            ? $zone?->fedex_shipping_servicelevel_token
+            : $zone?->shipping_servicelevel_token;
+
+        $rates = [];
+        foreach ($shippoShipment['rates'] ?? [] as $rate) {
             if ($serviceLevelToken && $rate['servicelevel']['token'] === $serviceLevelToken) {
                 return $rate;
             }
+            $rates[] = $rate;
         }
 
-        if ($firstCarrierAccountRate) {
-            return $firstCarrierAccountRate;
+        if ($rates === []) {
+            return null;
         }
 
-        return $shippoShipment['rates'][0] ?? null;
+        usort($rates, fn ($a, $b) => (float) $a['amount'] <=> (float) $b['amount']);
+
+        return $rates[0];
     }
 
     private function getServicelevelToken(string $shippingCountry): string

@@ -65,9 +65,15 @@ class LogisticsZone extends Resource
                 ->required()
                 ->rules('max:255'),
 
-            Select::make(__('Shipping service level token'), 'shipping_servicelevel_token')
-                ->options(ShippoServicesEnum::values())
+            Select::make(__('UPS shipping service level token'), 'shipping_servicelevel_token')
+                ->options(ShippoServicesEnum::upsValues())
                 ->displayUsingLabels(),
+
+            Select::make(__('FedEx shipping service level token'), 'fedex_shipping_servicelevel_token')
+                ->options(ShippoServicesEnum::fedexValues())
+                ->displayUsingLabels()
+                ->nullable()
+                ->help(__('Used for FedEx shipments. When empty, the cheapest rate is used.')),
 
             HasOne::make(__('Shipping fee'), 'shippingFee')
                 ->sortable(),

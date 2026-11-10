@@ -17,6 +17,10 @@ enum ShippoServicesEnum: string
     case FEDEX_INTERNATIONAL_ECONOMY = 'fedex_international_economy';
     case FEDEX_INTERNATIONAL_PRIORITY = 'fedex_international_priority';
     case FEDEX_INTERNATIONAL_FIRST = 'fedex_international_first';
+    case FEDEX_INTERNATIONAL_CONNECT_PLUS = 'fedex_international_connect_plus';
+    case FEDEX_INTERNATIONAL_PRIORITY_EXPRESS = 'fedex_international_priority_express';
+    case FEDEX_PRIORITY = 'fedex_priority';
+    case FEDEX_PRIORITY_EXPRESS = 'fedex_priority_express';
 
     public static function values(): array
     {
@@ -34,6 +38,38 @@ enum ShippoServicesEnum: string
             self::FEDEX_INTERNATIONAL_ECONOMY->value => 'FedEx International Economy®',
             self::FEDEX_INTERNATIONAL_PRIORITY->value => 'FedEx International Priority®',
             self::FEDEX_INTERNATIONAL_FIRST->value => 'FedEx International First®',
+            self::FEDEX_INTERNATIONAL_CONNECT_PLUS->value => 'FedEx International Connect Plus®',
+            self::FEDEX_INTERNATIONAL_PRIORITY_EXPRESS->value => 'FedEx International Priority® Express',
+            self::FEDEX_PRIORITY->value => 'FedEx Priority',
+            self::FEDEX_PRIORITY_EXPRESS->value => 'FedEx Priority Express',
         ];
+    }
+
+    /**
+     * Only the UPS service levels, as options for the UPS service level of a logistics zone.
+     *
+     * @return array<string, string>
+     */
+    public static function upsValues(): array
+    {
+        return array_filter(
+            self::values(),
+            fn (string $token) => str_starts_with($token, 'ups_'),
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+    /**
+     * Only the FedEx service levels, as options for the FedEx service level of a logistics zone.
+     *
+     * @return array<string, string>
+     */
+    public static function fedexValues(): array
+    {
+        return array_filter(
+            self::values(),
+            fn (string $token) => str_starts_with($token, 'fedex_'),
+            ARRAY_FILTER_USE_KEY
+        );
     }
 }
