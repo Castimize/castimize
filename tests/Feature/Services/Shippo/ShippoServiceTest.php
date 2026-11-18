@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Services\Shippo;
 
 use App\Enums\Shippo\ShippoCarriersEnum;
+use App\Enums\Shippo\ShippoCustomsDeclarationIncoTermsEnum;
 use App\Nova\Settings\Shipping\CustomsItemSettings;
 use App\Nova\Settings\Shipping\DcSettings;
 use App\Nova\Settings\Shipping\GeneralSettings;
@@ -134,6 +135,42 @@ class ShippoServiceTest extends TestCase
     {
         $this->assertArrayHasKey('UPS_Express_Envelope', $this->shippoService->packageTypes);
         $this->assertArrayHasKey('UPS_Express_Pak', $this->shippoService->packageTypes);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function customsDeclarationParams(array $overrides = []): array
+    {
+        $this->setSettingsProperty($this->generalSettings, 'certifySigner', 'Castimize B.V.');
+        $this->setSettingsProperty($this->generalSettings, 'contentsExplanation', 'Custom metal casted design(s)');
+        $this->setSettingsProperty($this->generalSettings, 'taxNumber', 'NL000000000B01');
+        $this->setSettingsProperty($this->generalSettings, 'taxType', 'VAT');
+
+        return array_merge([
+            'exporter_reference' => 1219,
+            'importer_reference' => '9693',
+            'currency' => 'USD',
+        ], $overrides);
+    }
+
+    #[Test]
+    public function it_sends_the_incoterm_to_shippo_with_the_field_name_shippo_expects(): void
+    {
+        $data = $this->shippoService->buildCustomsDeclarationData(
+            $this->customsDeclarationParams(['inco_term' => ShippoCustomsDeclarationIncoTermsEnum::DDP->value])
+        );
+
+        $this->assertSame('DDP', $data['incoterm']);
+        $this->assertArrayNotHasKey('inco_term', $data);
+    }
+
+    #[Test]
+    public function it_defaults_the_incoterm_to_ddu_when_none_is_given(): void
+    {
+        $data = $this->shippoService->buildCustomsDeclarationData($this->customsDeclarationParams());
+
+        $this->assertSame('DDU', $data['incoterm']);
     }
 
     private function setSettingsProperty(object $settings, string $property, mixed $value): void

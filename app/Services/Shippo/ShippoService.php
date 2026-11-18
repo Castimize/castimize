@@ -313,9 +313,16 @@ class ShippoService
         return $this;
     }
 
-    public function createCustomsDeclaration(array $params): static
+    /**
+     * Build the Shippo customs declaration payload. Shippo's field is `incoterm`;
+     * an unknown key such as `inco_term` is silently ignored and Shippo then defaults to DDU.
+     *
+     * @param  array<string, mixed>  $params
+     * @return array<string, mixed>
+     */
+    public function buildCustomsDeclarationData(array $params): array
     {
-        $customsDeclarationData = [
+        return [
             'certify' => true,
             'certify_signer' => $this->generalSettings->certifySigner,
             'commercial_invoice' => true,
@@ -324,7 +331,7 @@ class ShippoService
             'non_delivery_option' => ShippoCustomsDeclarationNonDeliveryOptionsEnum::RETURN->value,
             'exporter_reference' => $params['exporter_reference'],
             'importer_reference' => $params['importer_reference'],
-            'inco_term' => $params['inco_term'] ?? ShippoCustomsDeclarationIncoTermsEnum::DDU->value,
+            'incoterm' => $params['inco_term'] ?? ShippoCustomsDeclarationIncoTermsEnum::DDU->value,
             //            'b13a_filing_option' => 'NOT_REQUIRED',
             'currency' => $params['currency'],
             'exporter_identification' => [
@@ -336,6 +343,14 @@ class ShippoService
             ],
             'items' => $this->_customsItems,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $params
+     */
+    public function createCustomsDeclaration(array $params): static
+    {
+        $customsDeclarationData = $this->buildCustomsDeclarationData($params);
         $this->_customsDeclaration = Shippo_CustomsDeclaration::create($customsDeclarationData);
         $this->_requestData['customs_declaration'] = array_merge($customsDeclarationData, [
             'items' => $this->objectIds($this->_customsItems ?? []),
