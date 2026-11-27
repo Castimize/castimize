@@ -244,6 +244,15 @@ class CustomerShipment extends Resource
                 ->exceptOnForms()
                 ->sortable(),
 
+            Text::make(__('Shipping costs'), 'shipping_costs', function () {
+                return $this->shipping_costs !== null
+                    ? currencyFormatter((float) $this->shipping_costs, $this->shipping_costs_currency_code ?? 'USD')
+                    : '';
+            })
+                ->help(__('Final amount charged by Shippo for the purchased label'))
+                ->exceptOnForms()
+                ->sortable(),
+
             Code::make(__('Shipment meta data'), 'shippo_shipment_meta_data')
                 ->canSee(function (NovaRequest $request) {
                     return $request->user()->isSuperAdmin();

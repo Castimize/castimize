@@ -51,6 +51,8 @@ class CustomerShipment extends Model
         'total_costs',
         'service_lead_time',
         'service_costs',
+        'shipping_costs',
+        'shipping_costs_currency_code',
         'currency_code',
         'carrier',
         'inco_term',
@@ -122,6 +124,17 @@ class CustomerShipment extends Model
         return Attribute::make(
             get: fn ($value) => $value / 100,
             set: fn ($value) => $value * 100,
+        );
+    }
+
+    /**
+     * Interact with shipping_costs: the amount Shippo charged for the selected rate
+     */
+    protected function shippingCosts(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value === null ? null : $value / 100,
+            set: fn ($value) => $value === null ? null : (int) round($value * 100),
         );
     }
 
