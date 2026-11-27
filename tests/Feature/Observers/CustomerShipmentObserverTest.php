@@ -25,7 +25,10 @@ class CustomerShipmentObserverTest extends TestCase
     private function shippoResponse(): array
     {
         return [
-            'shipment' => ['object_id' => 'shp_1'],
+            'shipment' => ['object_id' => 'shp_1', 'rates' => [
+                ['object_id' => 'rate_1', 'amount' => '99.10', 'currency' => 'USD'],
+                ['object_id' => 'rate_2', 'amount' => '45.37', 'currency' => 'USD'],
+            ]],
             'transaction' => [
                 'object_id' => 'trx_1',
                 'status' => 'SUCCESS',
@@ -34,6 +37,7 @@ class CustomerShipmentObserverTest extends TestCase
                 'label_url' => 'https://label.test/1',
                 'commercial_invoice_url' => 'https://invoice.test/1',
                 'qr_code_url' => null,
+                'rate' => 'rate_2',
             ],
             'request' => [
                 'parcel' => ['length' => 17, 'width' => 13],
@@ -96,5 +100,35 @@ class CustomerShipmentObserverTest extends TestCase
 
         $this->assertSame('trx_1', $shipment->shippo_transaction_id);
         $this->assertNull($shipment->shippo_request_data);
+    }
+
+    #[Test]
+    public function it_stores_the_costs_of_the_purchased_rate(): void
+    {
+        $orderQueue = $this->createOrderQueue();
+        $shippingService = Mockery::mock(ShippingService::class);
+        $shippingService->shouldReceive('createShippoCustomerShipment')->once()->andReturn($this->shippoResponse());
+        $this->app->instance(ShippingService::class, $shippingService);
+
+        $shipment = $this->createShipment($orderQueue)->fresh();
+
+        $this->assertSame(45.37, $shipment->shipping_costs);
+        $this->assertSame('USD', $shipment->shipping_costs_currency_code);
+    }
+
+    #[Test]
+    public function it_leaves_the_costs_empty_when_the_purchased_rate_is_unknown(): void
+    {
+        $response = $this->shippoResponse();
+        $response['transaction']['rate'] = 'rate_unknown';
+        $orderQueue = $this->createOrderQueue();
+        $shippingService = Mockery::mock(ShippingService::class);
+        $shippingService->shouldReceive('createShippoCustomerShipment')->once()->andReturn($response);
+        $this->app->instance(ShippingService::class, $shippingService);
+
+        $shipment = $this->createShipment($orderQueue)->fresh();
+
+        $this->assertNull($shipment->shipping_costs);
+        $this->assertNull($shipment->shipping_costs_currency_code);
     }
 }

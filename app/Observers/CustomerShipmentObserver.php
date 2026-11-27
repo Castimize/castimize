@@ -121,6 +121,9 @@ class CustomerShipmentObserver
                 $customerShipment->shippo_shipment_id = $response['shipment']['object_id'];
                 $customerShipment->shippo_shipment_meta_data = $response['shipment'];
                 $customerShipment->shippo_request_data = $response['request'] ?? null;
+                $rate = $this->findPurchasedRate($response);
+                $customerShipment->shipping_costs = $rate !== null ? (float) $rate['amount'] : null;
+                $customerShipment->shipping_costs_currency_code = $rate['currency'] ?? null;
                 $customerShipment->expected_delivery_date = $response['transaction']['eta'] ?? null;
                 $customerShipment->tracking_number = $response['transaction']['tracking_number'];
                 $customerShipment->tracking_url = $response['transaction']['tracking_url_provider'];
@@ -133,6 +136,25 @@ class CustomerShipmentObserver
                 $customerShipment->save();
             }
         }
+    }
+
+    /**
+     * The rate of the shipment that was bought with the label transaction.
+     *
+     * @param  array<string, mixed>  $response
+     * @return array<string, mixed>|null
+     */
+    private function findPurchasedRate(array $response): ?array
+    {
+        $rateId = $response['transaction']['rate'] ?? null;
+
+        foreach ($response['shipment']['rates'] ?? [] as $rate) {
+            if ($rateId !== null && ($rate['object_id'] ?? null) === $rateId) {
+                return $rate;
+            }
+        }
+
+        return null;
     }
 
     public function deleted(CustomerShipment $customerShipment): void
